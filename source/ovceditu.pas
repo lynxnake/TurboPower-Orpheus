@@ -579,6 +579,12 @@ end;
 
 function edStrStInsert(Dest, S : PChar; DLen, SLen, Pos : Word) : PChar; register;    // FIXME
   {-insert S into Dest}
+{$IFDEF UNICODE}
+begin
+  Move(Dest[Pos], Dest[Pos + sLen], SLen * SizeOf(Char));
+  Move(S[0], Dest[Pos], SLen * SizeOf(Char));
+  Result := Dest;
+{$ELSE}
 asm
   push   esi            {save}
   push   edi            {save}
@@ -637,6 +643,7 @@ asm
   pop    ebx            {restore}
   pop    edi            {restore}
   pop    esi            {restore}
+{$ENDIF}
 end;
 
 function edWhiteSpace(C : Char) : Boolean; register;
