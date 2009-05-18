@@ -62,10 +62,10 @@ implementation
 
 type
   TMyRecord = record
-    mrString        : string[39];
+    mrString        : string;
     mrMemo          : array [0..79] of char;
     mrCheckBox      : TCheckBoxState;
-    mrSimple        : string[9];
+    mrSimple        : string;
     mrPicture       : TOvcDate;
     mrNumeric       : double;
     mrComboBox1     : integer;
@@ -95,7 +95,7 @@ procedure SetLength(var S : ShortString; Len : byte);
   end;
 {$ENDIF}
 
-function RandomString(MaxLen : integer) : ShortString;
+function RandomString(MaxLen : integer) : string;
   var
     i : integer;
     len : integer;
@@ -170,7 +170,7 @@ begin
   Data := nil;
   if (0 < RowNum) and (RowNum <= 199) then                      {!!.01}
     case ColToFieldMap[ColNum] of
-      1 : Data := @MyDB^[RowNum].mrString;
+      1 : Data := PChar(MyDB^[RowNum].mrString);
       2 : Data := @MyDB^[RowNum].mrMemo;
       3 : Data := @MyDB^[RowNum].mrCheckBox;
       4 : Data := @MyDB^[RowNum].mrSimple;
