@@ -88,7 +88,7 @@ procedure TForm1.OvcTable1GetCellData(Sender: TObject; RowNum: Longint;
   ColNum: Integer; var Data: Pointer; Purpose : TovcCellDataPurpose);
 begin
   CellData := '';
-  Data := @CellData;
+  Data := PChar(CellData);
     if (1 <= RowNum) and (RowNum <= 9) then
       case ColNum of
         1 : begin
