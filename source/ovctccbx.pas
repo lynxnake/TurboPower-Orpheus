@@ -670,20 +670,20 @@ begin
   if (ActiveRow = RowNum) and (ActiveCol = ColNum) then begin
     if FHideButton then begin
       {let ancestor paint the text}
-      inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @S);
+      inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, PChar(S));
     end else begin
       {Paint the string in the restricted rectangle}
-      inherited tcPaint(TableCanvas, R, RowNum, ColNum, CellAttr, @S);
+      inherited tcPaint(TableCanvas, R, RowNum, ColNum, CellAttr, PChar(S));
       {Paint the button on the right side}
       DrawButton(TableCanvas, CellRect);
     end;
   end else if FShowArrow then begin
     {paint the string in the restricted rectangle}
-    inherited tcPaint(TableCanvas, R, RowNum, ColNum, CellAttr, @S);
+    inherited tcPaint(TableCanvas, R, RowNum, ColNum, CellAttr, PChar(S));
     {Paint the arrow on the right side}
     DrawArrow(TableCanvas, CellRect, CellAttr);
   end else
-    inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @S);
+    inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, PChar(S));
 
 (*
   {Are we just displaying a button on the active cell?}
@@ -691,7 +691,7 @@ begin
     {If we are not the active cell, let the ancestor do the painting (we only
      paint a button when the cell is the active one)}
     if (ActiveRow <> RowNum) or (ActiveCol <> ColNum) then begin
-      inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @S);
+      inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, PChar(S));
       Exit;
     end;
     {Calculate the effective cell width (the cell width less the size
@@ -699,7 +699,7 @@ begin
     R := CellRect;
     dec(R.Right, OvcComboBoxButtonWidth);
     {Paint the string in this restricted rectangle}
-    inherited tcPaint(TableCanvas, R, RowNum, ColNum, CellAttr, @S);
+    inherited tcPaint(TableCanvas, R, RowNum, ColNum, CellAttr, PChar(S));
     {Paint the button on the right side}
     DrawButton(TableCanvas, CellRect);
   end else if FShowArrow then begin
@@ -708,11 +708,11 @@ begin
     R := CellRect;
     dec(R.Right, OvcComboBoxButtonWidth);
     {Paint the string in this restricted rectangle}
-    inherited tcPaint(TableCanvas, R, RowNum, ColNum, CellAttr, @S);
+    inherited tcPaint(TableCanvas, R, RowNum, ColNum, CellAttr, PChar(S));
     {Paint the arrow on the right side}
     DrawArrow(TableCanvas, CellRect, CellAttr);
   end else
-    inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @S);
+    inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, PChar(S));
 *)
 end;
 
