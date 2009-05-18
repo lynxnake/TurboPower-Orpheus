@@ -435,7 +435,7 @@ procedure TOvcTCRowHead.tcPaint(TableCanvas : TCanvas;
     HeadSt := '';
     if (ShowActiveRow and (RowNum = ActiveRow)) then
       begin
-        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @HeadSt);
+        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, PChar(HeadSt));
         PaintAnArrow;
       end
     else
@@ -445,7 +445,7 @@ procedure TOvcTCRowHead.tcPaint(TableCanvas : TCanvas;
             WorkRow := (RowNum + 1) - LockedRows;
             HeadSt := Format('%d', [WorkRow]);
           end;
-        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @HeadSt);
+        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, PChar(HeadSt));
       end;
   end;
 {--------}
