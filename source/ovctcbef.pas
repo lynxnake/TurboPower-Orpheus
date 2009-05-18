@@ -305,7 +305,7 @@ procedure TOvcTCBaseEntryField.tcPaint(TableCanvas : TCanvas;
             Delete(S, I+1, Length(S) - I);
           end;
         end;
-        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @S);
+        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, PChar(S));
       end;
   end;
 {--------}
