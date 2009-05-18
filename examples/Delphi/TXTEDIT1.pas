@@ -559,9 +559,10 @@ procedure TEditForm.Send1Click(Sender: TObject);
 var
   MapiMessage : TMapiMessage;
   MError : Cardinal;
-  TempBuffer : PAnsiChar;
+  TempBuffer : PChar;
   I, BufferSize : Integer;
   ParaLen : Word;
+  sAnsi: AnsiString;
 begin
   BufferSize := 1;
   Inc(BufferSize, Editor1.TextLength);
@@ -573,11 +574,12 @@ begin
       StrCat(TempBuffer, Editor1.GetPara(I, ParaLen));
       StrCat(TempBuffer, #13#10);
     end;
+    sAnsi := AnsiString(TempBuffer);
     with MapiMessage do
     begin
       ulReserved := 0;
       lpszSubject := nil;
-      lpszNoteText := TempBuffer;
+      lpszNoteText := PAnsiChar(sAnsi);
       lpszMessageType := nil;
       lpszDateReceived := nil;
       lpszConversationID := nil;
