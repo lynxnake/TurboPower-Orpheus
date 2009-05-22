@@ -581,9 +581,15 @@ end;
 function edStrStInsert(Dest, S : PChar; DLen, SLen, Pos : Word) : PChar; register;
   {-insert S into Dest}
 {$IFDEF UNICODE}
+var
+  Tmp: string;
 begin
-  Move(Dest[Pos], Dest[Pos + sLen], SLen * SizeOf(Char));
-  Move(S[0], Dest[Pos], SLen * SizeOf(Char));
+  if Pos > DLen then
+    Exit(Dest);
+
+  Tmp := Dest;
+  Insert(Copy(S, 1, SLen), Tmp, Pos+1);
+  StrPLCopy(Dest, Tmp, DLen+SLen);
   Result := Dest;
 end;
 {$ELSE}
