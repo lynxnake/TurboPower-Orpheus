@@ -534,6 +534,7 @@ var
   W : Word absolute S;
   B : Boolean absolute S;
   E : Extended absolute S;
+  T: string;
 
   function FieldIsZero : Boolean;
   begin
@@ -555,9 +556,13 @@ begin
     if not ValidateSelf then
       Exit;
 
-  if Field <> nil then begin
+  if Field <> nil then
+  begin
     {get the entry field value}
-    FLastError := Self.GetValue(S);
+    case FFieldType of
+      ftString{$IFDEF VERSION5}, ftWideString{$ENDIF}: FLastError := Self.GetValue(T);
+      else FLastError := Self.GetValue(S);
+    end;
 
     {if error, don't update the field object}
     if FLastError <> 0 then
@@ -572,7 +577,7 @@ begin
         {$IFDEF VERSION5}
         , ftWideString
         {$ENDIF}
-                     : Field.AsString  := S;
+                     : Field.AsString  := T;
         ftSmallInt   : Field.AsInteger := I;
         ftInteger    : Field.AsInteger := L;
         ftWord       : Field.AsInteger := W;
@@ -631,6 +636,7 @@ var
   M  : Boolean;
   EM : Boolean;
   F  : array[0..255] of Byte; {used to compare old and new value}
+  T: string;
 begin
   if efdbBusy then
     Exit;
@@ -645,7 +651,7 @@ begin
       {$IFDEF VERSION5}
       , ftWideString
       {$ENDIF}
-                   : S := Field.AsString;
+                   : T := Field.AsString;
       ftSmallInt   : I := Field.AsInteger;
       ftInteger    : L := Field.AsInteger;
       ftWord       : W := Field.AsInteger;
@@ -654,7 +660,7 @@ begin
       ftCurrency   : E := Field.AsFloat;
       ftBCD        : E := Field.AsFloat;
     else
-      S := Field.AsString;
+      T := Field.AsString;
     end;
     P := efHPos;
 
@@ -671,7 +677,21 @@ begin
       M := Modified;
 
       {set field value}
-      Self.SetValue(S);
+      case FFieldType of
+              ftString
+        {$IFDEF VERSION5}
+        , ftWideString
+        {$ENDIF}     : SetValue(T);
+        ftSmallInt,
+        ftInteger,
+        ftWord,
+        ftBoolean,
+        ftFloat,
+        ftCurrency,
+        ftBCD        : SetValue(S);
+        else
+          SetValue(T);
+      end;
 
       {restore modified states}
       if M then Include(sefOptions, sefModified);

@@ -371,7 +371,7 @@ begin
       else
         edMoveFast(S^, P^, (SLen+1) * SizeOf(Char));
 
-      FreeMem(S, BufSize);
+      FreeMem(S{, BufSize});
     end else
       P^ := #0;
     S := P;
@@ -707,7 +707,7 @@ begin
       L := Count
     else
       L := StLen;
-    Move(St^, S[Pos], L);
+    Move(St^, S[Pos], L * SizeOf(Char));
     RecalcAfterInsDel(WrapCol, TabSize, Pos, L, L, FL1, LL1);
   end else begin
     FL1 := High(SmallInt);

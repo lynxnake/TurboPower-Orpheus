@@ -109,7 +109,7 @@ function WordCount(const S : string; const WordDelims : TCharSet) : Integer;
   {-return the word count given a set of word delimiters}
 function WordPosition(const N : Integer; const S : string; const WordDelims : TCharSet) : Integer;
   {-return start position of N'th word in S}
-function PtrDiff(const P1, P2) : Word;
+function PtrDiff(const P1, P2: PChar) : Word;
   {-return the difference between P1 and P2}
 procedure PtrInc(var P; Delta : Word);
   {-increase P by Delta}
@@ -391,11 +391,11 @@ begin
   end;
 end;
 
-function PtrDiff(const P1, P2) : Word;
+function PtrDiff(const P1, P2: PChar) : Word;
   {-return the difference between P1 and P2}
 begin
   {P1 and P2 are assumed to point within the same buffer}
-  Result := PAnsiChar(P1) - PAnsiChar(P2);
+  Result := PChar(P1) - PChar(P2); //SZ used for PChar strings
 end;
 
 procedure PtrInc(var P; Delta : Word);

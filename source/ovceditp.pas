@@ -1707,7 +1707,7 @@ begin
     Error := Linking;
     Result := not Linking;
   end else begin
-    Sz := BufSize - PtrDiff(PUR, Buffer);
+    Sz := BufSize - (PAnsiChar(PUR) - PAnsiChar(Buffer)); //SZ: Sz := BufSize - PtrDiff(PUR, Buffer);
     Move(PUR^, Buffer^, Sz);
     PUndoRec(Buffer)^.PrevSize := 0;
     Dec(Undos, I);

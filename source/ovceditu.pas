@@ -94,7 +94,7 @@ implementation
 
 
 uses
-   Windows;
+   Windows, SysUtils;
 
 function edBreakPoint(S : PChar; MaxLen : Word): Word;
   {-return the position to word break S}
@@ -114,9 +114,9 @@ procedure edDeleteSubString(S : PChar; SLen, Count, Pos : Integer);
   {-delete Count characters from S starting at Pos}
 begin
   if SLen+1 >= 1024 then
-    edMoveBlock(S[Pos+Count], S[Pos], (SLen+1)-(Pos+Count))
+    edMoveBlock(S[Pos+Count], S[Pos], ((SLen+1)-(Pos+Count)) * SizeOf(Char))
   else
-    edMoveFast(S[Pos+Count], S[Pos], (SLen+1)-(Pos+Count));
+    edMoveFast(S[Pos+Count], S[Pos], ((SLen+1)-(Pos+Count)) * SizeOf(Char));
 end;
 
 function edEffectiveLen(S : PChar; Len : Word; TabSize : Byte) : Word; register;
@@ -207,6 +207,7 @@ asm
   mov    esi,eax        {esi = S}
   mov    ecx,edx        {ecx = WrapCol}
   add    esi,ecx        {point to default wrap point}
+  add    esi,ecx
   mov    edi,esi        {save esi in edi}
 
   std                   {go backward}
@@ -440,7 +441,7 @@ end;
 {$ENDIF}
 
 procedure edMoveBlock(var Src, Dest; Count : Word);
-  {-move block of data from Src to Dest}
+  {-move block of data from Src to Dest}          //SZ: string only
 begin
   Move(Src, Dest, Count);
 end;
@@ -577,13 +578,14 @@ asm
 end;
 {$ENDIF}
 
-function edStrStInsert(Dest, S : PChar; DLen, SLen, Pos : Word) : PChar; register;    // FIXME
+function edStrStInsert(Dest, S : PChar; DLen, SLen, Pos : Word) : PChar; register;
   {-insert S into Dest}
 {$IFDEF UNICODE}
 begin
   Move(Dest[Pos], Dest[Pos + sLen], SLen * SizeOf(Char));
   Move(S[0], Dest[Pos], SLen * SizeOf(Char));
   Result := Dest;
+end;
 {$ELSE}
 asm
   push   esi            {save}
@@ -643,8 +645,8 @@ asm
   pop    ebx            {restore}
   pop    edi            {restore}
   pop    esi            {restore}
-{$ENDIF}
 end;
+{$ENDIF}
 
 function edWhiteSpace(C : Char) : Boolean; register;
   {-return True if C is a white space character}
