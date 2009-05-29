@@ -6092,7 +6092,7 @@ end;
 
 procedure TOvcCustomTextFileEditor.LoadFromFile(const Name : string);
 const
-  BufSize = MaxSmallInt+1;
+  BufSize = (MaxSmallInt + 1) * SizeOf(Char);
 type
   SBuf = array[0..BufSize-1] of Char;
 var
@@ -6188,7 +6188,7 @@ end;
 procedure TOvcCustomTextFileEditor.SaveToFile(const Name : string);
   {-write the current file to disk}
 const
-  BufSize = 8192;
+  BufSize = 8192 * SizeOf(Char);
 var
   F     : System.Text;
   I, PC : LongInt;
