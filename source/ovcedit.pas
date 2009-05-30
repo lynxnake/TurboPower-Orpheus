@@ -862,12 +862,21 @@ type
       override;
     procedure NewFile(const Name : string);
       {-create a new file}
-    procedure LoadFromFile(const Name : string);
+
+{$IFDEF UNICODE}
+    procedure LoadFromFile(const Name : string; const AEncoding: TEncoding = nil); dynamic;
+{$ELSE}
+    procedure LoadFromFile(const Name : string); dynamic;
+{$ENDIF}
       {-open the file for editing}
-      dynamic;
-    procedure SaveToFile(const Name : string);
+
+{$IFDEF UNICODE}
+    procedure SaveToFile(const Name : string; const AEncoding: TEncoding = nil); dynamic;
+{$ELSE}
+    procedure SaveToFile(const Name : string); dynamic;
+{$ENDIF}
       {-write the text in the specified file}
-      dynamic;
+
 
     {public properties}
     property BackupExt : string
@@ -6090,6 +6099,66 @@ begin
     LoadFromFile(FFileName);
 end;
 
+{$IFDEF UNICODE}
+procedure TOvcCustomTextFileEditor.LoadFromFile(const Name : string; const AEncoding: TEncoding);
+var
+  pFile: TStringList;
+  sLine: string;
+  iCount: Integer;
+begin
+  if Name = '' then
+    Exit;
+
+  {save FileName}
+  FFileName := teFixFileName(Name);
+  pFile := nil;
+  try
+    {display hourglass}
+    Screen.Cursor := crHourGlass;
+    try
+      {open the file}
+      pFile := TStringList.Create;
+      pFile.LoadFromFile(Name, AEncoding);
+
+      {delete existing text and allow display to be refreshed}
+      {if HandleAllocated then begin}
+        DeleteAll(True);
+        Update;
+      {end;}
+
+      {read the file}
+      for iCount := 0 to pFile.Count - 1 do
+      begin
+        sLine := pFile[iCount];
+
+        case AppendPara(PChar(sLine)) of
+          0              : {};
+          oeTooManyBytes : raise EEditorError.Create(GetOrphStr(SCTooManyBytes), 0);
+          oeTooManyParas : raise EEditorError.Create(GetOrphStr(SCTooManyParas), 0);
+          oeParaTooLong  : raise EEditorError.Create(GetOrphStr(SCParaTooLong), 0);
+        else
+          raise EEditorError.Create(GetOrphStr(SCOutOfMemory), 0);
+        end;
+      end;
+
+      {reset the scroll bars}
+      ResetScrollBars(True);
+    finally
+      {free the List}
+      pFile.Free;
+      {restore original cursor}
+      Screen.Cursor := crDefault;
+    end;
+    FIsOpen := True;
+  except
+    IsOpen := False;
+    if not (csLoading in ComponentState) then
+      raise;
+  end;
+end;
+
+{$ELSE}
+
 procedure TOvcCustomTextFileEditor.LoadFromFile(const Name : string);
 const
   BufSize = (MaxSmallInt + 1) * SizeOf(Char);
@@ -6172,6 +6241,8 @@ begin
   end;
 end;
 
+{$ENDIF}
+
 procedure TOvcCustomTextFileEditor.NewFile(const Name : string);
   {-create a new file}
 begin
@@ -6184,6 +6255,88 @@ begin
   {reset file name}
   FileName := Name;
 end;
+
+{$IFDEF UNICODE}
+
+procedure TOvcCustomTextFileEditor.SaveToFile(const Name : string; const AEncoding: TEncoding);
+  {-write the current file to disk}
+var
+  I, PC : LongInt;
+  J     : Longint;
+  sBuffer: string;
+  pFile: TStringList;
+  procedure MakeBakFile(const NewName : string);
+    {-make a backup file}
+  var
+    BakName : string;
+  begin
+    if FileExists(NewName) then begin
+      BakName := ChangeFileExt(NewName, '.' + FBackupExt);
+      if NewName = BakName then
+        Exit;
+
+      DeleteFile(BakName);
+      RenameFile(NewName, BakName);
+    end;
+  end;
+
+begin
+  if csDesigning in ComponentState then
+    Exit;
+
+  if Name = '' then
+    Exit;
+
+  pFile := nil;
+  {display hourglass}
+  Screen.Cursor := crHourGlass;
+  try
+    {make backup file if appropriate}
+    if FMakeBackup then
+      MakeBakFile(Name);
+
+    {get number of paragraphs}
+    PC := ParaCount;
+
+    pFile := TStringList.Create;
+
+    {create the file}
+    I := 1;
+    repeat
+      sBuffer := GetParaPointer(I);
+
+      for J := 1 to Length(sBuffer) do
+      begin
+        if (FKeepClipboardChars) then
+        begin
+          if not ovcCharInSet(sBuffer[J], FClipboardChars) and
+                 (sBuffer[J] <= #32) then
+            sBuffer[J] := #32;
+        end
+        else
+          if (sBuffer[J] < #10) then
+            sBuffer[J] := #32;
+      end;
+
+      if (I < PC) or (sBuffer <> '') then
+        pFile.Add(sBuffer);
+
+      Inc(I);
+    until (I > PC);
+
+    pFile.SaveToFile(Name, AEncoding);
+
+  finally
+    pFile.Free;
+    {restore cursor}
+    Screen.Cursor := crDefault;
+  end;
+
+  {clear the modified flag}
+  SetModified(False);
+end;
+
+{$ELSE}
 
 procedure TOvcCustomTextFileEditor.SaveToFile(const Name : string);
   {-write the current file to disk}
@@ -6300,6 +6453,8 @@ begin
   {clear the modified flag}
   SetModified(False);
 end;
+
+{$ENDIF}
 
 procedure TOvcCustomTextFileEditor.SetFileName(const Value : string);
   {-set name of file being edited}
