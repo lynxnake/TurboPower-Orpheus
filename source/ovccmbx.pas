@@ -1402,13 +1402,15 @@ procedure TOvcBaseComboBox.SetItemHeight(Value : Integer);
 begin
   if Value <> FItemHeight then begin
     FItemHeight := Value;
-    (* !!.05
+// QEC080430-12:12 - Removed the commenting-out as it prevented the correct
+//                   setting of the ComboBox Height!!!!!!!
+//    (* !!.05
     {$IFDEF VERSION6}
     inherited SetItemHeight(Value);
     {$ELSE}
     SetItemHeight(Value);
     {$ENDIF}
-    *)
+//    *)
     RecreateWnd;
   end;
 end;

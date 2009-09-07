@@ -4132,11 +4132,15 @@ begin
   else
     efRangeHi := Value;
   end;
-  if (ValidateContents(true) > 0)
+
+// QEC060210-14:00 - Commented out code below to fix Windows Error 
+//                   "Cannot focus invisible or hidden component."
+//                   when using on Notebook Tab Pages.  
+{  if (ValidateContents(true) > 0)
   and (Parent <> nil)
   and (Parent.Visible)
   and (Parent.Enabled) then
-    SetFocus;
+    SetFocus; }
 end;
 
 procedure TOvcBaseEntryField.SetRangeHiStr(const Value : string);
@@ -4149,11 +4153,15 @@ begin
     if not efStRangeToRange(Value, R) then
       raise EInvalidRangeValue.Create(efDataType mod fcpDivisor);
   efRangeHi := R;
-  if (ValidateContents(true) > 0)
+
+// QEC060210-14:00 - Commented out code below to fix Windows Error 
+//                   "Cannot focus invisible or hidden component."
+//                   when using on Notebook Tab Pages.  
+{  if (ValidateContents(true) > 0)
   and (Parent <> nil)
   and (Parent.Visible)
   and (Parent.Enabled) then
-    SetFocus;
+    SetFocus;  }
 end;
 
 procedure TOvcBaseEntryField.SetRangeLo(const Value : TRangeType);
@@ -4172,11 +4180,15 @@ begin
   else
     efRangeLo := Value;
   end;
-  if (ValidateContents(true) > 0)
+
+// QEC060210-14:00 - Commented out code below to fix Windows Error 
+//                   "Cannot focus invisible or hidden component."
+//                   when using on Notebook Tab Pages.  
+{  if (ValidateContents(true) > 0)
   and (Parent <> nil)
   and (Parent.Visible)
   and (Parent.Enabled) then
-    SetFocus;
+    SetFocus; }
 end;
 
 procedure TOvcBaseEntryField.SetRangeLoStr(const Value : string);
@@ -4189,11 +4201,15 @@ begin
     if not efStRangeToRange(Value, R) then
       raise EInvalidRangeValue.Create(efDataType mod fcpDivisor);
   efRangeLo := R;
-  if (ValidateContents(true) > 0)
+
+// QEC060210-14:00 - Commented out code below to fix Windows Error 
+//                   "Cannot focus invisible or hidden component."
+//                   when using on Notebook Tab Pages.  
+{  if (ValidateContents(true) > 0)
   and (Parent <> nil)
   and (Parent.Visible)
   and (Parent.Enabled) then
-    SetFocus;
+    SetFocus;  }
 end;
 
 procedure TOvcBaseEntryField.SetSelStart(Value : Integer);
