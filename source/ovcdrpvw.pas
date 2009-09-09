@@ -926,8 +926,8 @@ begin
       if FieldSize[Index] = 0 then
         Result := ''
       else begin
-        SetLength(Result,(FieldSize[Index]-1) div sizeof(char)); {account for trailing #0}
-        if FieldSize[Index] > 1 then
+        SetLength(Result,((FieldSize[Index] div sizeof(char)) - 1)); {account for trailing #0}
+        if FieldSize[Index] > sizeof(char) then
           move(DataBuffer^[FieldIndexTable^[Index]],Result[1],FieldSize[Index])
         else
           Result := '';
@@ -986,8 +986,8 @@ begin
       if FieldSize[Index] = 0 then
         Result := ''
       else begin
-        SetLength(F,(FieldSize[Index] -1) div sizeof(char)); {account for trailing #0}
-        if FieldSize[Index] > 1 then
+        SetLength(F,((FieldSize[Index] div sizeof(char)) - 1)); {account for trailing #0}
+        if FieldSize[Index] > sizeof(char) then
           move(DataBuffer^[FieldIndexTable^[Index]],F[1],FieldSize[Index])
         else
           F := '';
@@ -1125,7 +1125,7 @@ begin
   dtString :
     if Value <> AsString[Index] then begin
       FieldSize[Index] := (length(Value) +  1) * sizeof(char);
-      if FieldSize[Index] > 1 then
+      if FieldSize[Index] > sizeof(char) then
         move(Value[1],DataBuffer^[FieldIndexTable^[Index]], FieldSize[Index]);
       Changed;
     end;
