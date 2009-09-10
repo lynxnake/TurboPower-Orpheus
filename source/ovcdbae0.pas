@@ -171,7 +171,7 @@ var
     else begin
       Result := 0;
       for I := DotPos+1 to EF.MaxLength-1 do
-        if EF.efNthMaskChar(I) in PictureChars then
+        if ovcCharInSet(EF.efNthMaskChar(I), PictureChars) then
           Inc(Result)
         else
           Break;

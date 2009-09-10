@@ -258,6 +258,10 @@ type
   end;
 
 implementation
+
+uses
+  ovcstr;
+
 const
   CacheSize = 256;
   {MaxRecords = 16384;}
@@ -540,12 +544,12 @@ function TOvcDbReportView.CreateValidFieldName(const FieldName : string) : strin
 var
   i : Integer;
 begin
-  if FieldName[1] in ['A'..'Z','a'..'z'] then
+  if ovcCharInSet(FieldName[1], ['A'..'Z','a'..'z']) then
     Result := FieldName[1]
   else
     Result := '_';
   for i := 2 to length(FieldName) do
-    if FieldName[i] in ['A'..'Z','a'..'z','0'..'9'] then
+    if ovcCharInSet(FieldName[i], ['A'..'Z','a'..'z','0'..'9']) then
       Result := Result + FieldName[i]
     else
       Result := Result + '_';

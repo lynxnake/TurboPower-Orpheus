@@ -446,7 +446,7 @@ procedure TOvcDbColumnList.clDrawHeader;
   {-draw the header and text}
 var
   R   : TRect;
-  Buf : array[0..255] of AnsiChar;
+  Buf : array[0..255] of Char;
   X,Y : Integer;
 begin
   {get the header text}
@@ -947,7 +947,7 @@ begin
         {paint the string}
         Canvas.FillRect(CR);
         ExtTextOut(Canvas.Handle, Left, Y, ETO_CLIPPED,
-                   @CR, P, StrLen(P), nil);
+                   @CR, string(P), StrLen(P), nil);
 
         {restore colors for active items}
         if I = ActiveRow then begin

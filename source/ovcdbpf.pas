@@ -355,7 +355,7 @@ end;
 
 procedure TOvcDbPictureField.efGetSampleDisplayData(T : PChar);
 var
-  S : string[MaxEditLen];
+  S : string;
   P : Integer;
 begin
   {overridden to supply live data for the field display}
@@ -538,7 +538,7 @@ begin
         {$IFDEF VERSION5}
         , ftWideString
         {$ENDIF}
-                     : Field.AsString  := S;
+                     : Field.AsString  := string(S);
         ftSmallInt   : Field.AsInteger := I;
         ftInteger    : Field.AsInteger := L;
         ftWord       : Field.AsInteger := W;
@@ -643,14 +643,14 @@ begin
       , ftWideString
       {$ENDIF}
                   : begin
-                     S := Field.AsString;
+                     S := AnsiString(Field.AsString);
                      if (S = '') and not (efoStripLiterals in Options) then begin
                        {new or empty field. create display string w/ literals}
                        FillChar(F[0], MaxLength, ' ');
                        F[MaxLength{+1}] := #0;
                        pbInitPictureFlags;
                        pbMergePicture(F, F);
-                       S := StrPas(F);
+                       S := AnsiString(StrPas(F));
                      end else if not (efoTrimBlanks in Options) and
                                  not (efoStripLiterals in Options) then
                        while Length(S) < MaxLength do
@@ -672,7 +672,7 @@ begin
         if (Field.IsNull) then DT := BadDate
         else DT := Field.AsDateTime;
     else
-      S := Field.AsString;
+      S := AnsiString(Field.AsString);
     end;
     P := efHPos;
 

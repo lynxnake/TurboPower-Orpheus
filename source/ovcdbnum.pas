@@ -204,6 +204,9 @@ type
 
 implementation
 
+uses
+  ovcstr;
+
 const
   NumFieldTypes : set of  TFieldType =
     [ftSmallInt, ftInteger, ftWord, ftFloat, ftCurrency, ftBCD];
@@ -265,7 +268,7 @@ end;
 procedure TOvcCustomDbNumberEdit.DataChange(Sender : TObject);
 var
   P : Integer;
-  S : string[80];
+  S : string;
 begin
   if FDataLink.Field <> nil then begin
     if FAlignment <> FDataLink.Field.Alignment then begin
@@ -393,12 +396,12 @@ end;
 
 procedure TOvcCustomDbNumberEdit.KeyPress(var Key : Char);
 begin
-  if AllowIncDec and (Key in ['+', '-']) then
+  if AllowIncDec and ovcCharInSet(Key, ['+', '-']) then
     FDataLink.Edit;
 
   inherited KeyPress(Key);
 
-  if (Key in [#32..#255]) and (FDataLink.Field <> nil) and
+  if ovcCharInSet(Key, [#32..#255]) and (FDataLink.Field <> nil) and
      not FDataLink.Field.IsValidChar(Key) then begin
     MessageBeep(0);
     Key := #0;

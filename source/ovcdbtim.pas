@@ -205,6 +205,9 @@ type
 
 implementation
 
+uses
+  ovcstr;
+
 const
   TimeFieldTypes : set of  TFieldType = [ftTime, ftDateTime];
 
@@ -267,7 +270,7 @@ procedure TOvcCustomDbTimeEdit.DataChange(Sender : TObject);
 var
   P  : Integer;
   DT : TDateTime;
-  S  : string[80];
+  S  : string;
 begin
   if FDataLink.Field <> nil then begin
     if FAlignment <> FDataLink.Field.Alignment then begin
@@ -405,7 +408,7 @@ procedure TOvcCustomDbTimeEdit.KeyPress(var Key : Char);
 begin
   inherited KeyPress(Key);
 
-  if (Key in [#32..#255]) and (FDataLink.Field <> nil) and
+  if ovcCharInSet(Key, [#32..#255]) and (FDataLink.Field <> nil) and
      not FDataLink.Field.IsValidChar(Key) then begin
     MessageBeep(0);
     Key := #0;

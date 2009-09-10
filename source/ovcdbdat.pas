@@ -216,6 +216,9 @@ type
 
 implementation
 
+uses
+  ovcstr;
+
 const
   DateFieldTypes : set of  TFieldType = [ftDate, ftDateTime];
 
@@ -287,7 +290,7 @@ procedure TOvcCustomDbDateEdit.DataChange(Sender : TObject);
 var
   P  : Integer;
   DT : TDateTime;
-  S  : string[80];
+  S  : string;
 begin
   if FDataLink.Field <> nil then begin
     if FAlignment <> FDataLink.Field.Alignment then begin
@@ -440,14 +443,14 @@ begin
   inherited KeyPress(Key);
 
 {  NeedsUpdating := (AllowIncDec and (Key in ['+', '-']));}
-  NeedsUpdating := (AllowIncDec and (TheKey in ['+', '-']));
+  NeedsUpdating := (AllowIncDec and ovcCharInSet(TheKey, ['+', '-']));
 
   if (NeedsUpdating) then begin
     FDataLink.Edit;
     FDataLink.Field.AsDateTime := FDate;
   end;
 
-  if (Key in [#32..#255]) and (FDataLink.Field <> nil) and
+  if ovcCharInSet(Key, [#32..#255]) and (FDataLink.Field <> nil) and
      not FDataLink.Field.IsValidChar(Key) then begin
     MessageBeep(0);
     Key := #0;

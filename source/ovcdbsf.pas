@@ -340,7 +340,7 @@ end;
 
 procedure TOvcDbSimpleField.efGetSampleDisplayData(T : PChar);
 var
-  S : string[MaxEditLen];
+  S : string;
   P : Integer;
 begin
   {overridden to supply live data for the field display}

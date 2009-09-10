@@ -1866,7 +1866,7 @@ var
   ColIsLocked : Boolean;
   IsActiveRow : Boolean;
   WordWrap    : Boolean;
-  S           : string[255];
+  S           : string;
 
   procedure DrawEffects(GridPen : TOvcGridPen; R : TRect);
   var
@@ -2041,7 +2041,7 @@ begin
             if Assigned(Fld) and not (hoUseLetters in HeaderOptions) and
                not (hoUseStrings in HeaderOptions) then begin
               S := Fld.DisplayLabel;
-              FHeaderCell.Paint(Canvas, DR, -1, Col.Number, CellAttr, @S);
+              FHeaderCell.Paint(Canvas, DR, -1, Col.Number, CellAttr, PChar(S));
             end else
               FHeaderCell.Paint(Canvas, DR, -1, Col.Number, CellAttr, nil);
           end else begin
@@ -4245,16 +4245,16 @@ begin
       Exit;
     end;
     if (ACell is TOvcTCString) then
-      S := AField.Text
+      S := AnsiString(AField.Text)
     else if (ACell is TOvcTCSimpleField) or
             (ACell is TOvcTCPictureField) or
             (ACell is TOvcTCNumericField) then begin
       case AField.DataType of
-        ftString   : S := AField.Text;
+        ftString   : S := AnsiString(AField.Text);
 
         {WideString Support}
         {$IFDEF VERSION5}
-        ftWideString : S := AField.Text;
+        ftWideString : S := AnsiString(AField.Text);
         {$ENDIF}
 
         ftSmallInt : I := AField.AsInteger;
@@ -4300,11 +4300,11 @@ begin
         PCellComboBoxInfo(Data)^.Index := AField.AsInteger;
         PCellComboBoxInfo(Data)^.St := '';
       end else begin
-        S := AField.Text;
+        S := AnsiString(AField.Text);
         if S = '' then
           Idx := -1
         else
-          Idx := TOvcTCComboBox(ACell).Items.IndexOf(S);
+          Idx := TOvcTCComboBox(ACell).Items.IndexOf(string(S));
 
         PCellComboBoxInfo(Data)^.Index := Idx;
 
@@ -4313,7 +4313,7 @@ begin
             {$IFDEF CBuilder}
             StrPCopy(PCellComboBoxInfo(Data)^.St, S);
             {$ELSE}
-            StrPCopy(PCellComboBoxInfo(Data)^.St, S);
+            StrPCopy(PCellComboBoxInfo(Data)^.St, string(S));
             {$ENDIF}
       end;
 
@@ -4650,7 +4650,7 @@ var
   DTOpts    : Cardinal;
   R         : TRect;
   OurAdjust : TOvcTblAdjust;
-  Buf       : array[0..255] of AnsiChar;
+  Buf       : array[0..255] of Char;
 begin
   Canvas.Font := CellAttr.caFont;
   Canvas.Font.Color := CellAttr.caFontColor;
@@ -5136,16 +5136,16 @@ begin
     Move(Data^, S, Size);
 
     if (ACell is TOvcTCString) then
-      AField.Text := S
+      AField.Text := string(S)
     else if (ACell is TOvcTCSimpleField) or
             (ACell is TOvcTCPictureField) or
             (ACell is TOvcTCNumericField) then begin
       case AField.DataType of
-        ftString   : AField.Text := S;
+        ftString   : AField.Text := string(S);
 
         {WideString Support}
         {$IFDEF VERSION5}
-        ftWideString : AField.Text := S;
+        ftWideString : AField.Text := string(S);
         {$ENDIF}
 
         ftSmallInt : AField.AsInteger := I;

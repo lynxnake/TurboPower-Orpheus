@@ -120,14 +120,19 @@ end;
 procedure TOvcDbBDEHelper.GetAliasDriverName(const aAlias  : string;
                                                var aDriver : string);
 var
+  AliasZSource : array[0..31] of Char;
   AliasZ : array[0..31] of AnsiChar;
   Desc   : DBDesc;
 begin
-  StrPLCopy(AliasZ, AnsiString(aAlias), pred(Length(AliasZ)));
-  CharToOemA(AliasZ, AliasZ);
+  StrPLCopy(AliasZSource, aAlias, pred(Length(AliasZSource)));
+{$IFDEF UNICODE}
+  CharToOemW(AliasZSource, AliasZ);
+{$ELSE}
+  CharToOemA(AliasZSource, AliasZ);
+{$ENDIF}
   Check(DbiGetDatabaseDesc(AliasZ, @Desc));
   OemToCharA(Desc.szDbType, Desc.szDbType);
-  aDriver := StrPas(Desc.szDbType);
+  aDriver := string(Desc.szDbType);
 end;
 {--------}
 procedure TOvcDbBDEHelper.GetAliasNames(aList : TStrings);
