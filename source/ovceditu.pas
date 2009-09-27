@@ -547,12 +547,14 @@ asm
   jne    @@9
   mov    edx,edi
   sub    edx,ebx        {find difference}
+  shr    edx,1          {!!WK}
 @@9:
   mov    eax,edx
 
   pop    ebx            {restore}
   pop    edi            {restore}
 end;
+
 {$ELSE}
 asm
   push   edi            {save}
