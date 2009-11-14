@@ -1226,7 +1226,7 @@ var
   begin
     sBuffer := PChar(DataPtr);
     if TransferFlag = otf_GetData then
-      StrPCopy(DataPtr, efEditSt)
+//      StrPLCopy(DataPtr, efEditSt, MaxLength)
     else begin
       if (sBuffer = '') then
         efEditSt[0] := #0

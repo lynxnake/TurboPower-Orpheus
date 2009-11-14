@@ -3385,7 +3385,7 @@ begin
       Exit;
 
     case efDataType mod fcpDivisor of
-      fsubString   : efTransfer(@string(Data), otf_GetData);
+      fsubString   : efTransfer(PChar(@Data), otf_GetData);
       fsubChar     : efTransfer(@Char(Data), otf_GetData);
       fsubBoolean  : efTransfer(@Boolean(Data),  otf_GetData);
       fsubYesNo    : efTransfer(@Boolean(Data),  otf_GetData);
