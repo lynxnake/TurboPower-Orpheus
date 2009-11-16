@@ -1224,10 +1224,13 @@ var
     I : Integer;
     sBuffer: string;
   begin
-    sBuffer := PChar(DataPtr);
     if TransferFlag = otf_GetData then
-//      StrPLCopy(DataPtr, efEditSt, MaxLength)
+    begin
+      sBuffer := efEditSt;
+      StrPLCopy(DataPtr, sBuffer, MaxLength);
+    end
     else begin
+       sBuffer := PChar(DataPtr);
       if (sBuffer = '') then
         efEditSt[0] := #0
       else begin

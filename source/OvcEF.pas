@@ -3183,9 +3183,10 @@ var
 begin
   Result := '';
   if (efDataType mod fcpDivisor) = fsubString then begin
-    FLastError := GetValue(S);
-    if FLastError = 0 then
-      Result := S;
+    Result := efEditSt;
+//    FLastError := GetValue(S);
+//    if FLastError = 0 then
+//      Result := S;
   end else begin
     StrCopy(Buf, efEditSt);
     if efoTrimBlanks in Options then
