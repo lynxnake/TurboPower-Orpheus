@@ -185,6 +185,7 @@ uses
   OvcTCNum,               {table cell}
   OvcTCCBx,               {table cell}
   OvcTCIco,               {table cell}
+  ovctccustomedt,         {table cell}
   OvcLabel,               {custom label component}
   OvcLbl0,                {property editor for label control}
   OvcCalDg,               {calendar dialog component}
@@ -755,7 +756,8 @@ begin
     TOvcTCBitMap,
     TOvcTCGlyph,
     TOvcTCIcon,
-    TO32TCFlexEdit
+    TO32TCFlexEdit,
+    TOvcTCCustomStr
     ]);
 
   {register deprecated components}
