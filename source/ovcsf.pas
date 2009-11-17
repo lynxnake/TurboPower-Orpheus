@@ -1222,19 +1222,14 @@ var
   procedure TransferString;
   var
     I : Integer;
-    sBuffer: string;
   begin
     if TransferFlag = otf_GetData then
-    begin
-      sBuffer := efEditSt;
-      StrPLCopy(DataPtr, sBuffer, MaxLength);
-    end
+      string(DataPtr^) := StrPas(efEditSt)
     else begin
-       sBuffer := PChar(DataPtr);
-      if (sBuffer = '') then
+      if (string(DataPtr^) = '') then
         efEditSt[0] := #0
       else begin
-        StrPLCopy(efEditSt, sBuffer, MaxLength);
+        StrPLCopy(efEditSt, string(DataPtr^), MaxLength);
         for I := 0 to Integer(StrLen(efEditSt))-1 do
           efFixCase(efNthMaskChar(I), efEditSt[I], #255);
       end;

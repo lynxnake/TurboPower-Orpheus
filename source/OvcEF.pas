@@ -3183,10 +3183,9 @@ var
 begin
   Result := '';
   if (efDataType mod fcpDivisor) = fsubString then begin
-    Result := efEditSt;
-//    FLastError := GetValue(S);
-//    if FLastError = 0 then
-//      Result := S;
+    FLastError := GetValue(S);
+    if FLastError = 0 then
+      Result := S;
   end else begin
     StrCopy(Buf, efEditSt);
     if efoTrimBlanks in Options then
@@ -3386,7 +3385,7 @@ begin
       Exit;
 
     case efDataType mod fcpDivisor of
-      fsubString   : efTransfer(PChar(@Data), otf_GetData);
+      fsubString   : efTransfer(@string(Data), otf_GetData);
       fsubChar     : efTransfer(@Char(Data), otf_GetData);
       fsubBoolean  : efTransfer(@Boolean(Data),  otf_GetData);
       fsubYesNo    : efTransfer(@Boolean(Data),  otf_GetData);
@@ -4270,7 +4269,7 @@ begin
   Include(sefOptions, sefUpdating);
   try
     case efDataType mod fcpDivisor of
-      fsubString   : efTransfer(PChar(@Data), otf_SetData);
+      fsubString   : efTransfer(@string(Data), otf_SetData);
       fsubChar     : efTransfer(@AnsiChar(Data), otf_SetData);
       fsubBoolean  : efTransfer(@Boolean(Data),  otf_SetData);
       fsubYesNo    : efTransfer(@Boolean(Data),  otf_SetData);
