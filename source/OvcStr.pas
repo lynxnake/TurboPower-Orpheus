@@ -49,6 +49,13 @@ type
   BTable = array[0..{$IFDEF UNICODE}$FFFF{$ELSE}$FF{$ENDIF}] of Byte;
   {table used by the Boyer-Moore search routines}
 
+{$IFDEF UNICODE}
+  TOvcCharSet = SysUtils.TSysCharSet;
+{$ELSE}
+  TOvcCharSet = set of AnsiChar;
+{$ENDIF}
+
+
 function BinaryBPChar(Dest : PChar; B : Byte) : PChar;
   {-Return a binary PChar string for a byte}
 function BinaryLPChar(Dest : PChar; L : LongInt) : PChar;
@@ -120,7 +127,7 @@ procedure TrimTrailingZerosPChar(P : PChar);
 function UpCaseChar(C : Char) : Char;
   {-Convert a character to uppercase using the AnsiUpper API}
 
-function ovcCharInSet(C: Char; const CharSet: TSysCharSet): Boolean;
+function ovcCharInSet(C: Char; const CharSet: TOvcCharSet): Boolean;
 
 function ovc32StringIsCurrentCodePage(const S: WideString): Boolean;
 
@@ -1358,7 +1365,7 @@ asm
   call  CharUpper
 end;
 
-function ovcCharInSet(C: Char; const CharSet: TSysCharSet): Boolean;
+function ovcCharInSet(C: Char; const CharSet: TOvcCharSet): Boolean;
 begin
 {$IFDEF UNICODE}
   Result := SysUtils.CharInSet(C, CharSet);

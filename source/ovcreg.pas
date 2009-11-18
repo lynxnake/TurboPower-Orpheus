@@ -757,7 +757,8 @@ begin
     TOvcTCGlyph,
     TOvcTCIcon,
     TO32TCFlexEdit,
-    TOvcTCCustomStr
+    TOvcTCCustomStr,
+    TOvcTCCustomInt
     ]);
 
   {register deprecated components}
