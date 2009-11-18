@@ -13,14 +13,10 @@ type
   private
     FCellOwner: TOvcBaseTableCell;
   protected
-    procedure WMGetDlgCode(var Msg: TMessage);
-    message WM_GETDLGCODE;
-    procedure WMKeyDown(var Msg: TWMKey);
-    message WM_KEYDOWN;
-    procedure WMKillFocus(var Msg: TWMKillFocus);
-    message WM_KILLFOCUS;
-    procedure WMSetFocus(var Msg: TWMSetFocus);
-    message WM_SETFOCUS;
+    procedure WMGetDlgCode(var Msg: TMessage); message WM_GETDLGCODE;
+    procedure WMKeyDown(var Msg: TWMKey); message WM_KEYDOWN;
+    procedure WMKillFocus(var Msg: TWMKillFocus); message WM_KILLFOCUS;
+    procedure WMSetFocus(var Msg: TWMSetFocus); message WM_SETFOCUS;
   public
     property CellOwner: TOvcBaseTableCell read FCellOwner write FCellOwner;
   end;
@@ -53,7 +49,6 @@ type
     FCharCase: TEditCharCase;
     FEdit: TOVCTCCustomEdt;
     FMaxLength: Integer;
-    FNurZiffern: Boolean;
     FPasswordChar: Char;
     FString: string;
   protected
@@ -71,7 +66,6 @@ type
   published
     property CharCase: TEditCharCase read FCharCase write FCharCase;
     property MaxLength: Integer read FMaxLength write FMaxLength;
-    property NurZiffern: Boolean read FNurZiffern write FNurZiffern;
     property PasswordChar: Char read get_PasswordChar write set_PasswordChar;
   end;
 
