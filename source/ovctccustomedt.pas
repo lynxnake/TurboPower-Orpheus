@@ -4,7 +4,7 @@ interface
 
 uses
   Messages, Types, Classes, Controls, StdCtrls, ExtCtrls, Graphics, ovctcmmn,
-  ovctcstr, ovctCell;
+  ovcstr, ovctcstr, ovctCell;
 
 type
   TAfterCreateControlEvent = procedure(const AControl: TWinControl) of object;
@@ -12,13 +12,18 @@ type
   TOVCTCCustomEdt = class(TCustomEdit)
   private
     FCellOwner: TOvcBaseTableCell;
+    FValidChars: TOvcCharSet;
   protected
+    function IsValidText(const AText: string): Boolean; virtual;
+    procedure KeyPress(var Key: Char); override;
     procedure WMGetDlgCode(var Msg: TMessage); message WM_GETDLGCODE;
     procedure WMKeyDown(var Msg: TWMKey); message WM_KEYDOWN;
     procedure WMKillFocus(var Msg: TWMKillFocus); message WM_KILLFOCUS;
+    procedure WMPaste(var Msg: TMessage); message WM_PASTE;
     procedure WMSetFocus(var Msg: TWMSetFocus); message WM_SETFOCUS;
   public
     property CellOwner: TOvcBaseTableCell read FCellOwner write FCellOwner;
+    property ValidChars: TOvcCharSet read FValidChars write FValidChars;
   end;
 
   TOvcTCCustomControl = class(TOvcTCBaseString)
@@ -51,6 +56,7 @@ type
     FMaxLength: Integer;
     FPasswordChar: Char;
     FString: string;
+    FValidChars: TOvcCharSet;
   protected
     function DoCreateControl: TWinControl; override;
     procedure DoDataToControl(const AControl: TWinControl; Data: Pointer); override;
@@ -63,6 +69,7 @@ type
     procedure SaveEditedData(Data: Pointer); override;
     procedure StringToData(const AValue: string; var Data: Pointer; Purpose: TOvcCellDataPurpose);
     property StringValue: string read FString;
+    property ValidChars: TOvcCharSet read FValidChars write FValidChars;
   published
     property CharCase: TEditCharCase read FCharCase write FCharCase;
     property MaxLength: Integer read FMaxLength write FMaxLength;
@@ -72,7 +79,7 @@ type
 implementation
 
 uses
-  SysUtils, Windows, Forms, ovctcedt;
+  SysUtils, Windows, Forms, ClipBrd, ovctcedt;
 
 type
   TProtectedWinControl = class(TWinControl)
@@ -82,6 +89,29 @@ type
   end;
 
 { TOVCTCCustomEdt }
+
+function TOVCTCCustomEdt.IsValidText(const AText: string): Boolean;
+var
+  iCount: Integer;
+begin
+  Result := True;
+  if FValidChars <> [] then
+  begin
+    for iCount := 1 to Length(AText) do
+    begin
+      Result := ovcCharInSet(AText[iCount], FValidChars);
+      if not Result then
+        Break;
+    end;
+  end;
+end;
+
+procedure TOVCTCCustomEdt.KeyPress(var Key: Char);
+begin
+  if (Key > #32) and (FValidChars <> []) and (not ovcCharInSet(Key, FValidChars)) then
+    Key := #0;
+  inherited KeyPress(Key);
+end;
 
 procedure TOVCTCCustomEdt.WMGetDlgCode(var Msg: TMessage);
 begin
@@ -170,6 +200,17 @@ begin
   inherited;
   if CellOwner <> nil then
     CellOwner.PostMessageToTable(ctim_KillFocus, Msg.FocusedWnd, 0);
+end;
+
+procedure TOVCTCCustomEdt.WMPaste(var Msg: TMessage);
+var
+  sNewText: string;
+begin
+  sNewText := Copy(Text, 1, SelStart) + Clipboard.AsText + Copy(Text, SelStart + SelLength + 1, Length(Text) - SelLength - SelStart);
+  if not IsValidText(sNewText) then
+    Msg.Result := 0
+  else
+    inherited;
 end;
 
 procedure TOVCTCCustomEdt.WMSetFocus(var Msg: TWMSetFocus);
@@ -314,6 +355,7 @@ begin
   FEdit.MaxLength := MaxLength;
   FEdit.CharCase := CharCase;
   FEdit.PasswordChar := FPasswordChar;
+  FEdit.ValidChars := FValidChars;
   Result := FEdit;
 end;
 
