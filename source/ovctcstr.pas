@@ -221,7 +221,7 @@ procedure TOvcTCBaseString.tcPaintStrZ(TblCanvas : TCanvas;
 
     //R.K.
   if CellAttr.caAccess = otxReadOnly then
-    DTOpts := DTOpts or DT_MODIFYSTRING or DT_END_ELLIPSIS;
+    DTOpts := DTOpts or {DT_MODIFYSTRING or} DT_END_ELLIPSIS;
     //R.K.
 
     case CellAttr.caTextStyle of
