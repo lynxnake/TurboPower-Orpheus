@@ -49,6 +49,7 @@ type
       {.Z+}
       FUseASCIIZStrings : boolean;
       FUseWordWrap      : boolean;
+      FShowEllipsis     : Boolean;
 
       FOnChange    : TNotifyEvent;
       {.Z-}
@@ -77,6 +78,8 @@ type
       property UseWordWrap : boolean
          read FUseWordWrap write SetUseWordWrap;
 
+      property ShowEllipsis: Boolean read FShowEllipsis write FShowEllipsis;
+
       {events}
       property OnChange : TNotifyEvent
          read FOnChange write FOnChange;
@@ -90,9 +93,10 @@ implementation
 
 {===TOvcTCBaseString==========================================}
 constructor TOvcTCBaseString.Create(AOwner : TComponent);
-  begin
-    inherited Create(AOwner);
-  end;
+begin
+  inherited Create(AOwner);
+  FShowEllipsis := True;
+end;
 
 procedure TOvcTCBaseString.tcPaint(TableCanvas : TCanvas;
                              const CellRect    : TRect;
@@ -219,10 +223,8 @@ procedure TOvcTCBaseString.tcPaintStrZ(TblCanvas : TCanvas;
         end;{case}
       end;
 
-    //R.K.
-  if CellAttr.caAccess = otxReadOnly then
-    DTOpts := DTOpts or {DT_MODIFYSTRING or} DT_END_ELLIPSIS;
-    //R.K.
+  if FShowEllipsis and (CellAttr.caAccess = otxReadOnly) then
+    DTOpts := DTOpts or DT_END_ELLIPSIS;
 
     case CellAttr.caTextStyle of
       tsFlat :

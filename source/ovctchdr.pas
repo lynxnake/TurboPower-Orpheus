@@ -100,6 +100,7 @@ type
       property TextStyle default tsFlat;
       property UseASCIIZStrings default False;
       property UseWordWrap default False;
+      property ShowEllipsis default True;
 
       {events inherited from custom ancestor}
       property OnClick;
