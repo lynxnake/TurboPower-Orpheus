@@ -60,6 +60,9 @@ type
     procedure StopEditing(SaveValue: Boolean; Data: Pointer); override;
     property StringValue: string read FString;
   published
+    property Adjust;
+    property Color;
+    property Font;
     property UseASCIIZStrings;
   end;
 
