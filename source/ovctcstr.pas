@@ -50,6 +50,7 @@ type
       FUseASCIIZStrings : boolean;
       FUseWordWrap      : boolean;
       FShowEllipsis     : Boolean;
+      FUsePString       : Boolean;
 
       FOnChange    : TNotifyEvent;
       {.Z-}
@@ -79,6 +80,8 @@ type
          read FUseWordWrap write SetUseWordWrap;
 
       property ShowEllipsis: Boolean read FShowEllipsis write FShowEllipsis;
+
+      property UsePString: Boolean read FUsePString write FUsePString;
 
       {events}
       property OnChange : TNotifyEvent
@@ -125,7 +128,12 @@ procedure TOvcTCBaseString.tcPaint(TableCanvas : TCanvas;
     if Data = nil then
       sBuffer := Format('%d:%d', [RowNum, ColNum])
     else
-      sBuffer := string(PChar(Data));
+    begin
+      if FUsePString then
+        sBuffer := PString(Data)^
+      else
+        sBuffer := string(PChar(Data));
+    end;
 
     tcPaintStrZ(TableCanvas, cellRect, CellAttr, PChar(sBuffer));
 

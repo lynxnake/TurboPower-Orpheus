@@ -82,6 +82,8 @@ type
          read FMaxLength write FMaxLength;
 
     public
+      constructor Create(AOwner: TComponent); override;
+
       function CreateEditControl(AOwner : TComponent) : TOvcTCStringEdit; virtual;
 
       function  EditHandle : THandle; override;
@@ -238,6 +240,12 @@ type
 implementation
 
 {===TOvcTCCustomString===============================================}
+constructor TOvcTCCustomString.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+  UsePString := True;
+end;
+
 function TOvcTCCustomString.CreateEditControl(AOwner : TComponent) : TOvcTCStringEdit;
   begin
     Result := TOvcTCStringEdit.Create(AOwner);
@@ -313,7 +321,12 @@ procedure TOvcTCCustomString.StartEditing(RowNum : TRowNum; ColNum : TColNum;
             if (Data = nil) then
               SetTextBuf('')
             else
-              SetTextBuf(PChar(Data));
+              begin
+                if UsePString then
+                  SetTextBuf(PWideChar(PString(Data)^))
+                else
+                  SetTextBuf(PChar(Data));
+              end;
           end
         else
           begin
@@ -361,12 +374,16 @@ procedure TOvcTCCustomString.StartEditing(RowNum : TRowNum; ColNum : TColNum;
 {--------}
 procedure TOvcTCCustomString.StopEditing(SaveValue : boolean;
                                          Data : pointer);
-
   begin
     try
       if SaveValue and Assigned(Data) then
         if UseASCIIZStrings then
-          FEdit.GetTextBuf(PChar(Data), MaxLength+1)
+        begin
+          if FUsePString then
+            PString(Data)^ := FEdit.Text
+          else
+            FEdit.GetTextBuf(PChar(Data), MaxLength+1)
+        end
         else
           POvcShortString(Data)^ := ShortString(Copy(FEdit.Text, 1, MaxLength));
     finally
