@@ -323,7 +323,7 @@ procedure TOvcTCCustomString.StartEditing(RowNum : TRowNum; ColNum : TColNum;
             else
               begin
                 if UsePString then
-                  SetTextBuf(PWideChar(PString(Data)^))
+                  SetTextBuf(PChar(PString(Data)^))
                 else
                   SetTextBuf(PChar(Data));
               end;
