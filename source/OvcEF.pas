@@ -1519,7 +1519,9 @@ var
   Len   : Word;
   Value : Double;
   Code  : Integer;
+  I     : Integer;
   S     : string;
+  pDest : PChar;
 begin
   FillChar(Dest^, Size * SizeOf(Char), #0);
   efMapControlChars(Dest, efEditSt);
@@ -1530,10 +1532,19 @@ begin
        ((ZeroDisplay = zdHideUntilModified) and not EverModified) then begin
       S := Trim(GetStrippedEditString);
       Val(S, Value, Code);
-      if (Value = ZeroDisplayValue) and (Code = 0) then begin
+      if (Value = ZeroDisplayValue) and (Code = 0) then
+      begin
         Len := StrLen(Dest);
         if Len > 0 then
-          FillChar(Dest^, Len * SizeOf(Char), ' ');
+        begin
+          pDest := Dest;
+          for I := 0 to Len - 1 do
+          begin
+            pDest^ := ' ';
+            Inc(pDest);
+          end;
+        end;
+//          FillChar(Dest^, Len * SizeOf(Char), ' ');
       end;
     end;
   end;
