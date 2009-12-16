@@ -876,6 +876,7 @@ begin
     varDate     : SetAsDate(Value);
     varBoolean  : SetAsBoolean(Value);
     varString   : SetAsString(Value);
+{$IFDEF UNICODE}varUString  : SetAsString(Value);{$ENDIF}
   end;
 end;
 

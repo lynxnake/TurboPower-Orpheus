@@ -201,6 +201,7 @@ type
     procedure efColorChanged(AColor : TObject);
     function  efGetTextExtent(S : PChar; Len : Integer) : Word;
     procedure efInitializeDataSize;
+    function GetDefStrType: TVarType;
 
 { - HWnd changed to TOvcHWnd for BCB Compatibility }
     function  efIsSibling(HW : TOvcHWnd{hWnd}) : Boolean;
@@ -3873,6 +3874,15 @@ begin
   end;
 end;
 
+function TOvcBaseEntryField.GetDefStrType: TVarType;
+begin
+{$IFDEF UNICODE}
+  Result := varUString;
+{$ELSE}
+  Result := varString;
+{$ENDIF}
+end;
+
 procedure TOvcBaseEntryField.SetAsVariant(Value : Variant);
   {-sets the field value to a Variant value}
 var
@@ -3892,7 +3902,7 @@ begin
         fsubLongInt : SetAsInteger(Value);
       else
         {try to convert it into a string}
-        SetAsString(VarAsType(Value, varString));
+        SetAsString(VarAsType(Value, GetDefStrType));
       end;
     varSingle,
     varDouble,
@@ -3905,21 +3915,22 @@ begin
         fsubComp : SetAsFloat(Value);
       else
         {try to convert it into a string}
-        SetAsString(VarAsType(Value, varString));
+        SetAsString(VarAsType(Value, GetDefStrType));
       end;
     varDate     :
       if fSub = fsubDate then
         SetAsDateTime(Value)
       else
         {try to convert it into a string}
-        SetAsString(VarAsType(Value, varString));
+        SetAsString(VarAsType(Value, GetDefStrType));
     varBoolean  :
       if fSub in [fsubBoolean, fsubYesNo] then
         SetAsBoolean(Value)
       else
         {try to convert it into a string}
-        SetAsString(VarAsType(Value, varString));
+        SetAsString(VarAsType(Value, GetDefStrType));
     varString   : SetAsString(Value);
+{$IFDEF UNICODE}varUString: SetAsString(Value);{$ENDIF}
   end;
 end;
 
