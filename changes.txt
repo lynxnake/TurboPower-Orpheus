@@ -1,13 +1,28 @@
-- TOvcTCColHead: Introduced the new property ShowEllipsis.
+Revision 49: (2009/11/28 Roman Kassebaum)
 - TOvcTCCustomString and with it TOvcTCString uses PString. This means the in the OnGetCellText event handler should look like the following:
   Data := @FString; (with FString: string, not a ShortString or AnsiString).
-- Added the new editor TOvcTCCustomStr which uses PChar. The OnGetCellText event handler should look like the following:
-  OvcTCCustomStr1.StringToData(FString, Data, Purpose);
-  Cause the TOvcTCCustomStr uses a PChar, the DoneEdit event handler must be assigned in the following way:
-  FString := OvcTCCustomStr1.StringValue;
+  This is the first revision that allows to use the TOvcTCString under unicode.
+  
+Revision 48: (2009/11/28 Roman Kassebaum)
+- Added the properties Adjust, Color and Font to the editor TOvcTCCustomControl.
+  
+Revision 47: (2009/11/25 Roman Kassebaum)  
+- TOvcTCColHead: Introduced the new property ShowEllipsis.
+
+Revision 46: (2009/11/24 Roman Kassebaum)  
+- TOvcTCColHead: Fixed a big problem that occurs if the Ellipsis was shown.
+  Previous revisions shouldn't be used any longer.
+  
+Revision 45: (2009/11/18 Roman Kassebaum)
 - Added the new editor TOvcTCCustomInt for Integers. The OnGetCellText event handler should look like the following:
   OvcTCCustomInt1.IntToData(FInteger, Data, Purpose);
   The DoneEdit event handler must be assigned in the following way:
   FInteger := OvcTCCustomInt1.IntegerValue;
+
+Revision 44: (2009/11/18 Roman Kassebaum)
+- Added the new editor TOvcTCCustomStr which uses PChar. The OnGetCellText event handler should look like the following:
+  OvcTCCustomStr1.StringToData(FString, Data, Purpose);
+  Cause the TOvcTCCustomStr uses a PChar, the DoneEdit event handler must be assigned in the following way:
+  FString := OvcTCCustomStr1.StringValue;
   
   
