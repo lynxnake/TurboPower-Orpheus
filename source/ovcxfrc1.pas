@@ -273,14 +273,14 @@ begin
 
       if (C is TEdit) then begin
         if TEdit(C).MaxLength = 0 then
-          Lines.Add(Format('    %sText%s : string[255];',
+          Lines.Add(Format('    %sText%s : string;',
            [C.Name, Spaces(Len-J-4)]))
         else
-          Lines.Add(Format('    %sText%s : string[%d];',
+          Lines.Add(Format('    %sText%s : string;',
            [C.Name, Spaces(Len-J-4), TEdit(C).MaxLength]));
       end else if (C is TLabel) or
          (C is TPanel) or (C is TOvcRotatedLabel) then begin
-        Lines.Add(Format('    %sText%s : string[255];',
+        Lines.Add(Format('    %sText%s : string;',
          [C.Name, Spaces(Len-J-4)]));
       end else if (C is TCheckBox) or (C is TRadioButton) then begin
         Lines.Add(Format('    %sChecked%s : Boolean;',
@@ -297,7 +297,7 @@ begin
       end else if (C is TOvcBaseEntryField) then begin
         case TLocalEF(C).efDataType mod fcpDivisor of
           fsubString   :
-            S := Format('string[%d];', [TLocalEF(C).DataSize-1]);
+            S := Format('string;', [TLocalEF(C).DataSize-1]);
           fsubChar     : S := 'AnsiChar;';
           fsubBoolean  : S := 'Boolean;';
           fsubYesNo    : S := 'Boolean;';
