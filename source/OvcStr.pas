@@ -515,10 +515,13 @@ end;
 
 function CharStrPChar(Dest : PChar; C : Char;
                       Len : Cardinal) : PChar; register;
+//SZ: inserts char C Len times into Dest; adds #0 - Unicode verified 27.01.2010
+{$IFDEF UNICODE}
 begin
   Result := StrPCopy(Dest, StringOfChar(C, Len));
 end;
-(*asm
+{$ELSE}
+asm
   push    edi            { Save EDI-about to change it }
   push    eax            { Save Dest pointer for return }
   mov     edi, eax       { Point EDI to Dest }
@@ -542,7 +545,8 @@ end;
 
   pop     eax            { Return Dest pointer }
   pop     edi            { Restore orig value of EDI }
-end;*)
+end;
+{$ENDIF}
 
 function DetabPChar(Dest : PChar; Src : PChar;
                     TabSize : Byte) : PChar; register;     // FIXME
@@ -673,11 +677,13 @@ begin
 end;
 
 function StrChDeletePrim(P : PChar; Pos : Cardinal) : PChar; register;
+//SZ: deletes character at pos P; fixed result 27.01.2010
 {$IFDEF UNICODE}
 begin
   if Pos > StrLen(P) then
     Exit(P);
-  Result := StrCopy(P + Pos, P + Pos + 1);
+  StrCopy(P + Pos, P + Pos + 1);
+  Result := P;
 end;
 {$ELSE}
 asm
@@ -714,6 +720,7 @@ end;
 
 function StrChInsertPrim(Dest : PChar; C : Char;
                          Pos : Cardinal) : PChar; register;
+//SZ Unicode verified 27.01.2010
 {$IFDEF UNICODE}
 var
   Tmp: String;
@@ -767,6 +774,8 @@ end;
 function StrChPos(P : PChar; C : Char;
                   var Pos : Cardinal): Boolean; register;
   {-Sets Pos to position of character C within string P returns True if found}
+//SZ Unicode verified 27.01.2010
+{$IFDEF UNICODE}
 var
   Tmp: PChar;
 begin
@@ -776,7 +785,8 @@ begin
   if Result then
     Pos := Tmp - P;
 end;
-(*asm
+{$ELSE}
+asm
   push   esi               {save since we'll be changing}
   push   edi
   push   ebx
@@ -815,7 +825,8 @@ end;
   pop    ebx               {restore registers}
   pop    edi
   pop    esi
-end;  *)
+end;
+{$ENDIF}
 
 procedure StrInsertChars(Dest : PChar; Ch : Char; Pos, Count : Word);
   {-Insert count instances of Ch into S at Pos}
@@ -843,9 +854,7 @@ begin
 end;
 
 function StrStDeletePrim(P : PChar; Pos, Count : Cardinal) : PChar; register;
-//begin
-//  Result := StrCopy(P + Pos, P + Pos + Count);
-//end;
+//SZ Unicode verified 27.01.2010
 {$IFDEF UNICODE}
 asm
   push   eax             {save because we will be changing them}
@@ -945,14 +954,7 @@ end;
 function StrStInsertPrim(Dest : PChar; S : PChar;
                          Pos : Cardinal) : PChar; register;
 {$IFDEF UNICODE}
-     //clc dette var mit forslag, virker... Dest := StrCat(s,dest);
-
-//begin
-//  Result := Dest;
-//  Inc(Dest, Pos);
-//  StrCopy(Dest + (StrEnd(S) - S), Dest);
-//  StrCopy(Dest, S);
-//end;
+//SZ Unicode verified 27.01.2010
 asm
   push   eax             {save because we will be changing them}
   push   edi
@@ -1071,6 +1073,7 @@ end;
 {$ENDIF}
 
 function StrStPos(P, S : PChar; var Pos : Cardinal) : boolean; register;
+//SZ Unicode verified 27.01.2010
 {$IFDEF UNICODE}
 var
   Q: PChar;
@@ -1159,6 +1162,7 @@ end;
 
 function StrToLongPChar(S : PChar; var I : LongInt) : Boolean;
   {-Convert a string to a longint, returning true if successful}
+//SZ Unicode verified 27.01.2010
 var
   Code : Cardinal;
   P    : array[0..255] of Char;
@@ -1325,7 +1329,26 @@ begin
   TrimAllSpacesPChar(P);
 end;
 
-function TrimTrailPrimPChar(S : PChar) : PChar; register;  // FIXME
+function TrimTrailPrimPChar(S : PChar) : PChar; register;
+//SZ Unicode fixed and verified 27.01.2010
+{$IFDEF UNICODE}
+var
+  Len: Integer;
+  PEnd: PChar;
+begin
+  Len := StrLen(S);
+  PEnd := S + Len - 1;
+  while PEnd >= S do
+  begin
+    if PEnd^ = ' ' then
+      PEnd^ := #0
+    else
+      Break;
+    Dec(PEnd);
+  end;
+  Result := S;
+end;
+{$ELSE}
 asm
    cld
    push   edi
@@ -1350,6 +1373,7 @@ asm
    mov    eax, edx
    pop    edi
 end;
+{$ENDIF}
 
 function TrimTrailPChar(Dest, S : PChar) : PChar;
   {-Return a string with trailing white space removed}
@@ -1358,12 +1382,26 @@ begin
   Result := TrimTrailPrimPChar(Dest);
 end;
 
-function UpCaseChar(C : Char) : Char; register; // FIXME
+function UpCaseChar(C : Char) : Char; register;
+//SZ Unicode fixed and verified 27.01.2010  (incorrect Result for Unicode chars)
+{$IFDEF UNICODE}
+var
+  S: String;
+begin
+  S := C;
+  S := CharUpper(PChar(S));
+  if Length(S) >= 1 then
+    Result := S[1]
+  else
+    Result := C;
+end;
+{$ELSE}
 asm
   and   eax, 0FFh
   push  eax
   call  CharUpper
 end;
+{$ENDIF}
 
 function ovcCharInSet(C: Char; const CharSet: TOvcCharSet): Boolean;
 begin
