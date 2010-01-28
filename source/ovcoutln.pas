@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{*    Sebastian Zierer (Upgraded to Unicode)                                  *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -359,8 +360,15 @@ type
     property Node[Index: LongInt]: TOvcOutlineNode read GetNode;
     procedure LoadFromFile(const FileName : string);
     procedure LoadFromStream(Stream : TStream);
+    {$IFDEF UNICODE}
+    procedure LoadFromText(const FileName : string; Encoding: TEncoding = nil);
+    {$ELSE}
     procedure LoadFromText(const FileName : string);
-    procedure SaveAsText(const FileName : string);
+    {$ENDIF}
+    procedure SaveAsText(const FileName : string); overload;
+    {$IFDEF UNICODE}
+    procedure SaveAsText(const FileName: string; Encoding: TEncoding); overload;
+    {$ENDIF}
     procedure SaveToFile(const FileName : string);
     procedure SaveToStream(Stream : TStream);
     procedure SetBounds(ALeft, ATop, AWidth, AHeight : Integer);
@@ -463,6 +471,10 @@ type
 {.Z+}
 
 implementation
+
+uses
+  WideStrUtils;
+
 var
   BrushBitmap : TBitmap;
 
@@ -1315,7 +1327,7 @@ begin
 
   if Key = 0 then
     if TextSort then
-      Result := CompareText(TOvcOutlineNode(I1).Text, TOvcOutlineNode(I2).Text)
+      Result := AnsiCompareText(TOvcOutlineNode(I1).Text, TOvcOutlineNode(I2).Text)
     else
       Result := IComp(TOvcOutlineNode(I1).AddIndex, TOvcOutlineNode(I2).AddIndex)
   else
@@ -1343,7 +1355,7 @@ begin
     if Result = 0 then
       if Key = 0 then
         if TextSort then
-          Result := CompareText(TOvcOutlineNode(I1).Text, TOvcOutlineNode(I2).Text)
+          Result := AnsiCompareText(TOvcOutlineNode(I1).Text, TOvcOutlineNode(I2).Text)
         else
           Result := IComp(TOvcOutlineNode(I1).AddIndex, TOvcOutlineNode(I2).AddIndex)
       else
@@ -1638,26 +1650,88 @@ begin
   inherited Notification(AComponent, Operation);
 end;
 
+{$IFDEF UNICODE}
+procedure TOvcCustomOutline.LoadFromText(const FileName: string; Encoding: TEncoding = nil);
+var
+  S : TStreamReader;
+  Ln : String;
+  CurLevel : Integer;
+
+  procedure NextLine;
+  begin
+    CurLevel := 0;
+    Ln := '';
+    if not S.EndOfStream then
+    begin
+      Ln := S.ReadLine;
+      while Copy(Ln, 1, 1) = #9 do
+      begin
+        Delete(Ln, 1, 1);
+        Inc(CurLevel);
+      end;
+    end;
+  end;
+
+  procedure LoadLevel(Parent : TOvcOutlineNode; S : TStreamReader; Level : Integer);
+  var
+    NewNode : TOvcOutlineNode;
+  begin
+    NewNode := nil;
+    repeat
+      if Ln = '' then
+        NextLine;
+      if Ln = '' then
+        exit;
+      if CurLevel < Level then
+        exit
+      else if CurLevel > Level then begin
+        LoadLevel(NewNode, S, Level + 1);
+        if (CurLevel < Level) then
+          exit;
+      end else begin
+        NewNode := Nodes.AddChild(Parent, Ln);
+        Ln := '';
+      end;
+    until false;
+  end;
+
+begin
+  if Encoding = nil then
+    Encoding := TEncoding.UTF8;
+  S := TStreamReader.Create(FileName, Encoding, True);
+  try
+    Clear;
+    BeginUpdate;
+    try
+      LoadLevel(nil, S, 0);
+    finally
+      EndUpdate;
+    end;
+  finally
+    S.Free;
+  end;
+end;
+{$ELSE}
 procedure TOvcCustomOutline.LoadFromText(const FileName: string);
 var
   S : TFileStream;
-  Ln : string;
+  Ln : AnsiString;
   CurLevel : Integer;
   Eoln : Boolean;
 
   procedure NextLine;
   var
-    Ch : Char;
+    Ch : AnsiChar;
   begin
     CurLevel := 0;
     Eoln := False;
     Ln := '';
     while (S.Position < S.Size) and not Eoln do begin
-      S.Read(Ch, 2);
+      S.Read(Ch, 1);
       case Ch of
       #13 :
         begin
-          S.Read(Ch, 2); {skip LF}
+          S.Read(Ch, 1); {skip LF}
           Eoln := True;
         end;
       #9 :
@@ -1705,6 +1779,7 @@ begin
     S.Free;
   end;
 end;
+{$ENDIF}
 
 { new}
 function TOvcCustomOutline.CalcMaxWidth: Integer;
@@ -2064,16 +2139,16 @@ procedure TOvcCustomOutline.SaveAsText(const FileName: string);
 
   procedure WriteNode(S : TStream; Level : Integer; ParentNode : TOvcOutlineNode);
   const
-    Tab: char = #9;
-    CrLf: array[0..1] of char = #13#10;
+    Tab: AnsiChar = #9;
+    CrLf: array[0..1] of AnsiChar = #13#10;
   var
     i : Integer;
     Node: TOvcOutlineNode;
   begin
     for i := 0 to Level - 1 do
-      S.Write(Tab, 2);
-    S.Write(ParentNode.Text[1], length(ParentNode.Text) * SizeOf(Char));
-    S.Write(CrLf, 2 * SizeOf(Char));
+      S.Write(Tab, 1);
+    S.Write(PAnsiChar(AnsiString(ParentNode.Text))^, length(ParentNode.Text));
+    S.Write(CrLf, 2);
     if ParentNode.HasChildren then begin
       ParentNode.PushChildIndex;
       Node := ParentNode.FirstChild;
@@ -2087,7 +2162,7 @@ procedure TOvcCustomOutline.SaveAsText(const FileName: string);
   end;
 
 var
-  S : TFileStream;
+  S : TStream;
   Node: TOvcOutlineNode;
 begin
   S := TFileStream.Create(FileName, fmCreate);
@@ -2249,22 +2324,26 @@ procedure TOvcCustomOutline.LoadFromStream(Stream: TStream);
 
   procedure ReadNode(Stream : TStream; Parent : TOvcOutlineNode);
   var
-    i : LongInt;
+    I : LongInt;
     NewNode : TOvcOutlineNode;
-    S: string;
+    S: {$IFDEF UNICODE}UTF8String{$ELSE}AnsiString{$ENDIF};
   begin
-    Stream.Read(i, sizeof(i));
-    SetLength(S, i);
-    Stream.Read(S[1], i);
+    Stream.Read(I, sizeof(I));
+    SetLength(S, I);
+    Stream.Read(PAnsiChar(S)^, I);
+
+    if HasUTF8BOM(S) then
+      Delete(S, 1, Length(sUTF8BOMString));
+
     NewNode := Nodes.AddChild(Parent, S);
-    Stream.Read(i, sizeof(i));
-    NewNode.ImageIndex := i;
-    Stream.Read(i, sizeof(i));
-    NewNode.Style := TOvcOlNodeStyle(i);
-    Stream.Read(i, sizeof(i));
-    NewNode.Checked := i <> 0;
-    Stream.Read(i, sizeof(i));
-    NewNode.Mode := TOvcOlNodeMode(i);
+    Stream.Read(I, sizeof(I));
+    NewNode.ImageIndex := I;
+    Stream.Read(I, sizeof(I));
+    NewNode.Style := TOvcOlNodeStyle(I);
+    Stream.Read(I, sizeof(I));
+    NewNode.Checked := I <> 0;
+    Stream.Read(I, sizeof(I));
+    NewNode.Mode := TOvcOlNodeMode(I);
     LoadLevel(Stream, NewNode);
   end;
 
@@ -2283,6 +2362,53 @@ begin
   LoadLevel(Stream, nil);
 end;
 
+{$IFDEF UNICODE}
+procedure TOvcCustomOutline.SaveAsText(const FileName: string;
+  Encoding: TEncoding);
+
+  procedure WriteNode(S : TStreamWriter; Level : Integer; ParentNode : TOvcOutlineNode);
+  const
+    Tab: Char = #9;
+  var
+    i : Integer;
+    Node: TOvcOutlineNode;
+  begin
+    for i := 0 to Level - 1 do
+      S.Write(Tab);
+    S.Write(ParentNode.Text);
+    S.WriteLine;
+    if ParentNode.HasChildren then begin
+      ParentNode.PushChildIndex;
+      Node := ParentNode.FirstChild;
+      if Node <> nil then
+        repeat
+          WriteNode(S, Level + 1, Node);
+          Node := ParentNode.NextChild;
+        until Node = nil;
+      ParentNode.PopChildIndex;
+    end;
+  end;
+
+var
+  S : TStreamWriter;
+  Node: TOvcOutlineNode;
+begin
+  S := TStreamWriter.Create(FileName, False, Encoding);
+  try
+    PushChildIndex;
+    Node := FirstChild;
+    if Node <> nil then
+      repeat
+        WriteNode(S, 0, Node);
+        Node := NextChild;
+      until Node = nil;
+    PopChildIndex;
+  finally
+    S.Free;
+  end;
+end;
+{$ENDIF}
+
 procedure TOvcCustomOutline.SaveToFile(const FileName: string);
 var
   S : TFileStream;
@@ -2299,25 +2425,40 @@ procedure TOvcCustomOutline.SaveToStream(Stream: TStream);
 
   procedure WriteNode(S : TStream; Level : Integer; ParentNode : TOvcOutlineNode);
   var
-    i : LongInt;
+    I : LongInt;
     Node: TOvcOutlineNode;
+    Txt: {$IFDEF UNICODE}UTF8String{$ELSE}AnsiString{$ENDIF};
   begin
-    i := length(ParentNode.Text);
-    Stream.Write(i, sizeof(i));
-    Stream.Write(ParentNode.Text[1], i * SizeOf(Char));
-    i := ParentNode.ImageIndex;
-    Stream.Write(i, sizeof(i));
-    i := ord(ParentNode.Style);
-    Stream.Write(i, sizeof(i));
-    i := ord(ParentNode.Checked);
-    Stream.Write(i, sizeof(i));
-    i := ord(ParentNode.Mode);
-    Stream.Write(i, sizeof(i));
-    if ParentNode.HasChildren then
-      i := ParentNode.FFChildren.Count
+    Txt := ParentNode.Text;
+    I := Length(Txt);
+    {$IFDEF UNICODE}
+    if HasExtendCharacter(Txt) then
+    begin
+      Inc(I, 3);
+      Stream.Write(I, sizeof(i));
+      Stream.Write(sUTF8BOMString[1], Length(sUTF8BOMString));
+      Stream.Write(PAnsiChar(Txt)^, I - Length(sUTF8BOMString));
+    end
     else
-      i := 0;
-    Stream.Write(i, sizeof(i));
+    {$ENDIF}
+    begin
+      Stream.Write(I, sizeof(i));
+      Stream.Write(PAnsiChar(Txt)^, I);
+    end;
+
+    I := ParentNode.ImageIndex;
+    Stream.Write(I, sizeof(I));
+    I := ord(ParentNode.Style);
+    Stream.Write(I, sizeof(I));
+    I := ord(ParentNode.Checked);
+    Stream.Write(I, sizeof(I));
+    I := ord(ParentNode.Mode);
+    Stream.Write(I, sizeof(I));
+    if ParentNode.HasChildren then
+      I := ParentNode.FFChildren.Count
+    else
+      I := 0;
+    Stream.Write(I, sizeof(I));
 
     if ParentNode.HasChildren then begin
       ParentNode.PushChildIndex;
