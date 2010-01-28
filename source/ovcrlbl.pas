@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{*    Sebastian Zierer (Unicode Version)                                      *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -278,7 +279,8 @@ var
   T         : string;
   XO, YO    : Integer;
   A         : Integer;
-  Buf       : array[0..255] of Char;
+  Buf       : PChar; //array[0..255] of Char;
+  Len       : Integer;
 begin
   T := Caption;
   if (Flags and DT_CALCRECT <> 0) and (T = '') then
@@ -298,60 +300,69 @@ begin
     Canvas.Font.Color := clGrayText;
 
   {draw the text}
-  StrPLCopy(Buf, T, 255);
-  if FFontAngle = 0 then begin
-    {draw shadow first, if selected}
-    if FShadowedText then begin
-      HoldColor := Canvas.Font.Color;
-      Canvas.Font.Color := FShadowColor;
-      if not Transparent then begin
-        SetBkMode(Canvas.Handle, OPAQUE);
-        Canvas.Brush.Color := Color;
-      end;
-      OffsetRect(R, +2, +1);
-      DrawText(Canvas.Handle, @Buf, -1, R, Flags);
-      Canvas.Font.Color := HoldColor;
-      SetBkMode(Canvas.Handle, Windows.TRANSPARENT);
-      OffsetRect(R, -2, -1);
-      DrawText(Canvas.Handle, @Buf, -1, R, Flags);
-    end else begin
-      DrawText(Canvas.Handle, @Buf, -1, R, Flags)
-    end;
-  end else begin
-    if FShadowedText then begin
-      HoldColor := Canvas.Font.Color;
-      Canvas.Font.Color := FShadowColor;
-      if not Transparent then begin
-        SetBkMode(Canvas.Handle, Windows.OPAQUE);
-        Canvas.Brush.Color := Color;
-      end;
-      {calculate the shadow offset based on the quadrant the text is in}
-      {        |          }  { 1 -- X+2, Y+1}
-      {     2  |  1       }  { 2 -- X-1, Y-2}
-      { -------+--------- }  { 3 -- X+2, Y+1}
-      {     3  |  4       }  { 4 -- X-1, Y-2}
-      {        |          }
-      A := FFontAngle;
-      if A < 0 then A := 360 + A;
-      if A >= 270 then begin
-        XO :=  2; YO :=  1;  {Quad=4}
-      end else if A >= 180 then begin
-        XO :=  2; YO :=  1;  {Quad=3}
-      end else if A >= 90 then begin
-        XO :=  2; YO :=  1;  {Quad=2}
+  //StrPLCopy(Buf, T, 255);
+  Len := Length(T);
+  if DT_MODIFYSTRING and Flags <> 0 then
+    Inc(Len, 4);   // this could add up to 4 characters
+  Buf := StrAlloc(Len + 1);
+  try
+    StrPCopy(Buf, T);
+    if FFontAngle = 0 then begin
+      {draw shadow first, if selected}
+      if FShadowedText then begin
+        HoldColor := Canvas.Font.Color;
+        Canvas.Font.Color := FShadowColor;
+        if not Transparent then begin
+          SetBkMode(Canvas.Handle, OPAQUE);
+          Canvas.Brush.Color := Color;
+        end;
+        OffsetRect(R, +2, +1);
+        DrawText(Canvas.Handle, Buf, -1, R, Flags);
+        Canvas.Font.Color := HoldColor;
+        SetBkMode(Canvas.Handle, Windows.TRANSPARENT);
+        OffsetRect(R, -2, -1);
+        DrawText(Canvas.Handle, Buf, -1, R, Flags);
       end else begin
-        XO :=  2; YO :=  1;  {Quad=1}
+        DrawText(Canvas.Handle, Buf, -1, R, Flags)
       end;
-      ExtTextOut(Canvas.Handle, OriginX+XO, OriginY+YO, ETO_CLIPPED,
-        @R, Buf, StrLen(Buf), nil);
-      Canvas.Font.Color := HoldColor;
-      SetBkMode(Canvas.Handle, Windows.TRANSPARENT);
-      ExtTextOut(Canvas.Handle, OriginX, OriginY, ETO_CLIPPED,
-        @R, Buf, StrLen(Buf), nil);
     end else begin
-      ExtTextOut(Canvas.Handle, OriginX, OriginY, ETO_CLIPPED,
-        @R, Buf, StrLen(Buf), nil);
+      if FShadowedText then begin
+        HoldColor := Canvas.Font.Color;
+        Canvas.Font.Color := FShadowColor;
+        if not Transparent then begin
+          SetBkMode(Canvas.Handle, Windows.OPAQUE);
+          Canvas.Brush.Color := Color;
+        end;
+        {calculate the shadow offset based on the quadrant the text is in}
+        {        |          }  { 1 -- X+2, Y+1}
+        {     2  |  1       }  { 2 -- X-1, Y-2}
+        { -------+--------- }  { 3 -- X+2, Y+1}
+        {     3  |  4       }  { 4 -- X-1, Y-2}
+        {        |          }
+        A := FFontAngle;
+        if A < 0 then A := 360 + A;
+        if A >= 270 then begin
+          XO :=  2; YO :=  1;  {Quad=4}
+        end else if A >= 180 then begin
+          XO :=  2; YO :=  1;  {Quad=3}
+        end else if A >= 90 then begin
+          XO :=  2; YO :=  1;  {Quad=2}
+        end else begin
+          XO :=  2; YO :=  1;  {Quad=1}
+        end;
+        ExtTextOut(Canvas.Handle, OriginX+XO, OriginY+YO, ETO_CLIPPED,
+          @R, Buf, StrLen(Buf), nil);
+        Canvas.Font.Color := HoldColor;
+        SetBkMode(Canvas.Handle, Windows.TRANSPARENT);
+        ExtTextOut(Canvas.Handle, OriginX, OriginY, ETO_CLIPPED,
+          @R, Buf, StrLen(Buf), nil);
+      end else begin
+        ExtTextOut(Canvas.Handle, OriginX, OriginY, ETO_CLIPPED,
+          @R, Buf, StrLen(Buf), nil);
+      end;
     end;
+  finally
+    StrDispose(Buf);
   end;
 end;
 
