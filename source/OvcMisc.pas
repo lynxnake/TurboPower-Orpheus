@@ -163,7 +163,7 @@ begin
   Result := LoadCursor(FindClassHInstance(TOvcCustomControlEx), lpCursorName);
 end;
 
-function CompStruct(const S1, S2; Size : Cardinal) : Integer; register;
+function CompStruct(const S1, S2; Size : Cardinal) : Integer; register;    // FIXME - check usage - do not use it for comparing records with string
   {-compare two fixed size structures}
 asm
   push    esi
