@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                    OVCLB.PAS 4.06                    *}
+{*                    OVCLB.PAS 4.06                     *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -539,7 +539,7 @@ begin
   S := Items[Index];
   if  FTabStops.Count > 0 then
     Result := LOWORD(GetTabbedTextExtent(
-      Canvas.Handle, @S[1], Length(S), FTabStops.Count, tlTabs))
+      Canvas.Handle, PChar(S), Length(S), FTabStops.Count, tlTabs))
   else
     Result := Canvas.TextWidth(S);
 end;

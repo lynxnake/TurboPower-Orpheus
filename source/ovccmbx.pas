@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{*    Sebastian Zierer (Unicode Version)                                      *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -680,7 +681,7 @@ var
   SrchText : PChar;
 begin
   L := Length(Text) + 1;
-  GetMem(SrchText, L * SizeOf(Char));
+  SrchText := StrAlloc(L); // GetMem(SrchText, L * SizeOf(Char));
   try
     StrPCopy(SrchText, Text);
     {the first items are part of the MRU list}
@@ -706,7 +707,7 @@ begin
                              FMRUList.Items.Count - 1,
                              LongInt(SrchText));
   finally
-    FreeMem(SrchText, L);
+    StrDispose(SrchText); // FreeMem(SrchText, L);
   end;
 end;
 
@@ -891,8 +892,7 @@ var
   SepRect    : TRect;
   BkColor    : TColor;
   TxtRect    : TRect;
-  TxtItem    : PChar;
-  L          : integer;
+  TxtItem    : string;
   BkMode     : Integer;
 begin
   with Canvas do begin
@@ -909,28 +909,23 @@ begin
 
     with ItemRect do
       TxtRect := Rect(Left + 2, Top, Right, Bottom);
-    L := Length(Items[Index])+1;
-    GetMem(TxtItem, L * SizeOf(Char));
-    try
-      StrPCopy(TxtItem, Items[Index]);
-      BkMode := GetBkMode(Canvas.Handle);
-      SetBkMode(Canvas.Handle, TRANSPARENT);
-      DrawText(Canvas.Handle, TxtItem, StrLen(TxtItem),
-               TxtRect, DT_VCENTER or DT_LEFT);
-      SetBkMode(Canvas.Handle, BkMode);
-      if (FMRUList.Items.Count > 0) and
-         (Index = FMRUList.Items.Count - 1) and DroppedDown then begin
-        SepRect := ItemRect;
-        SepRect.Top    := SepRect.Bottom - cbxSeparatorHeight;
-        SepRect.Bottom := SepRect.Bottom;
-        Pen.Color := clGrayText;
 
-        if not DrawingEdit then
-          with SepRect do
-            Rectangle(Left-1, Top, Right+1, Bottom);
-      end;
-    finally
-      FreeMem(TxtItem, L);
+    TxtItem := Items[Index]; //StrPCopy(TxtItem, Items[Index]);
+    BkMode := GetBkMode(Canvas.Handle);
+    SetBkMode(Canvas.Handle, TRANSPARENT);
+    DrawText(Canvas.Handle, PChar(TxtItem), Length(TxtItem),
+             TxtRect, DT_VCENTER or DT_LEFT);
+    SetBkMode(Canvas.Handle, BkMode);
+    if (FMRUList.Items.Count > 0) and
+       (Index = FMRUList.Items.Count - 1) and DroppedDown then begin
+      SepRect := ItemRect;
+      SepRect.Top    := SepRect.Bottom - cbxSeparatorHeight;
+      SepRect.Bottom := SepRect.Bottom;
+      Pen.Color := clGrayText;
+
+      if not DrawingEdit then
+        with SepRect do
+          Rectangle(Left-1, Top, Right+1, Bottom);
     end;
   end;
 end;
@@ -974,7 +969,7 @@ begin
   case Key of
     VK_RETURN, 9999{timer event}:
       begin
-        GetMem(SrchText, (length(Text) + 1) * SizeOf(Char));
+        SrchText := StrAlloc(Length(Text) + 1); // GetMem(SrchText, (length(Text) + 1) * SizeOf(Char));
         try
           StrPCopy(SrchText, Text);
           {this will search for the first matching item}
@@ -982,7 +977,7 @@ begin
                                FMRUList.Items.Count - 1,
                                  LongInt(SrchText));
         finally
-          FreeMem(SrchText, length(Text) + 1);
+          Dispose(SrchText); //FreeMem(SrchText, length(Text) + 1);
         end;
         if Index > -1 then begin
           Text := Items[Index];
@@ -1345,7 +1340,7 @@ begin
     UpdateMRUList
   else if (FList.Count > 0) and (FAutoSearch) then begin
     L := Length(Text) + 1;
-    GetMem(SrchText, L * SizeOf(Char));
+    SrchText := StrAlloc(L); // GetMem(SrchText, L * SizeOf(Char));
     try
       StrPCopy(SrchText, Text);
       ItemIndex := SendMessage(Handle,
@@ -1353,7 +1348,7 @@ begin
                                0,
                                LongInt(SrchText));
     finally
-      FreeMem(SrchText, L);
+      StrDispose(SrchText); // FreeMem(SrchText, L);
     end;
   end;
 

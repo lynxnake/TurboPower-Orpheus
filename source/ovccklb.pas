@@ -386,7 +386,6 @@ var
   M  : Integer;
   R  : TRect;
   NR : TRect;
-  B  : array[0..255] of Char;
 begin
   NR := Classes.Rect(0, 0, Rect.Right - Rect.Left, Rect.Bottom - Rect.Top);
   clDrawBmp.Width  := NR.Right;
@@ -491,7 +490,6 @@ begin
   {draw the item text}
   DY := ((NR.Bottom - NR.Top) - clDrawBmp.Canvas.TextHeight(Items[Index])) div 2;
   Y := NR.Top + DY;
-  StrPLCopy(B, Items[Index], 255);
   if odSelected in AState then begin
     clDrawBmp.Canvas.Font.Color := clHighlightText;
     clDrawBmp.Canvas.Brush.Color := clHighlight;
@@ -502,7 +500,7 @@ begin
     clDrawBmp.Canvas.Brush.Color := Color;
   clDrawBmp.Canvas.Pen.Color := Font.Color;
   ExtTextOut(clDrawBmp.Canvas.Handle, NR.Left + M + W + M, Y, ETO_CLIPPED,
-    @NR, B, StrLen(B), nil);
+    @NR, PChar(Items[Index]), Length(Items[Index]), nil);
 
   {draw the focus rect}
   if odFocused in AState then begin

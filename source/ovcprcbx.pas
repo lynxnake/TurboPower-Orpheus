@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{*     Sebastian Zierer                                                       *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -182,13 +183,12 @@ procedure TOvcPrinterComboBox.DrawItem(Index : Integer; ItemRect : TRect;
 var
   TxtRect : TRect;
   SepRect : TRect;
-  TxtItem : PChar;
+  TxtItem : string;
   BkMode  : Integer;
   BkColor  : TColor;
   IconIndex : Integer;
 begin
-  TxtItem := StrAlloc(256);
-  StrPCopy(TxtItem, Items[Index]);
+  TxtItem := Items[Index];
   TxtRect := ItemRect;
   if ((FMRUList.Items.Count > 0) and (Index < FMRUList.Items.Count)) then
     BkColor := FMRUListColor
@@ -208,7 +208,7 @@ begin
     end;
     BkMode := GetBkMode(Handle);
     SetBkMode(Handle, TRANSPARENT);
-    DrawText(Handle, TxtItem, StrLen(TxtItem), TxtRect, DT_VCENTER or DT_LEFT);
+    DrawText(Handle, PChar(TxtItem), Length(TxtItem), TxtRect, DT_VCENTER or DT_LEFT);
     SetBkMode(Handle, BkMode);
     if (FMRUList.Items.Count > 0) and (Index = FMRUList.Items.Count - 1) then begin
       SepRect := ItemRect;
@@ -223,7 +223,6 @@ begin
           Rectangle(Left-1, Top, Right+1, Bottom);
     end;
   end;
-  StrDispose(TxtItem);
 end;
 
 end.

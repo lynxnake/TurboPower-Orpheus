@@ -204,7 +204,7 @@ type
     tabHitTest     : TPoint;     {location of mouse cursor}
     tabLastRow     : Integer;    {the last row index -- tabTotalRows-1}
     tabOverTab     : Boolean;    {true if the mouse is over a tab}
-    tabPainting    : Boolean;    {ture when painting}
+    tabPainting    : Boolean;    {true when painting}
     tabTabChanging : Boolean;    {flag to indicate the tab is changing}
     tabTabCursor   : HCursor;    {design-time tab slecting cursor handle}
     tabTabSelecting: Boolean;    {true while moving through tabs}
@@ -892,7 +892,7 @@ procedure TOvcNotebook.CreateWnd;
 begin
   inherited CreateWnd;
 
-  {force the defalut "first page" to be TopMost}
+  {force the default "first page" to be TopMost}
   if IsValid(PageIndex) then
     with TOvcTabPage(FPages[PageIndex]) do begin
       Visible := True;
@@ -1423,7 +1423,7 @@ begin
       if (PF <> nil) then
         if ContainsControl(PF.ActiveControl) then begin
           PF.ActiveControl := nil;
-          
+
           //Fix for problem 667973.
           // We try to remove focus from the current control above, but the
           // control may refuse to let focus go away, if it does we can't

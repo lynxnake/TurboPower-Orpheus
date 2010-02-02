@@ -192,7 +192,7 @@ var
   SepRect    : TRect;
   BkColor    : TColor;
   TxtRect    : TRect;
-  TxtItem    : array [0..63] of char;
+  TxtItem    : string;
   BkMode     : Integer;
 
 begin
@@ -209,10 +209,10 @@ begin
     FillRect(ItemRect);
 
     TxtRect := ItemRect;
-    StrPCopy(TxtItem, Items[Index]);
+    TxtItem := Items[Index];
     BkMode := GetBkMode(Canvas.Handle);
     SetBkMode(Canvas.Handle, TRANSPARENT);
-    DrawText(Canvas.Handle, TxtItem, StrLen(TxtItem), TxtRect,
+    DrawText(Canvas.Handle, PChar(TxtItem), Length(TxtItem), TxtRect,
       DT_SINGLELINE or DT_VCENTER or DT_LEFT);
     SetBkMode(Canvas.Handle, BkMode);
 
