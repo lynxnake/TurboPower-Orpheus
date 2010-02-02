@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{*   Sebastian Zierer                                                         *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -298,11 +299,16 @@ function TOvcTCCustomString.GetModified : boolean;
     else Result := false;
   end ;
 {--------}
-procedure TOvcTCCustomString.SaveEditedData(Data : pointer);
+procedure TOvcTCCustomString.SaveEditedData(Data : pointer);     //SZ: TEST
   begin
     if Assigned(Data) then
       if UseASCIIZStrings then
-        FEdit.GetTextBuf(PChar(Data), MaxLength)
+      begin
+          if FUsePString then
+            PString(Data)^ := FEdit.Text
+          else
+            FEdit.GetTextBuf(PChar(Data), MaxLength);
+      end
       else
         POvcShortString(Data)^ := ShortString(Copy(FEdit.Text, 1, MaxLength));
   end;
@@ -322,7 +328,7 @@ procedure TOvcTCCustomString.StartEditing(RowNum : TRowNum; ColNum : TColNum;
               SetTextBuf('')
             else
               begin
-                if UsePString then
+                if FUsePString then
                   SetTextBuf(PChar(PString(Data)^))
                 else
                   SetTextBuf(PChar(Data));
@@ -510,6 +516,7 @@ constructor TOvcTCCustomMemo.Create(AOwner : TComponent);
     inherited Create(AOwner);
     UseASCIIZStrings := true;
     UseWordWrap := true;
+    UsePString := True;
   end;
 {--------}
 function TOvcTCCustomMemo.CreateEditControl(AOwner : TComponent) : TOvcTCMemoEdit;
@@ -573,7 +580,12 @@ procedure TOvcTCCustomMemo.StartEditing(RowNum : TRowNum; ColNum : TColNum;
         if (Data = nil) then
           SetTextBuf('')
         else
-          SetTextBuf(PChar(Data));
+        begin
+          if FUsePString then
+            SetTextBuf(PChar(PString(Data)^))
+          else
+            SetTextBuf(PChar(Data));
+        end;
         Color := CellAttr.caColor;
         Font := CellAttr.caFont;
         Font.Color := CellAttr.caFontColor;
@@ -619,7 +631,12 @@ procedure TOvcTCCustomMemo.StopEditing(SaveValue : boolean;
   begin
     try
       if SaveValue and Assigned(Data) then
-        FEdit.GetTextBuf(PChar(Data), MaxLength);
+      begin
+        if FUsePString then
+          PString(Data)^ := FEdit.Text
+        else
+          FEdit.GetTextBuf(PChar(Data), MaxLength+1)
+      end;
     finally
       FEdit.Free;
       FEdit := nil;
