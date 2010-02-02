@@ -2326,14 +2326,21 @@ procedure TOvcCustomOutline.LoadFromStream(Stream: TStream);
   var
     I : LongInt;
     NewNode : TOvcOutlineNode;
-    S: {$IFDEF UNICODE}UTF8String{$ELSE}AnsiString{$ENDIF};
+    S: {$IFDEF UNICODE}RawByteString{$ELSE}AnsiString{$ENDIF};
   begin
     Stream.Read(I, sizeof(I));
     SetLength(S, I);
     Stream.Read(PAnsiChar(S)^, I);
 
+    {$IFDEF UNICODE}
     if HasUTF8BOM(S) then
+    begin
       Delete(S, 1, Length(sUTF8BOMString));
+      SetCodePage(S, 65001, False);
+    end
+    else
+      SetCodePage(S, GetACP, False);
+    {$ENDIF}
 
     NewNode := Nodes.AddChild(Parent, S);
     Stream.Read(I, sizeof(I));
