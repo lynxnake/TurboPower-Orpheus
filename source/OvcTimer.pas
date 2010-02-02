@@ -180,7 +180,7 @@ end;
 procedure FreeEventRec(ER : PEventRec);
 begin
   if (ER <> nil) then
-    FreeMem(ER, SizeOf(TEventRec));
+    FreeMem(ER {, SizeOf(TEventRec)});
 end;
 
 

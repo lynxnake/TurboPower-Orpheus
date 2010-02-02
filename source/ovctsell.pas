@@ -210,7 +210,7 @@ procedure FreeRRArray(var RRA : POvcSelRRArray);
   {-Frees a row range array}
   begin
     {Note: assumes RRA is not nil}
-    FreeMem(RRA, CalcRRArraySize(RRA^.RRTotal));
+    FreeMem(RRA {, CalcRRArraySize(RRA^.RRTotal)});
     RRA := nil;
   end;
 {--------}
@@ -249,7 +249,7 @@ procedure ReallocColArray(var CA : POvcSelColArray; OldCC, NewCC : TColNum);
       end;
     {dispose of the old array, return the new one}
     if (OldCC > 0) then
-      FreeMem(CA, OldCC * sizeof(pointer));
+      FreeMem(CA {, OldCC * sizeof(pointer)});
     CA := NewArray;
   end;
 {====================================================================}

@@ -138,7 +138,7 @@ function CreateNewResource : PCellGlyphResource;
 
 procedure DestroyResource(ARes : PCellGlyphResource);
   begin
-    FreeMem(ARes, sizeof(TCellGlyphResource));
+    FreeMem(ARes {, sizeof(TCellGlyphResource)});
   end;
 
 {===TGlyphResourceManager=========================================}
