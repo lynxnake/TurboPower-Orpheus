@@ -93,8 +93,8 @@ type
 
     {internal working variables}
     intlHandle       : hWnd;  {our window handle}
-    w1159            : array[0..5] of Char;
-    w2359            : array[0..5] of Char;
+    w1159            : string; //array[0..5] of Char;
+    w2359            : string; //array[0..5] of Char;
     wColonChar       : Char;
     wCountry         : PChar;
     wCurrencyForm    : Byte;
@@ -1285,10 +1285,11 @@ procedure TOvcIntlSup.ResetInternationalInfo;
 var
   S    : string;
   I    : Cardinal;
-  Buf  : array[0..255] of Char;
+  //Buf  : array[0..255] of Char;
   R    : TRegistry;
 
-  procedure GetIntlString(S, Def, Buf : PChar; Size : Word);
+  //SZ these were fine for 16 bit code...
+  {procedure GetIntlString(S, Def, Buf : PChar; Size : Word);
   begin
     GetProfileString('intl', S, Def, Buf, Size);
   end;
@@ -1301,7 +1302,7 @@ var
     Result := B[0];
     if (Result = #0) then
       Result := Def[0];
-  end;
+  end; }
 
   procedure ExtractSubString(SubChar : Char; Dest : PChar);
   var
@@ -1334,28 +1335,73 @@ var
     StrChDeletePrim(wLongDate, I);
   end;
 
+  function GetLocaleChar(lcType: Cardinal; Default: Char): Char;
+  var
+    Len: Integer;
+    S: string;
+  begin
+    Result := Default;
+    Len := GetLocaleInfo(LOCALE_USER_DEFAULT, lcType, nil, 0);
+    if Len = 0 then
+      Exit;
+    SetLength(S, Len);
+    Len := GetLocaleInfo(LOCALE_USER_DEFAULT, lcType, PChar(S), Length(S));
+    S := Copy(S, 1, Len - 1);
+    if Length(S) = 1 then
+      Result := S[1];
+  end;
+
+  function GetLocaleString(lcType: Cardinal; Default: string): string;
+  var
+    Len: Integer;
+    S: string;
+  begin
+    Result := Default;
+    Len := GetLocaleInfo(LOCALE_USER_DEFAULT, lcType, nil, 0);
+    if Len = 0 then
+      Exit;
+    SetLength(S, Len);
+    Len := GetLocaleInfo(LOCALE_USER_DEFAULT, lcType, PChar(S), Length(S));
+    S := Copy(S, 1, Len - 1);
+    Result := Trim(S);
+  end;
+
+  function GetLocaleInt(lcType: Cardinal; Default: Integer): Integer;
+  var
+    Len: Integer;
+    S: string;
+  begin
+    Result := Default;
+    Len := GetLocaleInfo(LOCALE_USER_DEFAULT, lcType, nil, 0);
+    if Len = 0 then
+      Exit;
+    SetLength(S, Len);
+    Len := GetLocaleInfo(LOCALE_USER_DEFAULT, lcType, PChar(S), Length(S));
+    S := Copy(S, 1, Len - 1);
+    Result := StrToIntDef(S, Default);
+  end;
+
 begin
-  FDecimalChar     := GetIntlChar('sDecimal',
-    @DefaultIntlData.DecimalChar);
-  FCommaChar       := GetIntlChar('sThousand',
-    @DefaultIntlData.CommaChar);
-  FCurrencyDigits  := GetProfileInt('intl', 'iCurrDigits',
-    DefaultIntlData.CurrDigits);
+  FDecimalChar     := GetLocaleChar(LOCALE_SDECIMAL, DefaultIntlData.DecimalChar); // GetIntlChar('sDecimal', @DefaultIntlData.DecimalChar);
+  FCommaChar       := GetLocaleChar(LOCALE_STHOUSAND, DefaultIntlData.CommaChar); // GetIntlChar('sThousand', @DefaultIntlData.CommaChar);
+  FCurrencyDigits  := GetLocaleInt(LOCALE_ICURRDIGITS, DefaultIntlData.CurrDigits);  // GetProfileInt('intl', 'iCurrDigits', DefaultIntlData.CurrDigits);
   if (FCommaChar = FDecimalChar) then begin
     FDecimalChar := DefaultIntlData.DecimalChar;
     FCommaChar := DefaultIntlData.CommaChar;
   end;
-  wNegCurrencyForm := GetProfileInt('intl', 'iNegCurr', 0);
-  FListChar        := GetIntlChar('sList', ',');
+  wNegCurrencyForm := GetLocaleInt(LOCALE_INEGCURR, 0); //  GetProfileInt('intl', 'iNegCurr', 0);
+  FListChar        := GetLocaleChar(LOCALE_SLIST,','); // GetIntlChar('sList', ',');
 
-  GetIntlString('sCountry', '', Buf, SizeOf(Buf));
-  wCountry := StrNew(Buf);
+//  GetIntlString('sCountry', '', Buf, SizeOf(Buf));
+//  wCountry := StrNew(Buf);
+  wCountry := StrNew(PChar(GetLocaleString(LOCALE_SCOUNTRY, '')));
 
-  GetIntlString('sCurrency', DefaultIntlData.CurrencyLtStr,
-    FCurrencyLtStr, SizeOf(FCurrencyLtStr));
+//  GetIntlString('sCurrency', DefaultIntlData.CurrencyLtStr,
+//    FCurrencyLtStr, SizeOf(FCurrencyLtStr));
+  StrPCopy(FCurrencyLtStr, GetLocaleString(LOCALE_SCURRENCY, DefaultIntlData.CurrencyLtStr));
   StrCopy(FCurrencyRtStr, FCurrencyLtStr);
 
-  wCurrencyForm := GetProfileInt('intl', 'iCurrency', 0);
+  wCurrencyForm := GetLocaleInt(LOCALE_ICURRENCY, 0); //wCurrencyForm := GetProfileInt('intl', 'iCurrency', 0);
   case wCurrencyForm of
     0 : {};
     1 : {};
@@ -1363,16 +1409,16 @@ begin
     3 : StrChInsertPrim(FCurrencyRtStr, ' ', 0);
   end;
 
-  wTLZero := GetProfileInt('intl', 'iTLZero', 0) <> 0;
+  wTLZero := GetLocaleInt(LOCALE_ITLZERO, 0) <> 0; //  wTLZero := GetProfileInt('intl', 'iTLZero', 0) <> 0;
   w12Hour := LongTimeFormat[Length(LongTimeFormat)] = 'M';
 
-  wColonChar := GetIntlChar('sTTime', ':');
-  FSlashChar := GetIntlChar('sDate', @DefaultIntlData.SlashChar);
-  GetIntlString('s1159', 'AM', w1159, SizeOf(w1159));
-  GetIntlString('s2359', 'PM', w2359, SizeOf(w2359));
+  wColonChar := GetLocaleChar(LOCALE_STIME, ':'); // wColonChar := GetIntlChar('sTTime', ':');
+  FSlashChar := GetLocaleChar(LOCALE_SDATE, DefaultIntlData.SlashChar); // FSlashChar := GetIntlChar('sDate', @DefaultIntlData.SlashChar);
+  w1159 := GetLocaleString(LOCALE_S1159, 'AM'); // GetIntlString('s1159', 'AM', w1159, SizeOf(w1159));
+  w2359 := GetLocaleString(LOCALE_S2359, 'PM'); // GetIntlString('s2359', 'PM', w2359, SizeOf(w2359));
 
   {get short date mask and fix it up}
-     R := TRegistry.Create;
+ {    R := TRegistry.Create;
      try
        R.RootKey := HKEY_CURRENT_USER;
        if R.OpenKey('Control Panel\International', False) then begin
@@ -1390,7 +1436,8 @@ begin
                         wShortDate, SizeOf(wShortDate));
      finally
        R.Free;
-     end;
+     end;  }
+  StrPLCopy(wShortDate, GetLocaleString(LOCALE_SSHORTDATE, 'MM/dd/yy'), SizeOf(wShortDate));
 
   I := 0;
   while wShortDate[I] <> #0 do begin
@@ -1400,8 +1447,7 @@ begin
   end;
 
   {get long date mask and fix it up}
-  GetIntlString('sLongDate',  'dddd, MMMM dd, yyyy',
-                wLongDate,  SizeOf(wLongDate));
+  StrPLCopy(wLongDate, GetLocaleString(LOCALE_SLONGDATE, 'dddd, MMMM dd, yyyy'), SizeOf(wLongDate)); // GetIntlString('sLongDate',  'dddd, MMMM dd, yyyy', wLongDate,  SizeOf(wLongDate));
   ExtractSubString(pmLongDateSub1, wldSub1);
   ExtractSubString(pmLongDateSub2, wldSub2);
   ExtractSubString(pmLongDateSub3, wldSub3);
@@ -1525,8 +1571,8 @@ begin
   end;
 
   {check for TimeOnly}
-  if StrChPos(Picture, pmAmPm, I) and (w1159[0] <> #0)
-    and (w2359[0] <> #0) then begin
+  if StrChPos(Picture, pmAmPm, I) and (w1159 <> ''){(w1159[0] <> #0)}
+    and (w2359 <> '') {(w2359[0] <> #0)} then begin
     Tmp[0] := #0;
     J := 0;
     while Picture[I] = pmAmPm do begin
@@ -1537,9 +1583,9 @@ begin
     Tmp[J] := #0;
     TrimTrailPrimPChar(Tmp);
 
-    StrCopy(t1159, w1159);
+    StrPLCopy(t1159, w1159, Length(t1159));
     t1159[J] := #0;
-    StrCopy(t2359, w2359);
+    StrPLCopy(t2359, w2359, Length(t2359));
     t2359[J] := #0;
 
     if (Tmp[0] = #0) then
@@ -1627,7 +1673,7 @@ end;
 function TOvcIntlSup.TimeToTimePChar(Dest : PChar; Picture : PChar; T : TStTime; Pack : Boolean) : PChar;
   {-convert T to a string of the form indicated by Picture}
 begin
-  Result := isTimeToTimeStringPrim(Dest, Picture, T, Pack, w1159, w2359);
+  Result := isTimeToTimeStringPrim(Dest, Picture, T, Pack, PChar(w1159), PChar(w2359));
 end;
 
 procedure DestroyGlobalIntlSup; far;
