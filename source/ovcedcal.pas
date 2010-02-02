@@ -246,6 +246,22 @@ uses
 constructor TOvcCustomDateEdit.Create(AOwner : TComponent);
 var
   C : array[0..1] of Char;
+
+  function GetLocaleInt(lcType: Cardinal; Default: Integer): Integer;
+  var
+    Len: Integer;
+    S: string;
+  begin
+    Result := Default;
+    Len := GetLocaleInfo(LOCALE_USER_DEFAULT, lcType, nil, 0);
+    if Len = 0 then
+      Exit;
+    SetLength(S, Len);
+    Len := GetLocaleInfo(LOCALE_USER_DEFAULT, lcType, PChar(S), Length(S));
+    S := Copy(S, 1, Len - 1);
+    Result := StrToIntDef(S, Default);
+  end;
+
 begin
   inherited Create(AOwner);
 
@@ -259,8 +275,9 @@ begin
   {get the date order from windows}
   C[0] := '0'; {default}
 
-  GetProfileString('intl', 'iDate', '0', C, 2);
-  DateOrder := TOvcDateOrder(Ord(C[0])-Ord('0'));
+//  GetProfileString('intl', 'iDate', '0', C, 2);   //SZ: GetProfileString is deprecated
+//  DateOrder := TOvcDateOrder(Ord(C[0])-Ord('0'));
+  DateOrder := TOvcDateOrder(GetLocaleInt(LOCALE_IDATE, 0));
 
   {load button glyph}
   FButtonGlyph.Handle := LoadBaseBitmap('ORBTNCAL');
