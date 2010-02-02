@@ -2228,7 +2228,7 @@ begin
             if DataSize > 0 then begin
 
               {allocate data buffer}
-              GetMem(Data, DataSize);
+              GetMem(Data, DataSize);        //SZ: FIXME Data could contain string fields, this does not work correctly with GetMem
               try
                 tbGetFieldValue(Fld, Cell, Data, DataSize);
                 try
@@ -4185,7 +4185,7 @@ begin
     Result := Columns[ColNum].DefaultCell;
 end;
 
-function TOvcCustomDbTable.tbGetDataSize(ACell : TOvcBaseTableCell) : Integer;
+function TOvcCustomDbTable.tbGetDataSize(ACell : TOvcBaseTableCell) : Integer;    //SZ FIXME
   {-return the size of Cell's data requirements}
 begin
   Result := ACell.SpecialCellDataSize;
@@ -5074,7 +5074,7 @@ procedure TOvcCustomDbTable.tbSetFieldValue(AField : TField;
           ACell : TOvcBaseTableCell; Data : Pointer; Size : Integer);
   {-set the db field value}
 var
-  S   : string[255];
+  S   : string[255];          //SZ FIXME
   I   : SmallInt absolute S;
   L   : LongInt absolute S;
   W   : Word absolute S;

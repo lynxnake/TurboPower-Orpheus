@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{*   Sebastian Zierer                                                         *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -167,18 +168,13 @@ type
       1 : (RTItems : TStrings;
            RTSt    : array[0..255] of char);
     {$ELSE}
-    case integer of
-{$IFDEF UNICODE}
-      0 : (St      : array[0..255] of char);  {string value if Index = -1}
-{$ELSE}
-      0 : (St      : ShortString);  {string value if Index = -1}
-{$ENDIF}
-      1 : (RTItems : TStrings;      {run-time items list}
-{$IFDEF UNICODE}
-           RTSt    : array[0..255] of char);  {run-time string value if Index = -1}
-{$ELSE}
-           RTSt    : ShortString);  {run-time string value if Index = -1}
-{$ENDIF}           
+      St      : string;    {string value if Index = -1}  //SZ 02.02.2010: replaced array[0..255] of char with string. We cannot use a variant record anymore, but the lower memory usage of the string compensates for that. This also should make upgrading projects easier
+      RTItems : TStrings;  {run-time items list}
+      RTSt    : string;    {run-time string value if Index = -1}
+//    case integer of
+//      0 : (St      : ShortString);  {string value if Index = -1}
+//      1 : (RTItems : TStrings;      {run-time items list}
+//           RTSt    : ShortString);  {run-time string value if Index = -1}
     {$ENDIF}
   end;
 

@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{*   Sebastian Zierer                                                         *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -624,10 +625,12 @@ var
   OurItems  : TStrings;
 begin
   {Note: Data is a pointer to an integer, or to an integer and a
-         shortstring. The first is used for drop down ListBoxes
-         (only) and the latter with simple and drop down combo boxes}
+         string. The first is used for drop down ListBoxes
+         (only) and the latter with simple and drop down combo boxes.
 
-  {If the cell is invisible let the ancestor to all the work}
+         SZ: 02.02.2010 replaced shortstring with string for Unicode support}
+
+  {If the cell is invisible let the ancestor do all the work}
   if (CellAttr.caAccess = otxInvisible) then begin
     inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, nil);
     Exit;
@@ -727,26 +730,26 @@ procedure TOvcTCCustomComboBox.SaveEditedData(Data : pointer);
           begin
             if (ItemRec^.Index = -1) then
               if UseRunTimeItems then
-                {$IF defined(CBuilder) or defined(unicode)}
+                {$IF defined(CBuilder)}
                 StrPCopy(ItemRec^.RTSt, Copy(FEdit.Text, 1, MaxLength))
                 {$ELSE}
                 ItemRec^.RTSt := Copy(FEdit.Text, 1, MaxLength)
                 {$IFEND}
               else
-                {$IF defined(CBuilder) or defined(unicode)}
+                {$IF defined(CBuilder)}
                 StrPCopy(ItemRec^.St, Copy(FEdit.Text, 1, MaxLength))
                 {$ELSE}
                 ItemRec^.St := Copy(FEdit.Text, 1, MaxLength)
                 {$IFEND}
             else
               if UseRunTimeItems then
-                {$IF defined(CBuilder) or defined(unicode)}
+                {$IF defined(CBuilder)}
                 StrPCopy(ItemRec^.RTSt, Copy(ItemRec^.RTItems[ItemRec^.Index], 1, MaxLength))
                 {$ELSE}
                 ItemRec^.RTSt := Copy(ItemRec^.RTItems[ItemRec^.Index], 1, MaxLength)
                 {$IFEND}
               else
-                {$IF defined(CBuilder) or defined(unicode)}
+                {$IF defined(CBuilder)}
                 StrPCopy(ItemRec^.St, Copy(Items[ItemRec^.Index], 1, MaxLength));
                 {$ELSE}
                 ItemRec^.St := Copy(Items[ItemRec^.Index], 1, MaxLength);
@@ -825,13 +828,13 @@ procedure TOvcTCCustomComboBox.StartEditing(RowNum : TRowNum; ColNum : TColNum;
             if (ItemIndex = -1) and
                ((Style = csDropDown) or (Style = csSimple)) then
               if UseRunTimeItems then
-                {$IF defined(CBuilder) or defined(unicode)}
+                {$IF defined(CBuilder)}
                 Text := StrPas(ItemRec^.RTSt)
                 {$ELSE}
                 Text := ItemRec^.RTSt
                 {$IFEND}
               else
-                {$IF defined(CBuilder) or defined(unicode)}
+                {$IF defined(CBuilder)}
                 Text := StrPas(ItemRec^.St)
                 {$ELSE}
                 Text := ItemRec^.St;
@@ -870,26 +873,26 @@ procedure TOvcTCCustomComboBox.StopEditing(SaveValue : boolean;
           begin
             if (ItemRec^.Index = -1) then
               if UseRunTimeItems then
-                {$IF defined(CBuilder) or defined(unicode)}
+                {$IF defined(CBuilder)}
                 StrPCopy(ItemRec^.RTSt, Copy(FEdit.Text, 1, MaxLength))
                 {$ELSE}
                 ItemRec^.RTSt := Copy(FEdit.Text, 1, MaxLength)
                 {$IFEND}
               else
-                {$IF defined(CBuilder) or defined(unicode)}
+                {$IF defined(CBuilder)}
                 StrPCopy(ItemRec^.St, Copy(FEdit.Text, 1, MaxLength))
                 {$ELSE}
                 ItemRec^.St := Copy(FEdit.Text, 1, MaxLength)
                 {$IFEND}
             else
               if UseRunTimeItems then
-                {$IF defined(CBuilder) or defined(unicode)}
+                {$IF defined(CBuilder)}
                 StrPCopy(ItemRec^.RTSt, Copy(ItemRec^.RTItems[ItemRec^.Index], 1, MaxLength))
                 {$ELSE}
                 ItemRec^.RTSt := Copy(ItemRec^.RTItems[ItemRec^.Index], 1, MaxLength)
                 {$IFEND}
               else
-                {$IF defined(CBuilder) or defined(unicode)}
+                {$IF defined(CBuilder)}
                 StrPCopy(ItemRec^.St, Copy(Items[ItemRec^.Index], 1, MaxLength));
                 {$ELSE}
                 ItemRec^.St := Copy(Items[ItemRec^.Index], 1, MaxLength);
