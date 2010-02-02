@@ -1398,7 +1398,7 @@ var
     if Assigned(FOnDrawDate) then
       FOnDrawDate(Self, FDate, R)
     else
-      DrawText(Canvas.Handle, @S[1], Length(S), R, DT_SINGLELINE or DT_CENTER or DT_VCENTER);
+      DrawText(Canvas.Handle, PChar(S), Length(S), R, DT_SINGLELINE or DT_CENTER or DT_VCENTER);
   end;
 
   procedure DrawDayNames;
