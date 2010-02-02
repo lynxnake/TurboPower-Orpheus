@@ -565,7 +565,7 @@ end;
 procedure TOvcCommandTable.ctDisposeCommandEntry(P : POvcCmdRec);
 begin
   if Assigned(P) then
-    FreeMem(P, SizeOf(TOvcCmdRec));
+    FreeMem(P);
 end;
 
 function TOvcCommandTable.ctNewCommandEntry(const CmdRec : TOvcCmdRec): POvcCmdRec;
