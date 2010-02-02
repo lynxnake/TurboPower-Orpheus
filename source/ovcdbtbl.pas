@@ -4313,7 +4313,7 @@ begin
             {$IFDEF CBuilder}
             StrPCopy(PCellComboBoxInfo(Data)^.St, S);
             {$ELSE}
-            StrPCopy(PCellComboBoxInfo(Data)^.St, string(S));
+            PCellComboBoxInfo(Data)^.St := string(S);
             {$ENDIF}
       end;
 
