@@ -24,6 +24,7 @@
 {*                                                                            *}
 {* Contributor(s):                                                            *}
 {*    Sebastian Zierer (Upgraded to Unicode)                                  *}
+{*    Roman Kassebaum                                                         *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -2342,7 +2343,7 @@ procedure TOvcCustomOutline.LoadFromStream(Stream: TStream);
       SetCodePage(S, GetACP, False);
     {$ENDIF}
 
-    NewNode := Nodes.AddChild(Parent, S);
+    NewNode := Nodes.AddChild(Parent, string(S));
     Stream.Read(I, sizeof(I));
     NewNode.ImageIndex := I;
     Stream.Read(I, sizeof(I));
@@ -2436,7 +2437,11 @@ procedure TOvcCustomOutline.SaveToStream(Stream: TStream);
     Node: TOvcOutlineNode;
     Txt: {$IFDEF UNICODE}UTF8String{$ELSE}AnsiString{$ENDIF};
   begin
+{$IFDEF UNICODE}
+    Txt := UTF8String(ParentNode.Text);
+{$ELSE}
     Txt := ParentNode.Text;
+{$ENDIF}
     I := Length(Txt);
     {$IFDEF UNICODE}
     if HasExtendCharacter(Txt) then
