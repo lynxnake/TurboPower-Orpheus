@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{*    Roman Kassebaum                                                         *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -1286,7 +1287,7 @@ var
   S    : string;
   I    : Cardinal;
   //Buf  : array[0..255] of Char;
-  R    : TRegistry;
+  //R    : TRegistry;
 
   //SZ these were fine for 16 bit code...
   {procedure GetIntlString(S, Def, Buf : PChar; Size : Word);
