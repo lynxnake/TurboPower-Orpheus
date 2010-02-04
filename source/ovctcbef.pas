@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{*   Sebastian Zierer                                                         *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -212,7 +213,7 @@ constructor TOvcTCBaseEntryField.Create(AOwner : TComponent);
 destructor TOvcTCBaseEntryField.Destroy;
 begin
   if (CopyOfData <> nil) and (CopyOfDataSize > 0) then
-    FreeMem(CopyOfData, CopyOfDataSize);
+    FreeMem(CopyOfData {, CopyOfDataSize});
 
   inherited Destroy;
 end;
@@ -290,21 +291,7 @@ procedure TOvcTCBaseEntryField.tcPaint(TableCanvas : TCanvas;
         SetWindowPos(FEditDisplay.Handle, HWND_TOP, 0, 0, 0, 0,
                      SWP_HIDEWINDOW or SWP_NOREDRAW or SWP_NOZORDER);
         FEditDisplay.SetValue(Data^);
-        S := FEditDisplay.DisplayString;
-        if Length(S) > 0 then///clc nov2008 - it was ok without this when shortstrings were used they are staticlength >0
-        begin
-          I := 1;
-          while (S[I] <= #32) do
-            Inc(I);
-          Delete(S, 1, I-1);
-          I := Length(S);
-          if I > 0 then///clc nov2008 - it was ok without this when shortstrings were used they are staticlength >0
-          begin
-            while (S[I] <= #32) do
-              Dec(I);
-            Delete(S, I+1, Length(S) - I);
-          end;
-        end;
+        S := Trim(FEditDisplay.DisplayString);
         inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, PChar(S));
       end;
   end;
@@ -384,7 +371,7 @@ procedure TOvcTCBaseEntryField.StopEditing(SaveValue : boolean;
         FEdit.GetValue(CopyOfData^);
         Move(CopyOfData^, Data^, CopyOfDataSize);
       end;
-    FreeMem(CopyOfData, CopyOfDataSize);
+    FreeMem(CopyOfData {, CopyOfDataSize});
     CopyOfData := nil;
     CopyOfDataSize := 0;
     EditHide;

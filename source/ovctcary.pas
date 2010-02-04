@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{*   Sebastian Zierer                                                         *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -99,7 +100,7 @@ type
 destructor TOvcCellArray.Destroy;
   begin
     if Assigned(FArray) then
-      FreeMem(FArray, sizeof(TOvcCellAddress) * FLimit);
+      FreeMem(FArray {, sizeof(TOvcCellAddress) * FLimit});
   end;
 {--------}
 procedure TOvcCellArray.AddCell(RowNum : TRowNum; ColNum : TColNum);
@@ -117,7 +118,7 @@ procedure TOvcCellArray.AddCell(RowNum : TRowNum; ColNum : TColNum);
         if Assigned(FArray) then
           begin
             Move(FArray^, NewArray^, sizeof(TOvcCellAddress) * FLimit);
-            FreeMem(FArray, sizeof(TOvcCellAddress) * FLimit);
+            FreeMem(FArray {, sizeof(TOvcCellAddress) * FLimit});
           end;
         FLimit := NewLimit;
         FArray := NewArray;
@@ -308,7 +309,7 @@ procedure TOvcCellArray.Merge(CA : TOvcCellArray);
           inc(InxMerge);
         end;
     {all merged, replace the current array with the merged array}
-    FreeMem(FArray, sizeof(TOvcCellAddress) * FLimit);
+    FreeMem(FArray {, sizeof(TOvcCellAddress) * FLimit});
     FArray := NewA;
     FLimit := NewLimit;
     FCount := InxMerge;
