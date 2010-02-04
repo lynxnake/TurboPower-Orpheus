@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{*   Sebastian Zierer                                                         *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -327,7 +328,7 @@ procedure TOvcTCColHead.tcPaint(TableCanvas : TCanvas;
     else {Data points to a column heading}
       begin
         if Assigned(Data) then
-          HeadSt := PChar(Data)
+          HeadSt := PString(Data)^ //SZ PChar(Data)
 //          HeadSt := DataSt^ //R.K.
         else if (0 <= ColNum) and (ColNum < Headings.Count) then
           HeadSt := Headings[ColNum]
