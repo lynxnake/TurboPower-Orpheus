@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{*   Sebastian Zierer                                                         *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -1350,7 +1351,7 @@ begin
     pmAnyChar, pmForceUpper, pmForceLower, pmForceMixed :
       ;
     pmMonthName, pmMonthNameU, pmAlpha, pmUpperAlpha, pmLowerAlpha :
-      Result := ovcCharInSet(Ch, AlphaCharSet);
+      Result := IsCharAlpha(Ch) or ovcCharInSet(Ch, AlphaCharSet);  //SZ: AlphaCharSet works only for ANSI characters; we need to check for [' ', '-', '.', ','] as well
     pmDecimal :
       Result := ovcCharInSet(Ch, RealCharSet);
     pmWhole :
