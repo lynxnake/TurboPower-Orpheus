@@ -99,7 +99,7 @@ type
       property TableFont default True;
       property TextHiColor default clBtnHighlight;
       property TextStyle default tsFlat;
-      property UseASCIIZStrings default False;
+      property UseASCIIZStrings default True;
       property UseWordWrap default False;
       property ShowEllipsis default True;
 
@@ -157,6 +157,7 @@ type
       property TableFont default True;
       property TextHiColor default clBtnHighlight;
       property TextStyle default tsFlat;
+      property UseASCIIZStrings default True;
 
       {events inherited from custom ancestor}
       property OnClick;
@@ -180,7 +181,7 @@ constructor TOvcTCColHead.Create(AOwner : TComponent);
     inherited Create(AOwner);
     FHeadings := TStringList.Create;
     Access := otxReadOnly;
-    UseASCIIZStrings := false;
+    UseASCIIZStrings := True; //SZ false;
     {UseWordWrap := false;}
     ShowLetters := true;
   end;
@@ -328,7 +329,7 @@ procedure TOvcTCColHead.tcPaint(TableCanvas : TCanvas;
     else {Data points to a column heading}
       begin
         if Assigned(Data) then
-          HeadSt := PString(Data)^ //SZ PChar(Data)
+          HeadSt := PChar(Data) //SZ dont' use PString(Data)^ here
 //          HeadSt := DataSt^ //R.K.
         else if (0 <= ColNum) and (ColNum < Headings.Count) then
           HeadSt := Headings[ColNum]
@@ -369,7 +370,7 @@ constructor TOvcTCRowHead.Create(AOwner : TComponent);
   begin
     inherited Create(AOwner);
     Access := otxReadOnly;
-    UseASCIIZStrings := false;
+    UseASCIIZStrings := True; //SZ: false
     UseWordWrap := false;
     ShowNumbers := true;
   end;
