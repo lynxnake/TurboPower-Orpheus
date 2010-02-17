@@ -329,7 +329,7 @@ procedure TOvcTCColHead.tcPaint(TableCanvas : TCanvas;
     else {Data points to a column heading}
       begin
         if Assigned(Data) then
-          HeadSt := PChar(Data) //SZ dont' use PString(Data)^ here
+          HeadSt := PString(Data)^ //SZ PString(Data)^ was fine, but had to be changed in TOvcCustomDbTable.Paint as well
 //          HeadSt := DataSt^ //R.K.
         else if (0 <= ColNum) and (ColNum < Headings.Count) then
           HeadSt := Headings[ColNum]
