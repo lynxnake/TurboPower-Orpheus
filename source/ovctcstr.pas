@@ -74,7 +74,7 @@ type
 
       {properties}
       property UseASCIIZStrings : boolean
-         read FUseASCIIZStrings write SetUseASCIIZStrings;
+         read FUseASCIIZStrings write SetUseASCIIZStrings default True;
 
       property UseWordWrap : boolean
          read FUseWordWrap write SetUseWordWrap;
@@ -99,6 +99,7 @@ constructor TOvcTCBaseString.Create(AOwner : TComponent);
 begin
   inherited Create(AOwner);
   FShowEllipsis := True;
+  FUseASCIIZStrings := True;
 end;
 
 procedure TOvcTCBaseString.tcPaint(TableCanvas : TCanvas;

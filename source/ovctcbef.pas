@@ -278,7 +278,6 @@ procedure TOvcTCBaseEntryField.tcPaint(TableCanvas : TCanvas;
                                        Data        : pointer);
   var
     S : string;
-    I : integer;
   begin
     if (Data = nil) then
       inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, Data)

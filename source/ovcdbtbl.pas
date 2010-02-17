@@ -328,6 +328,8 @@ type
 
     function tbFindCell(ColNum : Integer) : TOvcBaseTableCell;
     function tbGetDataSize(ACell : TOvcBaseTableCell) : Integer;
+    procedure tbGetMem(var P: Pointer; ACell: TOvcBaseTableCell); //SZ (added)
+    procedure tbFreeMem(P: Pointer; ACell: TOvcBaseTableCell); //SZ (added)
     function tbGetFieldColumn(AField : TField) : Integer;
     procedure tbGetFieldValue(AField : TField;
                               ACell  : TOvcBaseTableCell;
@@ -629,7 +631,7 @@ begin
 
       GetMem(NewMap, NewSize * MapElementSize);
       Move(FFieldMap^, NewMap^, MapElementSize * FFieldCount);
-      FreeMem(FFieldMap, MapElementSize * FFieldCount);
+      FreeMem(FFieldMap {, MapElementSize * FFieldCount});
       FFieldMapSize := NewSize;
       FFieldMap := NewMap;
     end;
@@ -646,7 +648,7 @@ end;
 procedure TOvcDbTableDataLink.ClearFieldMappings;
 begin
   if FFieldMap <> nil then begin
-    FreeMem(FFieldMap, FFieldMapSize * MapElementSize);
+    FreeMem(FFieldMap {, FFieldMapSize * MapElementSize});
     FFieldMap := nil;
     FFieldMapSize := 0;
     FFieldCount := 0;
@@ -2228,7 +2230,7 @@ begin
             if DataSize > 0 then begin
 
               {allocate data buffer}
-              GetMem(Data, DataSize);        //SZ: FIXME Data could contain string fields, this does not work correctly with GetMem
+              tbGetMem(Data, Cell); // SZ GetMem(Data, DataSize);        //SZ: FIXME Data could contain string fields, this does not work correctly with GetMem
               try
                 tbGetFieldValue(Fld, Cell, Data, DataSize);
                 try
@@ -2241,7 +2243,7 @@ begin
                     raise;
                 end;
               finally
-                FreeMem(Data, DataSize);
+                tbFreeMem(Data, Cell); // FreeMem(Data {, DataSize});
               end;
             end else
               Cell.Paint(Canvas, DR, R, Col.Number, CellAttr, nil);
@@ -2252,7 +2254,7 @@ begin
             if DataSize > 0 then begin
 
               {allocate data buffer}
-              GetMem(Data, DataSize);
+              tbGetMem(Data, Cell); //SZ GetMem(Data, DataSize);
               try
                 tbGetFieldValue(Fld, Cell, Data, DataSize);
                 try
@@ -2265,7 +2267,7 @@ begin
                     raise;
                 end;
               finally
-                FreeMem(Data, DataSize);
+                tbFreeMem(Data, Cell); //SZ FreeMem(Data {, DataSize});
               end;
             end else
               Cell.Paint(Canvas, DR, R, Col.Number, CellAttr, nil);
@@ -2389,7 +2391,7 @@ begin
       end;
 
       {allocate data buffer}
-      GetMem(Data, DataSize);
+      tbGetMem(Data, tbActiveCell); // GetMem(Data, DataSize);
       try
         {get data from cell}
         tbActiveCell.SaveEditedData(Data);
@@ -2397,7 +2399,7 @@ begin
         {save data to field}
         tbSetFieldValue(Fld, tbActiveCell, Data, DataSize);
       finally
-        FreeMem(Data, DataSize);
+        tbFreeMem(Data, tbActiveCell); // FreeMem(Data {, DataSize});
       end;
     end;
   end;
@@ -3278,7 +3280,7 @@ begin
           end;
 
           {allocate data buffer}
-          GetMem(Data, DataSize);
+          tbGetMem(Data, tbActiveCell); //SZ GetMem(Data, DataSize);
           try
             {get the field value for the entry field}
             tbGetFieldValue(Fld, tbActiveCell, Data, DataSize);
@@ -3287,7 +3289,7 @@ begin
             tbActiveCell.StartEditing(ActiveRow, ActiveColumn, CellRect,
                                       CellAttr, tesNormal, Data);
           finally
-            FreeMem(Data, DataSize);
+            tbFreeMem(Data, tbActiveCell); //SZ FreeMem(Data {, DataSize});
           end;
 
           Result := (tbActiveCell.EditHandle <> 0);
@@ -3338,7 +3340,7 @@ begin
   if SaveValue and (DataSize > 0) and tbCellModified(tbActiveCell) then begin
 
     {allocate data buffer}
-    GetMem(Data, DataSize);
+    tbGetMem(Data, tbActiveCell); //SZ GetMem(Data, DataSize);
     try
       tbActiveCell.StopEditing(SaveValue, Data);
       {save the "Data" to the TField object}
@@ -3348,7 +3350,7 @@ begin
       if FDataLink.DataSet.State in [dsEdit, dsInsert] then
         FDataLink.UpdateRecord;
     finally
-      FreeMem(Data, DataSize);
+      tbFreeMem(Data, tbActiveCell); //SZ FreeMem(Data {, DataSize});
     end;
   end else
     tbActiveCell.StopEditing(False, nil);
@@ -4185,13 +4187,21 @@ begin
     Result := Columns[ColNum].DefaultCell;
 end;
 
+procedure TOvcCustomDbTable.tbFreeMem(P: Pointer; ACell: TOvcBaseTableCell);
+begin
+  if ACell is TOvcTCString then
+    Dispose(PString(P))
+  else
+    FreeMem(P);
+end;
+
 function TOvcCustomDbTable.tbGetDataSize(ACell : TOvcBaseTableCell) : Integer;    //SZ FIXME
   {-return the size of Cell's data requirements}
 begin
   Result := ACell.SpecialCellDataSize;
   if Result = 0 then begin
     if (ACell is TOvcTCString) then
-      Result := TOvcTCString(ACell).MaxLength+1
+      Result := SizeOf(PString) // TOvcTCString(ACell).MaxLength+1
     else if (ACell is TOvcTCMemo) then
       Result := 0
     else if (ACell is TOvcTCSimpleField) then
@@ -4224,19 +4234,19 @@ procedure TOvcCustomDbTable.tbGetFieldValue(AField : TField;
           ACell : TOvcBaseTableCell; Data : Pointer; Size : Integer);
   {-get the value from the db field}
 var
-  S   : string[255];
-  I   : SmallInt absolute S;
-  L   : LongInt absolute S;
-  W   : Word absolute S;
-  B   : Boolean absolute S;
-  E   : Extended absolute S;
-  WD  : TStDate absolute S;
-  WT  : TStTime absolute S;
+//  S   : string[255];
+//  I   : SmallInt absolute S;
+//  L   : LongInt absolute S;
+//  W   : Word absolute S;
+//  B   : Boolean absolute S;
+//  E   : Extended absolute S;
+//  WD  : TStDate absolute S;
+//  WT  : TStTime absolute S;
   {DT  : TDateTime absolute S;}
   Col : Integer;
   Idx : Integer;
 begin
-  FillChar(S, SizeOf(S), #0);
+//  FillChar(S, SizeOf(S), #0);
 
   if Assigned(AField) then begin
     {get the field value into Data^}
@@ -4245,51 +4255,51 @@ begin
       Exit;
     end;
     if (ACell is TOvcTCString) then
-      S := AnsiString(AField.Text)
+      PString(Data)^ := AField.Text
     else if (ACell is TOvcTCSimpleField) or
             (ACell is TOvcTCPictureField) or
             (ACell is TOvcTCNumericField) then begin
       case AField.DataType of
-        ftString   : S := AnsiString(AField.Text);
+        ftString   : PString(Data)^ := AField.Text;
 
         {WideString Support}
         {$IFDEF VERSION5}
-        ftWideString : S := AnsiString(AField.Text);
+        ftWideString : PString(Data)^ := AField.Text;
         {$ENDIF}
 
-        ftSmallInt : I := AField.AsInteger;
-        ftInteger  : L := AField.AsInteger;
-        ftWord     : W := AField.AsInteger;
-        ftBoolean  : B := AField.AsBoolean;
-        ftFloat    : E := AField.AsFloat;
-        ftCurrency : E := AField.AsFloat;
-        ftBCD      : E := AField.AsFloat;
+        ftSmallInt : PSmallInt(Data)^ := AField.AsInteger; //I := AField.AsInteger;
+        ftInteger  : PLongInt(Data)^ := AField.AsInteger; // L := AField.AsInteger;
+        ftWord     : PWord(Data)^ := AField.AsInteger; // W := AField.AsInteger;
+        ftBoolean  : PBoolean(Data)^ := AField.AsBoolean; // B := AField.AsBoolean;
+        ftFloat    : PExtended(Data)^ := AField.AsFloat; // E := AField.AsFloat;
+        ftCurrency : PExtended(Data)^ := AField.AsFloat; // E := AField.AsFloat;
+        ftBCD      : PExtended(Data)^ := AField.AsFloat; // E := AField.AsFloat;
         ftTime     :
           if (AField.IsNull) then
-            WT := BadTime
+            PStDate(Data)^ := BadTime // WT := BadTime
           else
-            WT := DateTimeToStTime(AField.AsDateTime);
+            PStTime(Data)^ := DateTimeToStTime(AField.AsDateTime); // WT := DateTimeToStTime(AField.AsDateTime);
         ftDate     :
           if (AField.IsNull) then
-            WD := BadDate
+            PStDate(Data)^ := BadDate // WD := BadDate
           else
-            WD := DateTimeToStDate(AField.AsDateTime);
+            PStDate(Data)^ := DateTimeToStDate(AField.AsDateTime); // WD := DateTimeToStDate(AField.AsDateTime);
         ftDateTime :
           begin
-            WD := BadDate;
+            PStDate(Data)^ := BadDate; // WD := BadDate;
             Col := tbGetFieldColumn(AField);
             if Col > -1 then begin
               case TOvcDbTableColumn(Columns[Col]).DateOrTime of
                 dtUseDate :
                   if (AField.IsNull) then
-                    WD := BadDate
+                    PStDate(Data)^ := BadDate // WD := BadDate
                   else
-                    WD := DateTimeToStDate(AField.AsDateTime);
+                    PStDate(Data)^ := DateTimeToStDate(AField.AsDateTime); // WD := DateTimeToStDate(AField.AsDateTime);
                 dtUseTime :
                   if (AField.IsNull) then
-                    WT := BadTime
+                    PStTime(Data)^ := BadTime // WT := BadTime
                   else
-                    WT := DateTimeToStTime(AField.AsDateTime);
+                    PStTime(Data)^ := DateTimeToStTime(AField.AsDateTime); // WT := DateTimeToStTime(AField.AsDateTime);
               end;
             end;
           end;
@@ -4300,11 +4310,11 @@ begin
         PCellComboBoxInfo(Data)^.Index := AField.AsInteger;
         PCellComboBoxInfo(Data)^.St := '';
       end else begin
-        S := AnsiString(AField.Text);
-        if S = '' then
+        PString(Data)^ := AField.Text;
+        if PString(Data)^ = '' then
           Idx := -1
         else
-          Idx := TOvcTCComboBox(ACell).Items.IndexOf(string(S));
+          Idx := TOvcTCComboBox(ACell).Items.IndexOf(PString(Data)^);
 
         PCellComboBoxInfo(Data)^.Index := Idx;
 
@@ -4313,7 +4323,7 @@ begin
             {$IFDEF CBuilder}
             StrPCopy(PCellComboBoxInfo(Data)^.St, S);
             {$ELSE}
-            PCellComboBoxInfo(Data)^.St := string(S);
+            PCellComboBoxInfo(Data)^.St := PString(Data)^ //S;
             {$ENDIF}
       end;
 
@@ -4337,9 +4347,25 @@ begin
   end;
 
   {transfer data}
-  if Size > SizeOf(S) then
-    Size := SizeOf(S);
-  Move(S, Data^, Size);
+//SZ - not needed anymore; data modified directly, the data size for strings can now be > 255
+//  if Size > SizeOf(S) then
+//    Size := SizeOf(S);
+//  Move(S, Data^, Size);
+end;
+
+
+procedure TOvcCustomDbTable.tbGetMem(var P: Pointer; ACell: TOvcBaseTableCell);
+// allocates memory for the cell data
+// we cannot use a simple GetMem anymore because PString has a special memory layout
+var
+  Size: Integer;
+begin
+  Size := tbGetDataSize(ACell);
+
+  if ACell is TOvcTCString then
+    New(PString(P))
+  else
+    GetMem(P, Size);
 end;
 
 procedure TOvcCustomDbTable.tbGridPenChanged(Sender : TObject);

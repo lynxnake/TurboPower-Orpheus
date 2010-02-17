@@ -59,6 +59,7 @@ uses
 
 type
   TStDate = LongInt;
+  PStDate = ^TStDate;
     {In STDATE, dates are stored in long integer format as the number of days
     since January 1, 1600}
 
@@ -72,6 +73,7 @@ type
     {An enumerated type used for calculating bond date differences}
 
   TStTime = LongInt;
+  PStTime = ^TStTime;
     {STDATE handles time in a manner similar to dates, representing a given
     time of day as the number of seconds since midnight}
 

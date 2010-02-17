@@ -1224,7 +1224,7 @@ var
     I : Integer;
   begin
     if TransferFlag = otf_GetData then
-      string(DataPtr^) := StrPas(efEditSt)
+      string(DataPtr^) := StrPas(efEditSt)      //SZ: this is the same as PString(DataPtr)^ := StrPas(efEditSt)
     else begin
       if (string(DataPtr^) = '') then
         efEditSt[0] := #0

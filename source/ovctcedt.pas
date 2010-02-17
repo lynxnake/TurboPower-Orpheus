@@ -123,7 +123,7 @@ type
       property TextHiColor default clBtnHighlight;
       property TextStyle default tsFlat;
       property UseWordWrap default False;
-      property UseASCIIZStrings default False;
+      property UseASCIIZStrings default True;
 
       {events inherited from custom ancestor}
       property OnChange;
