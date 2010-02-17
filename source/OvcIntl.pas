@@ -622,7 +622,7 @@ begin
     DLen := 247
   else
     DLen := J;
-  FillChar(Dest[0], DLen * SizeOf(Char), FormChar);
+  StrPCopy(Dest, StringOfChar(FormChar, DLen)); //SZ FillChar(Dest[0], DLen * SizeOf(Char), FormChar);
   Dest[DLen] := #0;
 
   if AddCommas then begin
@@ -640,7 +640,7 @@ begin
   {add in the decimals}
   if CurrencyDigits > 0 then begin
     Dest[DLen] := pmDecimalPt;
-    FillChar(Dest[DLen+1], CurrencyDigits * SizeOf(Char), FormChar);
+    StrPCopy(Dest + DLen + 1, StringOfChar(FormChar, CurrencyDigits)); //SZ  FillChar(Dest[DLen+1], CurrencyDigits * SizeOf(Char), FormChar);
     Inc(DLen, CurrencyDigits+1);
     Dest[DLen] := #0;
   end;
