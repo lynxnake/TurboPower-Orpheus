@@ -880,7 +880,8 @@ begin
     if (ML <> 0) then begin
       SL := StrLen(S);
       S[SL] := ' ';
-      FillChar(S[SL+1], ML, pmAmPm);
+	  StrPCopy(S + SL + 1, StringOfChar(pmAmPm, ML));  //R.K. FillChar(S[SL+1], ML, pmAmPm);
+	  
       S[SL+ML+1] := #0;
     end;
   end;
