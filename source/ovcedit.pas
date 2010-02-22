@@ -1425,7 +1425,11 @@ begin
   OpenClipboard(Handle);
   try
     EmptyClipboard;
+    {$IFDEF UNICODE}
     SetClipboardData(CF_UNICODETEXT, H);
+    {$ELSE}
+    SetClipboardData(CF_TEXT, H);
+    {$ENDIF}
   finally
     CloseClipboard;
   end;
@@ -6338,7 +6342,7 @@ end;
 
 {$ELSE}
 
-procedure TOvcCustomTextFileEditor.SaveToFile(const Name : string);
+procedure TOvcCustomTextFileEditor.SaveToFile(const Name : string);   //SZ FIXME: write correct text files Ansi/Unicode
   {-write the current file to disk}
 const
   BufSize = 8192 * SizeOf(Char);

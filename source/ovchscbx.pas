@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{*   Sebastian Zierer                                                         *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -148,7 +149,7 @@ begin
   if (Text > '') then begin
     Found := False;
     for I := 0 to Pred(Items.Count) do
-      if CompareText(Text, Items[I]) = 0 then begin
+      if AnsiCompareText(Text, Items[I]) = 0 then begin
         Found := True;
         Break;
       end;
