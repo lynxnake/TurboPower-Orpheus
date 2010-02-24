@@ -9,7 +9,8 @@ uses
   TestFramework,
   GUITestRunner,
   TextTestRunner,
-  TestOVCEditU in 'TestOVCEditU.pas';
+  TestOVCEditU in 'TestOVCEditU.pas',
+  TestOVCIntl in 'TestOVCIntl.pas';
 
 {$R *.RES}
 

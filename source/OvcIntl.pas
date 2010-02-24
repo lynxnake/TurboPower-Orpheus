@@ -882,7 +882,7 @@ begin
       S[SL] := ' ';
 	  StrPCopy(S + SL + 1, StringOfChar(pmAmPm, ML));  //R.K. FillChar(S[SL+1], ML, pmAmPm);
 	  
-      S[SL+ML+1] := #0;
+      //R.K. S[SL+ML+1] := #0; Not necessary cause of the StrCopy
     end;
   end;
 
