@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{* Roman Kassebaum                                                            *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -59,7 +60,15 @@ type
   TOvcCustomPictureLabel = class(TOvcCustomRotatedLabel)
   {.Z+}
   protected {private}
-    FData           : string;
+    FString         : string;
+    FBoolean        : Boolean;
+    FDate           : TDateTime;
+    FExtended       : Extended;
+    FLongInt        : LongInt;
+    FStDate         : TStDate;
+    FStTime         : TStTime;
+    FTime           : TDateTime;
+
     FDataType       : TPictureLabelDataType;
     FIntlSupport    : TOvcIntlSup;  {international support object}
     FPictureMask    : string;
@@ -68,25 +77,25 @@ type
     FUserData       : TOvcUserData;
 
     {property methods}
-    procedure SetAsBoolean(Value : Boolean);
+    procedure SetAsBoolean(const Value : Boolean);
       {-set the field value to a Boolean value}
-    procedure SetAsDate(Value : TDateTime);
+    procedure SetAsDate(const Value : TDateTime);
       {-set the field value to a Delphi date value}
-    procedure SetAsFloat(Value : Extended);
+    procedure SetAsFloat(const Value : Extended);
       {-set the field value to a Double value}
-    procedure SetAsInteger(Value : Longint);
+    procedure SetAsInteger(const Value : Longint);
       {-set the field value to a LongInt value}
-    procedure SetAsStDate(Value : TStDate);
+    procedure SetAsStDate(const Value : TStDate);
       {-set the field value to an Orpheus date value}
-    procedure SetAsStTime(Value : TStTime);
+    procedure SetAsStTime(const Value : TStTime);
       {-set the field value to an Orpheus time value}
     procedure SetAsString(const Value : string);
       {-set the field value to a string value}
-    procedure SetAsTime(Value : TDateTime);
+    procedure SetAsTime(const Value : TDateTime);
       {-set the field value to a Delphi time value}
-    procedure SetAsVariant(Value : Variant);
+    procedure SetAsVariant(const Value : Variant);
       {-sets the field value to a Variant value}
-    procedure SetAsYesNo(Value : Boolean);
+    procedure SetAsYesNo(const Value : Boolean);
       {-set the field value to a Boolean value}
     procedure SetIntlSupport(Value : TOvcIntlSup);
       {-set the international support object to use}
@@ -243,7 +252,7 @@ implementation
 procedure TOvcCustomPictureLabel.Clear;
   {-clear the field contents and picture mask}
 begin
-  FillChar(FData, SizeOf(FData), #0);
+//  FillChar(FData, SizeOf(FData), #0);
   FDataType := plNone;
   Caption := GetDisplayString;
 end;
@@ -386,20 +395,17 @@ end;
 function TOvcCustomPictureLabel.plGetDisplayString : string;
 {-return the display string}
 
-  function MergeBoolean(var Data) : string;
-  var
-    B : Boolean absolute Data;
+  function MergeBoolean : string;
   begin
-    if B then
+    if FBoolean then
       Result := IntlSupport.TrueChar
     else
       Result := IntlSupport.FalseChar;
     Result := plMergePicture(Result);
   end;
 
-  function MergeDate(var Data) : string;
+  function MergeDate: string;
   var
-    DT : TDateTime absolute Data;
     FC : Boolean;
     S  : string;
   begin
@@ -408,12 +414,11 @@ function TOvcCustomPictureLabel.plGetDisplayString : string;
       S := FIntlSupport.InternationalDate(FC)
     end else
       S := FPictureMask;
-    Result := FIntlSupport.DateToDateString(S, DateTimeToStDate(DT), False);
+    Result := FIntlSupport.DateToDateString(S, DateTimeToStDate(FDate), False);
   end;
 
-  function MergeFloat(var Data) : string;
+  function MergeFloat: string;
   var
-    E      : Extended absolute Data;
     Width  : Word;
     Places : Word;
     L      : Integer;
@@ -421,7 +426,7 @@ function TOvcCustomPictureLabel.plGetDisplayString : string;
   begin
     plCalcWidthAndPlaces(Width, Places);
     L := Length(FPictureMask);
-    Str(E:0:Places, sShort);
+    Str(FExtended:0:Places, sShort);
     Result := Trim(string(sShort));
 
     {does it fit?}
@@ -429,9 +434,9 @@ function TOvcCustomPictureLabel.plGetDisplayString : string;
     begin
       {won't fit--use scientific notation}
       if (Places > 0) and (9+Places < L) then
-        Str(E:9+Places, sShort)
+        Str(FExtended:9+Places, sShort)
       else
-        Str(E:L, sShort);
+        Str(FExtended:L, sShort);
       Result := Trim(string(sShort));
       Result := TrimEmbeddedZeros(Result);
       {convert decimal point}
@@ -442,40 +447,38 @@ function TOvcCustomPictureLabel.plGetDisplayString : string;
       Result := plMergePicture(Result);
   end;
 
-  function MergeInteger(var Data) : string;
+  function MergeInteger: string;
   var
-    D   : LongInt absolute Data;
     L   : Integer;
     Buf : array[0..MaxEditLen] of Char;
     sShort: ShortString;
   begin
     L := Length(FPictureMask);
     if Pos(pmHexadecimal, FPictureMask) > 0 then begin
-      HexLPChar(Buf, D);
+      HexLPChar(Buf, FLongInt);
       if L < 8 then
         StrStDeletePrim(Buf, 0, 8-L);
       Result := StrPas(Buf);
     end else if Pos(pmOctal, FPictureMask) > 0 then begin
-      OctalLPChar(Buf, D);
+      OctalLPChar(Buf, FLongInt);
       if L < 12 then
         StrStDeletePrim(Buf, 0, 12-L);
       Result := StrPas(Buf);
     end else if Pos(pmBinary, FPictureMask) > 0 then begin
-      BinaryLPChar(Buf, D);
+      BinaryLPChar(Buf, FLongInt);
       if L < 32 then
         StrStDeletePrim(Buf, 0, 32-L);
       Result := StrPas(Buf);
     end else
     begin
-      Str(D, sShort);
+      Str(FLongInt, sShort);
       Result := string(sShort);
     end;
     Result := plMergePicture(Result);
   end;
 
-  function MergeStDate(var Data) : string;
+  function MergeStDate: string;
   var
-    D  : TStDate absolute Data;
     FC : Boolean;
     S  : string;
   begin
@@ -484,45 +487,39 @@ function TOvcCustomPictureLabel.plGetDisplayString : string;
       S := FIntlSupport.InternationalDate(FC)
     end else
       S := FPictureMask;
-    Result := FIntlSupport.DateToDateString(S, D, False);
+    Result := FIntlSupport.DateToDateString(S, FStDate, False);
   end;
 
-  function MergeStTime(var Data) : string;
+  function MergeStTime : string;
   var
-    T : TStTime absolute Data;
     S : string;
   begin
     if FUseIntlMask then
       S := FIntlSupport.InternationalTime(False)
     else
       S := FPictureMask;
-    Result := FIntlSupport.TimeToTimeString(S, T, False);
+    Result := FIntlSupport.TimeToTimeString(S, FStTime, False);
   end;
 
-  function MergeString(var Data) : string;
-  var
-    S : string absolute Data;
+  function MergeString: string;
   begin
-    Result := plMergePicture(S);
+    Result := plMergePicture(FString);
   end;
 
-  function MergeTime(var Data) : string;
+  function MergeTime: string;
   var
-    DT : TDateTime absolute Data;
     S  : string;
   begin
     if FUseIntlMask then
       S := FIntlSupport.InternationalTime(False)
     else
       S := FPictureMask;
-    Result := FIntlSupport.TimeToTimeString(S, DateTimeToStTime(DT), False);
+    Result := FIntlSupport.TimeToTimeString(S, DateTimeToStTime(FTime), False);
   end;
 
-  function MergeYesNo(var Data) : string;
-  var
-    B : Boolean absolute Data;
+  function MergeYesNo: string;
   begin
-    if B then
+    if FBoolean then
       Result := IntlSupport.YesChar
     else
       Result := IntlSupport.NoChar;
@@ -532,15 +529,15 @@ function TOvcCustomPictureLabel.plGetDisplayString : string;
 begin
   case FDataType of
     plNone    : Caption := '';
-    plBoolean : Caption := MergeBoolean(FData);
-    plDate    : Caption := MergeDate(FData);
-    plFloat   : Caption := MergeFloat(FData);
-    plInteger : Caption := MergeInteger(FData);
-    plStDate  : Caption := MergeStDate(FData);
-    plStTime  : Caption := MergeStTime(FData);
-    plString  : Caption := MergeString(FData);
-    plTime    : Caption := MergeTime(FData);
-    plYesNo   : Caption := MergeYesNo(FData);
+    plBoolean : Caption := MergeBoolean;
+    plDate    : Caption := MergeDate;
+    plFloat   : Caption := MergeFloat;
+    plInteger : Caption := MergeInteger;
+    plStDate  : Caption := MergeStDate;
+    plStTime  : Caption := MergeStTime;
+    plString  : Caption := MergeString;
+    plTime    : Caption := MergeTime;
+    plYesNo   : Caption := MergeYesNo;
   end;
   Result := Caption;
 end;
@@ -792,50 +789,50 @@ begin
   Reader.ReadBoolean;
 end;
 
-procedure TOvcCustomPictureLabel.SetAsBoolean(Value : Boolean);
+procedure TOvcCustomPictureLabel.SetAsBoolean(const Value : Boolean);
   {-set the field value to a Boolean value}
 begin
-  Move(Value, FData, SizeOf(Boolean));
+  FBoolean := Value;
   FDataType := plBoolean;
   Caption := GetDisplayString;
 end;
 
-procedure TOvcCustomPictureLabel.SetAsDate(Value : TDateTime);
+procedure TOvcCustomPictureLabel.SetAsDate(const Value : TDateTime);
   {-set the field value to a Delphi date value}
 begin
-  Move(Value, FData, SizeOf(TDateTime));
+  FDate := Value;
   FDataType := plDate;
   Caption := GetDisplayString;
 end;
 
-procedure TOvcCustomPictureLabel.SetAsFloat(Value : Extended);
+procedure TOvcCustomPictureLabel.SetAsFloat(const Value : Extended);
   {-set the field value to a Double value}
 begin
-  Move(Value, FData, SizeOf(Extended));
+  FExtended := Value;
   FDataType := plFloat;
   Caption := GetDisplayString;
 end;
 
-procedure TOvcCustomPictureLabel.SetAsInteger(Value : Longint);
+procedure TOvcCustomPictureLabel.SetAsInteger(const Value : Longint);
   {-set the field value to a LongInt value}
 begin
-  Move(Value, FData, SizeOf(LongInt));
+  FLongInt := Value;
   FDataType := plInteger;
   Caption := GetDisplayString;
 end;
 
-procedure TOvcCustomPictureLabel.SetAsStDate(Value : TStDate);
+procedure TOvcCustomPictureLabel.SetAsStDate(const Value : TStDate);
   {-set the field value to a Orpheus date value}
 begin
-  Move(Value, FData, SizeOf(TStDate));
+  FStDate := Value;
   FDataType := plStDate;
   Caption := GetDisplayString;
 end;
 
-procedure TOvcCustomPictureLabel.SetAsStTime(Value : TStTime);
+procedure TOvcCustomPictureLabel.SetAsStTime(const Value : TStTime);
   {-set the field value to a Orpheus time value}
 begin
-  Move(Value, FData, SizeOf(TStTime));
+  FStTime := Value;
   FDataType := plStTime;
   Caption := GetDisplayString;
 end;
@@ -843,28 +840,28 @@ end;
 procedure TOvcCustomPictureLabel.SetAsString(const Value : string);
   {-set the field value to a string value}
 begin
-  FData := Value;
+  FString := Value;
   FDataType := plString;
   Caption := GetDisplayString;
 end;
 
-procedure TOvcCustomPictureLabel.SetAsTime(Value : TDateTime);
+procedure TOvcCustomPictureLabel.SetAsTime(const Value : TDateTime);
   {-set the field value to a Delphi time value}
 begin
-  Move(Value, FData, SizeOf(TDateTime));
+  FTime := Value;
   FDataType := plTime;
   Caption := GetDisplayString;
 end;
 
-procedure TOvcCustomPictureLabel.SetAsYesNo(Value : Boolean);
+procedure TOvcCustomPictureLabel.SetAsYesNo(const Value : Boolean);
   {-set the field value to a Boolean value}
 begin
-  Move(Value, FData, SizeOf(Boolean));
+  FBoolean := Value;
   FDataType := plYesNo;
   Caption := GetDisplayString;
 end;
 
-procedure TOvcCustomPictureLabel.SetAsVariant(Value : Variant);
+procedure TOvcCustomPictureLabel.SetAsVariant(const Value : Variant);
   {-sets the field value to a Variant value}
 begin
   case VarType(Value) of

@@ -5,12 +5,14 @@ program OrpheusTests;
 {$ENDIF}
 
 uses
+  FastMM4,
   Forms,
   TestFramework,
   GUITestRunner,
   TextTestRunner,
   TestOVCEditU in 'TestOVCEditU.pas',
-  TestOVCIntl in 'TestOVCIntl.pas';
+  TestOVCIntl in 'TestOVCIntl.pas',
+  TestOVCPlb in 'TestOVCPlb.pas';
 
 {$R *.RES}
 
