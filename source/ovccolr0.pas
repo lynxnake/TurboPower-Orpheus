@@ -100,11 +100,11 @@ end;
 function OrStringToColor(S : string) : TColor;
 var
   I    : Integer;
-  Text : array[0..63] of Char;
+  Text : string;
 begin
-  StrPLCopy(Text, S, SizeOf(Text) - 1);
+  Text := S;
   for I := Low(Colors) to High(Colors) do
-    if StrIComp(Colors[I].Name, Text) = 0 then begin
+    if CompareText(Colors[I].Name, Text) = 0 then begin
       Result := Colors[I].Value;
       Exit;
     end;

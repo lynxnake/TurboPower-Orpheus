@@ -2230,7 +2230,7 @@ begin
             if DataSize > 0 then begin
 
               {allocate data buffer}
-              tbGetMem(Data, Cell); // SZ GetMem(Data, DataSize);        //SZ: FIXME Data could contain string fields, this does not work correctly with GetMem
+              tbGetMem(Data, Cell); // SZ GetMem(Data, DataSize);        //SZ: Data could contain string fields, this does not work correctly with GetMem
               try
                 tbGetFieldValue(Fld, Cell, Data, DataSize);
                 try

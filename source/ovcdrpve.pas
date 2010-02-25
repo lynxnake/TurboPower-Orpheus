@@ -47,7 +47,7 @@ unit Ovcdrpve;
 interface
 
 uses
-  {$IFDEF Win32} Windows, {$ELSE} WinTypes, WinProcs, {$ENDIF}
+  Windows,
   Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls, Grids, OvcRptVw, OvcDRpVw, ExtCtrls,
   {$IFDEF VERSION6} DesignIntf, DesignEditors; {$ELSE} DsgnIntf; {$ENDIF}

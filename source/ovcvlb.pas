@@ -170,7 +170,6 @@ type
     lHighIndex         : LongInt;   {highest allowable index}
     lNumTabStops       : 0..vlbMaxTabStops; {number of tab stops in tabstop array}
     lRows              : Integer;   {number of rows in window}
-    lString            : TBuffer;   {temp item string buffer}
     lTabs              : TTabStopArray;
     lUpdating          : Integer;   {user updating flag}
     lVSHigh            : Integer;   {vertical scroll limit}
@@ -338,7 +337,7 @@ type
     procedure DoOnDrawItem(Index : LongInt; Rect : TRect; const S : string);
       virtual;
       {-call the OnDrawItem event, if assigned}
-    function DoOnGetItem(Index : LongInt) : PChar;
+    function DoOnGetItem(Index : LongInt) : string;
       virtual;
       {-call the OnGetItem event, if assigned}
     procedure DoOnGetItemColor(Index : LongInt; var FG, BG : TColor);
@@ -745,7 +744,7 @@ begin
     FOnDrawItem(Self, Index, Rect, S);
 end;
 
-function TOvcCustomVirtualListBox.DoOnGetItem(Index : LongInt) : PChar;
+function TOvcCustomVirtualListBox.DoOnGetItem(Index : LongInt) : string;
   {-returns the string representing Nth item}
 var
   S : string;
@@ -753,13 +752,11 @@ begin
   if Assigned(FOnGetItem) then begin
     S := '';
     FOnGetItem(Self, Index, S);
-    StrPCopy(lString, S);
-    Result := @lString[0];
+    Result := S;
   end else if csDesigning in ComponentState then begin
-    StrPCopy(lString, Format(GetOrphStr(SCSampleListItem), [Index]));
-    Result := @lString[0];
+    Result := Format(GetOrphStr(SCSampleListItem), [Index]);
   end else
-    Result := StrPCopy(lString, Format(GetOrphStr(SCGotItemWarning), [Index]));
+    Result := Format(GetOrphStr(SCGotItemWarning), [Index]);
 end;
 
 procedure TOvcCustomVirtualListBox.DoOnGetItemColor(Index : LongInt; var FG, BG : TColor);
@@ -1143,7 +1140,7 @@ end;
 procedure TOvcCustomVirtualListBox.Paint;
 var
   I    : Integer;
-  ST   : PChar;
+  ST   : string;
   CR   : TRect;
   IR   : TRect;
   Clip : TRect;
@@ -1187,23 +1184,23 @@ var
       {get the string}
       if N <= lHighIndex then begin
         ST := DoOnGetItem(N);
-        if lHDelta >= LongInt(StrLen(ST)) then
+        if lHDelta >= LongInt(Length(ST)) then
           S := nil
         else
-          S := @ST[lHDelta];
+          S := @PChar(ST)[lHDelta];
       end else
         S := nil;
 
       {draw the string}
       if S <> nil then begin
         if FOwnerDraw then
-          DoOnDrawItem(N, CR, StrPas(S))
+          DoOnDrawItem(N, CR, S)
         else if FUseTabStops then begin
           DX := 0;
           if lHDelta > 0 then begin
             {measure portion of string to the left of the window}
             DX := LOWORD(GetTabbedTextExtent(Canvas.Handle,
-                  ST, lHDelta, lNumTabStops, lTabs));
+                  PChar(ST), lHDelta, lNumTabStops, lTabs));
           end;
           TabbedTextOut(Canvas.Handle, CR.Left+2, CR.Top,
                         S, StrLen(S), lNumTabStops, lTabs, -DX)

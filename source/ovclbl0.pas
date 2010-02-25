@@ -40,7 +40,7 @@ unit ovclbl0;
 interface
 
 uses
-  SysUtils, WinTypes, WinProcs, Messages, Classes, Graphics, Controls, Forms,
+  SysUtils, Windows, Messages, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, ExtCtrls,
   {$IFDEF VERSION6} DesignIntf, DesignEditors, {$ELSE} DsgnIntf, {$ENDIF}
   Menus, IniFiles, OvcLbl2, TypInfo, OvcCmbx, OvcClrCb, OvcLabel, OvcBase,
