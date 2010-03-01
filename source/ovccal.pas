@@ -1421,13 +1421,8 @@ var
       S := Copy(ShortDayNames[Ord(DOW)+1], 1, FDayNameWidth);
 
       {draw the day name above each column}
-{$IFDEF UNICODE}
-      DrawText(Canvas.Handle, S, Length(S), clRowCol[1,I],
+      DrawText(Canvas.Handle, PChar(S), Length(S), clRowCol[1,I],
         DT_SINGLELINE or DT_CENTER or DT_VCENTER);
-{$ELSE}
-      DrawText(Canvas.Handle, @S[1], Length(S), clRowCol[1,I],
-        DT_SINGLELINE or DT_CENTER or DT_VCENTER);
-{$ENDIF}        
       Inc(I);
       if DOW < High(DOW) then
         Inc(DOW)

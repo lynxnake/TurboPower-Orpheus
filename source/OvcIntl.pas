@@ -875,7 +875,7 @@ begin
 
   {handle international AM/PM markers}
   if w12Hour then begin
-    ML := GetMaxWord(StrLen(PChar(@w1159)), StrLen(PChar(@w2359)));
+    ML := GetMaxWord(Length(w1159), Length(w2359));
     if (ML <> 0) then begin
       SL := StrLen(S);
       S[SL] := ' ';
