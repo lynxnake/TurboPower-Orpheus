@@ -2043,7 +2043,7 @@ begin
             if Assigned(Fld) and not (hoUseLetters in HeaderOptions) and
                not (hoUseStrings in HeaderOptions) then begin
               S := Fld.DisplayLabel;
-              FHeaderCell.Paint(Canvas, DR, -1, Col.Number, CellAttr, PString(@S));
+              FHeaderCell.Paint(Canvas, DR, -1, Col.Number, CellAttr, PString(@S)); //SZ: TOvcTCColHead.tcPaint (ovctchdr.pas) needs PString
             end else
               FHeaderCell.Paint(Canvas, DR, -1, Col.Number, CellAttr, nil);
           end else begin

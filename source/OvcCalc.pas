@@ -935,7 +935,7 @@ begin
 
   DC := GetDC(0);
   SaveFont := SelectObject(DC, taListBox.Font.Handle);
-  GetTextExtentPoint(DC, ' 0123456789', 11, Size);
+  GetTextExtentPoint32(DC, ' 0123456789', 11, Size);
   Result := taListBox.ClientHeight div Size.cy;
   if Result < 3 then
     Result := 3;
@@ -1741,7 +1741,7 @@ begin
   end;
   DC := GetDC(0);
   SaveFont := SelectObject(DC, cPanel.Font.Handle);
-  GetTextExtentPoint(DC, ' 0123456789', 11, Size);
+  GetTextExtentPoint32(DC, ' 0123456789', 11, Size);
   Result := Round(Size.cx/11);
   SelectObject(DC, SaveFont);
   ReleaseDC(0, DC);
@@ -2149,7 +2149,7 @@ begin
   Color                    := clBtnFace;
   TabStop                  := True;
   Width                    := 200;
-  Font.Name                := 'MS Sans Serif';
+  Font.Name                := 'Default';
   Font.Size                := 8;
   Font.Style               := [];
   cDecimalEntered          := False;
@@ -2232,6 +2232,14 @@ end;
 procedure TOvcCustomCalculator.CreateWnd;
 begin
   inherited CreateWnd;
+
+  if Ctl3D then begin              //SZ moved to here from Paint
+    cPanel.BevelOuter := bvLowered;
+    cPanel.BorderStyle := bsNone;
+  end else begin
+    cPanel.BevelOuter := bvNone;
+    cPanel.BorderStyle := bsSingle;
+  end;
 
   cCalculateLook;
   cClearAll;
@@ -2629,13 +2637,13 @@ begin
   Canvas.Brush.Color := clBtnFace;
   Canvas.FillRect(ClientRect);
 
-  if Ctl3D then begin
+{  if Ctl3D then begin              //SZ this causes 100% CPU usage when Themes are active, moved to CreateWnd
     cPanel.BevelOuter := bvLowered;
     cPanel.BorderStyle := bsNone;
   end else begin
     cPanel.BevelOuter := bvNone;
   cPanel.BorderStyle := bsSingle;
-  end;
+  end; }
 
   {draw buttons}
   for B := Low(cButtons) to High(cButtons) do begin

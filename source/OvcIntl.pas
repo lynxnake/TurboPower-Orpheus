@@ -1350,6 +1350,7 @@ var
     S := Copy(S, 1, Len - 1);
     if Length(S) = 1 then
       Result := S[1];
+    //SZ Note: DecimalChar, ... could be more than 1 char; use default in that case for now
   end;
 
   function GetLocaleString(lcType: Cardinal; Default: string): string;

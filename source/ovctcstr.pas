@@ -69,7 +69,7 @@ type
       procedure tcPaintStrZ(TblCanvas : TCanvas;
                       const CellRect  : TRect;
                       const CellAttr  : TOvcCellAttributes;
-                            StZ       : PChar);
+                            StZ       : string);
       {.Z-}
 
       {properties}
@@ -136,7 +136,7 @@ procedure TOvcTCBaseString.tcPaint(TableCanvas : TCanvas;
         sBuffer := string(PChar(Data));
     end;
 
-    tcPaintStrZ(TableCanvas, cellRect, CellAttr, PChar(sBuffer));
+    tcPaintStrZ(TableCanvas, cellRect, CellAttr, sBuffer);
 
 //R.K.
 //    {prepare to paint the string}
@@ -168,7 +168,7 @@ procedure TOvcTCBaseString.tcPaint(TableCanvas : TCanvas;
 procedure TOvcTCBaseString.tcPaintStrZ(TblCanvas : TCanvas;
                                const CellRect  : TRect;
                                const CellAttr  : TOvcCellAttributes;
-                                     StZ       : PChar);
+                                     StZ       : string);
   var
     Size   : TSize;
   var
@@ -181,7 +181,7 @@ procedure TOvcTCBaseString.tcPaintStrZ(TblCanvas : TCanvas;
     TblCanvas.Font := CellAttr.caFont;
     TblCanvas.Font.Color := CellAttr.caFontColor;
 
-    LenStZ := StrLen(StZ);
+    LenStZ := Length(StZ);
 
     R := CellRect;
     InflateRect(R, -Margin div 2, -Margin div 2);
@@ -204,7 +204,7 @@ procedure TOvcTCBaseString.tcPaintStrZ(TblCanvas : TCanvas;
 
         {make sure that if the string doesn't fit, we at least see
          the first few characters}
-        GetTextExtentPoint32(TblCanvas.Handle, StZ, LenStZ, Size);
+        GetTextExtentPoint32(TblCanvas.Handle, PChar(StZ), LenStZ, Size);
         Wd := Size.cX;
         OurAdjust := CellAttr.caAdjust;
         if Wd > (R.Right - R.Left) then
@@ -237,27 +237,27 @@ procedure TOvcTCBaseString.tcPaintStrZ(TblCanvas : TCanvas;
 
     case CellAttr.caTextStyle of
       tsFlat :
-        DrawText(TblCanvas.Handle, StZ, LenStZ, R, DTOpts);
+        DrawText(TblCanvas.Handle, PChar(StZ), LenStZ, R, DTOpts);
       tsRaised :
         begin
           OffsetRect(R, -1, -1);
           TblCanvas.Font.Color := CellAttr.caFontHiColor;
-          DrawText(TblCanvas.Handle, StZ, LenStZ, R, DTOpts);
+          DrawText(TblCanvas.Handle, PChar(StZ), LenStZ, R, DTOpts);
           OffsetRect(R, 1, 1);
           TblCanvas.Font.Color := CellAttr.caFontColor;
           TblCanvas.Brush.Style := bsClear;
-          DrawText(TblCanvas.Handle, StZ, LenStZ, R, DTOpts);
+          DrawText(TblCanvas.Handle, PChar(StZ), LenStZ, R, DTOpts);
           TblCanvas.Brush.Style := bsSolid;
         end;
       tsLowered :
         begin
           OffsetRect(R, 1, 1);
           TblCanvas.Font.Color := CellAttr.caFontHiColor;
-          DrawText(TblCanvas.Handle, StZ, LenStZ, R, DTOpts);
+          DrawText(TblCanvas.Handle, PChar(StZ), LenStZ, R, DTOpts);
           OffsetRect(R, -1, -1);
           TblCanvas.Font.Color := CellAttr.caFontColor;
           TblCanvas.Brush.Style := bsClear;
-          DrawText(TblCanvas.Handle, StZ, LenStZ, R, DTOpts);
+          DrawText(TblCanvas.Handle, PChar(StZ), LenStZ, R, DTOpts);
           TblCanvas.Brush.Style := bsSolid;
         end;
       end;
