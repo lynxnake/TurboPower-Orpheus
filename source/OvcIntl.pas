@@ -97,7 +97,7 @@ type
     w1159            : string; //array[0..5] of Char;
     w2359            : string; //array[0..5] of Char;
     wColonChar       : Char;
-    wCountry         : PChar;
+    wCountry         : string;
     wCurrencyForm    : Byte;
     wldSub1          : array[0..5] of Char;
     wldSub2          : array[0..5] of Char;
@@ -521,7 +521,6 @@ begin
   {$ELSE}
     DeallocateHWnd(intlHandle);
   {$ENDIF}
-  StrDispose(wCountry);
   inherited Destroy;
 end;
 
@@ -576,7 +575,7 @@ end;
 function TOvcIntlSup.GetCountry : string;
   {-return the country setting}
 begin
-  Result := StrPas(wCountry);
+  Result := wCountry;
 end;
 
 function TOvcIntlSup.GetCurrencyLtStr : string;
@@ -1396,7 +1395,7 @@ begin
 
 //  GetIntlString('sCountry', '', Buf, SizeOf(Buf));
 //  wCountry := StrNew(Buf);
-  wCountry := StrNew(PChar(GetLocaleString(LOCALE_SCOUNTRY, '')));
+  wCountry := GetLocaleString(LOCALE_SCOUNTRY, '');
 
 //  GetIntlString('sCurrency', DefaultIntlData.CurrencyLtStr,
 //    FCurrencyLtStr, SizeOf(FCurrencyLtStr));

@@ -846,7 +846,7 @@ begin
   if Pos < Len then begin
     if (Len-Pos) < Count then
       Count := Len-Pos;
-    Move(S[Pos{$IFDEF UNICODE}*2{$ENDIF}], Dest^, Count{$IFDEF UNICODE}*2{$ENDIF});
+    Move(S[Pos], Dest^, Count * SizeOf(Char));
     Dest[Count] := #0;
   end else
     Dest[0] := #0;
