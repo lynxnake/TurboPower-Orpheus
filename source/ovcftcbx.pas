@@ -391,7 +391,7 @@ begin
   StrPCopy(FntStr, FontName);
 
   try
-    EnumFonts(DC, FntStr, @GetFontCharSet, PChar(@CharSet));
+    EnumFonts(DC, FntStr, @GetFontCharSet, PChar(@CharSet)); //SZ FIXME EnumFonts is 16-bit compatibility function
     if CharSet = 0 then
       { It's a printer font }
       EnumFonts(Printer.Handle, FntStr, @GetFontCharSet, PChar(@CharSet));
@@ -457,7 +457,7 @@ begin
   DC := GetDC(0);
   TempList := TStringList.Create;
   try
-    EnumFontFamilies(DC, nil, @EnumFontFamProc, Integer(Self));
+    EnumFontFamilies(DC, nil, @EnumFontFamProc, Integer(Self));      //SZ FIXME EnumFontFamilies is 16-bit compatibility function
     if (Printer.Printers.Count > 0) and (Printer.Handle > 0) then
       EnumFontFamilies(Printer.Handle, nil, @EnumPrinterFontFamProc,
         Integer(Self));

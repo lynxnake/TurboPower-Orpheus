@@ -166,7 +166,7 @@ var
   Buf : array[0..1023] of Char;
 begin
   if URL > '' then begin
-    StrPLCopy(Buf, URL, SizeOf(Buf)-1);
+    StrPLCopy(Buf, URL, Length(Buf)-1);
     if ShellExecute(0, 'open', Buf, '', '', SW_SHOWNORMAL) <= 32 then
       MessageBeep(0);
   end;

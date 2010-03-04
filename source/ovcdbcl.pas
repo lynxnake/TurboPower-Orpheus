@@ -849,7 +849,7 @@ var
   SaveActive  : Integer;
   Left        : Integer;
   Indicator   : Integer;
-  P           : PAnsiChar;
+  P           : PChar;    //SZ FIXME
   Buf         : array[0..255] of Char;
 begin
   {get the client area}

@@ -385,8 +385,8 @@ var
   Buf1 : array[0..255] of Char;
   Buf2 : array[0..255] of Char;
 begin
-  StrPCopy(Buf1, Picture);
-  StrPCopy(Buf2, S);
+  StrPLCopy(Buf1, Picture, Length(Buf1) - 1);
+  StrPLCopy(Buf2, S, Length(Buf2) - 1);
   Result := DatePCharIsBlank(Buf1, Buf2);
 end;
 
@@ -410,8 +410,8 @@ var
   Buf1 : array[0..255] of Char;
   Buf2 : array[0..255] of Char;
 begin
-  StrPCopy(Buf1, Picture);
-  StrPCopy(Buf2, S);
+  StrPLCopy(Buf1, Picture, Length(Buf1) - 1);
+  StrPLCopy(Buf2, S, Length(Buf2) - 1);
   Result := DatePCharToDate(Buf1, Buf2, Epoch);
 end;
 
@@ -436,8 +436,8 @@ var
   Buf1 : array[0..255] of Char;
   Buf2 : array[0..255] of Char;
 begin
-  StrPCopy(Buf1, Picture);
-  StrPCopy(Buf2, S);
+  StrPLCopy(Buf1, Picture, Length(Buf1) - 1);
+  StrPLCopy(Buf2, S, Length(Buf2) - 1);
   Result := DatePCharToDMY(Buf1, Buf2, Day, Month, Year, Epoch);
 end;
 
@@ -464,7 +464,7 @@ var
   Buf1 : array[0..255] of Char;
   Buf2 : array[0..255] of Char;
 begin
-  StrPCopy(Buf1, Picture);
+  StrPLCopy(Buf1, Picture, Length(Buf1) - 1);
   Result := StrPas(DateToDatePChar(Buf2, Buf1, Julian, Pack));
 end;
 
@@ -531,7 +531,7 @@ var
   Buf1 : array[0..255] of Char;
   Buf2 : array[0..255] of Char;
 begin
-  StrPCopy(Buf1, Picture);
+  StrPLCopy(Buf1, Picture, Length(Buf1) - 1);
   Result := StrPas(DMYtoDatePChar(Buf2, Buf1, Day, Month, Year, Pack, Epoch));
 end;
 
@@ -1439,7 +1439,7 @@ begin
      finally
        R.Free;
      end;  }
-  StrPLCopy(wShortDate, GetLocaleString(LOCALE_SSHORTDATE, 'MM/dd/yy'), SizeOf(wShortDate));
+  StrPLCopy(wShortDate, GetLocaleString(LOCALE_SSHORTDATE, 'MM/dd/yy'), Length(wShortDate) - 1);
 
   I := 0;
   while wShortDate[I] <> #0 do begin
@@ -1449,7 +1449,7 @@ begin
   end;
 
   {get long date mask and fix it up}
-  StrPLCopy(wLongDate, GetLocaleString(LOCALE_SLONGDATE, 'dddd, MMMM dd, yyyy'), SizeOf(wLongDate)); // GetIntlString('sLongDate',  'dddd, MMMM dd, yyyy', wLongDate,  SizeOf(wLongDate));
+  StrPLCopy(wLongDate, GetLocaleString(LOCALE_SLONGDATE, 'dddd, MMMM dd, yyyy'), Length(wLongDate) - 1); // GetIntlString('sLongDate',  'dddd, MMMM dd, yyyy', wLongDate,  SizeOf(wLongDate));
   ExtractSubString(pmLongDateSub1, wldSub1);
   ExtractSubString(pmLongDateSub2, wldSub2);
   ExtractSubString(pmLongDateSub3, wldSub3);
@@ -1530,12 +1530,12 @@ end;
 
 procedure TOvcIntlSup.SetCurrencyLtStr(const Value : string);
 begin
-  StrPLCopy(FCurrencyLtStr, Value, SizeOf(FCurrencyLtStr)-1);
+  StrPLCopy(FCurrencyLtStr, Value, Length(FCurrencyLtStr)-1);
 end;
 
 procedure TOvcIntlSup.SetCurrencyRtStr(const Value : string);
 begin
-  StrPLCopy(FCurrencyRtStr, Value, SizeOf(FCurrencyRtStr)-1);
+  StrPLCopy(FCurrencyRtStr, Value, Length(FCurrencyRtStr)-1);
 end;
 
 function TOvcIntlSup.TimeStringToHMS(const Picture, S : string;
@@ -1545,8 +1545,8 @@ var
   Buf1 : array[0..255] of Char;
   Buf2 : array[0..255] of Char;
 begin
-  StrPCopy(Buf1, Picture);
-  StrPCopy(Buf2, S);
+  StrPLCopy(Buf1, Picture, Length(Buf1) - 1);
+  StrPLCopy(Buf2, S, Length(Buf2) - 1);
   Result := TimePCharToHMS(Buf1, Buf2, Hour, Minute, Second);
 end;
 
@@ -1618,7 +1618,7 @@ var
   Buf1 : array[0..255] of Char;
   Buf2 : array[0..255] of Char;
 begin
-  StrPCopy(Buf1, Picture);
+  StrPLCopy(Buf1, Picture, Length(Buf1) - 1);
   Result := StrPas(TimeToAmPmPChar(Buf2, Buf1, T, Pack));
 end;
 
@@ -1646,8 +1646,8 @@ var
   Buf1 : array[0..255] of Char;
   Buf2 : array[0..255] of Char;
 begin
-  StrPCopy(Buf1, Picture);
-  StrPCopy(Buf2, S);
+  StrPLCopy(Buf1, Picture, Length(Buf1) - 1);
+  StrPLCopy(Buf2, S, Length(Buf2) - 1);
   Result := TimePCharToTime(Buf1, Buf2);
 end;
 
@@ -1668,7 +1668,7 @@ var
   Buf1 : array[0..255] of Char;
   Buf2 : array[0..255] of Char;
 begin
-  StrPCopy(Buf1, Picture);
+  StrPLCopy(Buf1, Picture, Length(Buf1) - 1);
   Result := StrPas(TimeToTimePChar(Buf2, Buf1, T, Pack));
 end;
 

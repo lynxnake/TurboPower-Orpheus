@@ -1347,7 +1347,7 @@ begin
   Assert(TObject(I1) is TOvcOutlineNode);
   Assert(TObject(I2) is TOvcOutlineNode);
 
-  Result := PComp(TOvcOutlineNode(I1).Parent, TOvcOutlineNode(I2).Parent);
+  Result := PComp(TOvcOutlineNode(I1).Parent, TOvcOutlineNode(I2).Parent); //SZ FIXME (when using 4GB Flag)
 
   if Result = 0 then begin
 

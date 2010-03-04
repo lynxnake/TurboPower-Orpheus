@@ -1702,16 +1702,16 @@ procedure TOvcCustomVirtualListBox.vlbDrawHeader;
   {-draw the header and text}
 var
   R      : TRect;
-  Buf    : array[0..255] of Char;
+  Buf    : string;
   S      : PChar;
   DX     : Integer;
 begin
   {get the printable area of the header text}
-  StrPCopy(Buf, FHeader);
-  if lHDelta >= LongInt(StrLen(Buf)) then
+  Buf := FHeader;
+  if lHDelta >= LongInt(Length(Buf)) then
     S := ' ' {space to erase last character from header}
   else
-    S := @Buf[lHDelta];
+    S := PChar(@Buf[lHDelta+1]);
 
   Canvas.Font := Font;
   with Canvas do begin
@@ -1729,7 +1729,7 @@ begin
         DX := 0;
         if lHDelta > 0 then begin
           {measure portion of string to the left of the window}
-          DX := LOWORD(GetTabbedTextExtent(Canvas.Handle, Buf, lHDelta,
+          DX := LOWORD(GetTabbedTextExtent(Canvas.Handle, PChar(Buf), lHDelta,
                 lNumTabStops, lTabs));
         end;
         TabbedTextOut(Canvas.Handle, 2, 0,

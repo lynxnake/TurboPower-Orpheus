@@ -521,7 +521,7 @@ var
   Buf : TEditString;
 begin
   HandleNeeded;
-  StrPCopy(Buf, S);
+  StrPLCopy(Buf, S, Length(Buf) - 1);
   pbMergePicture(efEditSt, Buf);
 end;
 
@@ -561,7 +561,7 @@ begin
   P := B - pfSemiLits;
 
   if StrScan(efPicture, pmFloatDollar) <> nil then begin
-    StrPCopy(Buf, IntlSupport.CurrencyLtStr);
+    StrPLCopy(Buf, IntlSupport.CurrencyLtStr, Length(Buf) - 1);
     if StrStPos(efEditSt, Buf, I) then begin
       D := StrLen(Buf);
       StrStDeletePrim(efEditSt, I, D);
@@ -709,7 +709,7 @@ begin
     K := I;
     while (K+1 < DestLen) and (efNthMaskChar(K+1) = pmCurrencyLt) do
       Inc(K);
-    StrPCopy(Buf, IntlSupport.CurrencyLtStr);
+    StrPLCopy(Buf, IntlSupport.CurrencyLtStr, Length(Buf) - 1);
     J := StrLen(Buf);
     for N := K downto I do
       if J > 0 then begin
@@ -721,7 +721,7 @@ begin
 
   if StrChPos(efPicture, pmCurrencyRt, I) then begin
     J := 0;
-    StrPCopy(Buf, IntlSupport.CurrencyRtStr);
+    StrPLCopy(Buf, IntlSupport.CurrencyRtStr, Length(Buf) - 1);
     K := StrLen(Buf);
     while (LongInt(I+1) <= DestLen) and (efNthMaskChar(I) = pmCurrencyRt) do begin
       if J < K then begin
@@ -935,7 +935,7 @@ begin
       Inc(I);
       Inc(P);
     end;
-    StrPCopy(CLT, IntlSupport.CurrencyLtStr);
+    StrPLCopy(CLT, IntlSupport.CurrencyLtStr, Length(CLT) - 1);
     CLT[I] := #0;
     P := StrPos(Dest, CLT);
     if P <> nil then

@@ -1059,7 +1059,7 @@ begin
     HSnd := LoadResource(HInstance, HSnd);
     if HSnd > 0 then begin
       sndPlaySound(LockResource(HSnd), SND_ASYNC or SND_MEMORY);
-      FreeResource(HSnd);
+      // FreeResource(HSnd); //SZ FreeResource is a compatibility function for 16 bit Windows. It is not needed anymore.
     end;
   end;
 

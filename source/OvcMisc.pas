@@ -329,7 +329,7 @@ begin
     lfUnderline        := Byte(fsUnderline in F.Style);
     lfStrikeOut        := Byte(fsStrikeOut in F.Style);
     lfCharSet          := DEFAULT_CHARSET;
-    StrPCopy(lfFaceName, F.Name);
+    StrPLCopy(lfFaceName, F.Name, Length(lfFaceName) - 1);
     lfQuality          := DEFAULT_QUALITY;
     {everything else as default}
     lfOutPrecision     := OUT_DEFAULT_PRECIS;

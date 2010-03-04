@@ -820,20 +820,20 @@ end;
 destructor TOvcLiteCache.Destroy;
 begin
   Clear;
-  FreeMem(Buffer, FCacheSize * (sizeof(Pointer) + FValueSize + sizeof(LongInt)));
+  FreeMem(Buffer{, FCacheSize * (sizeof(Pointer) + FValueSize + sizeof(LongInt))});
     {last item is size of time stamp}
   inherited Destroy;
 end;
 
 function TOvcLiteCache.GetKeySlot(Index: Integer): Pointer;
 begin
-  Result := @PAnsiChar(Buffer)[Index * (sizeof(Pointer) + FValueSize + sizeof(LongInt))];
+  Result := {$IFDEF UNICODE}@PByte{$ELSE}@PAnsiChar{$ENDIF}(Buffer)[Index * (sizeof(Pointer) + FValueSize + sizeof(LongInt))];
 end;
 
 function TOvcLiteCache.GetTimeStamp(Index: Integer): LongInt;
 begin
   Result := LongInt(Pointer(@
-    PAnsiChar(Buffer)[Index * (sizeof(Pointer) + FValueSize + sizeof(LongInt))
+    {$IFDEF UNICODE}PByte{$ELSE}PAnsiChar{$ENDIF}(Buffer)[Index * (sizeof(Pointer) + FValueSize + sizeof(LongInt))
       + sizeof(Pointer) + FValueSize])^);
 end;
 
@@ -856,7 +856,7 @@ end;
 
 function TOvcLiteCache.GetValueSlot(Index: Integer): Pointer;
 begin
-  Result := @PAnsiChar(Buffer)[Index * (sizeof(Pointer)
+  Result := {$IFDEF UNICODE}@PByte{$ELSE}@PAnsiChar{$ENDIF}(Buffer)[Index * (sizeof(Pointer)
     + FValueSize + sizeof(LongInt)) + sizeof(Pointer)];
 end;
 
@@ -874,7 +874,7 @@ end;
 procedure TOvcLiteCache.SetTimeStamp(Index: Integer; const Value: LongInt);
 begin
   LongInt(Pointer(@
-    PAnsiChar(Buffer)[Index * (sizeof(Pointer) + FValueSize + sizeof(LongInt))
+    {$IFDEF UNICODE}PByte{$ELSE}PAnsiChar{$ENDIF}(Buffer)[Index * (sizeof(Pointer) + FValueSize + sizeof(LongInt))
       + sizeof(Pointer) + FValueSize])^)
       := Value;
 end;

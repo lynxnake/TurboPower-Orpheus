@@ -1799,7 +1799,7 @@ begin
     S[1] := #0;
   end else begin
     Str(L, St);
-    StrPCopy(S, string(St));
+    StrPLCopy(S, string(St), Length(S) - 1);
   end;
   StrCopy(P, S);
 end;
@@ -2739,7 +2739,7 @@ begin
         R.rtChar := Char(Value[1]);
     fsubLongInt, fsubWord, fsubInteger, fsubByte, fsubShortInt :
       begin
-        StrPCopy(Buf, Value);
+        StrPLCopy(Buf, Value, Length(Buf) - 1);
         if not efStr2Long(Buf, R.rtLong) then
           Code := 1
         else if (fSub = fsubWord) and
@@ -4248,7 +4248,7 @@ var
   Msg : TMessage;
   Buf : array[0..MaxEditLen] of Char;
 begin
-  StrPCopy(Buf, Value);
+  StrPLCopy(Buf, Value, Length(Buf) - 1);
   Msg.lParam := LongInt(@Buf);
   efPerformEdit(Msg, ccPaste);
 end;

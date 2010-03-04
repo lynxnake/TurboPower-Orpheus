@@ -1207,13 +1207,13 @@ begin
             {get text to display}
             if FFieldType = ftDateTime then begin
               case FDateOrTime of
-                ftUseDate : StrPCopy(Buf, DateToStr(Field.AsDateTime));
-                ftUseTime : StrPCopy(Buf, TimeToStr(Field.AsDateTime));
+                ftUseDate : StrPLCopy(Buf, DateToStr(Field.AsDateTime), Length(Buf) - 1);
+                ftUseTime : StrPLCopy(Buf, TimeToStr(Field.AsDateTime), Length(Buf) - 1);
               else
-                StrPCopy(Buf, Field.DisplayText);
+                StrPLCopy(Buf, Field.DisplayText, Length(Buf) - 1);
               end;
             end else
-              StrPCopy(Buf, Field.DisplayText);
+              StrPLCopy(Buf, Field.DisplayText, Length(Buf) - 1);
           end else begin
             if (DataLink <> nil) and (DataLink.DataSource <> nil) and
                (DataLink.DataSource.DataSet <> nil) and

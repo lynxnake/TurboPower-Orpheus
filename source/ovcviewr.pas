@@ -3285,7 +3285,7 @@ begin
     BufPtr   := @Buffer;
     BufPos   := 0;
     OpenFunc := @VwrTFDD_Open;
-    StrPCopy(Name, FileName);
+    StrPLCopy(Name, FileName, Length(Name) - 1);
   end;
 end;
 
@@ -4317,7 +4317,7 @@ begin
   end;
 
   {get copy of search string}
-  StrPCopy(Pattern, S);
+  StrPLCopy(Pattern, S, Length(Pattern) - 1);
 
   {assume failure}
   Result := False;
