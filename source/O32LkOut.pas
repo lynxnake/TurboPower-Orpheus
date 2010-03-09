@@ -2982,7 +2982,7 @@ begin
       if FActiveFolder > -1 then begin
         {play sound}
         if FPlaySounds and (FSoundAlias > '') then begin
-          StrPLCopy(Buf, FSoundAlias, SizeOf(Buf)-1);
+          StrPLCopy(Buf, FSoundAlias, Length(Buf)-1);
           FPlaySounds := PlaySound(@Buf, 0, SND_ASYNC);
         end;
 
