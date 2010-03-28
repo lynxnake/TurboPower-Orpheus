@@ -2302,9 +2302,19 @@ begin
 
   efCaret.Position := Pos;
 
-  RightBdr := ClientWidth - Margins.Right;
-  R := Rect(Margins.Left, Margins.Top, RightBdr + 1, ClientHeight - Margins.Bottom);
-  SendMessage(Handle, EM_SETRECTNP, 0, LongInt(@R));
+  {$IF compilerversion >= 18} // Version 18 = Delphi 2006
+  if AlignWithMargins then
+  begin
+    RightBdr := ClientWidth - Margins.Right;
+    R := Rect(Margins.Left, Margins.Top, RightBdr + 1, ClientHeight - Margins.Bottom);
+  end else
+  {$IFEND}
+  begin
+    RightBdr := ClientWidth;
+    R := Rect(0, 0, RightBdr + 1, ClientHeight);
+  end;
+
+  SendMessage(Handle, EM_SETRECTNP, 0, LongInt(@R));   //SZ: According to the Windows SDK, this is only processed by multi line edits. Why do we need it here? It was introduced with the IME changes
   SendMessage(Handle, EM_SCROLLCARET, 0, 0);
   if SysLocale.FarEast {and (IMEMode <> imDisable)} then
     SetImeCompositionWindow(Font, efCaret.Position.X,efCaret.Position.Y);
