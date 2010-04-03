@@ -386,6 +386,7 @@ var
   M  : Integer;
   R  : TRect;
   NR : TRect;
+  tmp: string;
 begin
   NR := Classes.Rect(0, 0, Rect.Right - Rect.Left, Rect.Bottom - Rect.Top);
   clDrawBmp.Width  := NR.Right;
@@ -499,8 +500,9 @@ begin
   end else
     clDrawBmp.Canvas.Brush.Color := Color;
   clDrawBmp.Canvas.Pen.Color := Font.Color;
+  tmp := Items[Index];
   ExtTextOut(clDrawBmp.Canvas.Handle, NR.Left + M + W + M, Y, ETO_CLIPPED,
-    @NR, PChar(Items[Index]), Length(Items[Index]), nil);
+    @NR, PChar(tmp), Length(tmp), nil);
 
   {draw the focus rect}
   if odFocused in AState then begin
