@@ -24,6 +24,8 @@
 {*                                                                            *}
 {* Contributor(s):                                                            *}
 {*                                                                            *}
+{* Roman Kassebaum                                                            *}
+{*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
 {$I OVC.INC}
@@ -328,8 +330,8 @@ type
 
     function tbFindCell(ColNum : Integer) : TOvcBaseTableCell;
     function tbGetDataSize(ACell : TOvcBaseTableCell) : Integer;
-    procedure tbGetMem(var P: Pointer; ACell: TOvcBaseTableCell); //SZ (added)
-    procedure tbFreeMem(P: Pointer; ACell: TOvcBaseTableCell); //SZ (added)
+    procedure tbGetMem(var P: Pointer; ACell: TOvcBaseTableCell; const AField: TField); //SZ (added)
+    procedure tbFreeMem(P: Pointer; ACell: TOvcBaseTableCell; const AField: TField); //SZ (added)
     function tbGetFieldColumn(AField : TField) : Integer;
     procedure tbGetFieldValue(AField : TField;
                               ACell  : TOvcBaseTableCell;
@@ -2230,7 +2232,7 @@ begin
             if DataSize > 0 then begin
 
               {allocate data buffer}
-              tbGetMem(Data, Cell); // SZ GetMem(Data, DataSize);        //SZ: Data could contain string fields, this does not work correctly with GetMem
+              tbGetMem(Data, Cell, Fld); // SZ GetMem(Data, DataSize);        //SZ: Data could contain string fields, this does not work correctly with GetMem
               try
                 tbGetFieldValue(Fld, Cell, Data, DataSize);
                 try
@@ -2243,7 +2245,7 @@ begin
                     raise;
                 end;
               finally
-                tbFreeMem(Data, Cell); // FreeMem(Data {, DataSize});
+                tbFreeMem(Data, Cell, Fld); // FreeMem(Data {, DataSize});
               end;
             end else
               Cell.Paint(Canvas, DR, R, Col.Number, CellAttr, nil);
@@ -2254,7 +2256,7 @@ begin
             if DataSize > 0 then begin
 
               {allocate data buffer}
-              tbGetMem(Data, Cell); //SZ GetMem(Data, DataSize);
+              tbGetMem(Data, Cell, Fld); //SZ GetMem(Data, DataSize);
               try
                 tbGetFieldValue(Fld, Cell, Data, DataSize);
                 try
@@ -2267,7 +2269,7 @@ begin
                     raise;
                 end;
               finally
-                tbFreeMem(Data, Cell); //SZ FreeMem(Data {, DataSize});
+                tbFreeMem(Data, Cell, Fld); //SZ FreeMem(Data {, DataSize});
               end;
             end else
               Cell.Paint(Canvas, DR, R, Col.Number, CellAttr, nil);
@@ -2391,7 +2393,7 @@ begin
       end;
 
       {allocate data buffer}
-      tbGetMem(Data, tbActiveCell); // GetMem(Data, DataSize);
+      tbGetMem(Data, tbActiveCell, Fld); // GetMem(Data, DataSize);
       try
         {get data from cell}
         tbActiveCell.SaveEditedData(Data);
@@ -2399,7 +2401,7 @@ begin
         {save data to field}
         tbSetFieldValue(Fld, tbActiveCell, Data, DataSize);
       finally
-        tbFreeMem(Data, tbActiveCell); // FreeMem(Data {, DataSize});
+        tbFreeMem(Data, tbActiveCell, Fld); // FreeMem(Data {, DataSize});
       end;
     end;
   end;
@@ -3280,7 +3282,7 @@ begin
           end;
 
           {allocate data buffer}
-          tbGetMem(Data, tbActiveCell); //SZ GetMem(Data, DataSize);
+          tbGetMem(Data, tbActiveCell, Fld); //SZ GetMem(Data, DataSize);
           try
             {get the field value for the entry field}
             tbGetFieldValue(Fld, tbActiveCell, Data, DataSize);
@@ -3289,7 +3291,7 @@ begin
             tbActiveCell.StartEditing(ActiveRow, ActiveColumn, CellRect,
                                       CellAttr, tesNormal, Data);
           finally
-            tbFreeMem(Data, tbActiveCell); //SZ FreeMem(Data {, DataSize});
+            tbFreeMem(Data, tbActiveCell, Fld); //SZ FreeMem(Data {, DataSize});
           end;
 
           Result := (tbActiveCell.EditHandle <> 0);
@@ -3340,7 +3342,7 @@ begin
   if SaveValue and (DataSize > 0) and tbCellModified(tbActiveCell) then begin
 
     {allocate data buffer}
-    tbGetMem(Data, tbActiveCell); //SZ GetMem(Data, DataSize);
+    tbGetMem(Data, tbActiveCell, Fld); //SZ GetMem(Data, DataSize);
     try
       tbActiveCell.StopEditing(SaveValue, Data);
       {save the "Data" to the TField object}
@@ -3350,7 +3352,7 @@ begin
       if FDataLink.DataSet.State in [dsEdit, dsInsert] then
         FDataLink.UpdateRecord;
     finally
-      tbFreeMem(Data, tbActiveCell); //SZ FreeMem(Data {, DataSize});
+      tbFreeMem(Data, tbActiveCell, Fld); //SZ FreeMem(Data {, DataSize});
     end;
   end else
     tbActiveCell.StopEditing(False, nil);
@@ -4187,9 +4189,9 @@ begin
     Result := Columns[ColNum].DefaultCell;
 end;
 
-procedure TOvcCustomDbTable.tbFreeMem(P: Pointer; ACell: TOvcBaseTableCell);
+procedure TOvcCustomDbTable.tbFreeMem(P: Pointer; ACell: TOvcBaseTableCell; const AField: TField);
 begin
-  if ACell is TOvcTCString then
+  if (ACell is TOvcTCString) or (AField.DataType in [ftString{$IFDEF VERSION5}, ftWideString{$ENDIF}]) then
     Dispose(PString(P))
   else
     FreeMem(P);
@@ -4354,15 +4356,16 @@ begin
 end;
 
 
-procedure TOvcCustomDbTable.tbGetMem(var P: Pointer; ACell: TOvcBaseTableCell);
+procedure TOvcCustomDbTable.tbGetMem(var P: Pointer; ACell: TOvcBaseTableCell; const AField: TField);
 // allocates memory for the cell data
 // we cannot use a simple GetMem anymore because PString has a special memory layout
+// this also happens if the Field is a StringField
 var
   Size: Integer;
 begin
   Size := tbGetDataSize(ACell);
 
-  if ACell is TOvcTCString then
+  if (ACell is TOvcTCString) or (AField.DataType in [ftString{$IFDEF VERSION5}, ftWideString{$ENDIF}]) then
     New(PString(P))
   else
     GetMem(P, Size);
