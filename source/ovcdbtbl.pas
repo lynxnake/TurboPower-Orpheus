@@ -5162,7 +5162,11 @@ begin
     {transfer data}
     if Size > SizeOf(S) then
       Size := SizeOf(S);
-    Move(Data^, S, Size);
+    //If the field is a StringField then the data pointer is a PString.
+    if AField.InheritsFrom(TStringField) then
+      S := ShortString(PString(Data)^)
+    else
+      Move(Data^, S, Size);
 
     if (ACell is TOvcTCString) then
       AField.Text := string(S)
