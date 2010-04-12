@@ -24,6 +24,7 @@
 {*                                                                            *}
 {* Contributor(s):                                                            *}
 {*   Sebastian Zierer                                                         *}
+{*   Roman Kassebaum                                                          *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
