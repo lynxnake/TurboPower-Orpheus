@@ -148,6 +148,11 @@ type
 
 implementation
 
+uses
+  Forms;
+
+type
+  TPForm = class(TCustomForm);
 
 {===TOvcTCCustomPictureField=========================================}
 function TOvcTCCustomPictureField.CreateEntryField(AOwner : TComponent) : TOvcBaseEntryField;
@@ -273,7 +278,15 @@ procedure TOvcTCPictureFieldEdit.WMKeyDown(var Msg : TWMKey);
   var
     GridReply : TOvcTblKeyNeeds;
     GridUsedIt : boolean;
+    pForm: TCustomForm;
   begin
+    pForm := GetParentForm(Self);
+    if pForm <> nil then
+    begin
+      if pForm.KeyPreview and TPForm(pForm).DoKeyDown(Msg) then
+        Exit;
+    end;
+
     GridUsedIt := false;
     GridReply := otkDontCare;
     if (CellOwner <> nil) then
