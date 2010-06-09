@@ -59,19 +59,15 @@ type
   public
     procedure Clear;
     constructor Create;
-    destructor Destroy;
-      override;
+    destructor Destroy; override;
 
-    procedure NewItem(const Item : string; Obj : TObject);
+    procedure NewItem(const Item: string; Obj: TObject);
     procedure Shrink;
-    function RemoveItem(const Item : string) : Boolean;
+    function RemoveItem(const Item: string): Boolean;
 
-    property Items : TStrings
-      read FList;
+    property Items: TStrings read FList;
 
-    property MaxItems : Integer
-      read FMaxItems
-      write SetMaxItems;
+    property MaxItems: Integer read FMaxItems write SetMaxItems;
   end;
 
 const
@@ -84,21 +80,12 @@ type
   protected {private}
     FHighlight : TColor;
     FShadow    : TColor;
-
   public
-    constructor Create;
-      virtual;
-
+    constructor Create; virtual;
   published
-    property Highlight : TColor
-      read FHighlight
-      write FHighlight
+    property Highlight: TColor read FHighlight write FHighlight
       default clBtnHighlight;
-
-    property Shadow : TColor
-      read FShadow
-      write FShadow
-      default clBtnShadow;
+    property Shadow: TColor read FShadow write FShadow default clBtnShadow;
   end;
 
   TOvcBaseComboBox = class(TCustomComboBox)
@@ -223,32 +210,22 @@ type
       ComboWnd: TOvcHWnd{HWnd}; ComboProc: Pointer);
       {$IFDEF CBuilder} reintroduce; {$ELSE} override; {$ENDIF}
 
-    procedure CreateParams(var Params : TCreateParams);
-      override;
-    procedure CreateWnd;
-      override;
-    procedure DestroyWnd;
-      override;
-    procedure DoOnMouseWheel(Shift : TShiftState;
-                              Delta, XPos, YPos : SmallInt);
-      dynamic;
-    procedure DoExit;
-      override;
-    procedure DrawItem(Index : Integer; ItemRect : TRect; State : TOwnerDrawState);
-      override;
-    procedure KeyDown(var Key : Word; Shift: TShiftState);
-      override;
-    procedure Loaded;
-      override;
-    procedure MeasureItem(Index : Integer; var IHeight : Integer);
-      override;
-    procedure Notification(AComponent : TComponent; Operation : TOperation);
-      override;
-    procedure WndProc(var Message: TMessage);
-      override;
+    procedure CreateParams(var Params: TCreateParams); override;
+    procedure CreateWnd; override;
+    procedure DestroyWnd; override;
+    procedure DoOnMouseWheel(Shift: TShiftState;
+      Delta, XPos, YPos: SmallInt); dynamic;
+    procedure DoExit; override;
+    procedure DrawItem(Index: Integer; ItemRect: TRect;
+      State: TOwnerDrawState); override;
+    procedure KeyDown(var Key: Word; Shift: TShiftState); override;
+    procedure Loaded; override;
+    procedure MeasureItem(Index: Integer; var IHeight: Integer); override;
+    procedure Notification(AComponent: TComponent;
+      Operation: TOperation); override;
+    procedure WndProc(var Message: TMessage); override;
 
-    procedure SelectionChanged;
-      virtual;
+    procedure SelectionChanged; virtual;
 
     procedure BorderChanged(ABorder : TObject);
     procedure Paint;
@@ -264,102 +241,56 @@ type
     procedure SetHTColors(Value : TOvcHTColors);
 
     {properties}
-    property About : string
-      read GetAbout write SetAbout stored False;
-    property AutoSearch : Boolean
-      read FAutoSearch write FAutoSearch
+    property About: string read GetAbout write SetAbout stored False;
+    property AutoSearch: Boolean read FAutoSearch write FAutoSearch
       default True;
-    property ItemHeight: Integer
-      read FItemHeight write SetItemHeight;
-    property KeyDelay : Integer
-      read FKeyDelay write SetKeyDelay
-      default 500;
-    property LabelInfo : TOvcLabelInfo
-      read FLabelInfo write FLabelInfo;
-    property MRUListColor: TColor
-      read FMRUListColor write FMRUListColor
+    property ItemHeight: Integer read FItemHeight write SetItemHeight;
+    property KeyDelay: Integer read FKeyDelay write SetKeyDelay default 500;
+    property LabelInfo: TOvcLabelInfo read FLabelInfo write FLabelInfo;
+    property MRUListColor: TColor read FMRUListColor write FMRUListColor
       default clWindow;
-    property MRUListCount : Integer
-      read FMRUListCount write SetMRUListCount
+    property MRUListCount: Integer read FMRUListCount write SetMRUListCount
       default 3;
-    property Style : TOvcComboStyle
-      read FStyle write SetOcbStyle;
+    property Style: TOvcComboStyle read FStyle write SetOcbStyle;
 
     {events}
-    property AfterEnter : TNotifyEvent
-      read FAfterEnter write FAfterEnter;
-    property AfterExit : TNotifyEvent
-      read FAfterExit write FAfterExit;
-
-    property OnMouseWheel : TMouseWheelEvent
-      read FOnMouseWheel write FOnMouseWheel;
-
-    property OnSelectionChange : TNotifyEvent
-      read FOnSelChange write FOnSelChange;
-
+    property AfterEnter: TNotifyEvent read FAfterEnter write FAfterEnter;
+    property AfterExit: TNotifyEvent read FAfterExit write FAfterExit;
+    property OnMouseWheel: TMouseWheelEvent read FOnMouseWheel
+      write FOnMouseWheel;
+    property OnSelectionChange: TNotifyEvent read FOnSelChange
+      write FOnSelChange;
   public
-    constructor Create(AOwner : TComponent);
-      override;
-    destructor Destroy;
-      override;
-    property DrawingEdit : Boolean
-      read FDrawingEdit;
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+    property DrawingEdit: Boolean read FDrawingEdit;
 
-    procedure SetBounds(ALeft, ATop, AWidth, AHeight: Integer);
-      override;
-    function  AddItem(const Item : string;
-                      AObject : TObject) : Integer;
-                      {$IFDEF VERSION4}reintroduce;{$ENDIF}
+    procedure SetBounds(ALeft, ATop, AWidth, AHeight: Integer); override;
+    function AddItem(const Item: string; AObject: TObject): Integer;
+      {$IFDEF VERSION4}reintroduce; {$ENDIF}
     procedure AssignItems(Source: TPersistent);
     procedure ClearItems;
-    procedure InsertItem(Index : Integer; const Item : string;
-      AObject: TObject);
-    procedure RemoveItem(const Item : string);
+    procedure InsertItem(Index: Integer; const Item: string; AObject: TObject);
+    procedure RemoveItem(const Item: string);
 
     procedure ClearMRUList;
     procedure ForceItemsToMRUList(Value: Integer);
-
-    property AttachedLabel : TOvcAttachedLabel
-      read GetAttachedLabel;
-
-    property DroppedWidth : Integer
-      read FDroppedWidth
-      write SetDroppedWidth
-        default -1;
-
-    property HotTrack : Boolean
-      read FHotTrack
-      write SetHotTrack
-      default False;
-
-    property List: TStrings
-      read GetList;
-
-    property ListIndex: Integer
-      read GetListIndex write SetListIndex;
-
-    property MRUList: TStrings
-      read GetMRUList;
-
-    property StandardHomeEnd : Boolean
-      read FStandardHomeEnd write SetStandardHomeEnd;
-
+    property AttachedLabel: TOvcAttachedLabel read GetAttachedLabel;
+    property DroppedWidth: Integer read FDroppedWidth write SetDroppedWidth
+      default -1;
+    property HotTrack: Boolean read FHotTrack write SetHotTrack default False;
+    property List: TStrings read GetList;
+    property ListIndex: Integer read GetListIndex write SetListIndex;
+    property MRUList: TStrings read GetMRUList;
+    property StandardHomeEnd: Boolean read FStandardHomeEnd
+      write SetStandardHomeEnd;
   published
-    property Borders : TOvcBorders
-      read FBorders
-      write FBorders;
-
-    property HotTrackBorder : Boolean
-      read FHTBorder
-      write SetHTBorder
+    property Borders: TOvcBorders read FBorders write FBorders;
+    property HotTrackBorder: Boolean read FHTBorder write SetHTBorder
       default True;
-
-    property HotTrackColors : TOvcHTColors
-      read FHTColors
-      write SetHTColors;
+    property HotTrackColors: TOvcHTColors read FHTColors write SetHTColors;
     {$IFDEF VERSION6}
-    property AutoComplete
-      default False;
+    property AutoComplete default False;
     {$ENDIF}
   end;
 
@@ -977,7 +908,7 @@ begin
                                FMRUList.Items.Count - 1,
                                  LongInt(SrchText));
         finally
-          Dispose(SrchText); //FreeMem(SrchText, length(Text) + 1);
+          StrDispose(SrchText); //FreeMem(SrchText, length(Text) + 1);
         end;
         if Index > -1 then begin
           Text := Items[Index];
