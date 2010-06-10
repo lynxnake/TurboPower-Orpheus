@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{*    Sebastian Zierer (Windows Visual Styles)                                *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -246,6 +247,11 @@ type
 
 implementation
 
+{$IFDEF VERSION7}
+uses
+  Themes;
+{$ENDIF}
+
 {*** TOvcCheckList ***}
 
 procedure TOvcCheckList.ChangeStateForAll(NewState : TCheckBoxState);
@@ -387,6 +393,9 @@ var
   R  : TRect;
   NR : TRect;
   tmp: string;
+  {$IFDEF VERSION7}
+  ElementDetails: TThemedElementDetails;
+  {$ENDIF}
 begin
   NR := Classes.Rect(0, 0, Rect.Right - Rect.Left, Rect.Bottom - Rect.Top);
   clDrawBmp.Width  := NR.Right;
@@ -411,73 +420,114 @@ begin
   if {not} Odd(W) then
     Dec(W);
 
-  {draw the box}
-  if odGrayed in AState then
-    clDrawBmp.Canvas.Brush.Bitmap := clGrayBitmap
-  else begin
-    clDrawBmp.Canvas.Brush.Bitmap := nil;
-    clDrawBmp.Canvas.Brush.Color := FBoxColor;
+  {$IFDEF VERSION7}
+  if ThemeServices.ThemesEnabled then
+  begin
+    if odChecked in AState then
+    begin
+      if not (odDisabled in AState) then
+        ElementDetails := ThemeServices.GetElementDetails(tbCheckBoxCheckedNormal)
+      else
+        ElementDetails := ThemeServices.GetElementDetails(tbCheckBoxCheckedDisabled);
+    end
+    else
+    if odGrayed in AState then
+    begin
+      if not (odDisabled in AState) then
+        ElementDetails := ThemeServices.GetElementDetails(tbCheckBoxMixedNormal)
+      else
+        ElementDetails := ThemeServices.GetElementDetails(tbCheckBoxMixedDisabled);
+    end
+    else
+    begin
+      if not (odDisabled in AState) then
+        ElementDetails := ThemeServices.GetElementDetails(tbCheckBoxUncheckedNormal)
+      else
+        ElementDetails := ThemeServices.GetElementDetails(tbCheckBoxUncheckedDisabled)
+    end;
+
+    ThemeServices.DrawElement(clDrawBmp.Canvas.Handle, ElementDetails, Classes.Rect(NR.Left + M, NR.Top + M, NR.Left + M + W, NR.Top + M + W));
   end;
+  {$ENDIF}
+
+  {draw the box}
   X := NR.Left + M;
   Y := NR.Top + M;
-  clDrawBmp.Canvas.Pen.Color := RGB(192,204,216);
-  clDrawBmp.Canvas.Rectangle(X, Y, X+W, Y+W);
-  clDrawBmp.Canvas.Pen.Color := RGB(80,100,128);
-  clDrawBmp.Canvas.PolyLine([Point(X,     Y+W-2),
-                             Point(X,     Y),
-                             Point(X+W-1, Y)]);
-  clDrawBmp.Canvas.Pen.Color := clBlack;
-  clDrawBmp.Canvas.PolyLine([Point(X+1,   Y+W-3),
-                             Point(X+1,   Y+1),
-                             Point(X+W-2, Y+1)]);
-  clDrawBmp.Canvas.Pen.Color := RGB(128,152,176);
-  clDrawBmp.Canvas.PolyLine([Point(X+1,   Y+W-2),
-                             Point(X+W-2, Y+W-2),
-                             Point(X+W-2, Y)]);
+  {$IFDEF VERSION7}
+  if not ThemeServices.ThemesEnabled then
+  {$ENDIF}
+  begin
+    if odGrayed in AState then
+      clDrawBmp.Canvas.Brush.Bitmap := clGrayBitmap
+    else begin
+      clDrawBmp.Canvas.Brush.Bitmap := nil;
+      clDrawBmp.Canvas.Brush.Color := FBoxColor;
+    end;
+    clDrawBmp.Canvas.Pen.Color := RGB(192,204,216);
+    clDrawBmp.Canvas.Rectangle(X, Y, X+W, Y+W);
+    clDrawBmp.Canvas.Pen.Color := RGB(80,100,128);
+    clDrawBmp.Canvas.PolyLine([Point(X,     Y+W-2),
+                               Point(X,     Y),
+                               Point(X+W-1, Y)]);
+    clDrawBmp.Canvas.Pen.Color := clBlack;
+    clDrawBmp.Canvas.PolyLine([Point(X+1,   Y+W-3),
+                               Point(X+1,   Y+1),
+                               Point(X+W-2, Y+1)]);
+    clDrawBmp.Canvas.Pen.Color := RGB(128,152,176);
+    clDrawBmp.Canvas.PolyLine([Point(X+1,   Y+W-2),
+                               Point(X+W-2, Y+W-2),
+                               Point(X+W-2, Y)]);
+  end;
 
   { Let the owner draw the check mark }
-  if Assigned(FOwnerDrawCheck) then begin
-    R := Classes.Rect(X + 3, Y + 3, X + W - 3, Y + W - 3);
-    FOwnerDrawCheck(self, clDrawBmp.Canvas, R, AState, CheckStyle);
-  end else begin
-    { draw the check mark or the X }
-    clDrawBmp.Canvas.Pen.Color := CheckColor;
-    if (odChecked in AState) or (odGrayed in AState) then begin
-      R := Classes.Rect(X+3, Y+3, X+W-3, Y+W-3);
-      case CheckStyle of
-        csX : with clDrawBmp.Canvas do begin
-        {X}
-          MoveTo(R.Left, R.Top);
-          LineTo(R.Right, R.Bottom);
-          MoveTo(R.Left, R.Top+1);
-          LineTo(R.Right-1, R.Bottom);
-          MoveTo(R.Left+1, R.Top);
-          LineTo(R.Right, R.Bottom-1);
-          MoveTo(R.Left, R.Bottom-1);
-          LineTo(R.Right, R.Top-1);
-          MoveTo(R.Left, R.Bottom-2);
-          LineTo(R.Right-1, R.Top-1);
-          MoveTo(R.Left+1, R.Bottom-1);
-          LineTo(R.Right, R.Top);
-        end;
-        csCheck : with clDrawBmp.Canvas do begin
-        {check}
-          MoveTo(R.Left, R.Bottom-5);
-          LineTo(R.Left+3, R.Bottom-2);
-          MoveTo(R.Left, R.Bottom-4);
-          LineTo(R.Left+3, R.Bottom-1);
-          MoveTo(R.Left, R.Bottom-3);
-          LineTo(R.Left+3, R.Bottom);
-          MoveTo(R.Left+2, R.Bottom-3);
-          LineTo(R.Right,  R.Top-1);
-          MoveTo(R.Left+2, R.Bottom-2);
-          LineTo(R.Right,  R.Top);
-          MoveTo(R.Left+2, R.Bottom-1);
-          LineTo(R.Right,  R.Top+1);
+  {$IFDEF VERSION7}
+  if not ThemeServices.ThemesEnabled then
+  {$ENDIF}
+  begin
+    if Assigned(FOwnerDrawCheck) then begin
+      R := Classes.Rect(X + 3, Y + 3, X + W - 3, Y + W - 3);
+      FOwnerDrawCheck(self, clDrawBmp.Canvas, R, AState, CheckStyle);
+    end else begin
+      { draw the check mark or the X }
+      clDrawBmp.Canvas.Pen.Color := CheckColor;
+      if (odChecked in AState) or (odGrayed in AState) then begin
+        R := Classes.Rect(X+3, Y+3, X+W-3, Y+W-3);
+        case CheckStyle of
+          csX : with clDrawBmp.Canvas do begin
+          {X}
+            MoveTo(R.Left, R.Top);
+            LineTo(R.Right, R.Bottom);
+            MoveTo(R.Left, R.Top+1);
+            LineTo(R.Right-1, R.Bottom);
+            MoveTo(R.Left+1, R.Top);
+            LineTo(R.Right, R.Bottom-1);
+            MoveTo(R.Left, R.Bottom-1);
+            LineTo(R.Right, R.Top-1);
+            MoveTo(R.Left, R.Bottom-2);
+            LineTo(R.Right-1, R.Top-1);
+            MoveTo(R.Left+1, R.Bottom-1);
+            LineTo(R.Right, R.Top);
+          end;
+          csCheck : with clDrawBmp.Canvas do begin
+          {check}
+            MoveTo(R.Left, R.Bottom-5);
+            LineTo(R.Left+3, R.Bottom-2);
+            MoveTo(R.Left, R.Bottom-4);
+            LineTo(R.Left+3, R.Bottom-1);
+            MoveTo(R.Left, R.Bottom-3);
+            LineTo(R.Left+3, R.Bottom);
+            MoveTo(R.Left+2, R.Bottom-3);
+            LineTo(R.Right,  R.Top-1);
+            MoveTo(R.Left+2, R.Bottom-2);
+            LineTo(R.Right,  R.Top);
+            MoveTo(R.Left+2, R.Bottom-1);
+            LineTo(R.Right,  R.Top+1);
+          end;
         end;
       end;
-    end;
-  end; { if OwnerDrawCheck }
+    end; { if OwnerDrawCheck }
+  end;
+
 
   {draw glyphs if enabled}
   if FShowGlyphs and (Glyphs <> nil) and (Index < FGlyphIndex.Count) then begin
@@ -501,7 +551,9 @@ begin
     clDrawBmp.Canvas.Brush.Color := Color;
   clDrawBmp.Canvas.Pen.Color := Font.Color;
   tmp := Items[Index];
-  ExtTextOut(clDrawBmp.Canvas.Handle, NR.Left + M + W + M, Y, ETO_CLIPPED,
+  if odDisabled in AState then // SZ text should be grayed if item is disabled
+    clDrawBmp.Canvas.Font.Color := clGrayText;
+  ExtTextOut(clDrawBmp.Canvas.Handle, NR.Left + M + W + M + 1, Y, ETO_CLIPPED,
     @NR, PChar(tmp), Length(tmp), nil);
 
   {draw the focus rect}
