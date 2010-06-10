@@ -250,6 +250,8 @@ type
     procedure CloseUp; override;
     procedure CNCtlcoloredit(var Message: TMessage); message CN_CTLCOLOREDIT;
     procedure WMSize(var Message: TMessage); message WM_SIZE;
+    procedure CMEnabledchanged(var Message: TMessage);
+      message CM_ENABLEDCHANGED;
 
     {properties}
     property About: string read GetAbout write SetAbout stored False;
@@ -689,6 +691,15 @@ begin
     FIsHot := False;
     Invalidate;
   end;
+end;
+
+procedure TOvcBaseComboBox.CMEnabledchanged(var Message: TMessage);
+begin
+  inherited;
+  if Enabled then
+    StartAnimation(CBRO_NORMAL)
+  else
+    StartAnimation(CBRO_DISABLED);
 end;
 
 procedure TOvcBaseComboBox.CMFontChanged(var Message: TMessage);
@@ -1730,7 +1741,6 @@ begin
 
   ThemeServices.DrawParentBackground(Handle, DC, Details, True, @R);
   ThemeServices.DrawElement(DC, Details, ClientRect);
-//  GetThemeBackgroundContentRect(ThemeServices.Theme[teComboBox], DC, CP_READONLY, State, ClientRect, @R);
   R := pcbi.rcItem;
   Inc(R.Left, 1);
   Canvas.Font := Font;
@@ -1747,6 +1757,10 @@ begin
   // Draw dropdown arrow
   Details.Part := CP_DROPDOWNBUTTONRIGHT;
   Details.State := 0;
+  if Enabled then
+    Details.State := 0
+  else
+    Details.State := CBRO_DISABLED;
   ThemeServices.DrawElement(DC, Details, pcbi.rcButton);
   {$ENDIF}
 end;
@@ -1789,7 +1803,7 @@ begin
   {$IFDEF VERSION2010}
   if UseRuntimeThemes then
   begin
-    if not DroppedDown then
+    if not DroppedDown and Enabled then
       StartAnimation(CBRO_NORMAL);
   end
   else
