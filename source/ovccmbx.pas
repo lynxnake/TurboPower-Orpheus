@@ -89,6 +89,9 @@ type
   end;
 
   TOvcBaseComboBox = class(TCustomComboBox)
+  private
+    // Vista runtime themes
+    FCurrentState, FNewState: Cardinal;
   protected {private}
     {property variables}
     FAutoSearch   : Boolean;
@@ -194,8 +197,8 @@ type
       message CM_VISIBLECHANGED;
     procedure CMFontChanged(var Message: TMessage);
       message CM_FONTCHANGED;
-    procedure CMMouseEnter (var Message : TMessage); message CM_MOUSEENTER;
-    procedure CMMouseLeave (var Message : TMessage); message CM_MOUSELEAVE;
+    procedure CMMouseEnter(var Message : TMessage); message CM_MOUSEENTER;
+    procedure CMMouseLeave(var Message : TMessage); message CM_MOUSELEAVE;
 
   protected
     {descendants can set the value of this variable after calling inherited }
@@ -239,6 +242,14 @@ type
 
     procedure SetHTBorder(Value : Boolean);
     procedure SetHTColors(Value : TOvcHTColors);
+
+    // Vista runtime themes
+    function UseRuntimeThemes: Boolean;
+    procedure PaintState(DC: HDC; State: Cardinal);
+    procedure StartAnimation(NewState: Cardinal);
+    procedure CloseUp; override;
+    procedure CNCtlcoloredit(var Message: TMessage); message CN_CTLCOLOREDIT;
+    procedure WMSize(var Message: TMessage); message WM_SIZE;
 
     {properties}
     property About: string read GetAbout write SetAbout stored False;
@@ -361,7 +372,7 @@ type
 implementation
 
 uses
-  OvcVer, OvcExcpt;
+  OvcVer, OvcExcpt {$IFDEF VERSION2010}, Themes, UxTheme, Math {$ENDIF};
 
 constructor TOvcHTColors.Create;
 begin
@@ -466,6 +477,12 @@ begin
   end;
 end;
 
+procedure TOvcBaseComboBox.CloseUp;
+begin
+  inherited;
+  StartAnimation(CBRO_NORMAL);
+end;
+
 { - added}
 procedure TOvcBaseComboBox.ForceItemsToMRUList(Value: Integer);
 var
@@ -489,9 +506,26 @@ begin
 end;
 
 procedure TOvcBaseComboBox.CNDrawItem(var Msg : TWMDrawItem);
+var
+  State: TOwnerDrawState;
 begin
   {gather flag information that Borland left out}
   FDrawingEdit := (ODS_COMBOBOXEDIT and Msg.DrawItemStruct.itemState) <> 0;
+
+  {$IFDEF VERSION2010}
+  //SZ do not let Delphi paint the focus rect if themes are enabled
+  if UseRuntimeThemes then
+    with Msg.DrawItemStruct^ do
+    begin
+      State := TOwnerDrawState(LoWord(itemState));
+      if (odComboBoxEdit in State) and (odFocused in State) then
+      begin
+        Exclude(State, odFocused);
+        itemState := itemState and not ODS_FOCUS;
+      end;
+    end;
+  {$ENDIF}
+
   inherited;
 end;
 
@@ -605,6 +639,11 @@ begin
   MRUListUpdate(FMRUList.Items.Count + 1);
 end;
 
+function TOvcBaseComboBox.UseRuntimeThemes: Boolean;
+begin
+  Result := ThemeServices.ThemesEnabled and CheckWin32Version(6, 0) {Vista} and (Style = ocsDropDownList);
+end;
+
 procedure TOvcBaseComboBox.MRUListUpdate(Count : Integer);
 var
   I,
@@ -699,7 +738,22 @@ begin
         Invalidate;
       end;
     end;
+
   inherited;
+
+  case Message.NotifyCode of
+    CBN_DROPDOWN: StartAnimation(CBRO_PRESSED); // must be done after DropDown event
+  end;
+end;
+
+procedure TOvcBaseComboBox.CNCtlcoloredit(var Message: TMessage);
+begin
+  {$IFDEF VERSION2010}
+  if UseRuntimeThemes then
+    Message.Result := GetStockObject(NULL_BRUSH)
+  else
+  {$ENDIF}
+    inherited;
 end;
 
 constructor TOvcBaseComboBox.Create(AOwner : TComponent);
@@ -826,6 +880,15 @@ var
   TxtItem    : string;
   BkMode     : Integer;
 begin
+  {$IFDEF VERSION2010}
+    if UseRuntimeThemes and (odComboBoxEdit in State) then
+    begin
+      Canvas.Brush.Color := clBlack;
+      Canvas.Handle;
+      Exit;
+    end;
+  {$ENDIF}
+
   with Canvas do begin
     if (FMRUList.Items.Count > 0) and (Index < FMRUList.Items.Count) then
       BkColor := FMRUListColor
@@ -859,6 +922,16 @@ begin
           Rectangle(Left-1, Top, Right+1, Bottom);
     end;
   end;
+
+  {$IFDEF VERSION2010}
+  // Set brush color so that DrawFocusRect has the correct colors
+  if UseRuntimeThemes then
+  begin
+    Canvas.Brush.Color := clBlack;
+    Canvas.Handle;
+    Exit;
+  end;
+  {$ENDIF}
 end;
 
 function TOvcBaseComboBox.GetAttachedLabel : TOvcAttachedLabel;
@@ -1259,7 +1332,7 @@ begin
   GetTextMetrics(DC, M);
   SelectObject(DC, F);
   ReleaseDC(0, DC);
-  SetItemHeight(M.tmHeight - 1);
+  SetItemHeight(M.tmHeight{ - 1}); //SZ 09.06.2010 removed "- 1" because "q" is cut off at bottom
 end;
 
 procedure TOvcBaseComboBox.SelectionChanged;
@@ -1317,6 +1390,14 @@ end;
 
 procedure TOvcBaseComboBox.SetHotTrack(Value : Boolean);
 begin
+  {$IFDEF VERSION2010}
+  if not (csDesigning in ComponentState) then
+  begin
+    if ThemeServices.ThemesEnabled then
+      Value := False;
+  end;
+  {$ENDIF}
+
   if FHotTrack <> Value then begin
     FHotTrack := Value;
     Invalidate;
@@ -1372,6 +1453,15 @@ begin
 end;
 
 
+
+procedure TOvcBaseComboBox.StartAnimation(NewState: Cardinal);
+begin
+  FNewState := NewState;
+  {$IFDEF VERSION2010}
+  if UseRuntimeThemes then
+    InvalidateRect(Handle, nil, True);
+  {$ENDIF}
+end;
 
 procedure TOvcBaseComboBox.SetAbout(const Value : string);
 begin
@@ -1437,6 +1527,20 @@ begin
   inherited;
 
   PostMessage(Handle, OM_AFTERENTER, 0, 0);
+  {$IFDEF VERSION2010}
+  if UseRuntimeThemes then
+    Invalidate;
+  {$ENDIf}
+end;
+
+procedure TOvcBaseComboBox.WMSize(var Message: TMessage);
+begin
+  {$IFDEF VERSION2010}
+  if UseRuntimeThemes then
+    BufferedPaintStopAllAnimations(Handle);
+  {$ENDIF}
+
+  inherited;
 end;
 
 procedure TOvcBaseComboBox.SetHTBorder(Value : Boolean);
@@ -1460,13 +1564,54 @@ end;
 
 { - Hdc changed to TOvcHdc for BCB Compatibility }
 procedure TOvcBaseComboBox.PaintWindow(DC : TOvcHDC{Hdc});
+{$IFDEF VERSION2010}
+var
+  animParams: BP_ANIMATIONPARAMS;
+  rc: TRect;
+  hbpAnimation: HANIMATIONBUFFER;
+  hdcFrom, hdcTo: HDC;
+{$ENDIF}
 begin
-  inherited PaintWindow(DC);
-  Canvas.Handle := DC;
-  try
-    PaintBorders;
-  finally
-    Canvas.Handle := 0;
+  {$IFDEF VERSION2010}
+  if UseRuntimeThemes then
+  begin
+    TControlCanvas(Canvas).UpdateTextFlags;
+
+    // See if this paint was generated by a soft-fade animation
+    if not BufferedPaintRenderAnimation(Handle, Canvas.Handle) then
+    begin
+        FillChar(animParams, sizeof(animParams), 0);
+        animParams.cbSize := sizeof(BP_ANIMATIONPARAMS);
+        animParams.style := BPAS_LINEAR;
+
+        GetThemeTransitionDuration(ThemeServices.Theme[teComboBox], CP_READONLY, FCurrentState,
+                                       FNewState, TMT_TRANSITIONDURATIONS, animParams.dwDuration);
+
+        RC := ClientRect;
+
+        hbpAnimation := BeginBufferedAnimation(Handle, DC {Canvas.Handle}, rc, BPBF_COMPATIBLEBITMAP, nil, &animParams, &hdcFrom, &hdcTo);
+        if hbpAnimation <> 0 then
+        begin
+          if hdcFrom <> 0 then
+            PaintState(hdcFrom, FCurrentState);
+          if hdcTo <> 0 then
+            PaintState(hdcTo, FNewState);
+
+          FCurrentState := FNewState;
+          EndBufferedAnimation(hbpAnimation, TRUE);
+        end;
+    end;
+  end
+  else
+  {$ENDIF}
+  begin
+    inherited PaintWindow(DC);
+    Canvas.Handle := DC;
+    try
+      PaintBorders;
+    finally
+      Canvas.Handle := 0;
+    end;
   end;
 end;
 
@@ -1479,7 +1624,11 @@ end;
 
 procedure TOvcBaseComboBox.WMPaint(var Msg : TWMPaint);
 begin
-  PaintHandler(Msg);
+  // SZ inherited calls PaintHandler if csCustomPaint is set
+  // PaintHandler(Msg);
+  ControlState := ControlState + [csCustomPaint];
+  inherited;
+  ControlState := ControlState - [csCustomPaint];
 end;
 
 procedure TOvcBaseComboBox.PaintBorders;
@@ -1559,6 +1708,49 @@ begin
   end;
 end;
 
+procedure TOvcBaseComboBox.PaintState(DC: HDC; State: Cardinal);
+{$IFDEF VERSION2010}
+var
+  Details: TThemedElementDetails;
+  R: TRect;
+  S: string;
+  Original: HGDIOBJ;
+  pcbi: TComboBoxInfo;
+{$ENDIF}
+begin
+  {$IFDEF VERSION2010}
+  Details.Element := teComboBox;
+  Details.Part := CP_READONLY;
+  Details.State := State;
+  R := ClientRect;
+
+  FillChar(pcbi, SizeOf(pcbi), 0);
+  pcbi.cbSize := SizeOf(pcbi);
+  GetComboBoxInfo(Handle, pcbi);
+
+  ThemeServices.DrawParentBackground(Handle, DC, Details, True, @R);
+  ThemeServices.DrawElement(DC, Details, ClientRect);
+//  GetThemeBackgroundContentRect(ThemeServices.Theme[teComboBox], DC, CP_READONLY, State, ClientRect, @R);
+  R := pcbi.rcItem;
+  Inc(R.Left, 1);
+  Canvas.Font := Font;
+  if InRange(ItemIndex, 0, Items.Count - 1) then
+    S := Items[ItemIndex]
+  else
+    S := '';
+  Original := SelectObject(DC, Font.Handle);
+  ThemeServices.DrawText(DC, Details, S, R, DT_VCENTER or DT_SINGLELINE, 0);
+  SelectObject(DC, Original);
+
+  if Focused and not DroppedDown then
+    DrawFocusRect(DC, pcbi.rcItem);
+  // Draw dropdown arrow
+  Details.Part := CP_DROPDOWNBUTTONRIGHT;
+  Details.State := 0;
+  ThemeServices.DrawElement(DC, Details, pcbi.rcButton);
+  {$ENDIF}
+end;
+
 procedure TOvcBaseComboBox.BorderChanged(ABorder : TObject);
 begin
   if (FBorders.BottomBorder.Enabled) or
@@ -1580,6 +1772,12 @@ end;
 
 procedure TOvcBaseComboBox.CMMouseEnter(var Message: TMessage);
 begin
+  {$IFDEF VERSION2010}
+  if UseRuntimeThemes then
+    StartAnimation(CBRO_HOT)
+  else
+  {$ENDIF}
+
   if not FIsHot and HotTrack then begin
     FIsHot := True;
     Invalidate;
@@ -1588,6 +1786,15 @@ end;
 
 procedure TOvcBaseComboBox.CMMouseLeave(var Message: TMessage);
 begin
+  {$IFDEF VERSION2010}
+  if UseRuntimeThemes then
+  begin
+    if not DroppedDown then
+      StartAnimation(CBRO_NORMAL);
+  end
+  else
+  {$ENDIF}
+
   if FIsHot and HotTrack then begin
     FIsHot := False;
     Invalidate;
