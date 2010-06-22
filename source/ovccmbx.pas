@@ -42,7 +42,8 @@ interface
 
 uses
   Windows, SysUtils, Messages, Classes, Graphics, Controls, Forms, StdCtrls,
-  Buttons, OvcBase, OvcConst, OvcData, OvcMisc, OvcBordr, OvcTimer;
+  Buttons, OvcBase, OvcConst, OvcData, OvcMisc, OvcBordr, OvcTimer
+  {$IFDEF VERSION2010}, Themes{$ENDIF};
 
 type
   {this class implements a stack for keeping track of
@@ -90,8 +91,9 @@ type
 
   TOvcBaseComboBox = class(TCustomComboBox)
   private
-    // Vista runtime themes
+    // Vista visual styles
     FCurrentState, FNewState: Cardinal;
+    FBufferedPaintInitialized: Boolean;
   protected {private}
     {property variables}
     FAutoSearch   : Boolean;
@@ -243,7 +245,7 @@ type
     procedure SetHTBorder(Value : Boolean);
     procedure SetHTColors(Value : TOvcHTColors);
 
-    // Vista runtime themes
+    // Vista visual styles
     function UseRuntimeThemes: Boolean;
     procedure PaintState(DC: HDC; State: Cardinal);
     procedure StartAnimation(NewState: Cardinal);
@@ -252,6 +254,7 @@ type
     procedure WMSize(var Message: TMessage); message WM_SIZE;
     procedure CMEnabledchanged(var Message: TMessage);
       message CM_ENABLEDCHANGED;
+    procedure DrawItemThemed(DC: HDC; Details: TThemedElementDetails; Index: Integer; Rect: TRect); virtual;
 
     {properties}
     property About: string read GetAbout write SetAbout stored False;
@@ -374,7 +377,7 @@ type
 implementation
 
 uses
-  OvcVer, OvcExcpt {$IFDEF VERSION2010}, Themes, UxTheme, Math {$ENDIF};
+  OvcVer, OvcExcpt {$IFDEF VERSION2010}, UxTheme, Math {$ENDIF};
 
 constructor TOvcHTColors.Create;
 begin
@@ -771,6 +774,11 @@ constructor TOvcBaseComboBox.Create(AOwner : TComponent);
 begin
   inherited Create(AOwner);
 
+  {$IFDEF VERSION2010}
+  if CheckWin32Version(6, 0) then
+    FBufferedPaintInitialized := Succeeded(BufferedPaintInit);
+  {$ENDIF}
+
   {$IFDEF VERSION6}
   AutoComplete := false;
   {$ENDIF}
@@ -858,6 +866,11 @@ begin
   FHTColors.Free;
   FHTColors := nil;
 
+  {$IFDEF VERSION2010}
+  if FBufferedPaintInitialized then
+    BufferedPaintUnInit;
+  {$ENDIF}
+
   inherited Destroy;
 end;
 
@@ -943,6 +956,19 @@ begin
     Exit;
   end;
   {$ENDIF}
+end;
+
+procedure TOvcBaseComboBox.DrawItemThemed(DC: HDC;
+  Details: TThemedElementDetails; Index: Integer; Rect: TRect);
+var
+  S: string;
+begin
+  if InRange(ItemIndex, 0, Items.Count - 1) then
+    S := Items[ItemIndex]
+  else
+    S := '';
+
+  ThemeServices.DrawText(DC, Details, S, Rect, DT_VCENTER or DT_SINGLELINE, 0);
 end;
 
 function TOvcBaseComboBox.GetAttachedLabel : TOvcAttachedLabel;
@@ -1744,12 +1770,9 @@ begin
   R := pcbi.rcItem;
   Inc(R.Left, 1);
   Canvas.Font := Font;
-  if InRange(ItemIndex, 0, Items.Count - 1) then
-    S := Items[ItemIndex]
-  else
-    S := '';
   Original := SelectObject(DC, Font.Handle);
-  ThemeServices.DrawText(DC, Details, S, R, DT_VCENTER or DT_SINGLELINE, 0);
+  DrawItemThemed(DC, Details, ItemIndex, R);
+//  ThemeServices.DrawText(DC, Details, S, R, DT_VCENTER or DT_SINGLELINE, 0);
   SelectObject(DC, Original);
 
   if Focused and not DroppedDown then

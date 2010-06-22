@@ -42,7 +42,7 @@ interface
 
 uses
   Windows, Classes, Controls, Forms, Graphics, Menus, Messages, StdCtrls,
-  OvcCmbx, OvcConst, OvcData;
+  OvcCmbx, OvcConst, OvcData {$IFDEF VERSION2010}, Themes{$ENDIF};
 
 type
   TOvcCustomColorComboBox = class(TOvcBaseComboBox)
@@ -77,6 +77,8 @@ type
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
     procedure DrawItem(Index : Integer; Rect : TRect; State : TOwnerDrawState);
+      override;
+    procedure DrawItemThemed(DC: HDC; Details: TThemedElementDetails; Index: Integer; Rect: TRect);
       override;
     procedure SetBounds(ALeft, ATop, AWidth, AHeight : Integer);
       override;
@@ -139,6 +141,9 @@ type
   end;
 
 implementation
+
+uses
+  SysUtils;
 
 procedure TOvcCustomColorComboBox.CalculateBoxWidth;
 var
@@ -234,6 +239,15 @@ var
   BC : TColor;
   S  : string;
 begin
+  // Done in DrawItem Themed if visual styles are enabled (otherwise flashing white rectangle when switching focus to another control)
+  if ThemeServices.ThemesEnabled and CheckWin32Version(6, 0) and (odComboBoxEdit in State) then
+  begin
+    Canvas.Pen.Color := clBlack;
+    Canvas.Brush.Color := clWhite;
+    Canvas.Handle;
+    Exit;
+  end;
+
   {get selected color and text to display}
   if Index > -1 then begin
     S := Items[Index];
@@ -263,6 +277,61 @@ begin
   Canvas.Brush.Color := BC;
   Canvas.Rectangle(ClientWidth - BoxWidth, Rect.Top + 1, Rect.Right -1,
     Rect.Bottom - 1);
+
+  // Set the color for the focus rect (drawn by CNDrawItem)
+  Canvas.Pen.Color := clBlack;
+  Canvas.Brush.Color := clWhite;
+  Canvas.Handle;
+end;
+
+procedure TOvcCustomColorComboBox.DrawItemThemed(DC: HDC;
+  Details: TThemedElementDetails; Index: Integer; Rect: TRect);
+var
+  BC : TColor;
+  S  : string;
+  Canvas: TCanvas;
+begin
+  Canvas := TCanvas.Create;
+  try
+    Canvas.Handle := DC;
+    {get selected color and text to display}
+    if Index > -1 then begin
+      S := Items[Index];
+      BC := ColorFromString(S);
+    end else begin
+      S := GetOrphStr(SCColorBlack);
+      BC := clBlack;
+    end;
+
+    CalculateBoxWidth;
+
+    Canvas.Font.Color := Font.Color;
+    Canvas.Brush.Color := Color;
+
+    if FShowColorNames then begin
+      Canvas.Pen.Color := Canvas.Brush.Color;
+      Canvas.Brush.Style := bsClear;
+//      Canvas.Rectangle(Rect.Left, Rect.Top, Rect.Right, Rect.Bottom);
+//      Inc(Rect.Left);
+  {$IFDEF UNICODE}
+      DrawText(Canvas.Handle, S, Length(S), Rect, DT_LEFT or DT_VCENTER or DT_SINGLELINE);
+  {$ELSE}
+      DrawText(Canvas.Handle, PAnsiChar(S), Length(S), Rect, DT_LEFT or DT_VCENTER or DT_SINGLELINE);
+  {$ENDIF}
+    end;
+
+    Canvas.Pen.Color := Font.Color;
+    Canvas.Brush.Color := BC;
+    Canvas.Rectangle(ClientWidth - BoxWidth, Rect.Top + 1, Rect.Right -1,
+      Rect.Bottom - 1);
+
+    // Set the color for the focus rect (drawn by CNDrawItem)
+    Canvas.Pen.Color := clBlack;
+    Canvas.Brush.Color := clWhite;
+    Canvas.Handle;
+  finally
+    Canvas.Free;
+  end;
 end;
 
 function TOvcCustomColorComboBox.GetSelectedColor : TColor;
