@@ -1762,7 +1762,6 @@ procedure TOvcBaseComboBox.PaintState(DC: HDC; State: Cardinal);
 var
   Details: TThemedElementDetails;
   R: TRect;
-  S: string;
   Original: HGDIOBJ;
   pcbi: TComboBoxInfo;
 {$ENDIF}
