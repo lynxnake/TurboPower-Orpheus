@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{* Roman Kassebaum (D2007 support)                                            *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -947,7 +948,7 @@ begin
         {paint the string}
         Canvas.FillRect(CR);
         ExtTextOut(Canvas.Handle, Left, Y, ETO_CLIPPED,
-                   @CR, string(P), StrLen(P), nil);
+                   @CR, {$IFDEF UNICODE}string(P){$ELSE}P{$ENDIF}, StrLen(P), nil);
 
         {restore colors for active items}
         if I = ActiveRow then begin

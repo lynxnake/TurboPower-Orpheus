@@ -24,6 +24,7 @@
 {*                                                                            *}
 {* Contributor(s):                                                            *}
 {*   Sebastian Zierer (Visual Styles)                                         *}
+{*   Roman Kassebaum  (D2007 support)                                         *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -2406,7 +2407,7 @@ var
   end;
 
 begin
-  {$IFDEF VERSION7}
+  {$IFDEF VERSION2010}
   if ThemeServices.ThemesEnabled then
   begin
     CR := ClientRect;
@@ -3471,7 +3472,7 @@ var
   end;
 
 begin
-  {$IFDEF VERSION7}
+  {$IFDEF VERSION2010}
   if ThemeServices.ThemesEnabled then
   begin
     CR := ClientRect;

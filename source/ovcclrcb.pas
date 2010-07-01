@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{* Roman Kassebaum   (D2007 support)                                          *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -78,10 +79,8 @@ type
     destructor Destroy; override;
     procedure DrawItem(Index : Integer; Rect : TRect; State : TOwnerDrawState);
       override;
-    procedure DrawItemThemed(DC: HDC; Details: TThemedElementDetails; Index: Integer; Rect: TRect);
-      override;
-    procedure SetBounds(ALeft, ATop, AWidth, AHeight : Integer);
-      override;
+{$IFDEF VERSION2010}procedure DrawItemThemed(DC: HDC; Details: TThemedElementDetails; Index: Integer; Rect: TRect); override;{$ENDIF}
+    procedure SetBounds(ALeft, ATop, AWidth, AHeight : Integer); override;
   end;
 
   TOvcColorComboBox = class(TOvcCustomColorComboBox)
@@ -240,6 +239,7 @@ var
   S  : string;
 begin
   // Done in DrawItem Themed if visual styles are enabled (otherwise flashing white rectangle when switching focus to another control)
+{$IFDEF VERSION2010}
   if ThemeServices.ThemesEnabled and CheckWin32Version(6, 0) and (odComboBoxEdit in State) then
   begin
     Canvas.Pen.Color := clBlack;
@@ -247,6 +247,7 @@ begin
     Canvas.Handle;
     Exit;
   end;
+{$ENDIF}  
 
   {get selected color and text to display}
   if Index > -1 then begin
@@ -284,7 +285,7 @@ begin
   Canvas.Handle;
 end;
 
-procedure TOvcCustomColorComboBox.DrawItemThemed(DC: HDC;
+{$IFDEF VERSION2010}procedure TOvcCustomColorComboBox.DrawItemThemed(DC: HDC;
   Details: TThemedElementDetails; Index: Integer; Rect: TRect);
 var
   BC : TColor;
@@ -332,7 +333,7 @@ begin
   finally
     Canvas.Free;
   end;
-end;
+end;{$ENDIF}
 
 function TOvcCustomColorComboBox.GetSelectedColor : TColor;
 begin

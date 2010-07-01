@@ -24,6 +24,7 @@
 {*                                                                            *}
 {* Contributor(s):                                                            *}
 {*    Sebastian Zierer (Unicode Version)                                      *}
+{*    Roman Kassebaum  (D2007 support)                                        *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -92,8 +93,9 @@ type
   TOvcBaseComboBox = class(TCustomComboBox)
   private
     // Vista visual styles
-    FCurrentState, FNewState: Cardinal;
-    FBufferedPaintInitialized: Boolean;
+{$IFDEF VERSION2010}FCurrentState: Cardinal;{$ENDIF}
+    FNewState: Cardinal;
+{$IFDEF VERSION2010}FBufferedPaintInitialized: Boolean;{$ENDIF}
   protected {private}
     {property variables}
     FAutoSearch   : Boolean;
@@ -254,7 +256,7 @@ type
     procedure WMSize(var Message: TMessage); message WM_SIZE;
     procedure CMEnabledchanged(var Message: TMessage);
       message CM_ENABLEDCHANGED;
-    procedure DrawItemThemed(DC: HDC; Details: TThemedElementDetails; Index: Integer; Rect: TRect); virtual;
+{$IFDEF VERSION2010}procedure DrawItemThemed(DC: HDC; Details: TThemedElementDetails; Index: Integer; Rect: TRect); virtual;{$ENDIF}
 
     {properties}
     property About: string read GetAbout write SetAbout stored False;
@@ -485,7 +487,7 @@ end;
 procedure TOvcBaseComboBox.CloseUp;
 begin
   inherited;
-  StartAnimation(CBRO_NORMAL);
+{$IFDEF VERSION2010}StartAnimation(CBRO_NORMAL);{$ENDIF}
 end;
 
 { - added}
@@ -511,8 +513,10 @@ begin
 end;
 
 procedure TOvcBaseComboBox.CNDrawItem(var Msg : TWMDrawItem);
+{$IFDEF VERSION2010}
 var
   State: TOwnerDrawState;
+{$ENDIF}  
 begin
   {gather flag information that Borland left out}
   FDrawingEdit := (ODS_COMBOBOXEDIT and Msg.DrawItemStruct.itemState) <> 0;
@@ -646,7 +650,11 @@ end;
 
 function TOvcBaseComboBox.UseRuntimeThemes: Boolean;
 begin
+{$IFDEF VERSION2010}
   Result := ThemeServices.ThemesEnabled and CheckWin32Version(6, 0) {Vista} and (Style = ocsDropDownList);
+{$ELSE}
+  Result := False;
+{$ENDIF}    
 end;
 
 procedure TOvcBaseComboBox.MRUListUpdate(Count : Integer);
@@ -699,10 +707,12 @@ end;
 procedure TOvcBaseComboBox.CMEnabledchanged(var Message: TMessage);
 begin
   inherited;
+{$IFDEF VERSION2010}
   if Enabled then
     StartAnimation(CBRO_NORMAL)
   else
     StartAnimation(CBRO_DISABLED);
+{$ENDIF}    
 end;
 
 procedure TOvcBaseComboBox.CMFontChanged(var Message: TMessage);
@@ -755,9 +765,11 @@ begin
 
   inherited;
 
+{$IFDEF VERSION2010}
   case Message.NotifyCode of
     CBN_DROPDOWN: StartAnimation(CBRO_PRESSED); // must be done after DropDown event
   end;
+{$ENDIF}  
 end;
 
 procedure TOvcBaseComboBox.CNCtlcoloredit(var Message: TMessage);
@@ -958,7 +970,7 @@ begin
   {$ENDIF}
 end;
 
-procedure TOvcBaseComboBox.DrawItemThemed(DC: HDC;
+{$IFDEF VERSION2010}procedure TOvcBaseComboBox.DrawItemThemed(DC: HDC;
   Details: TThemedElementDetails; Index: Integer; Rect: TRect);
 var
   S: string;
@@ -969,7 +981,7 @@ begin
     S := '';
 
   ThemeServices.DrawText(DC, Details, S, Rect, DT_VCENTER or DT_SINGLELINE, 0);
-end;
+end; {$ENDIF}
 
 function TOvcBaseComboBox.GetAttachedLabel : TOvcAttachedLabel;
 begin
