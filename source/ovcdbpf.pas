@@ -627,6 +627,9 @@ var
   F  : array[0..255] of Char; {used to compare old and new value}
   Pt : TPoint;
   TL : longint;
+  iCount: Integer;
+  sBuffer: string;
+  pBuffer: Pointer;
 begin
   if efdbBusy then
     Exit;
@@ -646,7 +649,11 @@ begin
                      S := AnsiString(Field.AsString);
                      if (S = '') and not (efoStripLiterals in Options) then begin
                        {new or empty field. create display string w/ literals}
-                       FillChar(F[0], MaxLength, ' ');
+                       //R.K. FillChar doesn't work under Unicode
+                       for iCount := Low(F) to High(F) do
+                         F[iCount] := ' ';
+//                       FillChar(F[0], MaxLength, ' ');
+
                        F[MaxLength{+1}] := #0;
                        pbInitPictureFlags;
                        pbMergePicture(F, F);
@@ -677,14 +684,22 @@ begin
     P := efHPos;
 
     {clear to insure match before transfer}
-    FillChar(F, SizeOf(F), 0);
+    //R.K. FillChar doenn't work under Unicode
+    for iCount := Low(F) to High(F) do
+      F[iCount] := #0;
+//    FillChar(F, SizeOf(F), 0);
 
     Include(sefOptions, sefNoUserValidate);
     efdbBusy := True;
     try
       {get copy of current field value}
-      Self.GetValue(F);
 
+      //R.K. GetValue expects a PString
+      sBuffer := F;
+      pBuffer := @sBuffer;
+      Self.GetValue(pBuffer);
+      StrPCopy(F, sBuffer);
+//      Self.GetValue(F);
 
       SS := efSelStart;
       SE := efSelEnd;
@@ -699,7 +714,13 @@ begin
         ftTime     : Self.AsDateTime := DT;
         ftDateTime : Self.AsDateTime := DT;
       else
-        Self.SetValue(S);
+        begin
+          //R.K. SetValue expects a PString
+          sBuffer := string(S);
+          pBuffer := @sBuffer;
+          Self.SetValue(pBuffer);
+          //Self.SetValue(S);
+        end;
       end;
 
       {restore modified states}

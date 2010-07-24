@@ -59,8 +59,8 @@ begin
     TProtectedIntlSub(pIntlSup).w1159 := 'AM';
     TProtectedIntlSub(pIntlSup).w2359 := 'PM';
 
-    CheckEquals(pIntlSup.InternationalTime(True), 'hh:mm:ss ttttt');
-    CheckEquals(pIntlSup.InternationalTime(False), 'hh:mm ttttt');
+    CheckEquals(pIntlSup.InternationalTime(True), 'hh:mm:ss tt');
+    CheckEquals(pIntlSup.InternationalTime(False), 'hh:mm tt');
   finally
     pIntlSup.Free;
   end;

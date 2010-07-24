@@ -4302,7 +4302,9 @@ begin
   Include(sefOptions, sefUpdating);
   try
     case efDataType mod fcpDivisor of
-      fsubString   : efTransfer(@string(Data), otf_SetData);
+      //R.K. efTransfer expetcs a PString
+      fsubString   : efTransfer(PString(Data), otf_SetData);
+//      fsubString   : efTransfer(@string(Data), otf_SetData);
       fsubChar     : efTransfer(@AnsiChar(Data), otf_SetData);
       fsubBoolean  : efTransfer(@Boolean(Data),  otf_SetData);
       fsubYesNo    : efTransfer(@Boolean(Data),  otf_SetData);
