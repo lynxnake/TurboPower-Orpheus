@@ -3203,10 +3203,12 @@ function TOvcBaseEntryField.GetAsString : string;
 var
   Buf : TEditString;
   S   : string;
+  pBuffer: PString;
 begin
   Result := '';
   if (efDataType mod fcpDivisor) = fsubString then begin
-    FLastError := GetValue(S);
+    pBuffer := @S;
+    FLastError := GetValue(pBuffer);
     if FLastError = 0 then
       Result := S;
   end else begin
@@ -3408,7 +3410,7 @@ begin
       Exit;
 
     case efDataType mod fcpDivisor of
-      fsubString   : efTransfer(@string(Data), otf_GetData);
+      fsubString   : efTransfer(PString(Data), otf_GetData);
       fsubChar     : efTransfer(@Char(Data), otf_GetData);
       fsubBoolean  : efTransfer(@Boolean(Data),  otf_GetData);
       fsubYesNo    : efTransfer(@Boolean(Data),  otf_GetData);

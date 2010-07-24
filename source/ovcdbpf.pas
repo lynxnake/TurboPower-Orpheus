@@ -493,6 +493,7 @@ var
   E  : Extended absolute S;
   DT : TDateTime absolute S;
   H  : TDateTime;
+  sBuffer: string;
 
   function FieldIsZero : Boolean;
   begin
@@ -520,6 +521,11 @@ begin
       ftDate,
       ftTime,
       ftDateTime : DT := Self.AsDateTime;
+      ftString:
+        begin
+          FLastError := Self.GetValue(sBuffer);
+          S := AnsiString(sBuffer);
+        end;
     else
       FLastError := Self.GetValue(S);
     end;
@@ -651,7 +657,7 @@ begin
                        {new or empty field. create display string w/ literals}
                        //R.K. FillChar doesn't work under Unicode
                        for iCount := Low(F) to High(F) do
-                         F[iCount] := ' ';
+                         F[iCount] := #0;
 //                       FillChar(F[0], MaxLength, ' ');
 
                        F[MaxLength{+1}] := #0;
@@ -684,7 +690,7 @@ begin
     P := efHPos;
 
     {clear to insure match before transfer}
-    //R.K. FillChar doenn't work under Unicode
+    //R.K. FillChar doesn't work under Unicode
     for iCount := Low(F) to High(F) do
       F[iCount] := #0;
 //    FillChar(F, SizeOf(F), 0);
@@ -695,11 +701,15 @@ begin
       {get copy of current field value}
 
       //R.K. GetValue expects a PString
-      sBuffer := F;
-      pBuffer := @sBuffer;
-      Self.GetValue(pBuffer);
-      StrPCopy(F, sBuffer);
-//      Self.GetValue(F);
+      if Field.DataType in [ftString {$IFDEF VERSION5}, ftWideString{$ENDIF}] then
+      begin
+        sBuffer := F;
+        pBuffer := @sBuffer;
+        Self.GetValue(pBuffer);
+        StrPCopy(F, sBuffer);
+      end
+      else
+        Self.GetValue(F);
 
       SS := efSelStart;
       SE := efSelEnd;
@@ -716,10 +726,14 @@ begin
       else
         begin
           //R.K. SetValue expects a PString
-          sBuffer := string(S);
-          pBuffer := @sBuffer;
-          Self.SetValue(pBuffer);
-          //Self.SetValue(S);
+          if Field.DataType in [ftString {$IFDEF VERSION5}, ftWideString{$ENDIF}] then
+          begin
+            sBuffer := string(S);
+            pBuffer := @sBuffer;
+            Self.SetValue(pBuffer);
+          end
+          else
+            Self.SetValue(S);
         end;
       end;
 
