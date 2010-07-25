@@ -659,7 +659,7 @@ begin
                        for iCount := 1 to Length(sNewValue) do
                          sNewValue := ' ';
                        pbInitPictureFlags;
-                       pbMergePicture(PWideChar(sNewValue), PWideChar(sNewValue));
+                       pbMergePicture(PChar(sNewValue), PChar(sNewValue));
                      end else if not (efoTrimBlanks in Options) and
                                  not (efoStripLiterals in Options) then
                        while Length(S) < MaxLength do
