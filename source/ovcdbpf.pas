@@ -493,7 +493,8 @@ var
   E  : Extended absolute S;
   DT : TDateTime absolute S;
   H  : TDateTime;
-  sBuffer: string;
+  sValue: string;
+  pBuffer: PString;
 
   function FieldIsZero : Boolean;
   begin
@@ -521,10 +522,10 @@ begin
       ftDate,
       ftTime,
       ftDateTime : DT := Self.AsDateTime;
-      ftString:
+      ftString{$IFDEF VERSION5}, ftWideString{$ENDIF}:
         begin
-          FLastError := Self.GetValue(sBuffer);
-          S := AnsiString(sBuffer);
+          pBuffer := @sValue;
+          FLastError := Self.GetValue(pBuffer);
         end;
     else
       FLastError := Self.GetValue(S);
@@ -540,11 +541,8 @@ begin
       Field.Clear
     else
       case Field.DataType of
-        ftString
-        {$IFDEF VERSION5}
-        , ftWideString
-        {$ENDIF}
-                     : Field.AsString  := string(S);
+        ftString{$IFDEF VERSION5}, ftWideString{$ENDIF}
+                     : Field.AsString  := sValue;
         ftSmallInt   : Field.AsInteger := I;
         ftInteger    : Field.AsInteger := L;
         ftWord       : Field.AsInteger := W;
@@ -634,7 +632,8 @@ var
   Pt : TPoint;
   TL : longint;
   iCount: Integer;
-  sBuffer: string;
+  sOldValue: string;
+  sNewValue: string;
   pBuffer: Pointer;
 begin
   if efdbBusy then
@@ -652,22 +651,19 @@ begin
       , ftWideString
       {$ENDIF}
                   : begin
-                     S := AnsiString(Field.AsString);
-                     if (S = '') and not (efoStripLiterals in Options) then begin
+                     sNewValue := Field.AsString;
+                     if (sNewValue = '') and not (efoStripLiterals in Options) then begin
                        {new or empty field. create display string w/ literals}
                        //R.K. FillChar doesn't work under Unicode
-                       for iCount := Low(F) to High(F) do
-                         F[iCount] := #0;
-//                       FillChar(F[0], MaxLength, ' ');
-
-                       F[MaxLength{+1}] := #0;
+                       SetLength(sNewValue, MaxLength);
+                       for iCount := 1 to Length(sNewValue) do
+                         sNewValue := ' ';
                        pbInitPictureFlags;
-                       pbMergePicture(F, F);
-                       S := AnsiString(StrPas(F));
+                       pbMergePicture(PWideChar(sNewValue), PWideChar(sNewValue));
                      end else if not (efoTrimBlanks in Options) and
                                  not (efoStripLiterals in Options) then
                        while Length(S) < MaxLength do
-                         S := S + ' ';
+                         sNewValue := sNewValue + ' ';
                    end;
       ftSmallInt : I := Field.AsInteger;
       ftInteger  : L := Field.AsInteger;
@@ -703,10 +699,8 @@ begin
       //R.K. GetValue expects a PString
       if Field.DataType in [ftString {$IFDEF VERSION5}, ftWideString{$ENDIF}] then
       begin
-        sBuffer := F;
-        pBuffer := @sBuffer;
+        pBuffer := @sOldValue;
         Self.GetValue(pBuffer);
-        StrPCopy(F, sBuffer);
       end
       else
         Self.GetValue(F);
@@ -728,8 +722,7 @@ begin
           //R.K. SetValue expects a PString
           if Field.DataType in [ftString {$IFDEF VERSION5}, ftWideString{$ENDIF}] then
           begin
-            sBuffer := string(S);
-            pBuffer := @sBuffer;
+            pBuffer := @sNewValue;
             Self.SetValue(pBuffer);
           end
           else
@@ -747,7 +740,12 @@ begin
     end;
 
     {if field value changed, call DoOnChange}
-    if (Field.DataType = ftDate) then begin
+    if Field.DataType in [ftString {$IFDEF VERSION5}, ftWideString{$ENDIF}] then
+    begin
+      if sNewValue <> sOldValue then
+        inherited DoOnChange;
+    end
+    else if (Field.DataType = ftDate) then begin
       Move(F, TL, SizeOf(Longint));
       if (DT <> StDateToDateTime(TStDate(TL))) then
         inherited DoOnChange;

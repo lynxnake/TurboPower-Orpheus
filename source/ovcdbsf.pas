@@ -535,6 +535,7 @@ var
   B : Boolean absolute S;
   E : Extended absolute S;
   T: string;
+  pBuffer: PString;
 
   function FieldIsZero : Boolean;
   begin
@@ -560,7 +561,11 @@ begin
   begin
     {get the entry field value}
     case FFieldType of
-      ftString{$IFDEF VERSION5}, ftWideString{$ENDIF}: FLastError := Self.GetValue(T);
+      ftString{$IFDEF VERSION5}, ftWideString{$ENDIF}:
+        begin
+          pBuffer := @T;
+          FLastError := Self.GetValue(pBuffer);
+        end;
       else FLastError := Self.GetValue(S);
     end;
 
@@ -636,7 +641,9 @@ var
   M  : Boolean;
   EM : Boolean;
   F  : array[0..255] of Byte; {used to compare old and new value}
-  T: string;
+  sNewValue: string;
+  sOldValue: string;
+  pBuffer: PString;
 begin
   if efdbBusy then
     Exit;
@@ -651,7 +658,7 @@ begin
       {$IFDEF VERSION5}
       , ftWideString
       {$ENDIF}
-                   : T := Field.AsString;
+                   : sNewValue := Field.AsString;
       ftSmallInt   : I := Field.AsInteger;
       ftInteger    : L := Field.AsInteger;
       ftWord       : W := Field.AsInteger;
@@ -660,7 +667,7 @@ begin
       ftCurrency   : E := Field.AsFloat;
       ftBCD        : E := Field.AsFloat;
     else
-      T := Field.AsString;
+      sNewValue := Field.AsString;
     end;
     P := efHPos;
 
@@ -668,7 +675,13 @@ begin
     efdbBusy := True;
     try
       {get copy of current field value}
-      Self.GetValue(F);
+      if FFieldType in [ftString {$IFDEF VERSION5}, ftWideString{$ENDIF}] then
+      begin
+        pBuffer := @sOldValue;
+        GetValue(pBuffer);
+      end
+      else
+        Self.GetValue(F);
       SS := efSelStart;
       SE := efSelEnd;
 
@@ -678,10 +691,11 @@ begin
 
       {set field value}
       case FFieldType of
-              ftString
-        {$IFDEF VERSION5}
-        , ftWideString
-        {$ENDIF}     : SetValue(T);
+        ftString {$IFDEF VERSION5}, ftWideString{$ENDIF}:
+        begin
+          pBuffer := @sNewValue;
+          SetValue(pBuffer);
+        end;
         ftSmallInt,
         ftInteger,
         ftWord,
@@ -690,7 +704,7 @@ begin
         ftCurrency,
         ftBCD        : SetValue(S);
         else
-          SetValue(T);
+          SetValue(sNewValue);
       end;
 
       {restore modified states}
@@ -703,8 +717,16 @@ begin
     end;
 
     {if field value changed, call DoOnChange}
-    if CompStruct(S, F, Self.DataSize) <> 0 then
-      inherited DoOnChange;
+    if FFieldType in [ftString {$IFDEF VERSION5}, ftWideString{$ENDIF}] then
+    begin
+      if sOldValue <> sNewValue then
+        inherited DoOnChange;
+    end
+    else
+    begin
+      if CompStruct(S, F, Self.DataSize) <> 0 then
+        inherited DoOnChange;
+    end;
 
     if not (esSelected in sfdbState) and not (csDesigning in ComponentState) then begin
       {return caret and highlight state}
