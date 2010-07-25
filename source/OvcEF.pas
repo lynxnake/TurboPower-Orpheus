@@ -3853,6 +3853,7 @@ var
   B    : Boolean;
   Ch   : Char;
   S    : string;
+  pBuffer: PString;
 begin
   if sefUserValidating in sefOptions then
     Exit;
@@ -3860,7 +3861,8 @@ begin
   fSub := (efDataType mod fcpDivisor);
   if fSub = fsubString then begin
     S := Value;
-    SetValue(S)
+    pBuffer := @S;
+    SetValue(pBuffer);
   end else if fSub in [fsubBoolean, fsubYesNo] then begin
     B := False;
     if Length(Value) > 0 then begin
