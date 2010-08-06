@@ -662,7 +662,7 @@ begin
                        pbMergePicture(PChar(sNewValue), PChar(sNewValue));
                      end else if not (efoTrimBlanks in Options) and
                                  not (efoStripLiterals in Options) then
-                       while Length(S) < MaxLength do
+                       while Length(sNewValue) < MaxLength do
                          sNewValue := sNewValue + ' ';
                    end;
       ftSmallInt : I := Field.AsInteger;
