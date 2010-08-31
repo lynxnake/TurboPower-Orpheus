@@ -200,6 +200,8 @@ contains
   OvcUtils in '..\..\source\OvcUtils.pas',
   O32IGrid in '..\..\source\O32IGrid.pas',
   O32SBar in '..\..\source\O32SBar.pas',
-  o32WideCharSet in '..\..\source\o32WideCharSet.pas';
+  o32WideCharSet in '..\..\source\o32WideCharSet.pas',
+  ovcBidi in '..\..\source\ovcBidi.pas',
+  ovcThemes in '..\..\source\ovcThemes.pas';
 
 end.

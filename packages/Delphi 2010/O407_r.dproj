@@ -211,6 +211,8 @@
 			<DCCReference Include="..\..\source\O32IGrid.pas"/>
 			<DCCReference Include="..\..\source\O32SBar.pas"/>
 			<DCCReference Include="..\..\source\o32WideCharSet.pas"/>
+			<DCCReference Include="..\..\source\ovcBidi.pas"/>
+			<DCCReference Include="..\..\source\ovcThemes.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>
