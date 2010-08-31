@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899.12.30 00:00:00.000.dproj,D:\Prog\Weaver\TP Orpheus\tporpheus\packages\O407_r150.dproj=D:\Prog\Weaver\TP Orpheus\tporpheus\packages\O407_r140.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.481,F:\Prog\Fulcrum Components\tporpheus\packages\Delphi XE\O407_r.dproj=F:\Prog\Fulcrum Components\tporpheus\packages\Delphi XE\O407_r150.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.065,=F:\Prog\Fulcrum Components\tporpheus\source\ovcBidi.pas</Transaction>
+    <Transaction>2010.08.31 22:56:03.903,=F:\Prog\Fulcrum Components\tporpheus\source\ovcThemes.pas</Transaction>
+  </Transactions>
+</BorlandProject>
