@@ -1,13 +1,15 @@
 object FormIGridItemEditor: TFormIGridItemEditor
   Left = 885
   Top = 174
-  Width = 238
-  Height = 161
+  ClientHeight = 134
+  ClientWidth = 230
+  Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clBlack
   Font.Height = -11
   Font.Name = 'Default'
   Font.Style = []
+  OldCreateOrder = True
   ShowHint = True
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -25,6 +27,7 @@ object FormIGridItemEditor: TFormIGridItemEditor
     TabOrder = 0
     OnClick = ListBox1Click
     OnKeyDown = ListBox1KeyDown
+    ExplicitWidth = 186
   end
   object Panel1: TPanel
     Left = 194
@@ -34,13 +37,12 @@ object FormIGridItemEditor: TFormIGridItemEditor
     Align = alRight
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitLeft = 186
     object BtnAdd: TOvcSpeedButton
       Left = 8
       Top = 8
       Width = 25
       Height = 25
-      AutoRepeat = False
-      Flat = False
       Glyph.Data = {
         DE000000424DDE0000000000000076000000280000000D0000000D0000000100
         0400000000006800000000000000000000001000000010000000000000000000
@@ -50,18 +52,6 @@ object FormIGridItemEditor: TFormIGridItemEditor
         300030AAAAAAAAA0300030AAAAAAAAA0300030AAAAAAAAA0300030000AAA0000
         300033330AAA0333300033330AAA033330003333000003333000333333333333
         3000}
-      GrayedInactive = True
-      Layout = blGlyphTop
-      Margin = -1
-      NumGlyphs = 1
-      RepeatDelay = 500
-      RepeatInterval = 100
-      Spacing = 1
-      Style = bsAutoDetect
-      Transparent = False
-      WordWrap = False
-      ParentShowHint = False
-      ShowHint = True
       OnClick = BtnAddClick
     end
     object BtnDelete: TOvcSpeedButton
@@ -69,8 +59,6 @@ object FormIGridItemEditor: TFormIGridItemEditor
       Top = 40
       Width = 25
       Height = 25
-      AutoRepeat = False
-      Flat = False
       Glyph.Data = {
         DE000000424DDE0000000000000076000000280000000D0000000D0000000100
         0400000000006800000000000000000000001000000010000000000000000000
@@ -80,18 +68,6 @@ object FormIGridItemEditor: TFormIGridItemEditor
         3000309999999990300030999999999030003099999999903000300000000000
         3000333333333333300033333333333330003333333333333000333333333333
         3000}
-      GrayedInactive = True
-      Layout = blGlyphTop
-      Margin = -1
-      NumGlyphs = 1
-      RepeatDelay = 500
-      RepeatInterval = 100
-      Spacing = 1
-      Style = bsAutoDetect
-      Transparent = False
-      WordWrap = False
-      ParentShowHint = False
-      ShowHint = True
       OnClick = BtnDeleteClick
     end
     object BtnMoveUp: TOvcSpeedButton
@@ -99,8 +75,6 @@ object FormIGridItemEditor: TFormIGridItemEditor
       Top = 72
       Width = 25
       Height = 25
-      AutoRepeat = False
-      Flat = False
       Glyph.Data = {
         DE000000424DDE0000000000000076000000280000000D0000000D0000000100
         0400000000006800000000000000000000001000000010000000000000000000
@@ -110,18 +84,6 @@ object FormIGridItemEditor: TFormIGridItemEditor
         3000333306660333300030000666000030003306666666033000333066666033
         3000333306660333300033333060333330003333330333333000333333333333
         3000}
-      GrayedInactive = True
-      Layout = blGlyphTop
-      Margin = -1
-      NumGlyphs = 1
-      RepeatDelay = 500
-      RepeatInterval = 100
-      Spacing = 1
-      Style = bsAutoDetect
-      Transparent = False
-      WordWrap = False
-      ParentShowHint = False
-      ShowHint = True
       OnClick = BtnMoveUpClick
     end
     object BtnMoveDown: TOvcSpeedButton
@@ -129,8 +91,6 @@ object FormIGridItemEditor: TFormIGridItemEditor
       Top = 104
       Width = 25
       Height = 25
-      AutoRepeat = False
-      Flat = False
       Glyph.Data = {
         DE000000424DDE0000000000000076000000280000000D0000000D0000000100
         0400000000006800000000000000000000001000000010000000000000000000
@@ -140,18 +100,6 @@ object FormIGridItemEditor: TFormIGridItemEditor
         3000333066666033300033066666660330003000066600003000333306660333
         3000333306660333300033330666033330003333000003333000333333333333
         3000}
-      GrayedInactive = True
-      Layout = blGlyphTop
-      Margin = -1
-      NumGlyphs = 1
-      RepeatDelay = 500
-      RepeatInterval = 100
-      Spacing = 1
-      Style = bsAutoDetect
-      Transparent = False
-      WordWrap = False
-      ParentShowHint = False
-      ShowHint = True
       OnClick = BtnMoveDownClick
     end
   end

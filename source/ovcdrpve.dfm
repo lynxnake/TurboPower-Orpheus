@@ -1,9 +1,9 @@
 object OvcfrmRvDataItemEditor: TOvcfrmRvDataItemEditor
   Left = 287
   Top = 211
-  Width = 372
-  Height = 277
   Caption = 'OvcfrmRvDataItemEditor'
+  ClientHeight = 243
+  ClientWidth = 364
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -25,6 +25,8 @@ object OvcfrmRvDataItemEditor: TOvcfrmRvDataItemEditor
     TabOrder = 0
     OnSelectCell = StringGrid1SelectCell
     OnSetEditText = StringGrid1SetEditText
+    ExplicitWidth = 356
+    ExplicitHeight = 211
   end
   object Panel1: TPanel
     Left = 0
@@ -34,6 +36,8 @@ object OvcfrmRvDataItemEditor: TOvcfrmRvDataItemEditor
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitTop = 211
+    ExplicitWidth = 356
     object btnAdd: TButton
       Left = 2
       Top = 2
