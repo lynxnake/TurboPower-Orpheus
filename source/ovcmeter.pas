@@ -167,6 +167,9 @@ type
 
 implementation
 
+uses
+  ovcBidi;
+
 {*** TOvcMeter ***}
 
 constructor TOvcCustomMeter.Create(AOwner : TComponent);
@@ -327,6 +330,8 @@ begin
   end;
 
   if ShowPercent then begin
+    if GetLayout(Canvas.Handle) = LAYOUT_RTL then
+      SetLayout(MemBM.Canvas.Handle, LAYOUT_RTL);  // double mirror the text if needed
     if InvertPercent then begin
       if (TxtBM <> nil) and ((TxtBM.Width <> ClientWidth)
       or (TxtBM.Height <> ClientHeight)) then begin
@@ -364,6 +369,7 @@ begin
           ClRect.Top + (ClHeight - TextHt) div 2, ValueString);
       end;
     end;
+    SetLayout(MemBM.Canvas.Handle, 0);
   end
   else if Assigned(OnOwnerDraw) then
     OnOwnerDraw(MemBM.Canvas, Rect(0, 0, Width, Height));
