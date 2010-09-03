@@ -10,7 +10,7 @@
 	</PersonalityInfo>
 	<Delphi.Personality>
 		<Source>
-			<Source Name="MainSource">O407_d110.dpk</Source>
+			<Source Name="MainSource">O407_d.dpk</Source>
 		</Source>
 		<FileVersion>
 			<FileVersion Name="Version">7.0</FileVersion>
@@ -179,10 +179,14 @@
 			<VersionInfoKeys Name="Comments"></VersionInfoKeys>
 		</VersionInfoKeys>
 		<Excluded_Packages>
-      <Excluded_Packages Name="E:\Projekte\Komponenten\madCollection\madExcept\DeXter\madExceptVcl_.bpl">madExceptVcl 2.0c  -  www.madshi.net</Excluded_Packages>
-      <Excluded_Packages Name="E:\Projekte\Komponenten\madCollection\madExcept\DeXter\madExceptWizard_.bpl">madExceptWizard 3.0b  -  www.madshi.net</Excluded_Packages>
-      <Excluded_Packages Name="$(BDS)\bin\dclofficexp100.bpl">Microsoft Office XP Beispiele für gekapselte Komponenten für Automation Server</Excluded_Packages>
-      <Excluded_Packages Name="$(BDS)\bin\dcloffice2k100.bpl">Microsoft Office 2000 Beispiele für gekapselte Komponenten für Automation Server</Excluded_Packages>
+      
+      
+      
+      
+      
+      
+      
+      
     </Excluded_Packages>
 		<buildevents/>
 	</Delphi.Personality>

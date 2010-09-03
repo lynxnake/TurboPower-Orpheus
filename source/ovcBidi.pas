@@ -109,7 +109,7 @@ begin
   if Len = 0 then
     Exit;
   SetLength(Buf, Len);
-  Len := GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_FONTSIGNATURE, PWideChar(Buf), Length(Buf));
+  Len := GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_FONTSIGNATURE, PChar(Buf), Length(Buf));
 
   Move(PByte(Buf)^, LocaleSig, Min(Len, SizeOf(LocaleSig)));
 

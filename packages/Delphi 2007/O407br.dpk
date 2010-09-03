@@ -22,17 +22,17 @@
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
-PACKAGE O407br120;
+PACKAGE O407br;
 
 {$R *.res}
 {$ALIGN 8}
 {$ASSERTIONS ON}
 {$BOOLEVAL OFF}
-{$DEBUGINFO ON}
+{$DEBUGINFO OFF}
 {$EXTENDEDSYNTAX ON}
 {$IMPORTEDDATA ON}
-{$IOCHECKS ON}
-{$LOCALSYMBOLS ON}
+{$IOCHECKS OFF}
+{$LOCALSYMBOLS OFF}
 {$LONGSTRINGS ON}
 {$OPENSTRINGS ON}
 {$OPTIMIZATION ON}
@@ -46,7 +46,8 @@ PACKAGE O407br120;
 {$WRITEABLECONST ON}
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
-{$DESCRIPTION 'TurboPower Orpheus 4.07 data-aware runtime package - VCL120'}
+{$DESCRIPTION 'TurboPower Orpheus 4.07 data-aware runtime package - VCL110'}
+{$LIBSUFFIX '110'}
 {$RUNONLY}
 {$IMPLICITBUILD OFF}
 
@@ -55,35 +56,35 @@ requires
   dbrtl,
   vcldb,
   bdertl,
-  O407_r120;
+  O407_r;
 
 contains
-  ovcdbacb in '..\source\ovcdbacb.pas',
-  ovcdbadg in '..\source\ovcdbadg.pas' {OvcfrmAliasDlg},
-  ovcdbae in '..\source\ovcdbae.pas',
-  ovcdbcal in '..\source\ovcdbcal.pas',
-  ovcdbccb in '..\source\ovcdbccb.pas',
-  ovcdbcl in '..\source\ovcdbcl.pas',
-  ovcdbclk in '..\source\ovcdbclk.pas',
-  ovcdbdat in '..\source\ovcdbdat.pas',
-  ovcdbdlb in '..\source\ovcdbdLb.pas',
-  ovcdbed in '..\source\ovcdbed.pas',
-  ovcdbfcb in '..\source\ovcdbfcb.pas',
-  ovcdbhll in '..\source\ovcdbhll.pas',
-  ovcdbidx in '..\source\ovcdbidx.pas',
-  ovcdbise in '..\source\ovcdbise.pas',
-  ovcdbmdg in '..\source\ovcdbmdg.pas' {OvcfrmDbMemoDlg},
-  ovcdbnf in '..\source\ovcdbnf.pas',
-  ovcdbnum in '..\source\ovcdbnum.pas',
-  ovcdbpf in '..\source\ovcdbpf.pas',
-  ovcdbplb in '..\source\ovcdbplb.pas',
-  ovcdbrpv in '..\source\ovcdbrpv.pas',
-  ovcdbsed in '..\source\ovcdbsed.pas',
-  ovcdbsf in '..\source\ovcdbsf.pas',
-  ovcdbsld in '..\source\ovcdbsld.pas',
-  ovcdbtbl in '..\source\ovcdbtbl.pas',
-  ovcdbtcb in '..\source\ovcdbtcb.pas',
-  ovcdbtim in '..\source\ovcdbtim.pas',
-  o32dbfe in '..\source\o32dbfe.pas';
+  ovcdbacb in '..\..\source\ovcdbacb.pas',
+  ovcdbadg in '..\..\source\ovcdbadg.pas' {OvcfrmAliasDlg},
+  ovcdbae in '..\..\source\ovcdbae.pas',
+  ovcdbcal in '..\..\source\ovcdbcal.pas',
+  ovcdbccb in '..\..\source\ovcdbccb.pas',
+  ovcdbcl in '..\..\source\ovcdbcl.pas',
+  ovcdbclk in '..\..\source\ovcdbclk.pas',
+  ovcdbdat in '..\..\source\ovcdbdat.pas',
+  ovcdbdLb in '..\..\source\ovcdbdLb.pas',
+  ovcdbed in '..\..\source\ovcdbed.pas',
+  ovcdbfcb in '..\..\source\ovcdbfcb.pas',
+  ovcdbhll in '..\..\source\ovcdbhll.pas',
+  ovcdbidx in '..\..\source\ovcdbidx.pas',
+  ovcdbise in '..\..\source\ovcdbise.pas',
+  ovcdbmdg in '..\..\source\ovcdbmdg.pas' {OvcfrmDbMemoDlg},
+  ovcdbnf in '..\..\source\ovcdbnf.pas',
+  ovcdbnum in '..\..\source\ovcdbnum.pas',
+  ovcdbpf in '..\..\source\ovcdbpf.pas',
+  ovcdbplb in '..\..\source\ovcdbplb.pas',
+  ovcdbrpv in '..\..\source\ovcdbrpv.pas',
+  ovcdbsed in '..\..\source\ovcdbsed.pas',
+  ovcdbsf in '..\..\source\ovcdbsf.pas',
+  ovcdbsld in '..\..\source\ovcdbsld.pas',
+  ovcdbtbl in '..\..\source\ovcdbtbl.pas',
+  ovcdbtcb in '..\..\source\ovcdbtcb.pas',
+  ovcdbtim in '..\..\source\ovcdbtim.pas',
+  o32dbfe in '..\..\source\o32dbfe.pas';
 
 end.

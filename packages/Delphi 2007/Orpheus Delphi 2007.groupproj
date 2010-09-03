@@ -1,0 +1,64 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{93551913-2b31-4ca1-83d1-d6ce56d3471b}</ProjectGuid>
+  </PropertyGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Projects Include="O407bd.bdsproj" />
+    <Projects Include="O407br.bdsproj" />
+    <Projects Include="O407_d.bdsproj" />
+    <Projects Include="O407_r.bdsproj" />
+  </ItemGroup>
+  <ProjectExtensions>
+    <Borland.Personality>Default.Personality</Borland.Personality>
+    <Borland.ProjectType />
+    <BorlandProject>
+<BorlandProject xmlns=""><Default.Personality></Default.Personality></BorlandProject></BorlandProject>
+  </ProjectExtensions>
+  <Target Name="O407_r">
+    <MSBuild Projects="O407_r.bdsproj" Targets="" />
+  </Target>
+  <Target Name="O407_r:Clean">
+    <MSBuild Projects="O407_r.bdsproj" Targets="Clean" />
+  </Target>
+  <Target Name="O407_r:Make">
+    <MSBuild Projects="O407_r.bdsproj" Targets="Make" />
+  </Target>
+  <Target Name="O407_d">
+    <MSBuild Projects="O407_d.bdsproj" Targets="" />
+  </Target>
+  <Target Name="O407_d:Clean">
+    <MSBuild Projects="O407_d.bdsproj" Targets="Clean" />
+  </Target>
+  <Target Name="O407_d:Make">
+    <MSBuild Projects="O407_d.bdsproj" Targets="Make" />
+  </Target>
+  <Target Name="O407br">
+    <MSBuild Projects="O407br.bdsproj" Targets="" />
+  </Target>
+  <Target Name="O407br:Clean">
+    <MSBuild Projects="O407br.bdsproj" Targets="Clean" />
+  </Target>
+  <Target Name="O407br:Make">
+    <MSBuild Projects="O407br.bdsproj" Targets="Make" />
+  </Target>
+  <Target Name="O407bd">
+    <MSBuild Projects="O407bd.bdsproj" Targets="" />
+  </Target>
+  <Target Name="O407bd:Clean">
+    <MSBuild Projects="O407bd.bdsproj" Targets="Clean" />
+  </Target>
+  <Target Name="O407bd:Make">
+    <MSBuild Projects="O407bd.bdsproj" Targets="Make" />
+  </Target>
+  <Target Name="Build">
+    <CallTarget Targets="O407_r;O407_d;O407br;O407bd" />
+  </Target>
+  <Target Name="Clean">
+    <CallTarget Targets="O407_r:Clean;O407_d:Clean;O407br:Clean;O407bd:Clean" />
+  </Target>
+  <Target Name="Make">
+    <CallTarget Targets="O407_r:Make;O407_d:Make;O407br:Make;O407bd:Make" />
+  </Target>
+  <Import Condition="Exists('$(MSBuildBinPath)\Borland.Group.Targets')" Project="$(MSBuildBinPath)\Borland.Group.Targets" />
+</Project>
