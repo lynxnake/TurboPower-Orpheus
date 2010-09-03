@@ -6,7 +6,7 @@
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
 			<ProjectVersion>12.0</ProjectVersion>
 		</PropertyGroup>
-		<PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+		<PropertyGroup Condition="'$(Config)'=='Basis' or '$(Base)'!=''">
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_1)'!=''">
@@ -20,9 +20,12 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<DCC_DcuOutput>$(CompileTo)</DCC_DcuOutput>
+			<DCC_DcpOutput>$(ComponentsBin)</DCC_DcpOutput>
+			<DCC_BplOutput>$(ComponentsBin)</DCC_BplOutput>
 			<DllSuffix>140</DllSuffix>
 			<DesignOnlyPackage>false</DesignOnlyPackage>
-			<DCC_DependencyCheckOutputName>C:\Users\Public\Documents\RAD Studio\7.0\Bpl\O407_r140.bpl</DCC_DependencyCheckOutputName>
+			<DCC_DependencyCheckOutputName>..\..\..\..\..\Components\Compile\2010\O407_r140.bpl</DCC_DependencyCheckOutputName>
 			<DCC_WriteableConstants>true</DCC_WriteableConstants>
 			<DCC_Description>TurboPower Orpheus 4.07 runtime package - VCL140</DCC_Description>
 			<RuntimeOnlyPackage>true</RuntimeOnlyPackage>
@@ -93,6 +96,7 @@
 			<DCCReference Include="..\..\source\ovcfiler.pas"/>
 			<DCCReference Include="..\..\source\ovcflcbx.pas"/>
 			<DCCReference Include="..\..\source\ovcfmcbx.pas"/>
+			<DCCReference Include="..\..\source\ovcformatsettings.pas"/>
 			<DCCReference Include="..\..\source\ovcftcbx.pas"/>
 			<DCCReference Include="..\..\source\ovcfxfnt.pas"/>
 			<DCCReference Include="..\..\source\ovchscbx.pas"/>
@@ -213,7 +217,7 @@
 			<DCCReference Include="..\..\source\o32WideCharSet.pas"/>
 			<DCCReference Include="..\..\source\ovcBidi.pas"/>
 			<DCCReference Include="..\..\source\ovcThemes.pas"/>
-			<BuildConfiguration Include="Base">
+			<BuildConfiguration Include="Basis">
 				<Key>Base</Key>
 			</BuildConfiguration>
 			<BuildConfiguration Include="Debug">

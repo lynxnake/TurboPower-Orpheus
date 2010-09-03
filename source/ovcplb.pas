@@ -247,6 +247,9 @@ type
 
 implementation
 
+uses
+  OvcFormatSettings;
+
 {*** TOvcCustomPictureLabel ***}
 
 procedure TOvcCustomPictureLabel.Clear;
@@ -410,7 +413,7 @@ function TOvcCustomPictureLabel.plGetDisplayString : string;
     S  : string;
   begin
     if FUseIntlMask then begin
-      FC := Pos('yyyy', ShortDateFormat) > 0;
+      FC := Pos('yyyy', FormatSettings.ShortDateFormat) > 0;
       S := FIntlSupport.InternationalDate(FC)
     end else
       S := FPictureMask;
@@ -483,7 +486,7 @@ function TOvcCustomPictureLabel.plGetDisplayString : string;
     S  : string;
   begin
     if FUseIntlMask then begin
-      FC := Pos('yyyy', ShortDateFormat) > 0;
+      FC := Pos('yyyy', FormatSettings.ShortDateFormat) > 0;
       S := FIntlSupport.InternationalDate(FC)
     end else
       S := FPictureMask;

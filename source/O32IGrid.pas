@@ -822,7 +822,8 @@ type
 implementation
 
 uses
-  Math, Consts, SysUtils, OvcData, OvcConst, OvcVer, Dialogs, OvcUtils, OVCStr;
+  Math, Consts, SysUtils, OvcData, OvcConst, OvcVer, Dialogs, OvcUtils, OVCStr,
+  OvcFormatSettings;
 
 const
   TextMargin = 2;
@@ -2809,12 +2810,12 @@ begin
   case FType of
     itString   : result := FString;
     itParent   : result := FString;
-    itDate     : result := FormatDateTime(ShortDateFormat , FDate);
+    itDate     : result := FormatDateTime(FormatSettings.ShortDateFormat , FDate);
     itList     : result := FString;
     itInteger  : result := IntToStr(FInt);
     itFloat    : result := FloatToStr(FDouble);
-    itCurrency : result := FormatCurr(CurrencyString + '#' + ThousandSeparator
-      + '##0' + DecimalSeparator + '00' , FCurrency);
+    itCurrency : result := FormatCurr(FormatSettings.CurrencyString + '#' + FormatSettings.ThousandSeparator
+      + '##0' + FormatSettings.DecimalSeparator + '00' , FCurrency);
     itLogical: begin
       if FLogical then
         result := 'True'
@@ -3029,8 +3030,8 @@ begin
     itInteger  : FInt      := StrToIntDef(Str, 0);
     itFloat    : FDouble   := StrToFloat(Str);
     itCurrency : begin
-      StripCharSeq(ThousandSeparator, Str);
-      StripCharSeq(CurrencyString, Str);
+      StripCharSeq(FormatSettings.ThousandSeparator, Str);
+      StripCharSeq(FormatSettings.CurrencyString, Str);
       FCurrency := StrToCurr(Str);
     end;
     itDate     : begin

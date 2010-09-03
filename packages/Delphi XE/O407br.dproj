@@ -10,8 +10,9 @@
 			<Platform>Win32</Platform>
 			<AppType>Package</AppType>
 			<FrameworkType>None</FrameworkType>
+			<Basis>True</Basis>
 		</PropertyGroup>
-		<PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+		<PropertyGroup Condition="'$(Config)'=='Basis' or '$(Base)'!=''">
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_1)'!=''">
@@ -49,6 +50,9 @@
 			<DCC_DebugInformation>false</DCC_DebugInformation>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
+			<DCC_BplOutput>$(ComponentsBin)</DCC_BplOutput>
+			<DCC_DcuOutput>$(CompileTo)</DCC_DcuOutput>
+			<DCC_DcpOutput>$(ComponentsBin)</DCC_DcpOutput>
 			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
 		</PropertyGroup>
 		<ItemGroup>
@@ -95,7 +99,7 @@
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
 			</BuildConfiguration>
-			<BuildConfiguration Include="Base">
+			<BuildConfiguration Include="Basis">
 				<Key>Base</Key>
 			</BuildConfiguration>
 			<BuildConfiguration Include="Release">
@@ -132,6 +136,13 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
 						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="CompanyName"/>
+						<VersionInfoKeys Name="FileDescription"/>
+						<VersionInfoKeys Name="InternalName"/>
+						<VersionInfoKeys Name="LegalCopyright"/>
+						<VersionInfoKeys Name="LegalTrademarks"/>
+						<VersionInfoKeys Name="OriginalFilename"/>
+						<VersionInfoKeys Name="ProductName"/>
 					</VersionInfoKeys>
 				</Delphi.Personality>
 				<Platforms>

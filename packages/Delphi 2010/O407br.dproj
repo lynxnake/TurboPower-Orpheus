@@ -6,7 +6,7 @@
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
 			<ProjectVersion>12.0</ProjectVersion>
 		</PropertyGroup>
-		<PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+		<PropertyGroup Condition="'$(Config)'=='Basis' or '$(Base)'!=''">
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_1)'!=''">
@@ -20,10 +20,13 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<DCC_DcuOutput>$(CompileTo)</DCC_DcuOutput>
+			<DCC_DcpOutput>$(ComponentsBin)</DCC_DcpOutput>
+			<DCC_BplOutput>$(ComponentsBin)</DCC_BplOutput>
 			<DesignOnlyPackage>false</DesignOnlyPackage>
 			<DllSuffix>140</DllSuffix>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
-			<DCC_DependencyCheckOutputName>C:\Users\Public\Documents\RAD Studio\7.0\Bpl\O407br140.bpl</DCC_DependencyCheckOutputName>
+			<DCC_DependencyCheckOutputName>..\..\..\..\..\Components\Compile\2010\O407br140.bpl</DCC_DependencyCheckOutputName>
 			<DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
 			<DCC_WriteableConstants>true</DCC_WriteableConstants>
 			<DCC_Platform>x86</DCC_Platform>
@@ -87,7 +90,7 @@
 			<DCCReference Include="..\..\source\ovcdbtcb.pas"/>
 			<DCCReference Include="..\..\source\ovcdbtim.pas"/>
 			<DCCReference Include="..\..\source\o32dbfe.pas"/>
-			<BuildConfiguration Include="Base">
+			<BuildConfiguration Include="Basis">
 				<Key>Base</Key>
 			</BuildConfiguration>
 			<BuildConfiguration Include="Debug">
@@ -131,6 +134,13 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
 						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="CompanyName"/>
+						<VersionInfoKeys Name="FileDescription"/>
+						<VersionInfoKeys Name="InternalName"/>
+						<VersionInfoKeys Name="LegalCopyright"/>
+						<VersionInfoKeys Name="LegalTrademarks"/>
+						<VersionInfoKeys Name="OriginalFilename"/>
+						<VersionInfoKeys Name="ProductName"/>
 					</VersionInfoKeys>
 				</Delphi.Personality>
 			</BorlandProject>

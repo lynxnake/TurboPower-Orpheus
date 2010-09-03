@@ -542,7 +542,7 @@ type
 implementation
 
 uses
-  ovcstr;
+  ovcstr, OvcFormatSettings;
 
 const
   calcDefMinSize = 30;
@@ -1592,7 +1592,7 @@ begin
 
   Inc(X, BW+M1);
   cButtons[cbDecimal].Position := Rect(X, Y, X+BW, Y+BH);
-  cButtons[cbDecimal].Caption := DecimalSeparator;
+  cButtons[cbDecimal].Caption := FormatSettings.DecimalSeparator;
 
   Inc(X, BW+M1);
   cButtons[cbAdd].Position := Rect(X, Y, X+BW, Y+BH);
@@ -2314,7 +2314,7 @@ begin
     #8  : PressButton(cbBack);      {backspace}
     #27 : PressButton(cbClear);     {esc}
   else
-    if Key = DecimalSeparator then
+    if Key = FormatSettings.DecimalSeparator then
       PressButton(cbDecimal);
   end;
 end;
@@ -2367,7 +2367,7 @@ begin
     cClearAll;
     for I := 1 to Length(S) do begin
       C := S[I];
-      if ovcCharInSet(C, ['0'..'9', DecimalSeparator, '.', '+', '-', '*', '/', '=', '%']) then
+      if ovcCharInSet(C, ['0'..'9', FormatSettings.DecimalSeparator, '.', '+', '-', '*', '/', '=', '%']) then
         KeyPress(C);
     end;
   end;
@@ -2439,24 +2439,24 @@ procedure TOvcCustomCalculator.PressButton(Button : TOvcCalculatorButton);
       end;
 
       if (Decimals < 0) and not cDecimalEntered then begin
-        if Pos(DecimalSeparator, FDisplayStr) > 0 then begin
-          DP := Pos(DecimalSeparator, FDisplayStr);
+        if Pos(FormatSettings.DecimalSeparator, FDisplayStr) > 0 then begin
+          DP := Pos(FormatSettings.DecimalSeparator, FDisplayStr);
           if FDisplayStr[1] = '0' then
             FDisplayStr := Copy(FDisplayStr,2,DP-2) +
                            Copy(FDisplayStr,DP+1,1) +
-                           DecimalSeparator +
+                           FormatSettings.DecimalSeparator +
                            Copy(FDisplayStr,DP+2,Length(FDisplayStr) - DP)
           else
             FDisplayStr := Copy(FDisplayStr,1,DP-1) +
                            Copy(FDisplayStr,DP+1,1) +
-                           DecimalSeparator +
+                           FormatSettings.DecimalSeparator +
                            Copy(FDisplayStr,DP+2,Length(FDisplayStr) - DP);
         end;
       end;
       D := StrToFloat(FDisplayStr);
       LastOperand := D;
       if (D <> 0) or
-         (Pos(DecimalSeparator, FDisplayStr) > 0) then begin
+         (Pos(FormatSettings.DecimalSeparator, FDisplayStr) > 0) then begin
         DisplayValue := D;
         cSetDisplayString(FDisplayStr);
         cEngine.State := [csValid];
@@ -2474,16 +2474,16 @@ procedure TOvcCustomCalculator.PressButton(Button : TOvcCalculatorButton);
   begin
     {check if the decimal was first character entered after a command}
     if csClear in cEngine.State then begin
-      FDisplayStr := '0' + DecimalSeparator;
+      FDisplayStr := '0' + FormatSettings.DecimalSeparator;
       cSetDisplayString(FDisplayStr);
       cDecimalEntered := True;
       cEngine.State := [csValid];
     end;
 
     {check if there is already a decimal separator in the string}
-    if Pos(DecimalSeparator, FDisplayStr) = 0 then begin
-      FDisplayStr := FDisplayStr + DecimalSeparator;
-      if (pos(DecimalSeparator, FDisplayStr) = 1) then
+    if Pos(FormatSettings.DecimalSeparator, FDisplayStr) = 0 then begin
+      FDisplayStr := FDisplayStr + FormatSettings.DecimalSeparator;
+      if (pos(FormatSettings.DecimalSeparator, FDisplayStr) = 1) then
         FDisplayStr := '0' + FDisplayStr;
       D := StrToFloat(FDisplayStr);
       cSetDisplayString(FDisplayStr);
@@ -2504,16 +2504,16 @@ procedure TOvcCustomCalculator.PressButton(Button : TOvcCalculatorButton);
     if D <> 0 then begin
       if Length(FDisplayStr) > 1 then begin
         if (Decimals < 0) and not cDecimalEntered then begin
-          if Pos(DecimalSeparator, FDisplayStr) > 0 then begin
+          if Pos(FormatSettings.DecimalSeparator, FDisplayStr) > 0 then begin
             if FDisplayStr[1] = '-' then begin
               SaveSign :='-';
               FDisplayStr := Copy(FDisplayStr,2,Length(FDisplayStr)-1);
             end else begin
               SaveSign :='';
             end;
-            DP := Pos(DecimalSeparator, FDisplayStr);
+            DP := Pos(FormatSettings.DecimalSeparator, FDisplayStr);
             FDisplayStr := '0' + Copy(FDisplayStr,1,DP-2) +
-                           DecimalSeparator +
+                           FormatSettings.DecimalSeparator +
                            Copy(FDisplayStr,DP-1,1) +
                            Copy(FDisplayStr,DP+1,Length(FDisplayStr) - DP);
             if (FDisplayStr[1] = '0') and (FDisplayStr[2] <> '.') then

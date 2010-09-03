@@ -550,7 +550,7 @@ type
 implementation
 
 uses
-  ovcstr;
+  ovcstr, OvcFormatSettings;
 
 constructor TOvcBorderEdPopup.Create(AOwner : TComponent);
 begin
@@ -813,7 +813,7 @@ var
 begin
   S := Text;
   for I := Length(S) downto 1 do
-    if not ovcCharInSet(S[I], ['0'..'9', '+', '-', DecimalSeparator]) then
+    if not ovcCharInSet(S[I], ['0'..'9', '+', '-', FormatSettings.DecimalSeparator]) then
       Delete(S, I, 1);
   Result := StrToFloat(S);
 end;

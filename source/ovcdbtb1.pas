@@ -62,13 +62,16 @@ type
 
 implementation
 
-{$R *.DFM}
+uses
+  OvcFormatSettings;
+
+{$R *.dfm}
 
 procedure TOvcfrmProperties.rgDateOrTimeClick(Sender: TObject);
 var
   ForceCentury : Boolean;
 begin
-   ForceCentury := Pos('yyyy', ShortDateFormat) > 0;
+   ForceCentury := Pos('yyyy', FormatSettings.ShortDateFormat) > 0;
    if rgDateOrTime.ItemIndex = 0 then
      edPictureMask.AsString := OvcIntlSup.InternationalDate(ForceCentury)
    else

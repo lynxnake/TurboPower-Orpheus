@@ -223,7 +223,7 @@ type
 implementation
 
 uses
-  OVCStr;
+  OVCStr, OvcFormatSettings;
 
 procedure DateTimeToHMS(D : TDateTime; var H, M, S : LongInt);
 var
@@ -259,7 +259,7 @@ begin
 
   FDurationDisplay := ddHMS;
   FPrimaryField    := tfHours;
-  FNowString       := TimeSeparator;
+  FNowString       := FormatSettings.TimeSeparator;
   FShowSeconds     := False;
   FTime            := SysUtils.Time;
   FTimeMode        := tmClock;
@@ -309,9 +309,9 @@ begin
       end;
     end else begin
       case FDurationDisplay of
-        ddHMS : Result := IntToStr(H) + TimeSeparator + InttoStr(M) + TimeSeparator + InttoStr(S);
-        ddHM  : Result := IntToStr(H) + TimeSeparator + InttoStr(M);
-        ddMS  : Result := IntToStr(H*60+M) + TimeSeparator + InttoStr(S);
+        ddHMS : Result := IntToStr(H) + FormatSettings.TimeSeparator + InttoStr(M) + FormatSettings.TimeSeparator + InttoStr(S);
+        ddHM  : Result := IntToStr(H) + FormatSettings.TimeSeparator + InttoStr(M);
+        ddMS  : Result := IntToStr(H*60+M) + FormatSettings.TimeSeparator + InttoStr(S);
         ddHHH : Result := IntToStr(H);
         ddMMM : Result := IntToStr(H*60+M);
         ddSSS : Result := IntToStr((H*60+M)*60+S);
@@ -577,9 +577,9 @@ begin
 
       {set default am/pm}
       {in case user has deleted these window settings}
-      if (TimeAmString > '') and (TimePmString > '') then begin
-        Am := AnsiUpperCase(TimeAmString[1]);
-        Pm := AnsiUpperCase(TimePmString[1]);
+      if (FormatSettings.TimeAmString > '') and (FormatSettings.TimePmString > '') then begin
+        Am := AnsiUpperCase(FormatSettings.TimeAmString[1]);
+        Pm := AnsiUpperCase(FormatSettings.TimePmString[1]);
       end else begin
         Am := 'A';
         Pm := 'P'
@@ -590,8 +590,8 @@ begin
         AmPm := Am;
 
       {see if we're using a 24 hour time format}
-      if (Pos(Am, ShortTimeFormat) = 0) and
-         (Pos(Pm, ShortTimeFormat) = 0) then
+      if (Pos(Am, FormatSettings.ShortTimeFormat) = 0) and
+         (Pos(Pm, FormatSettings.ShortTimeFormat) = 0) then
         AmPm := '';
 
       FieldCount := FieldList.Count;

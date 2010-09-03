@@ -219,7 +219,7 @@ type
 implementation
 
 uses
-  OVCStr;
+  OVCStr, OvcFormatSettings;
 
 {*** TOvcCustomSliderEdit ***}
 
@@ -312,7 +312,7 @@ var
 begin
   S := Text;
   for I := Length(S) downto 1 do
-    if not ovcCharInSet(S[I], ['0'..'9', '+', '-', DecimalSeparator]) then
+    if not ovcCharInSet(S[I], ['0'..'9', '+', '-', FormatSettings.DecimalSeparator]) then
       Delete(S, I, 1);
   Result := StrToFloat(S);
   if FValidate and ((Result < FSlider.Min) or (Result > FSlider.Max)) then begin
@@ -390,7 +390,7 @@ var
 begin
   inherited KeyPress(Key);
 
-  if not ovcCharInSet(Key, [#27, '0'..'9', '.', DecimalSeparator, #8, '+', '-', '*', '/']) then begin
+  if not ovcCharInSet(Key, [#27, '0'..'9', '.', FormatSettings.DecimalSeparator, #8, '+', '-', '*', '/']) then begin
     Key := #0;
     MessageBeep(0);
     Exit;

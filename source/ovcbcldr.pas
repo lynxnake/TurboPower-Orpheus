@@ -520,6 +520,9 @@ type
 
 implementation
 
+uses
+  OvcFormatSettings;
+
 {******************************************************************************}
 {                        TOvcBorderedDateEdit                                  }
 {******************************************************************************}
@@ -607,7 +610,7 @@ begin
   FAllowIncDec         := True;
   FForceCentury        := False;
   FRequiredFields      := [rfMonth, rfDay];
-  FTodayString         := DateSeparator;
+  FTodayString         := FormatSettings.DateSeparator;
 
   {load button glyph}
   FButtonGlyph.Handle := LoadBaseBitmap('ORBTNCAL');

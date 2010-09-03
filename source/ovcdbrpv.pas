@@ -260,7 +260,7 @@ type
 implementation
 
 uses
-  ovcstr;
+  ovcstr, OvcFormatSettings;
 
 const
   CacheSize = 256;
@@ -760,7 +760,7 @@ begin
       if FmtStr = '' then begin
         if Currency or (DataType = ftCurrency) then begin
           FloatFormat := ffCurrency;
-          Digits := CurrencyDecimals;
+          Digits := FormatSettings.CurrencyDecimals;
         end else begin
           FloatFormat := ffGeneral;
           Digits := 0;

@@ -204,6 +204,8 @@ type
 
 implementation
 
+uses
+  OvcFormatSettings;
 
 {*** TOvcCustomPictureField ***}
 
@@ -889,10 +891,10 @@ procedure TOvcCustomPictureField.efEdit(var Msg : TMessage; Cmd : Word);
               efHPos := DotPos + 1;
             end else if efHPos <= StEnd then
               if not CharIsOK then begin
-                if ((DataType = pftDate) and (Ch = DateSeparator)) or
-                   ((DataType = pfttime) and (Ch = TimeSeparator)) or
-                   ((DataType = pftDateTime) and ((Ch = TimeSeparator)
-                                               or (Ch = DateSeparator)))
+                if ((DataType = pftDate) and (Ch = FormatSettings.DateSeparator)) or
+                   ((DataType = pfttime) and (Ch = FormatSettings.TimeSeparator)) or
+                   ((DataType = pftDateTime) and ((Ch = FormatSettings.TimeSeparator)
+                                               or (Ch = FormatSettings.DateSeparator)))
                 then
                   AdvanceToNextSubField
                 else
@@ -2717,7 +2719,7 @@ begin
     pftSingle    : Update('##########');
     pftComp      : Update('iiiiiiiiii');
     pftDate      : begin
-                     FC := Pos('yyyy', ShortDateFormat) > 0;
+                     FC := Pos('yyyy', FormatSettings.ShortDateFormat) > 0;
                      M := IntlSupport.InternationalDate(FC);
                      Update(M);
                    end;
@@ -2726,7 +2728,7 @@ begin
                      Update(M);
                    end;
     pftDateTime  : begin
-                     FC := Pos('yyyy', ShortDateFormat) > 0;
+                     FC := Pos('yyyy', FormatSettings.ShortDateFormat) > 0;
                      M := IntlSupport.InternationalDate(FC) + ' '
                        + IntlSupport.InternationalTime(False);
                      Update(M);

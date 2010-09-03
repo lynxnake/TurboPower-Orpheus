@@ -399,6 +399,8 @@ type
 
 implementation
 
+uses
+  OvcFormatSettings;
 
 const
   calMargin = 4; {left, right, and top margin}
@@ -1269,7 +1271,7 @@ begin
       {create the menu items}
       repeat
         MI := TMenuItem.Create(M);
-        MI.Caption := LongMonthNames[I];
+        MI.Caption := FormatSettings.LongMonthNames[I];
         MI.Enabled := Enabled;
         MI.OnClick := calChangeMonth;
         MI.Tag := I;
@@ -1418,7 +1420,7 @@ var
         SunCol := I;
 
       {get the day name}
-      S := Copy(ShortDayNames[Ord(DOW)+1], 1, FDayNameWidth);
+      S := Copy(FormatSettings.ShortDayNames[Ord(DOW)+1], 1, FDayNameWidth);
 
       {draw the day name above each column}
       DrawText(Canvas.Handle, PChar(S), Length(S), clRowCol[1,I],

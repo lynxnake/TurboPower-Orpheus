@@ -6,7 +6,7 @@
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
 			<ProjectVersion>12.0</ProjectVersion>
 		</PropertyGroup>
-		<PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+		<PropertyGroup Condition="'$(Config)'=='Basis' or '$(Base)'!=''">
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_1)'!=''">
@@ -20,11 +20,14 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<DCC_DcuOutput>$(CompileTo)</DCC_DcuOutput>
+			<DCC_DcpOutput>$(ComponentsBin)</DCC_DcpOutput>
+			<DCC_BplOutput>$(ComponentsBin)</DCC_BplOutput>
 			<DllSuffix>140</DllSuffix>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
 			<DesignOnlyPackage>true</DesignOnlyPackage>
 			<DCC_WriteableConstants>true</DCC_WriteableConstants>
-			<DCC_DependencyCheckOutputName>C:\Users\Public\Documents\RAD Studio\7.0\Bpl\O407bd140.bpl</DCC_DependencyCheckOutputName>
+			<DCC_DependencyCheckOutputName>..\..\..\..\..\Components\Compile\2010\O407bd140.bpl</DCC_DependencyCheckOutputName>
 			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
 			<DCC_Platform>x86</DCC_Platform>
 			<DCC_Description>TurboPower Orpheus 4.07 data-aware designtime package - VCL140</DCC_Description>
@@ -75,7 +78,7 @@
 			</DCCReference>
 			<DCCReference Include="..\..\source\ovcregbd.pas"/>
 			<DCCReference Include="..\..\source\ovcregdb.pas"/>
-			<BuildConfiguration Include="Base">
+			<BuildConfiguration Include="Basis">
 				<Key>Base</Key>
 			</BuildConfiguration>
 			<BuildConfiguration Include="Debug">
@@ -119,6 +122,13 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
 						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="CompanyName"/>
+						<VersionInfoKeys Name="FileDescription"/>
+						<VersionInfoKeys Name="InternalName"/>
+						<VersionInfoKeys Name="LegalCopyright"/>
+						<VersionInfoKeys Name="LegalTrademarks"/>
+						<VersionInfoKeys Name="OriginalFilename"/>
+						<VersionInfoKeys Name="ProductName"/>
 					</VersionInfoKeys>
 				</Delphi.Personality>
 			</BorlandProject>

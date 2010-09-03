@@ -6,7 +6,7 @@
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
 			<ProjectVersion>12.0</ProjectVersion>
 		</PropertyGroup>
-		<PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+		<PropertyGroup Condition="'$(Config)'=='Basis' or '$(Base)'!=''">
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_1)'!=''">
@@ -20,9 +20,12 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<DCC_DcuOutput>$(CompileTo)</DCC_DcuOutput>
+			<DCC_DcpOutput>$(ComponentsBin)</DCC_DcpOutput>
+			<DCC_BplOutput>$(ComponentsBin)</DCC_BplOutput>
 			<DllSuffix>140</DllSuffix>
 			<DesignOnlyPackage>true</DesignOnlyPackage>
-			<DCC_DependencyCheckOutputName>C:\Users\Public\Documents\RAD Studio\7.0\Bpl\O407_d140.bpl</DCC_DependencyCheckOutputName>
+			<DCC_DependencyCheckOutputName>..\..\..\..\..\Components\Compile\2010\O407_d140.bpl</DCC_DependencyCheckOutputName>
 			<DCC_Description>TurboPower Orpheus 4.07 designtime package - VCL140</DCC_Description>
 			<DCC_WriteableConstants>true</DCC_WriteableConstants>
 			<GenPackage>true</GenPackage>
@@ -124,7 +127,7 @@
 			<DCCReference Include="..\..\source\O32IGridItemEd.pas">
 				<Form>FormIGridItemEditor</Form>
 			</DCCReference>
-			<BuildConfiguration Include="Base">
+			<BuildConfiguration Include="Basis">
 				<Key>Base</Key>
 			</BuildConfiguration>
 			<BuildConfiguration Include="Debug">

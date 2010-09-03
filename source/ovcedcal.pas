@@ -239,7 +239,7 @@ type
 implementation
 
 uses
-  OVCStr;
+  OVCStr, OvcFormatSettings;
 
 {*** TOvcCustomDateEdit ***}
 
@@ -270,7 +270,7 @@ begin
   FAllowIncDec         := True;
   FForceCentury        := False;
   FRequiredFields      := [rfMonth, rfDay];
-  FTodayString         := DateSeparator;
+  FTodayString         := FormatSettings.DateSeparator;
 
   {get the date order from windows}
   C[0] := '0'; {default}
@@ -478,19 +478,19 @@ var
   begin
     D   := StartDate;
     DOW := DayofWeek(DateTimeToStDate(SysUtils.Date));
-    if Pos(AnsiUppercase(Copy(LongDayNames[1],1,3)), S) > 0 then begin
+    if Pos(AnsiUppercase(Copy(FormatSettings.LongDayNames[1],1,3)), S) > 0 then begin
       DOW := Sunday;
-    end else if Pos(AnsiUppercase(Copy(LongDayNames[2],1,3)), S) > 0 then begin
+    end else if Pos(AnsiUppercase(Copy(FormatSettings.LongDayNames[2],1,3)), S) > 0 then begin
       DOW := Monday;
-    end else if Pos(AnsiUppercase(Copy(LongDayNames[3],1,3)), S) > 0 then begin
+    end else if Pos(AnsiUppercase(Copy(FormatSettings.LongDayNames[3],1,3)), S) > 0 then begin
       DOW := Tuesday;
-    end else if Pos(AnsiUppercase(Copy(LongDayNames[4],1,3)), S) > 0 then begin
+    end else if Pos(AnsiUppercase(Copy(FormatSettings.LongDayNames[4],1,3)), S) > 0 then begin
       DOW := Wednesday;
-    end else if Pos(AnsiUppercase(Copy(LongDayNames[5],1,3)), S) > 0 then begin
+    end else if Pos(AnsiUppercase(Copy(FormatSettings.LongDayNames[5],1,3)), S) > 0 then begin
       DOW := Thursday;
-    end else if Pos(AnsiUppercase(Copy(LongDayNames[6],1,3)), S) > 0 then begin
+    end else if Pos(AnsiUppercase(Copy(FormatSettings.LongDayNames[6],1,3)), S) > 0 then begin
       DOW := Friday;
-    end else if Pos(AnsiUppercase(Copy(LongDayNames[7],1,3)), S) > 0 then begin
+    end else if Pos(AnsiUppercase(Copy(FormatSettings.LongDayNames[7],1,3)), S) > 0 then begin
       DOW := Saturday;
     end else begin
       if DefaultDate > 0 then begin
@@ -921,7 +921,7 @@ begin
                 {error converting month name}
                 Error := SCMonthNameConvertError;
                 repeat
-                  if S = AnsiUpperCase(Copy(ShortMonthNames[I1], 1, Length(S))) then begin
+                  if S = AnsiUpperCase(Copy(FormatSettings.ShortMonthNames[I1], 1, Length(S))) then begin
                     Month := I1;
                     I1 := 13;
                     Error := 0;

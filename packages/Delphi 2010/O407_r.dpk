@@ -95,6 +95,7 @@ contains
   ovcfiler in '..\..\source\ovcfiler.pas',
   ovcflcbx in '..\..\source\ovcflcbx.pas',
   ovcfmcbx in '..\..\source\ovcfmcbx.pas',
+  ovcformatsettings in '..\..\source\ovcformatsettings.pas',
   ovcftcbx in '..\..\source\ovcftcbx.pas',
   ovcfxfnt in '..\..\source\ovcfxfnt.pas',
   ovchscbx in '..\..\source\ovchscbx.pas',

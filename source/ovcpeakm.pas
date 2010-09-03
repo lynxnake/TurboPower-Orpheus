@@ -162,6 +162,8 @@ type
 
 implementation
 
+uses
+  OvcFormatSettings;
 
 function TIntToStr(L : LongInt) : String;
 var
@@ -174,7 +176,7 @@ begin
     Dec(i);
     Inc(j);
     if (j mod 3 = 0) and (i > 1) then
-      Insert(ThousandSeparator, Result, i);
+      Insert(FormatSettings.ThousandSeparator, Result, i);
   until i = 0;
 end;
 

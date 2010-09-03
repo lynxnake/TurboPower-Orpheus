@@ -196,7 +196,7 @@ type
 implementation
 
 uses
-  O32Vlop1, OvcUtils;
+  O32Vlop1, OvcUtils, OvcFormatSettings;
 
 const
   {field types supported by the data aware FlexEdit}
@@ -458,8 +458,8 @@ begin
 
         ftCurrency: begin
           Str := S;
-          StripCharSeq(ThousandSeparator, Str);
-          StripCharSeq(CurrencyString, Str);
+          StripCharSeq(FormatSettings.ThousandSeparator, Str);
+          StripCharSeq(FormatSettings.CurrencyString, Str);
           Field.AsCurrency := StrToCurr(Str);
         end;
 
@@ -537,10 +537,10 @@ begin
         S := FloatToStr(Field.AsFloat);
 
       ftCurrency:
-        S := FormatCurr(CurrencyString + '#' + ThousandSeparator
-          + '##0' + DecimalSeparator + '00' , Field.AsCurrency);
+        S := FormatCurr(FormatSettings.CurrencyString + '#' + FormatSettings.ThousandSeparator
+          + '##0' + FormatSettings.DecimalSeparator + '00' , Field.AsCurrency);
 
-      ftDate: S := FormatDateTime(ShortDateFormat, Field.AsDateTime);
+      ftDate: S := FormatDateTime(FormatSettings.ShortDateFormat, Field.AsDateTime);
     else
       S := Field.AsString;
     end;

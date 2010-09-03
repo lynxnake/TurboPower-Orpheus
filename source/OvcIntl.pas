@@ -310,7 +310,7 @@ var
 implementation
 
 uses
-  StrUtils;
+  StrUtils, OvcFormatSettings;
 
 {*** Inline routines ***}
 
@@ -502,7 +502,7 @@ function TOvcIntlSup.DayOfWeekToString(WeekDay : TDayType) : string;
   {-return the day of the week specified by WeekDay as a string. Will
     honor the international names as specified in the INI file.}
 begin
-  Result := LongDayNames[Ord(WeekDay)+1];
+  Result := FormatSettings.LongDayNames[Ord(WeekDay)+1];
 end;
 
 function TOvcIntlSup.DayOfWeekToPChar(Dest : PChar; WeekDay : TDayType) : PChar;
@@ -510,7 +510,7 @@ function TOvcIntlSup.DayOfWeekToPChar(Dest : PChar; WeekDay : TDayType) : PChar;
     honor the international names as specified in the INI file.}
 begin
   Result := Dest;
-  StrPCopy(Dest, LongDayNames[Ord(WeekDay)+1]);
+  StrPCopy(Dest, FormatSettings.LongDayNames[Ord(WeekDay)+1]);
 end;
 
 destructor TOvcIntlSup.Destroy;
@@ -760,7 +760,7 @@ var
   begin
     Result := 0;
     for I := 1 to 12 do
-      Result := GetMaxWord(Result, Length(LongMonthNames[I]));
+      Result := GetMaxWord(Result, Length(FormatSettings.LongMonthNames[I]));
   end;
 
   function LongestDayName : Word;
@@ -769,7 +769,7 @@ var
   begin
     Result := 0;
     for D := Sunday to Saturday do
-      Result := GetMaxWord(Result, Length(LongDayNames[Ord(D)+1]));
+      Result := GetMaxWord(Result, Length(FormatSettings.LongDayNames[Ord(D)+1]));
   end;
 
   procedure FixMask(MC : Char; DL : Integer);
@@ -1025,14 +1025,14 @@ begin
     if UCh = pmWeekDayU then
       case I of
         Ord(Sunday)..Ord(Saturday) :
-          Tmp := LongDayNames[I+1];
+          Tmp := FormatSettings.LongDayNames[I+1];
         else
           Tmp := '';
       end
     else
       case I of
         1..12 :
-          Tmp := LongMonthNames[I];
+          Tmp := FormatSettings.LongMonthNames[I];
         else
           Tmp := '';
       end;
@@ -1215,7 +1215,11 @@ function TOvcIntlSup.MonthStringToMonth(const S : string; Width : Byte) : Byte;
   St   : string[MaxDateLen];
 //  SLen : Byte absolute St; }
 begin
+{$IFDEF VERSIONXE}
+  Result := AnsiIndexText(S, FormatSettings.LongMonthNames) + 1;
+{$ELSE}
   Result := AnsiIndexText(S, LongMonthNames) + 1;
+{$ENDIF}
  { Result := 0;
   Mt := AnsiUpperCase(S);
   if Width > MLen then
@@ -1223,7 +1227,7 @@ begin
   MLen := Width;
 
   for I := 1 to 12 do begin
-    St := AnsiUpperCase(LongMonthNames[I]);
+    St := AnsiUpperCase(FormatSettings.LongMonthNames[I]);
     if Width > SLen then
       FillChar(St[SLen+1], Width-SLen, ' ');
     SLen := Width;
@@ -1243,7 +1247,11 @@ function TOvcIntlSup.MonthPCharToMonth(S : PChar; Width : Byte) : Byte;
   St   : string[MaxDateLen];
 //  SLen : Byte absolute St; }
 begin
+{$IFDEF VERSIONXE}
+  Result := AnsiIndexText(S, FormatSettings.LongMonthNames) + 1;
+{$ELSE}
   Result := AnsiIndexText(S, LongMonthNames) + 1;
+{$ENDIF}
 {  Result := 0;
   Mt := AnsiUpperCase(StrPas(S));
   if Width > MLen then
@@ -1251,7 +1259,7 @@ begin
   MLen := Width;
 
   for I := 1 to 12 do begin
-    St := AnsiUpperCase(LongMonthNames[I]);
+    St := AnsiUpperCase(FormatSettings.LongMonthNames[I]);
     if Width > SLen then
       FillChar(St[SLen+1], Width-SLen, ' ');
     SLen := Width;
@@ -1266,7 +1274,7 @@ function TOvcIntlSup.MonthToString(Month : Integer) : string;
   {-return month name as a string for Month}
 begin
   if (Month >= 1) and (Month <= 12) then
-    Result := LongMonthNames[Month]
+    Result := FormatSettings.LongMonthNames[Month]
   else
     Result := '';
 end;
@@ -1276,7 +1284,7 @@ function TOvcIntlSup.MonthToPChar(Dest : PChar; Month : Integer) : PChar;
 begin
   Result := Dest;
   if (Month >= 1) and (Month <= 12) then
-    StrPCopy(Dest, LongMonthNames[Month])
+    StrPCopy(Dest, FormatSettings.LongMonthNames[Month])
   else
     Dest[0] := #0;
 end;
@@ -1412,7 +1420,7 @@ begin
   end;
 
   wTLZero := GetLocaleInt(LOCALE_ITLZERO, 0) <> 0; //  wTLZero := GetProfileInt('intl', 'iTLZero', 0) <> 0;
-  w12Hour := LongTimeFormat[Length(LongTimeFormat)] = 'M';
+  w12Hour := FormatSettings.LongTimeFormat[Length(FormatSettings.LongTimeFormat)] = 'M';
 
   wColonChar := GetLocaleChar(LOCALE_STIME, ':'); // wColonChar := GetIntlChar('sTTime', ':');
   FSlashChar := GetLocaleChar(LOCALE_SDATE, DefaultIntlData.SlashChar); // FSlashChar := GetIntlChar('sDate', @DefaultIntlData.SlashChar);
