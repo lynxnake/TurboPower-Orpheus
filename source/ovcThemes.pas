@@ -51,10 +51,12 @@ uses
 { TovcThemes }
 
 class procedure TovcThemes.DrawSelection(Canvas: TCanvas; ARect: TRect);
-var
+{$IFDEF VERSION2010}
+  var
   LTheme: HTHEME;
   LRect, Rect2: TRect;
   BRC: TBrushRecall;
+{$ENDIF VERSION2010}
 begin
   {$IFDEF VERSION2010}
   if ThemeServices.ThemesEnabled and (Win32MajorVersion >= 6) and (Canvas.Brush.Color = clHighLight) then
