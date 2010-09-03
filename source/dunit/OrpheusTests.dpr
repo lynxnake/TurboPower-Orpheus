@@ -6,13 +6,17 @@ program OrpheusTests;
 
 uses
   FastMM4,
+  MidasLib,
   Forms,
   TestFramework,
   GUITestRunner,
   TextTestRunner,
   TestOVCEditU in 'TestOVCEditU.pas',
   TestOVCIntl in 'TestOVCIntl.pas',
-  TestOVCPlb in 'TestOVCPlb.pas';
+  TestOVCPlb in 'TestOVCPlb.pas',
+  TestOvcFormatSettings in 'TestOvcFormatSettings.pas',
+  TestOvcDbPictureField in 'TestOvcDbPictureField.pas',
+  TestOvcDbSimpleField in 'TestOvcDbSimpleField.pas';
 
 {$R *.RES}
 
