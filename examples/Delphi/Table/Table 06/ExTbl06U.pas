@@ -5,12 +5,12 @@ unit ExTbl06U;
 interface
 
 uses
-  SysUtils, WinTypes, WinProcs, Messages, Classes, Graphics, Controls,
+  SysUtils, Windows, Messages, Classes, Graphics, Controls,
   Forms, Dialogs, StdCtrls, OvcTCmmn, OvcTCell, OvcTCStr, OvcTCEdt,
   OvcBase, OvcTable;
 
 type
-  S10 = string[10];
+  S10 = string;
 
   TForm1 = class(TForm)
     OvcTable1: TOvcTable;

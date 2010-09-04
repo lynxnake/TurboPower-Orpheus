@@ -10,7 +10,7 @@ unit ExTbl04U;
 interface
 
 uses
-  WinProcs, WinTypes, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   OvcTCStr, OvcTCCBx, OvcTCmmn, OvcTCell, OvcTCBmp, OvcTCGly, OvcBase,
   OvcTable, StdCtrls, OvcTCEdt;
 
@@ -34,7 +34,7 @@ type
   MyRec = record
     GIdx : Integer;
     CIdx : Integer;
-    CStr : string[10];
+    CStr : string;//[10];
   end;
 
 var
@@ -59,7 +59,7 @@ begin
         GIdx := 1
       else
         GIdx := 0;
-      CStr := Chr(Random(26) + Ord('A')); 
+      CStr := Chr(Random(26) + Ord('A'));
     end;
 end;
 

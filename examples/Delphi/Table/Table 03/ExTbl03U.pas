@@ -14,13 +14,13 @@ unit ExTbl03U;
 interface
 
 uses
-  SysUtils, WinTypes, WinProcs, Messages, Classes, Graphics, Controls,
+  SysUtils, Windows, Messages, Classes, Graphics, Controls,
   Forms, Dialogs, OvcTCmmn, OvcTCell, OvcTCStr, OvcTCBEF, OvcTCPic,
   OvcBase, OvcTable, OvcTCEdt, StdCtrls;
 
 type
-  StrBuf = array[0..99] of char;
-  GroupNrString = string[7];
+  StrBuf = string; //array[0..99] of char;
+  GroupNrString = string;//[7];
 
   TForm1 = class(TForm)
     OvcTable1: TOvcTable;
@@ -34,13 +34,12 @@ type
     procedure OvcTable1DoneEdit(Sender: TObject; RowNum: Longint;
       ColNum: Integer);
     procedure Button1Click(Sender: TObject);
-    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
   public
     { Public declarations }
-    function LoStrBuf(SB : PChar) : PChar;
-    procedure UpStrBuf(SB : PChar; Row : TRowNum);
+    function LoStrBuf(var SB : string) : string;
+    procedure UpStrBuf(var SB : string; Row : TRowNum);
 
     function String2GroupNr(S : GroupNrString) : Word;
     function GroupNr2String(N : Word) : GroupNrString;
@@ -49,7 +48,7 @@ type
 var
   Form1: TForm1;
   MyMemos : array[1..9] of StrBuf;
-  ABuf : PChar;
+  ABuf : string;
 
   MyWords : array[1..9] of Word;
   AString : GroupNrString;
@@ -58,14 +57,16 @@ implementation
 
 {$R *.DFM}
 
-function TForm1.LoStrBuf(SB : PChar) : PChar;
+function TForm1.LoStrBuf(var SB : string) : string;
 begin
-  Result := StrLower(SB);
+  SB := AnsiLowerCase(SB);
+  Result := SB;
 end;
 
-procedure TForm1.UpStrBuf(SB : PChar; Row : TRowNum);
+procedure TForm1.UpStrBuf(var SB : string; Row : TRowNum);
 begin
-  strCopy(MyMemos[Row], StrUpper(SB));
+  SB := AnsiUpperCase(SB);
+  MyMemos[Row] := SB;
 end;
 
 
@@ -85,10 +86,10 @@ var
   S2  : GroupNRString;
 begin
   S1 := IntToStr((N and $7800) shr 11);
-  while (Byte(S1[0]) < 2) do
+  while (Length(S1) < 2) do
     S1 := ' ' + S1;
   S2 := IntToStr(N and $07FF);
-  while (Byte(S2[0]) < 4) do
+  while (Length(S2) < 4) do
     S2 := '0' + S2;
   Result := S1 + '/' + S2;
 end;
@@ -104,10 +105,10 @@ begin
       1 : begin
             if (Purpose <> cdpForSave) then
             begin
-              StrCopy(ABuf, MyMemos[RowNum]);
+              ABuf := MyMemos[RowNum];
               ABuf := LoStrBuf(ABuf);
             end;
-            Data := ABuf;
+            Data := @ABuf;
           end;
 
       2 : begin
@@ -127,11 +128,10 @@ begin
   begin
     MyWords[I] := I;
     if ((I mod  2) = 0) then
-      StrPCopy(MyMemos[I], 'a')
+      MyMemos[I] := 'a'
     else
-      StrPCopy(MyMemos[I], 'A');
+      MyMemos[I] := 'A';
   end;
-  GetMem(ABuf, SizeOf(StrBuf)+1);
 end;
 
 procedure TForm1.OvcTable1DoneEdit(Sender: TObject; RowNum: Longint;
@@ -146,12 +146,7 @@ end;
 procedure TForm1.Button1Click(Sender: TObject);
 begin
   with OvcTable1 do
-    ShowMessage(StrPas(MyMemos[ActiveRow]));
-end;
-
-procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
-begin
-  FreeMem(ABuf, SizeOf(StrBuf)+1);
+    ShowMessage(MyMemos[ActiveRow]);
 end;
 
 end.

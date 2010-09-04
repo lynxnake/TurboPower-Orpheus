@@ -5,11 +5,7 @@ unit ExTbl02U;
 interface
 
 uses
-  {$IFDEF Win32}
   Windows,
-  {$ELSE}
-  WinTypes, WinProcs,
-  {$ENDIF}
   Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   StdCtrls,
   OvcData,
@@ -63,16 +59,18 @@ implementation
 type
   TMyRecord = record
     mrString        : string;
-    mrMemo          : array [0..79] of char;
+    mrMemo          : string; //array [0..79] of char;
     mrCheckBox      : TCheckBoxState;
     mrSimple        : string;
     mrPicture       : TOvcDate;
     mrNumeric       : double;
     mrComboBox1     : integer;
-    mrComboBox2Int  : integer;
-    mrComboBox2Str  : string[19];
-    mrComboBox3Int  : integer;
-    mrComboBox3Items: TStringList;
+//    mrComboBox2Int  : integer;
+//    mrComboBox2Str  : string;//[19];
+//    mrComboBox3Int  : integer;
+//    mrComboBox3Items: TStringList;
+    mrComboBox2     : TCellComboBoxInfo;
+    mrComboBox3     : TCellComboBoxInfo;
     mrGlyph         : integer;
   end;
   PMyDatabase = ^TMyDatabase;
@@ -84,16 +82,6 @@ var
   Items1 : TStringList;
   Items2 : TStringList;
   MyBitmap : TBitmap;
-
-{$IFNDEF Win32}
-type
-  ShortString = string[255];
-
-procedure SetLength(var S : ShortString; Len : byte);
-  begin
-    S[0] := char(Len);
-  end;
-{$ENDIF}
 
 function RandomString(MaxLen : integer) : string;
   var
@@ -131,18 +119,18 @@ begin
     with MyDB^[Row] do
       begin
         mrString := RandomString(39);
-        StrPCopy(mrMemo, RandomString(79));
+        mrMemo := RandomString(79);
         mrCheckBox := TCheckBoxState(Odd(Random(50)));
         mrSimple := RandomString(9);
         mrPicture := (Random(1000) + 144000);
         mrNumeric := (integer(Random(2000)) - 1000) / 100.0;
         mrComboBox1 := Random(10);
-        mrComboBox2Int := Random(10);
-        mrComboBox3Int := Random(5);
+        mrComboBox2.Index := Random(10); // mrComboBox2Int := Random(10);
+        mrComboBox3.Index := Random(5); //SZ mrComboBox3Int := Random(5);
         if Odd(Random(50)) then
-          mrComboBox3Items := Items1
+          mrComboBox3.RTItems := Items1 //SZ mrComboBox3Items := Items1
         else
-          mrComboBox3Items := Items2;
+          mrComboBox3.RTItems := Items2; //SZ mrComboBox3Items := Items2;
         mrGlyph := Random(4);
       end;
   {set up the column-to-field mapping}
@@ -170,15 +158,15 @@ begin
   Data := nil;
   if (0 < RowNum) and (RowNum <= 199) then                      {!!.01}
     case ColToFieldMap[ColNum] of
-      1 : Data := PChar(MyDB^[RowNum].mrString);
+      1 : Data := @MyDB^[RowNum].mrString;
       2 : Data := @MyDB^[RowNum].mrMemo;
       3 : Data := @MyDB^[RowNum].mrCheckBox;
       4 : Data := @MyDB^[RowNum].mrSimple;
       5 : Data := @MyDB^[RowNum].mrPicture;
       6 : Data := @MyDB^[RowNum].mrNumeric;
       7 : Data := @MyDB^[RowNum].mrComboBox1;
-      8 : Data := @MyDB^[RowNum].mrComboBox2Int;
-      9 : Data := @MyDB^[RowNum].mrComboBox3Int;
+      8 : Data := @MyDB^[RowNum].mrComboBox2; //SZ mrComboBox2Int;
+      9 : Data := @MyDB^[RowNum].mrComboBox3; //SZ mrComboBox3Int;
      10 : Data := @MyDB^[RowNum].mrGlyph;
      11 : Data := MyBitmap;
     end;

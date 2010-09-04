@@ -30,7 +30,7 @@ unit ExTbl01U;
 interface
 
 uses
-  SysUtils, WinTypes, WinProcs, Messages, Classes, Graphics, Controls,
+  SysUtils, Windows, Messages, Classes, Graphics, Controls,
   Forms, Dialogs, OvcTCHdr, OvcTCCBx, OvcTCmmn, OvcTable, OvcTCStr, OvcBase,
   StdCtrls, Buttons, OvcTCell;
 
@@ -65,7 +65,7 @@ implementation
 type
   TTestRec = packed record
     C1Index  : integer;       { index for combobox1 }
-    C1String : string[20];     { string for combobox1 }
+    C1String : string;//[20];     { string for combobox1 }
     C2Index  : integer;       { index for combobox2 }
   end;
 

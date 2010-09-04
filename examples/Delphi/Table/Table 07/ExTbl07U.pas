@@ -44,7 +44,7 @@ type
 
   MyRec = record
     GIdx : Integer;
-    CStr : string[10];
+    CStr : string;//[10];
   end;
 
 var
