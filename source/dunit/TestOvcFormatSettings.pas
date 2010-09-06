@@ -8,30 +8,26 @@ uses
 type
   TTestFormatSettings = class(TTestCase)
   published
-    procedure TestovcLongDayNames;
+    procedure TestLongMonthNames;
   end;
 
 implementation
 
 uses
-  OvcFormatSettings;
+  SysUtils, OvcFormatSettings;
 
 { TTestFormatSettings }
 
-procedure TTestFormatSettings.TestovcLongDayNames;
+{ TTestFormatSettings }
+
+procedure TTestFormatSettings.TestLongMonthNames;
 var
+  pOVCSettings: TFormatSettings;
+  pSettings: SysUtils.TFormatSettings;
   iCount: Integer;
-  pSettings: TDayArray;
-  sBuffer: string;
 begin
-  for iCount := Low(pSettings) to High(pSettings) do
-  begin
-    sBuffer := pSettings[iCount];
-    if sBuffer <> '' then
-    begin
-    end;
-  end;
-  CheckTrue(True);
+  for iCount := Low(pOVCSettings.LongMonthNames) to High(pSettings.LongMonthNames) do
+    CheckEquals(pSettings.LongMonthNames[iCount], pOVCSettings.LongMonthNames[iCount]);
 end;
 
 initialization
