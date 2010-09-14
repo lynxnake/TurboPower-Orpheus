@@ -18,8 +18,6 @@ uses
 
 { TTestFormatSettings }
 
-{ TTestFormatSettings }
-
 procedure TTestFormatSettings.TestLongMonthNames;
 var
   pOVCSettings: TFormatSettings;
