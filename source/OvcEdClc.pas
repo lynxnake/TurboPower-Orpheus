@@ -198,7 +198,7 @@ type
 implementation
 
 uses
-  ovcstr, OvcFormatSettings;
+  Types, ovcstr, OvcFormatSettings;
 
 {*** TOvcCustomNumberEdit ***}
 
