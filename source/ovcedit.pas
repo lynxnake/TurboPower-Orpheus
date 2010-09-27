@@ -4885,7 +4885,7 @@ begin
 
   OpenClipboard(Handle);
   try
-    H := GetClipboardData(CF_UNICODETEXT);
+    H := GetClipboardData({$IFDEF UNICODE}CF_UNICODETEXT{$ELSE}CF_TEXT{$ENDIF});
     if H <> 0 then begin
       P := PChar(GlobalLock(H));
       try
