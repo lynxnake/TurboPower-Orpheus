@@ -1,7 +1,7 @@
 // every PCHAR was PAnsiChar
 
 {*********************************************************}
-{*                   OVCSTR.PAS 4.06                    *}
+{*                   OVCSTR.PAS 4.06                     *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -25,6 +25,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{*   Armin Biernaczk   (unicode version of BMSearch & BMSearchUC)             *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -45,8 +46,14 @@ interface
 uses
   SysUtils;
 
+{ For unicode-strings, we have two options:
+  a) Use a huge (64KB) BM-table for searches. This results in a larger overhead, but searching
+     is faster, when the buffer being searched contains many 2-byte-characters.
+  b) Use a small (256B) BM-Table. The overhead is smaller, but searching can be slower }
+{$DEFINE HUGE_UNICODE_BMTABLE}
+
 type
-  BTable = array[0..{$IFDEF UNICODE}$FFFF{$ELSE}$FF{$ENDIF}] of Byte;
+  BTable = array[0..{$IFDEF UNICODE}{$IFDEF HUGE_UNICODE_BMTABLE}$FFFF{$ELSE}$FF{$ENDIF}{$ELSE}$FF{$ENDIF}] of Byte;
   {table used by the Boyer-Moore search routines}
 
 {$IFDEF UNICODE}
@@ -180,7 +187,27 @@ begin
 end;
 
 procedure BMMakeTable(MatchString : PChar; var BT : BTable); register;
-  {Build Boyer-Moore link table}
+  {Build Boyer-Moore link table
+   BT contains one Byte for every possible character (256 Bytes for Ansi-Strings /
+   65536 Bytes for Unicode-Strings. The procedure fills this array as follows
+   - For characters c that are not present in the first n characters of
+     'Matchstring', where n := min(255,Length(MatchString))-1, B[c] is set to
+     min(255,Length(MatchString))
+   - For other characters c the Position p of the last occurrence within the
+     first n characters of MatchString is calculated and B[c] is set to
+     Length(MatchString)-p
+
+   Example: For MatchString='ABCABC' we get
+            BT[65] = 2
+            BT[66] = 1
+            BT[67] = 3
+            BT[c]  = 6 for c<65 or c>67
+
+   Using BT, the search of Matchstring in a given Buffer can be accelarated, see
+   'BMSearch'
+
+   Important: MatchString must not be longer than 255 characters; otherwise the
+     BM-table will not be constructed properly. }
 {$IFDEF UNICODE}
 asm
   push  esi             { Save registers because they will be changed }
@@ -205,9 +232,13 @@ asm
   shl   eax, 16
   mov   ax, cx
   mov   edi, edx        { Point to the table }
-  mov   ecx, 4000h         { Fill table bytes with length }
+{$IFDEF HUGE_UNICODE_BMTABLE}
+  mov   ecx, 4000h      { Fill table bytes with length }
+{$ELSE}
+  mov   ecx, 40h        { Fill table bytes with length }
+{$ENDIF}
   rep   stosd
-  cmp   al, 1           { If length >= 1, we're done }
+  cmp   al, 1           { If length <= 1, we're done }
   jbe   @@MTDone
   mov   edi, edx        { Reset EDI to beginning of table }
   xor   ebx, ebx        { Zero EBX }
@@ -216,8 +247,13 @@ asm
 
 @@MTNext:
   lodsw                 { Load table with positions of letters }
+{$IFNDEF HUGE_UNICODE_BMTABLE}
+  test  ah, ah
+  jnz   @@MTDontfill
+{$ENDIF}
   mov   bx, ax          { That exist in the search string }
   mov   [edi+ebx], cl
+@@MTDontfill:
   loop  @@MTNext
 
 @@MTDone:
@@ -273,14 +309,166 @@ end;
 
 function BMSearch(var Buffer; BufLength : Cardinal; var BT : BTable;
   MatchString : PChar; var Pos : Cardinal) : Boolean; register;
-{$IFNDEF UNICODE}
+{ This function searches 'MatchString' in 'Buffer' and returns True/False accordingly.
+  If 'MatchString' is found, 'Pos' returns it's position within the 'Buffer'.
+
+  'BufLength' is the size of 'Buffer' in characters (Unicode: not in bytes!). 'Pos'
+  is character-based and zero-based.
+
+  The procedure needs the BTable 'BT' which has to be computed via 'BMMakeTable'
+  based on 'MatchString'.
+  For Length(MatchString)>1, this table ist used to accelerate the search as follows:
+  Assume 'MatchString' is NOT found at Position p. The procedure looks at the
+  character c at Position p+Length(MatchString)-1. The next position that has to be
+  checked is not p+1, but p+BT[c]. In many cases we have BT[c]=Length(MatchString)
+  which results in a significant reduction in the number of necessary comparisons.
+
+  (This is a simplyfied version of the Boyer-Moore search algorithm).
+
+  The length of MatchString must not exceed 255 characters (n.b. 'BMMakeTable' fails
+  to calculate the BM-Table for 'MatchString' properly in this case)
+
+  At the beginning of the code, we have EAX=Buffer, EDX=BufLength and ECX=BT; MatchString
+  and Pos are on the stack }
 var
   BufPtr : Pointer;
-{$ENDIF}
 {$IFDEF UNICODE}
-begin
-  Result := False;
-  Assert(False, 'Not Implemented'); // FIXME
+                            { The Unicode-variant of this function has been derived from
+                              the original non-Unicode version. }
+  lenMS1: Word;
+asm
+  push  edi                 { Save registers since we will be changing }
+  push  esi
+  push  ebx
+  push  edx
+
+  mov   BufPtr, eax         { Copy Buffer to local variable and ESI }
+  mov   esi, eax
+  mov   ebx, ecx            { Copy BT (Pointer to Boyer-Moore-Table) to EBX }
+
+  cld                       { Ensure forward string ops }
+  xor   eax, eax            { Zero out EAX so we can search for null }
+  mov   edi, MatchString    { Set EDI to beginning of MatchString }
+  or    ecx, -1             { We will be counting down }
+  repne scasw               { Find null }
+  not   ecx                 { ECX = length of MatchString + null }
+  dec   ecx                 { ECX = length of MatchString (in Characters) }
+  mov   edx, ecx            { Copy length of MatchString to EDX }
+
+  pop   ecx                 { Pop length of buffer (in characters) into ECX }
+  mov   edi, esi            { Set EDI to beginning of search buffer }
+  mov   esi, MatchString    { Set ESI to beginning of MatchString }
+
+  cmp   dl, 1               { Check to see if we have a trivial case }
+  ja    @@BMSInit           { If Length(MatchString) > 1 do BM search }
+  jb    @@BMSNotFound       { If Length(MatchString) = 0 we're done }
+
+  mov   ax,[esi]            { If Length(MatchString) = 1 do a REPNE SCASW }
+  mov   ebx, edi
+  repne scasw               { search for ax, starting at edi }
+  jne   @@BMSNotFound       { No match during REPNE SCASW }
+  sub   edi, ebx            { Found, calculate position. EDI points to the
+                              character after the matching character. }
+  shr   edi, 1
+  dec   edi
+  mov   esi, Pos            { Set position in Pos }
+  mov   [esi], edi
+  mov   eax, 1              { Set result to True }
+  jmp   @@BMSDone           { We're done }
+
+@@BMSInit:
+{ At this point we have: EAX = 0
+                         EBX = Pointer to BT
+                         EDI = Pointer to Buffer
+                         ECX = Length of Buffer in characters
+                         ESI = Pointer to MatchString
+                         EDX = Length of MatchString in characters }
+
+  dec   edx                 { Set up for BM Search }
+  mov   lenMS1, dx          { lenMS1 := Length(MatchString)-1 }
+
+  shl   edx, 1
+  add   esi, edx            { Set ESI to end of MatchString }
+  shl   ecx, 1
+  add   ecx, edi            { Set ECX to end of buffer }
+  add   edi, edx            { Set EDI to first check point }
+  mov   dx, [esi]           { Set DX to character we'll be looking for }
+  sub   esi, 2              { Dec ESI in prep for BMSFound loop }
+  std                       { Backward string ops }
+  jmp   @@BMSComp           { Jump to first comparison }
+
+@@BMSNext:
+{$IFNDEF HUGE_UNICODE_BMTABLE}
+                            { Regarding the BM-Table there are two options:
+                              a) Use a table with one entry for every character; this
+                                 results in a 64K table. The following 4 lines of code
+                                 can be omitted in this case.
+                              b) Use a table with only 256 entries. The overhead for
+                                 building the table is smaller, but for "real" 2-byte
+                                 characters, you can only proceed one character. }
+  test  ah,ah
+  jz    @@UseBT
+  add   edi, 2              { For 2-byte characters, the BM-Table is not used. }
+  jmp   @@BMSComp
+{$ENDIF}
+
+@@UseBT:
+  movzx ax, [ebx+eax]       { Look up skip distance from table }
+  shl   ax, 1
+  add   edi, eax            { Skip EDI ahead to next check point }
+
+@@BMSComp:
+{ At this point we have: EAX = 0
+                         DX  = Last character of MatchString (the char we
+                               are looking for in the Buffer)
+                         EBX = Pointer to Boyer-Moore-Table
+                         ESI = Pointer to the second last character of MatchString
+                         EDI = Pointer to the character in the buffer, that has to
+                               be compared with DX
+                         ECX = Pointer to the end of the Buffer (points to the first
+                               byte behind the Buffer) }
+
+  cmp   edi, ecx            { Have we reached end of buffer? }
+  jae   @@BMSNotFound       { If so, we're done }
+  mov   ax, [edi]           { Move character from buffer into AX for comparison }
+  cmp   dx, ax              { Compare }
+  jne   @@BMSNext           { If not equal, go to next checkpoint }
+
+  push  ecx                 { Save ECX }
+  sub   edi, 2              { EDI now points to the char corresponding to ESI }
+  movzx ecx, lenMS1         { Move Length(MatchString)-1 to ECX }
+  repe  cmpsw               { Compare MatchString to buffer }
+  je    @@BMSFound          { If equal, string is found }
+
+  mov   ax, lenMS1          { Move Length(MatchString)-1 to AX }
+  sub   ax, cx              { Calculate offset that string didn't match }
+  shl   ax, 1
+  add   esi, eax            { Move ESI back to end of MatchString }
+  add   edi, eax            { Move EDI to pre-string compare location }
+  add   edi, 2
+  mov   ax, dx              { Move character back to AX }
+  pop   ecx                 { Restore ECX }
+  jmp   @@BMSNext           { Do another compare }
+
+@@BMSFound:                 { EDI points to the char BEFORE the start of match }
+  add   edi, 2
+  sub   edi, BufPtr         { Calculate position of match }
+  mov   eax, edi
+  shr   eax,1
+  mov   esi, Pos
+  mov   [esi], eax          { Set Pos to position of match }
+  mov   eax, 1              { Set result to True }
+  pop   ecx                 { Restore ESP }
+  jmp   @@BMSDone
+
+@@BMSNotFound:
+  xor   eax, eax            { Set result to False }
+
+@@BMSDone:
+  cld                       { Restore direction flag }
+  pop   ebx                 { Restore registers }
+  pop   esi
+  pop   edi
 end;
 {$ELSE}
 asm
@@ -384,15 +572,149 @@ function BMSearchUC(var Buffer; BufLength : Cardinal; var BT : BTable;
   MatchString : PChar; var Pos : Cardinal) : Boolean; register;
   {- Case-insensitive search of Buffer for MatchString. Return indicates
      success or failure.  Assumes MatchString is already raised to
-     uppercase (PRIOR to creating the table) -}
-{$IFNDEF UNICODE}
+     uppercase (PRIOR to creating the table)
+
+     For details see 'BMSearch'; the code is slightly different, because
+     - we cannot use REPNE SCASB(W) when Length(MatchString)=1 and
+     - we cannot use REPE CMPB(W) for comparing MatchString with
+       a text in the buffer. -}
 var
   BufPtr : Pointer;
-{$ENDIF}
 {$IFDEF UNICODE}
-begin
-  Result := False;
-  Assert(False, 'Not Implemented'); // FIXME
+  lenMS1: Word;
+asm
+  push  edi                 { Save registers since we will be changing }
+  push  esi
+  push  ebx
+  push  edx
+
+  mov   BufPtr, eax         { Copy Buffer to local variable and ESI }
+  mov   esi, eax
+  mov   ebx, ecx            { Copy BT (Pointer to Boyer-Moore-Table) to EBX }
+
+  cld                       { Ensure forward string ops }
+  xor   eax, eax            { Zero out EAX so we can search for null }
+  mov   edi, MatchString    { Set EDI to beginning of MatchString }
+  or    ecx, -1             { We will be counting down }
+  repne scasw               { Find null }
+  not   ecx                 { ECX = length of MatchString + null }
+  dec   ecx                 { ECX = length of MatchString (in Characters) }
+  mov   edx, ecx            { Copy length of MatchString to EDX }
+
+  pop   ecx                 { Pop length of buffer (in characters) into ECX }
+  mov   edi, esi            { Set EDI to beginning of search buffer }
+  mov   esi, MatchString    { Set ESI to beginning of MatchString }
+
+  or    dl, dl              { Check to see if we have a trivial case }
+  jz    @@BMSNotFound       { If Length(MatchString) = 0 we're done }
+
+{ At this point we have: EAX = 0
+                         EBX = Pointer to BT
+                         EDI = Pointer to Buffer
+                         ECX = Length of Buffer in characters
+                         ESI = Pointer to MatchString
+                         EDX = Length of MatchString in characters }
+
+  dec   edx                 { Set up for BM Search }
+  mov   lenMS1, dx          { lenMS1 := Length(MatchString)-1 }
+
+  shl   edx, 1
+  add   esi, edx            { Set ESI to end of MatchString }
+  shl   ecx, 1
+  add   ecx, edi            { Set ECX to end of buffer }
+  add   edi, edx            { Set EDI to first check point }
+  mov   dx, [esi]           { Set DX to character we'll be looking for }
+  jmp   @@BMSComp           { Jump to first comparison }
+
+@@BMSNext:
+{$IFNDEF HUGE_UNICODE_BMTABLE}
+  test  ah,ah
+  jz    @@UseBT
+  add   edi, 2              { For 2-byte characters, the BM-Table is not used. }
+  jmp   @@BMSComp
+{$ENDIF}
+
+@@UseBT:
+  movzx ax, [ebx+eax]       { Look up skip distance from table }
+  shl   ax, 1
+  add   edi, eax            { Skip EDI ahead to next check point }
+
+@@BMSComp:
+{ At this point we have: EAX = 0
+                         DX  = Last character of MatchString (the character we
+                               are looking for in the Buffer)
+                         EBX = Pointer to Boyer-Moore-Table
+                         ESI = Pointer to the last character of MatchString
+                         EDI = Pointer to the character in the buffer that has to
+                               be compared with DX
+                         ECX = Pointer to the end of the Buffer (points to the first
+                               byte behind the Buffer) }
+
+  cmp   edi, ecx            { Have we reached end of buffer? }
+  jae   @@BMSNotFound       { If so, we're done }
+  mov   ax, [edi]           { Move character from buffer into AX for comparison }
+
+  push  ebx                 { Save registers }
+  push  ecx
+  push  edx
+  push  eax                 { Push Char onto stack for CharUpper }
+  call  CharUpper
+  pop   edx                 { Restore registers }
+  pop   ecx
+  pop   ebx
+
+  cmp   dx, ax              { Compare }
+  jne   @@BMSNext           { If not equal, go to next checkpoint }
+
+  push  ecx                 { Save ECX }
+  movzx ecx, LenMS1         { Move Length(MatchString)-1 to ECX }
+  jcxz  @@BMSFound          { If CX is zero, string is found }
+
+@@StringComp:
+  sub   edi, 2              { Dec buffer index }
+  mov   ax, [edi]           { Get char from buffer }
+
+  push  ebx                 { Save registers }
+  push  ecx
+  push  edx
+  push  eax                 { Push Char onto stack for CharUpper }
+  call  CharUpper
+  pop   edx                 { Restore registers }
+  pop   ecx
+  pop   ebx
+
+  sub   esi, 2
+  cmp   ax, [esi]
+  loope @@StringComp        { OK?  Get next character }
+  je    @@BMSFound          { Matched! }
+
+  mov   ax, lenMS1          { Move Length(MatchString)-1 to AX }
+  sub   ax, cx              { Calculate offset that string didn't match }
+  shl   ax, 1
+  add   esi, eax            { Move ESI back to end of MatchString }
+  add   edi, eax            { Move EDI to pre-string compare location }
+
+  mov   ax, dx              { Move character back to AX }
+  pop   ecx                 { Restore ECX }
+  jmp   @@BMSNext           { Do another compare }
+
+@@BMSFound:                 { EDI points to the char BEFORE the start of match }
+  sub   edi, BufPtr         { Calculate position of match }
+  mov   eax, edi
+  shr   eax,1
+  mov   esi, Pos
+  mov   [esi], eax          { Set Pos to position of match }
+  mov   eax, 1              { Set result to True }
+  pop   ecx                 { Restore ESP }
+  jmp   @@BMSDone
+
+@@BMSNotFound:
+  xor   eax, eax            { Set result to False }
+
+@@BMSDone:
+  pop   ebx                 { Restore registers }
+  pop   esi
+  pop   edi
 end;
 {$ELSE}
 asm
