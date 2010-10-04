@@ -471,7 +471,7 @@ asm
   repne  scasw           {find null terminator}
   not    ecx             {calc length of S}
   dec    ecx             {backup one character}
-  dec    edi
+  sub    edi, 2
   mov    eax,ebx         {eax = Len}
   sub    eax,ecx         {find difference}
   jbe    @@ExitPoint     {nothing to do}
