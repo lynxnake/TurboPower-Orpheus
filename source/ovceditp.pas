@@ -1748,7 +1748,7 @@ begin
   PUR := Buffer;
   for I := 1 to Undos do begin
     GUN.Done(PUR);
-    PtrInc(PUR, PUR^.DSize + UndoRecSize);
+    PtrInc(PUR, PUR^.DSize * SizeOf(Char) + UndoRecSize);
   end;
 
   BufAvail := BufSize;
@@ -1766,7 +1766,7 @@ var
 begin
   PUR := Last;
   if Undos > 0 then
-    PtrInc(PUR, PUR^.DSize + UndoRecSize);
+    PtrInc(PUR, PUR^.DSize * SizeOf(Char) + UndoRecSize);
   with PUR^ do begin
     UT := GUN.GetUndoType(PUR);
     Link := LinkNum;
@@ -1850,6 +1850,9 @@ asm
   xor    eax,eax                 {clear high word}
 @@1:
   mov    ax,[esi].TUndoRec.DSize {size of next record}
+{$IFDEF UNICODE}
+  shl    ax,1
+{$ENDIF}
   add    esi,eax                 {point to next record}
   add    esi,UndoRecSize         {undo record size}
   loop   @@1                     {until done}
@@ -1869,7 +1872,7 @@ begin
   else begin
     PUR := Last;
     if Undos > 0 then
-      PtrInc(PUR, PUR^.DSize + UndoRecSize);
+      PtrInc(PUR, PUR^.DSize * SizeOf(Char) + UndoRecSize);
     Link := PUR^.LinkNum;
   end;
 end;
@@ -1926,7 +1929,7 @@ begin
       Inc(CurLink);
 
   {make sure there's room}
-  Size := LongInt(DLen) + UndoRecSize;
+  Size := LongInt(DLen)*SizeOF(Char) + UndoRecSize;
   if not CheckSize(Size) then
     Exit;
 
@@ -1934,7 +1937,7 @@ begin
   Inc(Undos);
   PUR := Last;
   if Undos > 1 then begin
-    PSize := PUR^.DSize + UndoRecSize;
+    PSize := PUR^.DSize * SizeOf(Char) + UndoRecSize;
     PtrInc(PUR, PSize);
   end else
     PSize := 0;
@@ -2016,7 +2019,7 @@ begin
   J := Undos + Redos;
   for I := 1 to J do begin
     GUN.SetModFlag(PUR, True);
-    PtrInc(PUR, PUR^.DSize + UndoRecSize);
+    PtrInc(PUR, PUR^.DSize * SizeOf(Char) + UndoRecSize);
   end;
 end;
 
