@@ -17,7 +17,8 @@ uses
   TestOvcFormatSettings in 'TestOvcFormatSettings.pas',
   TestOvcDbPictureField in 'TestOvcDbPictureField.pas',
   TestOvcDbSimpleField in 'TestOvcDbSimpleField.pas',
-  TestOVCStr in 'TestOVCStr.pas';
+  TestOVCStr in 'TestOVCStr.pas',
+  TestOVCEdit in 'TestOVCEdit.pas' {Form1};
 
 {$R *.RES}
 
