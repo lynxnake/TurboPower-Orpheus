@@ -29,6 +29,7 @@ type
   TTestOVCEdit = class(TTestCase)
   published
     procedure TestUndo;
+    procedure TestInsert;
   end;
 
 implementation
@@ -37,6 +38,28 @@ implementation
 
 
 { TTestOVCEdit }
+
+procedure TTestOVCEdit.TestInsert;
+var
+  Form1: TForm1;
+  s: string;
+begin
+  Form1 := TForm1.Create(nil);
+  try
+    Form1.OvcEditor.ScrollPastEnd := True;
+    Form1.OvcEditor.AppendPara('Test');
+    Form1.OvcEditor.SetSelection(1,1,1,5,True);
+    Form1.OvcEditor.CopyToClipboard;
+    Form1.OvcEditor.SetCaretPosition(1,9);
+    Form1.OvcEditor.PasteFromClipboard;
+    SetLength(s, 15);
+    s := Form1.OvcEditor.GetLine(1,@s[1],15);
+    { Fails in 4.07 (unicode) }
+    CheckTrue(s='Test    Test');
+  finally
+    Form1.Free;
+  end;
+end;
 
 procedure TTestOVCEdit.TestUndo;
 var

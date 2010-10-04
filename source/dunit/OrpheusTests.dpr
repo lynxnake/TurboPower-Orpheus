@@ -5,7 +5,7 @@ program OrpheusTests;
 {$ENDIF}
 
 uses
-  FastMM4,
+//FastMM4,
   MidasLib,
   Forms,
   TestFramework,
