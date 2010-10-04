@@ -23,6 +23,8 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{*   Armin Biernaczyk (selection, copy, paste & delete of rectangular blocks  *}
+{*                     of text)                                               *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -211,6 +213,9 @@ type
     edVSMax             : LongInt;    {max value for vertical scroll bar       }
     edSuppressChar      : Boolean;    {suppress next character                 }
 
+    edRectSelect        : Boolean;    { 4.08 True if we are selecting a        }
+                                      {      rectangular block of text         }
+    edRectSelectDiff    : Integer;
     {property methods}
     function GetFirstEditor : TOvcCustomEditor;
     function GetInsCaretType : TOvcCaret;
@@ -1343,81 +1348,137 @@ procedure TOvcCustomEditor.CopyToClipboard;
 var
   I    : LongInt;
   Size : LongInt;
-  N    : LongInt;
-  C    : Integer;
+  N, N1, N2 : LongInt;
+  C, C1, C2 : Integer;
   H    : THandle;
   S    : PChar;
   GP,
   GPs  : PChar;
-  Len  : Word;
+  Len, Len1 : Word;
 begin
   if not edHaveHighlight then
     Exit;
 
-  {calculate size of highlighted section}
-  N := edHltBgn.Para;
-  C := edHltBgn.Pos;
-  Size := 0;
-  repeat
-    if N = edHltEnd.Para then
-      Inc(Size, edHltEnd.Pos-C)
-    else begin
-      GetPara(N, Len);
-      Inc(Len, 3);
-      Inc(Size, Len-C);
-    end;
-    Inc(N);
-    C := 1;
-  until (N > edHltEnd.Para);
-
-  {allocate global memory block}
-  H := GlobalAlloc(GHND, (Size+1) * SizeOf(Char));
-  if H = 0 then begin
-    DoOnError(oeOutOfMemory);
-    Exit;
-  end;
-
-  {copy selected text to global memory block}
-  GP := GlobalLock(H);
-  Gps := GP;
-  try
+  if not edRectSelect then begin
+    { a) Normal selection mode; select entire lines (except for the first and
+           last line }
+    {calculate size of highlighted section}
     N := edHltBgn.Para;
+    {4.08 edHltBgn.Pos might be behind the end of the line}
+    GetPara(N, Len);
     C := edHltBgn.Pos;
+    if C>Len+1 then C := Len+1;
+
+    Size := 0;
     repeat
-      S := GetPara(N, Len);
-      if N = edHltEnd.Para then begin
-        Len := edHltEnd.Pos-C;
-        Move(S[C-1], GP^, Len * SizeOf(Char));
-        Inc(GP, Len);
-      end else begin
-        Dec(Len, Pred(C));
-        Move(S[C-1], GP^, Len * SizeOf(Char));
-        Inc(GP, Len);
-        Move(CRLF, GP^, 2 * SizeOf(Char));
-        Inc(GP, 2);
+      if N = edHltEnd.Para then
+        Inc(Size, edHltEnd.Pos-C)
+      else begin
+        GetPara(N, Len);
+        Inc(Len, 3);
+        Inc(Size, Len-C);
       end;
       Inc(N);
       C := 1;
     until (N > edHltEnd.Para);
-    GP^ := #0;
 
-    {strip control chars}
-
-(*
-    for I := 0 to StrLen(GPs)-1 do
-      if GPs[I] < #10 then
-        GPs[I] := #32;
-*)
-    for I := 0 to StrLen(GPs)-1 do begin
-      if (FKeepClipboardChars) then begin
-        if not ovcCharInSet(GPs[I], FClipboardChars) and
-               (GPs[I] <= #32) then
-          GPs[I] := #32;
-      end else
-        if (GPs[I] < #10) then
-          GPs[I] := #32;
+    {allocate global memory block}
+    H := GlobalAlloc(GHND, (Size+1) * SizeOf(Char));
+    if H = 0 then begin
+      DoOnError(oeOutOfMemory);
+      Exit;
     end;
-  finally
+
+    {copy selected text to global memory block}
+    GP := GlobalLock(H);
+    Gps := GP;
+    try
+      N := edHltBgn.Para;
+      {4.08 edHltBgn.Pos might be behind the end of the line}
+      GetPara(N, Len);
+      C := edHltBgn.Pos;
+      if C>Len+1 then C := Len+1;
+      repeat
+        S := GetPara(N, Len);
+        if N = edHltEnd.Para then begin
+          Len := edHltEnd.Pos-C;
+          Move(S[C-1], GP^, Len * SizeOf(Char));
+          Inc(GP, Len);
+        end else begin
+          Dec(Len, Pred(C));
+          Move(S[C-1], GP^, Len * SizeOf(Char));
+          Inc(GP, Len);
+          Move(CRLF, GP^, 2 * SizeOf(Char));
+          Inc(GP, 2);
+        end;
+        Inc(N);
+        C := 1;
+      until (N > edHltEnd.Para);
+      GP^ := #0;
+
+      {strip control chars}
+  (*
+      for I := 0 to StrLen(GPs)-1 do
+        if GPs[I] < #10 then
+          GPs[I] := #32;
+  *)
+      for I := 0 to StrLen(GPs)-1 do begin
+        if (FKeepClipboardChars) then begin
+          if not ovcCharInSet(GPs[I], FClipboardChars) and
+                 (GPs[I] <= #32) then
+            GPs[I] := #32;
+        end else
+          if (GPs[I] < #10) then
+            GPs[I] := #32;
+      end;
+    finally
+      GlobalUnlock(H);
+    end;
+  end else begin
+    { b) 4.08: Rect selection mode: select a rectangular block of text }
+    C1 := edHltBgn.Pos;
+    C2 := edHltEnd.Pos;
+    {calculate size of highlighted section}
+    if C1=C2 then Exit;
+    if C1>C2 then begin C:=C1; C1:=C2; C2:=C; end;
+    N1 := edHltBgn.Para;
+    N2 := edHltEnd.Para;
+    Size := (C2-C1+1) * (Abs(N1-N2)+1);
+
+    {allocate global memory block}
+    H := GlobalAlloc(GHND,(Size+1) * SizeOf(Char));
+    if H = 0 then begin
+      DoOnError(oeOutOfMemory);
+      Exit;
+    end;
+
+    {copy selected text to global memory block}
+    GP := GlobalLock(H);
+    repeat
+      S := GetPara(N1, Len);
+      if C1>Len then
+        Len1 := 0
+      else if C2>Len then
+        Len1 := Len-C1+1
+      else
+        Len1 := C2-C1;
+      Move(S[C1-1], GP^, Len1 * SizeOf(Char));
+      Inc(GP, Len1);
+      {Fill lines that are too short with blanks}
+      while Len1<C2-C1 do begin
+        GP^ := ' ';
+        Inc(GP);
+        Inc(Len1);
+      end;
+      {use CR instead of CRLF at the end of lines so that we know it's
+       a rectangular block of text when pasting it. }
+      if N1<N2 then begin
+        GP^ := ^M;
+        Inc(GP);
+      end;
+      Inc(N1);
+    until (N1 > N2);
+    GP^ := #0;
     GlobalUnlock(H);
   end;
 
@@ -1500,6 +1561,10 @@ begin
   edPendingVSR := False;
   edSelCursor := LoadBaseCursor('ORLINECURSOR');
   edSelCursorOn := False;
+
+  { 4.08 }
+  edRectSelect := False;
+  edRectSelectDiff := 0;
 
   {initialize the paragraph list}
   edParas := TOvcParaList.Init(Self, DefUndoBufferSize, False);
@@ -1977,10 +2042,14 @@ end;
 procedure TOvcCustomEditor.edDeleteSelection;
 var
   BC, EC : Integer;
+  BCmax, ECmax: Integer;
   CurPos : Integer;
   BP     : LongInt;
   EP     : LongInt;
   I      : LongInt;
+  hC, L  : Integer;
+  hP, b  : LongInt;
+  SaveLinking : Boolean;
 begin
   if ReadOnly then
     Exit;
@@ -1992,20 +2061,48 @@ begin
     BC := edHltBgn.Pos;
     EP := edHltEnd.Para;
     EC := edHltEnd.Pos;
-    if (BP = EP) then begin
-      {all the text is in the current paragraph}
-      edParas.DeleteText(Self, BP, BC, EC-BC);
+    if not edRectSelect then begin
+      {4.08 cursor might be placed behind the end of the line;
+            BC and EC must be corrected in this case }
+      BCmax := edParas.ParaLength(BP)+1;
+      if BC > BCmax then BC := BCmax;
+      ECmax := edParas.ParaLength(EP)+1;
+      if EC > ECmax then EC := ECmax;
 
-      {redraw the affected lines}
-      edRefreshLines(edParas.FLine, edParas.LLine);
-      edMoveCaretToPP(BP, BC, False);
+      if (BP = EP) then begin
+        {all the text is in the current paragraph}
+        edParas.DeleteText(Self, BP, BC, EC-BC);
+
+        {redraw the affected lines}
+        edRefreshLines(edParas.FLine, edParas.LLine);
+        edMoveCaretToPP(BP, BC, False);
+      end else begin
+        {delete the block}
+        edParas.DeleteBlock(Self, BP, BC, EP, EC);
+
+        edSetVScrollRange;
+        edRedraw(False);
+        edMoveCaretToPP(BP, BC, False);
+      end;
     end else begin
-      {delete the block}
-      edParas.DeleteBlock(Self, BP, BC, EP, EC);
-
-      edSetVScrollRange;
-      edRedraw(False);
+      {4.08 Delete the selected, rectangular block }
+      if EC=BC then Exit;
+      edParas.UndoBuffer.BeginComplexOp(SaveLinking);
+      if EP<BP then begin hP:=EP; EP:=BP; BP:=hP; end;
+      if EC<BC then begin hC:=EC; EC:=BC; BC:=hC; end;
+      for b := BP to EP do begin
+        L := edParas.LineLength(b);
+        if L>=BC then begin
+          if EC<=L+1 then
+            edParas.DeleteText(Self, b, BC, EC-BC)
+          else
+            edParas.DeleteText(Self, b, BC, L+1-BC);
+          edRefreshLines(edParas.FLine, edParas.LLine);
+        end;
+      end;
       edMoveCaretToPP(BP, BC, False);
+      edParas.UndoBuffer.EndComplexOp(SaveLinking);
+      Update;
     end;
   end else if CurPos > edParas.ParaLength(edCurPara) then begin
     {join the next paragraph with the current one at the cursor}
@@ -2185,7 +2282,7 @@ procedure TOvcCustomEditor.edDoTab;
         end else
           Next := Start;
       finally
-        FreeMem(S, Len+1);
+        FreeMem(S{, (Len+1) * SizeOf(Char)});
       end;
       Result := Next;
     end;
@@ -2383,50 +2480,107 @@ var
   Pos     : LongInt;
   Offset  : LongInt;
   Ch      : Char;
+  P2, P3  : PChar;
+  SaveLinking : Boolean;
+  CP      : LongInt;
+  CC      : Integer;
 begin
-  Result := 0;
-  if (P = nil) or (P^ = #0) then
-    Exit;
+  { 4.08 In case P contains several lines that are separated by
+         CR (instead of CRLF), we assume that it's a rectangular
+         block of text (and has to be inserted accordingly). }
+  P2 := P;
+  while (P2^<>#0) and (P2^<>#13) do Inc(P2);
+  if P2^=#13 then Inc(P2);
 
-  {get caret position}
-  CurPara := edCurPara;
-  CurPos := edLinePos+edCurCol;
+  if (P2^=#0) or (P2^=#10) then begin
+    { a) Normal insert mode }
+    Result := 0;
+    if (P = nil) or (P^ = #0) then
+      Exit;
 
-  if StrLen(P) > BlockSize then begin
-    SaveLen := StrLen(P);
-    Pos := 0;
+    {get caret position}
+    CurPara := edCurPara;
+    CurPos := edLinePos+edCurCol;
+
+    if StrLen(P) > BlockSize then begin
+      SaveLen := StrLen(P);
+      Pos := 0;
+      repeat
+        {pointer to block to paste}
+        S := @P[Pos];
+        Offset := 0;
+        if Pos + BlockSize < SaveLen then begin
+          {don't end block in cr/lf}
+          while ovcCharInSet(S[BlockSize+Offset], [#13, #10]) and
+                (BlockSize+Offset < $FFF0) and
+                (Pos+BlockSize+Offset < SaveLen) do
+            Inc(Offset);
+          {save character at block end}
+          CH := S[BlockSize+Offset];
+          {mark end of block}
+          S[BlockSize+Offset] := #0;
+          {do the insertion}
+          Result := edParas.InsertBlock(Self, CurPara, CurPos, S);
+          {restore character}
+          S[BlockSize+Offset] := Ch;
+        end else
+          Result := edParas.InsertBlock(Self, CurPara, CurPos, S);
+
+        {move to next block}
+        Inc(Pos, BlockSize+Offset);
+      until (Result <> 0) or (Pos > SaveLen);
+    end else
+      Result := edParas.InsertBlock(Self, CurPara, CurPos, P);
+
+    {adjust scroll range}
+    edSetVScrollRange;
+    edRefreshLines(edParas.FLine, edParas.LLine);
+    edMoveCaretToPP(CurPara, CurPos, False);
+    Update;
+  end else begin
+    { 4.08 Rectangular insert mode }
+    Result := 0;
+    if (P = nil) or (P^ = #0) then Exit;
+
+    edParas.UndoBuffer.BeginComplexOp(SaveLinking);
+    edRedrawPending := True;
+    CP := edCurPara;
+    CC := edLinePos+edCurCol;
+    P2 := P;
     repeat
-      {pointer to block to paste}
-      S := @P[Pos];
-      Offset := 0;
-      if Pos + BlockSize < SaveLen then begin
-        {don't end block in cr/lf}
-        while ovcCharInSet(S[BlockSize+Offset], [#13, #10]) and
-              (BlockSize+Offset < $FFF0) and
-              (Pos+BlockSize+Offset < SaveLen) do
-          Inc(Offset);
-        {save character at block end}
-        CH := S[BlockSize+Offset];
-        {mark end of block}
-        S[BlockSize+Offset] := #0;
-        {do the insertion}
-        Result := edParas.InsertBlock(Self, CurPara, CurPos, S);
-        {restore character}
-        S[BlockSize+Offset] := Ch;
+      P := P2;
+      while (P2^<>#0) and (P2^<>#13) do Inc(P2);
+      if P2^=#13 then begin
+        P2^:=#0;
+        P3 := P2;
+        Inc(P2);
+        if P2^=#10 then Inc(P2);
       end else
-        Result := edParas.InsertBlock(Self, CurPara, CurPos, S);
-
-      {move to next block}
-      Inc(Pos, BlockSize+Offset);
-    until (Result <> 0) or (Pos > SaveLen);
-  end else
-    Result := edParas.InsertBlock(Self, CurPara, CurPos, P);
-
-  {adjust scroll range}
-  edSetVScrollRange;
-  edRefreshLines(edParas.FLine, edParas.LLine);
-  edMoveCaretToPP(CurPara, CurPos, False);
-  Update;
+        P3 := nil;
+      CurPara := CP;
+      CurPos  := CC;
+      Result := edParas.InsertBlock(Self, CurPara, CurPos, P);
+      if P3<>nil then P3^:=#13;
+      edSetVScrollRange;
+      edMoveCaretToPP(CurPara, CurPos, False);
+      if P2^<>#0 then begin
+        if CP=GetLineCount then begin
+          edMoveToEndOfLine(False);
+          CurPos := edLinePos+edCurCol;
+          Result := edParas.InsertBlock(Self, CurPara, CurPos, #13#10#0);
+        end;
+        Inc(CP);
+        edMoveCaretTo(CP, CC, False);
+        CurPara := edCurPara;
+        CurPos  := edLinePos+edCurCol;
+        while CC > CurPos do
+          Result := edParas.InsertBlock(Self, CurPara, CurPos, ' ');
+      end;
+    until P2^=#0;
+    edParas.UndoBuffer.EndComplexOp(SaveLinking);
+    edRedrawPending := False;
+    edRedraw(True);
+  end;
 end;
 
 function TOvcCustomEditor.edIsStringHighlighted(S : PChar; MatchCase : Boolean) : Boolean;
@@ -2811,7 +2965,8 @@ begin
   edHltBgn.Pos := edLinePos+edCurCol;
   Len := edParas.ParaLength(edCurPara);
   if edHltBgn.Pos > Len then begin
-    Delta := edHltBgn.Pos-(Len+1);
+    {4.08 }
+    Delta := 0;
     Dec(edHltBgn.Pos, Delta);
   end else
     Delta := 0;
@@ -3393,7 +3548,6 @@ var
   SaveEnd  : TMarker;
   TmpPos   : TMarker;
   SwpPos   : TMarker;
-  Len      : Word;
   Start    : LongInt;
   Stop     : LongInt;
 
@@ -3412,9 +3566,6 @@ begin
   SaveEndL := edHltEndL;
   TmpPos.Para := edCurPara;
   TmpPos.Pos := edLinePos+edCurCol;
-  Len := edParas.ParaLength(edCurPara);
-  if TmpPos.Pos > Len then
-    TmpPos.Pos := Len+1;
 
   if CompHltPos(edAnchor, edHltBgn) = 0 then
     edHltBgn := TmpPos
@@ -4101,7 +4252,7 @@ begin
       try
         StrLCopy(Dest, DetabPChar(T, S, edParas.TabSize), DestLen);
       finally
-        FreeMem(T, I+1);
+        FreeMem(T{, (I+1) * SizeOf(Char)});
       end;
       S[L] := C;
     end;
@@ -4530,48 +4681,75 @@ var
   procedure DrawComplexRow(S : PChar; Len, Row : Integer; N : LongInt);
     {-draw a row that has highlighting}
   var
-    Len1, Len2, Len3, Col1 : Integer;
+    Len1, Len2, Len3, Lhilf, Col1 : Integer;
   begin
     Col1 := edHDelta+1;
     Len1 := 0;
     Len2 := 0;
     Len3 := 0;
-    {is entire line unhighlighted?}
-    if NoHighlight or (N < HBLine) or (N > HELine) then
-      Len1 := Len
-    {is entire line highlighted?}
-    else if (N > HBLine) and (N < HELine) then
-      Len2 := Len
-    {is this the first highlighted line?}
-    else if (N = HBLine) then begin
-      {is this the only highlighted line?}
-      if (N = HELine) then begin
-        Len1 := edParas.EffCol(SA, SALen, HBCol)-Col1;
-        if Len1 < 0 then
-          Len1 := 0;
-        Len2 := edParas.EffCol(SA, SALen, HECol)-(Col1+Len1);
-        if Len1+Len2 > Len then
+
+    if not edRectSelect then begin
+      { a) Normal selection mode; select entire lines (except for the first and
+           last line }
+      {is entire line unhighlighted?}
+      if NoHighlight or (N < HBLine) or (N > HELine) then
+        Len1 := Len
+      {is entire line highlighted?}
+      else if (N > HBLine) and (N < HELine) then
+        Len2 := Len
+      {is this the first highlighted line?}
+      else if (N = HBLine) then begin
+        {is this the only highlighted line?}
+        if (N = HELine) then begin
+          Len1 := edParas.EffCol(SA, SALen, HBCol)-Col1;
+          if Len1 < 0 then
+            Len1 := 0
+          { 4.08: fixed: If ScrollPastEnd is true, Len1 might be larger than Len.
+                  if Len1 is not changed, we run into a 'DrawAt(S,Len1,Row)' later
+                  where Len1>Length(s) - resulting in "ghost-characters" being
+                  displayed. }
+          else if Len1>Len then
+            Len1 := Len;
+          Len2 := edParas.EffCol(SA, SALen, HECol)-(Col1+Len1);
+          if Len1+Len2 > Len then
+            Len2 := Len-Len1;
+          Len3 := Len-(Len1+Len2);
+          if Len3 > Len then
+            Len3 := Len;
+        end else begin
+          Len1 := edParas.EffCol(SA, SALen, HBCol)-Col1;
+          { 4.08 Fix for edRectSelect: same problem as above; only relevant if
+                 edRectSelect is True }
+          if Len1 < 0 then Len1 := 0 else if Len1 > Len then Len1 := Len;
           Len2 := Len-Len1;
-        Len3 := Len-(Len1+Len2);
-        if Len3 > Len then
-          Len3 := Len;
-      end else begin
+          Len3 := Len-(Len1+Len2);
+        end
+      {it's the last line--is highlighted portion visible?}
+      end else if (Col1 > edParas.EffCol(SA, SALen, HECol)) then
+        {no--display unhighlighted}
+        Len1 := Len
+      else begin
+        Len2 := edParas.EffCol(SA, SALen, HECol)-Col1;
+        if Len2 > Len then
+          Len2 := Len;
+        Len3 := Len-Len2;
+      end;
+    end else begin
+      { b) 4.08: Rect selection mode: select a rectangular block of text }
+      {is (entire) line unhighlighted?}
+      if NoHighlight or (N < HBLine) or (N > HELine) then
+        Len1 := Len
+      else begin
         Len1 := edParas.EffCol(SA, SALen, HBCol)-Col1;
-        if Len1 < 0 then
-          Len1 := 0;
-        Len2 := Len-Len1;
+        Len2 := edParas.EffCol(SA, SALen, HECol)-Col1;
+        if Len2<Len1 then begin Lhilf:=Len1; Len1:=Len2; Len2:=Lhilf; end;
+        if Len1 < 0 then Len1 := 0 else if Len1 > Len then Len1 := Len;
+        Len2 := Len2-Len1;
+        if Len1+Len2 > Len then Len2 := Len-Len1;
         Len3 := Len-(Len1+Len2);
-      end
-    {it's the last line--is highlighted portion visible?}
-    end else if (Col1 > edParas.EffCol(SA, SALen, HECol)) then
-      {no--display unhighlighted}
-      Len1 := Len
-    else begin
-      Len2 := edParas.EffCol(SA, SALen, HECol)-Col1;
-      if Len2 > Len then
-        Len2 := Len;
-      Len3 := Len-Len2;
+      end;
     end;
+
     if Len1 > 0 then begin
       {draw first unhighlighted portion of line}
       if Len1 <> Len then
@@ -4594,9 +4772,12 @@ var
       FR.Left := FR.Right;
       FR.Right := FarRt;
     end;
-    if (FR.Left < FR.Right) then
+    if (FR.Left < FR.Right) then begin
       {draw last unhighlighted portion of line}
       DrawAt(S, Len3, Row);
+      { 4.08 }
+      FR.Left := FR.Right;
+    end;
   end;
 
 
@@ -4605,6 +4786,7 @@ var
   var
     S, T      : PChar;
     I, Len    : Word;
+    HEmax     : Word;
     AllocSize : Word;
     C         : Char;
     OldColor  : TColor;
@@ -4631,6 +4813,8 @@ var
       SA := S;
       ST := S;
       SALen := Len;
+      { 4.08 }
+      if HECol>HBCol then HEmax := HECol else HEmax := HBCol;
       if (Len > 0) and edHaveTabs(S, Len) then begin
         I := edEffectiveLen(S, Len, edParas.TabSize);
         AllocSize := I+1;
@@ -4642,6 +4826,17 @@ var
         S := T;
         ST := T;
         Len := I;
+      { 4.08 to display "nice" rectangular blocks of text if edRectSelect
+             is True, we need to "enlarge" lines that are too short. }
+      end else if (HEmax>Len+1) and edRectSelect then begin
+        AllocSize := HEmax;
+        GetMem(T, AllocSize * SizeOf(Char));
+        StrCopy (T, S);
+        for I := Len to HEmax-2 do T[I] := ' ';
+        T[HEmax-1] := #0;
+        S := T;
+        ST := T;
+        Len := HEmax-1;
       end;
       if edHDelta >= Len then begin
         S := '';
@@ -4672,7 +4867,7 @@ var
           DrawComplexRow(S, Len, Row, N);
       end;
       if (T <> nil) and (AllocSize > 0) then
-        FreeMem(T, AllocSize);
+        FreeMem(T{, AllocSize * SizeOf(Char)});
     end;
     {reset FR}
     FR.Left := CR.Left + GetLeftMargin;
@@ -4842,6 +5037,15 @@ begin
   {do we need to fill in the partial line at the bottom of the window?}
 {  if LastRow > edRows then
     DrawAt('', 0, LastRow);}
+
+  { 4.08 }
+  if edRectSelect and not NoHighlight and (edRectSelectDiff<>HBCol-HECol) then begin
+    edRectSelectDiff := HBCol-HECol;
+    if (FirstRow>HBLine-edTopLine+1) and (FirstRow>1) then
+      edRefreshLines(HBLine, FirstRow+edTopLine-2)
+    else if (LastRow<HELine-edTopLine+1) and (LastRow<EdRows) then
+      edRefreshLines(LastRow+edTopLine,HELine);
+  end;
 
   edRedrawPending := False;
 
@@ -5813,6 +6017,9 @@ begin
     Windows.SetFocus(Handle);
 
   if (edParas.ByteCount <> 0) then begin
+    { activate RectSelection if ALt-Key is pressed }
+    edRectSelect := GetKeyState(VK_MENU)<0;
+
     {activate capture}
     SetCapture(Handle);
     edCapture := True;
