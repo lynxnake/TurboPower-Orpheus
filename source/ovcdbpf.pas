@@ -260,6 +260,8 @@ type
 
 implementation
 
+uses
+  Types;
 
 procedure TOvcDbPictureField.CMEnter(var Msg : TMessage);
 begin
