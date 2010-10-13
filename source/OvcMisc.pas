@@ -151,7 +151,7 @@ procedure DebugOutput(const S : string);
 implementation
 
 uses
-  OvcBase, OvcStr;
+  Types, OvcBase, OvcStr;
 
 function LoadBaseBitmap(lpBitmapName : PChar) : HBITMAP;
 begin

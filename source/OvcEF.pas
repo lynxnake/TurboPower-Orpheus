@@ -640,6 +640,9 @@ type
 
 implementation
 
+uses
+  Types;
+
 {*** TOvcEfColors ***}
 
 procedure TOvcEfColors.Assign(Source : TPersistent);

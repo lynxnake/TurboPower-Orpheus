@@ -173,7 +173,8 @@ type
 
 implementation
 
-
+uses
+  Types;
 
 {===TOvcTCColHead====================================================}
 constructor TOvcTCColHead.Create(AOwner : TComponent);
