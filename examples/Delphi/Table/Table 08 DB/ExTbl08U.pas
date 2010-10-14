@@ -5,7 +5,7 @@ unit ExTbl08U;
 interface
 
 uses
-  SysUtils, WinTypes, WinProcs, Messages, Classes, Graphics, Controls,
+  SysUtils, Windows, Messages, Classes, Graphics, Controls,
   Forms, Dialogs, OvcTCmmn, OvcTCell, OvcTCStr, OvcTCBEF, OvcTCSim, DB,
   DBTables, OvcBase, OvcTable, StdCtrls;
 
@@ -32,7 +32,7 @@ type
 
 var
   Form1: TForm1;
-  GS : string[255];
+  GS : string;//[255];
   GI : LongInt;
 
 implementation

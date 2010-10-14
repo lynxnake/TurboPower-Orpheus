@@ -5,7 +5,7 @@ unit Extbl12u;
 interface
 
 uses
-  WinProcs, WinTypes, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   OvcTCBmp, OvcTCGly, OvcTCBox, OvcTCmmn, OvcTCell, OvcTCStr, OvcTCEdt,
   OvcBase, OvcTable, StdCtrls, OVCDATE, OvcTCBEF, OvcTCPic,  IniFiles;
 
@@ -13,7 +13,7 @@ uses
 type
   MyDataRecord = record
     TF1  : Boolean;
-    TF2  : String[10];
+    TF2  : String;//[10];
     TF3  : TStTime;
   end;
 
@@ -67,8 +67,8 @@ begin
     TF3 := Random(30000);
   end;
 
-  if FileExists('c:\extbl12.ini') then begin
-    IniF := TIniFile.Create('c:\extbl12.ini');
+  if FileExists(ChangeFileExt(Application.ExeName, '.ini')) then begin
+    IniF := TIniFile.Create(ChangeFileExt(Application.ExeName, '.ini')); // extbl12.ini
     try
       for I := 1 to 3 do begin
         with IniF do begin

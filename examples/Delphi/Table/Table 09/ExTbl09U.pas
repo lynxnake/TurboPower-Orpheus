@@ -5,7 +5,7 @@ unit ExTbl09U;
 interface
 
 uses
-  WinProcs, WinTypes, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   OvcTCBmp, OvcTCGly, OvcTCBox, OvcTCmmn, OvcTCell, OvcTCStr, OvcTCEdt,
   OvcBase, OvcTable, StdCtrls, OvcUser, OvcData, OvcTCBEF, OvcTCPic, OvcPF;
 
@@ -14,7 +14,7 @@ const
 
 type
   MyDataRecord = record
-    TF1     : String[10];
+    TF1     : string;
   end;
 
   TForm1 = class(TForm)
@@ -58,7 +58,7 @@ begin
   Randomize;
   for I := 1 to 9 do
   with MyData[I] do begin
-    TF1[0] := Chr(10);
+    SetLength(TF1, 10);
     for J := 1 to 5 do
       TF1[J] := Chr(Ord('A') + (I - 1) mod 3);
     for J := 6 to 10 do

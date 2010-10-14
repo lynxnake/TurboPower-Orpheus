@@ -5,7 +5,7 @@ unit ExTbl11U;
 interface
 
 uses
-  SysUtils, WinTypes, WinProcs, Messages, Classes, Graphics, Controls,
+  SysUtils, Windows, Messages, Classes, Graphics, Controls,
   Forms, Dialogs, OvcEf, OvcPb, OvcPf, OvcTCPic, OvcTCBEF, OvcTCHdr,
   OvcTCmmn, OvcTable, OvcTCStr, OvcTCEdt, OvcBase, StdCtrls, Buttons,
   OvcTCell;
@@ -37,11 +37,12 @@ implementation
 
 {$R *.DFM}
 
+
 procedure TForm1.OvcTable1GetCellData(Sender: TObject; RowNum: Longint;
   ColNum: Integer; var Data: Pointer; Purpose : TOvcCellDataPurpose);
 type
   TTestRec = record
-    Name  : string[49];
+    Name  : string;
     Age   : word;
   end;
   TTestDataBase = array [1..9] of TTestRec;
@@ -57,7 +58,7 @@ const
     (Name:'';                 Age:0),
     (Name:'';                 Age:0));
 const
-  ColHeading : string[15] = '';
+  ColHeading : string = '';
 begin
   Data := nil;
   if (1 <= RowNum) and (RowNum <= 9) then
