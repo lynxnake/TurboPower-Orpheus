@@ -5,7 +5,7 @@ unit ExDbTbU;
 interface
 
 uses
-  WinTypes, WinProcs, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   OvcDbTbl, OvcBase, OvcEF, OvcPB, OvcPF, OvcDbPF, StdCtrls, DB, DBTables,
   OvcTCmmn, OvcTCell, OvcTCStr, OvcTCEdt, Buttons, Grids, DBGrids, OvcTable,
   OvcEditU, OvcEdit, ExtCtrls, DBCtrls, OvcTCBEF, OvcTCPic, OvcTGPns,

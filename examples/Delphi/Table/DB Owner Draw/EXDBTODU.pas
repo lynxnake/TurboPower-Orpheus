@@ -10,13 +10,13 @@ unit Exdbtodu;
 interface
 
 uses
-  SysUtils, WinTypes, WinProcs, Messages, Classes, Graphics, Controls,
+  SysUtils, Windows, Messages, Classes, Graphics, Controls,
   Forms, Dialogs, DB, DBTables, OvcTCmmn, OvcTCell, OvcTCStr, OvcTCBEF,
   OvcTCSim, OvcBase, OvcDbTbl;
 
 type
-  S24 = string[24];
-  S14 = string[14];
+  S24 = string;//[24];
+  S14 = string;//[14];
 
   TForm1 = class(TForm)
     OvcDbTable1: TOvcDbTable;
@@ -144,7 +144,7 @@ procedure TForm1.OvcTCSimpleField4OwnerDraw(Sender: TObject;
   ColNum: Integer; const CellAttr: TOvcCellAttributes; Data: Pointer;
   var DoneIt: Boolean);
 var
-  S : string[14];
+  S : string;//[14];
   I : Integer;
 begin
   if (Table1.Fields[3].AsInteger < 1000000) then
@@ -173,7 +173,7 @@ procedure TForm1.OvcTCSimpleField5OwnerDraw(Sender: TObject;
   ColNum: Integer; const CellAttr: TOvcCellAttributes; Data: Pointer;
   var DoneIt: Boolean);
 var
-  S : String[14];
+  S : String;//[14];
   I : Integer;
 begin
   if (Table1.Fields[3].AsInteger < 1000000) then
