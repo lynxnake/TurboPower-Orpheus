@@ -9,7 +9,7 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
   Dialogs, OvcBase, OvcOutln, StdCtrls, OvcVLB, OvcSplit, OvcRVIdx,
   OvcRptVw, OvcDRpVw, OvcCmbx, OvcRvCbx, ExtCtrls,
-  {$IFDEF Version4} ImgList, {$ENDIF} ShellAPI, Menus;
+  ShellAPI, Menus, ImgList;
 
 type
   TForm1 = class(TForm)
@@ -55,6 +55,7 @@ procedure TForm1.AddDirectories(TreeRoot : TOvcOutlineNode; DirPath : string);
 var
   SearchRec : TSearchRec;
   Path : string;
+  Data: PString;
 begin
   OvcOutline1.BeginUpdate;
   try
@@ -63,9 +64,12 @@ begin
         repeat
           if (SearchRec.Attr and faDirectory <> 0)
           and (SearchRec.Name <> '.')
-          and (SearchRec.Name <> '..') then begin
+          and (SearchRec.Name <> '..') then
+          begin
             Path := DirPath+'\'+SearchRec.Name;
-            OvcOutline1.Nodes.AddChildObjectEx(TreeRoot, SearchRec.Name, NewStr(Path), 0, omDynamicLoad);
+            New(Data);
+            Data^ := Path;
+            OvcOutline1.Nodes.AddChildObjectEx(TreeRoot, SearchRec.Name, Data {NewStr(Path)}, 0, omDynamicLoad);
           end;
         until FindNext(SearchRec) <> 0;
       finally
@@ -85,7 +89,7 @@ begin
   Screen.Cursor := crHourglass;
   try
     if Node.Data <> nil then
-      AddDirectories(Node,pstring(Node.Data)^);
+      AddDirectories(Node, PString(Node.Data)^);
   finally
     Screen.Cursor := OldCursor;
   end;
@@ -95,6 +99,7 @@ procedure TForm1.FormShow(Sender: TObject);
 var
   c : char;
   Root : array[0..4] of char;
+  Data: PString;
 begin
   for c := 'A' to 'Z' do begin
     StrCopy(Root, '%:\');
@@ -107,7 +112,9 @@ begin
       DRIVE_RAMDISK :
         begin
           Root[2] := #0;
-          OvcOutline1.Nodes.AddObjectEx(Root, NewStr(Root), 2, omDynamicLoad);
+          New(Data);
+          Data^ := Root;
+          OvcOutline1.Nodes.AddObjectEx(Root, Data {NewStr(Root)}, 2, omDynamicLoad);
         end;
     end;
   end;
@@ -116,7 +123,7 @@ end;
 procedure TForm1.OvcOutline1NodeDestroy(Sender: TOvcCustomOutline;
   Node: TOvcOutlineNode);
 begin
-  DisposeStr(Node.Data);
+  Dispose(PString(Node.Data)); //DisposeStr(Node.Data);
 end;
 
 function TypeString(FileName : string) : string;
@@ -130,13 +137,13 @@ function AttrString(Attr : Integer) : string;
 begin
   Result := '';
   if Attr and faArchive <> 0 then
-    AppendStr(Result,'A');
+    Result := Result + 'A';
   if Attr and faReadOnly <> 0 then
-    AppendStr(Result,'R');
+    Result := Result + 'R';
   if Attr and faHidden <> 0 then
-    AppendStr(Result,'H');
+    Result := Result + 'H';
   if Attr and faSysFile <> 0 then
-    AppendStr(Result,'S');
+    Result := Result + 'S';
 end;
 
 procedure TForm1.AddFiles(DirPath : string);
@@ -188,7 +195,7 @@ begin
   if OvcDataReportView1.CurrentItem <> nil then begin
     StrPCopy(CommandLine, OvcDataReportView1.CurrentItem.AsString[5] + '\' + OvcDataReportView1.CurrentItem.AsString[0]);
     StrPCopy(Path, OvcDataReportView1.CurrentItem.AsString[5]);
-    ShellExecute(0, 'open' , CommandLine, nil, Path, SW_SHOWNORMAL);
+    ShellExecute(Handle, nil, CommandLine, nil, Path, SW_SHOWNORMAL);
   end;
 end;
 
@@ -246,5 +253,7 @@ begin
   UpdateFilter;
 end;
 
+initialization
+  ReportMemoryLeaksOnShutdown := true;
 end.
 

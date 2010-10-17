@@ -5,7 +5,7 @@ unit Exvalidu;
 interface
 
 uses
-  SysUtils, WinTypes, WinProcs, Messages, Classes, Graphics, Controls,
+  SysUtils, Windows, Messages, Classes, Graphics, Controls,
   Forms, Dialogs, OvcNf, OvcPb, OvcPf, OvcBase, OvcEf, OvcSf, StdCtrls,
   Buttons;
 
