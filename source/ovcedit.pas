@@ -6018,7 +6018,7 @@ begin
 
   if (edParas.ByteCount <> 0) then begin
     { activate RectSelection if ALt-Key is pressed }
-    edRectSelect := GetKeyState(VK_MENU)<0;
+    edRectSelect := not WordWrap and (GetKeyState(VK_MENU)<0);
 
     {activate capture}
     SetCapture(Handle);

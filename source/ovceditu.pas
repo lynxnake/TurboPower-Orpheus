@@ -218,7 +218,7 @@ asm
   jmp    @@7
 
 @@1:
-  lodsw                 {next byte into al}
+  lodsw                 {next char into ax}
   cmp    ax,'-'         {is it a hyphen?}
   ja     @@2
   je     @@3
@@ -242,7 +242,7 @@ asm
   inc    esi
 
 @@5:
-  lodsw                 {next character into al}
+  lodsw                 {next character into ax}
   cmp    ax,' '         {is it > than a space?}
   ja     @@6            {if so, we're done}
   je     @@5            {if it's a space, keep going}
@@ -350,11 +350,50 @@ asm
 end;
 
 function edGetActualCol(S : PChar; Col : Word; TabSize : Byte) : Word; register;
-  {-compute actual column for effective column Col, accounting for tabs}            //  Tiburon FIXME
+  {-compute actual column for effective column Col, accounting for tabs}
 asm
   push   esi            {save}
   push   edi            {save}
   push   ebx            {save}
+
+{$IFDEF UNICODE}
+  mov    esi,eax        {esi = S}
+  movzx  edi,dx         {edi = Col}
+  xor    ebx,ebx        {length = 0}
+  movzx  edx,cx         {dx = TabSize}
+  xor    ecx,ecx        {ecx = actual column}
+
+  cld                   {go forward}
+
+@@1:
+  inc    ecx            {increment column}
+  lodsw                 {get next character}
+  or     ax,ax          {is it a null?}
+  jz     @@3            {done if so}
+  inc    ebx            {increment effective length}
+  cmp    ax, 09         {is it a tab?}
+  jne    @@2            {if not, check the column}
+  dec    ebx            {decrement length}
+  mov    eax,ebx        {eax has length}
+
+  {determine integral offset}
+  push   edx            {save}
+  push   ecx            {save}
+  mov    cx,dx          {cx=tab size}
+  xor    dx,dx          {clear remainder register}
+  div    cx             {divide by tabsize}
+  inc    ax             {add one}
+  mul    cx             {multiply by tabsize}
+  pop    ecx            {restore}
+  pop    edx            {restore - ignore upper 16 bits}
+
+  mov    ebx,eax        {put result in ebx}
+
+@@2:
+  cmp    ebx,edi        {have we reached the target column yet?}
+  jb     @@1            {get next character}
+
+{$ELSE}
 
   mov    esi,eax        {esi = S}
   and    edx,0FFFFh     {clear high word}
@@ -396,6 +435,7 @@ asm
   cmp    ebx,edi        {have we reached the target column yet?}
   jb     @@1            {get next character}
 
+{$ENDIF}
 @@3:
   mov    eax,ecx        {put result in eax}
 
