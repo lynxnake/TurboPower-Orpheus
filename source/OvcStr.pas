@@ -870,8 +870,7 @@ asm
 end;
 {$ENDIF}
 
-function DetabPChar(Dest : PChar; Src : PChar;
-                    TabSize : Byte) : PChar; register;     // FIXME
+function DetabPChar(Dest : PChar; Src : PChar; TabSize : Byte) : PChar; register;
   { -Expand tabs in a string to blanks on spacing TabSize- }
 asm
   push    eax           { Save Dest for return value }
@@ -888,6 +887,35 @@ asm
   cld                   { Forward! }
   xor     edx, edx      { Set output length to zero }
 
+{$IFDEF UNICODE}
+@@Next:
+  lodsw                 { Get next input character }
+  or      ax, ax        { Is it a null? }
+  jz      @@Done        { Yes-all done }
+  cmp     ax, 09        { Is it a tab? }
+  je      @@Tab         { Yes, compute next tab stop }
+  stosw                 { No, store to output }
+  inc     edx           { Increment output length }
+  jmp     @@Next        { Next character }
+
+@@Tab:
+  push    edx           { Save output length }
+  mov     eax, edx      { Get current output length in DX:AX }
+  xor     edx, edx
+  div     ebx           { Output length MOD TabSize in DX }
+  mov     ecx, ebx      { Calc number of spaces to insert... }
+  sub     ecx, edx      { = TabSize - Mod value }
+  pop     edx
+  add     edx, ecx      { Add count of spaces into current output length }
+
+  mov     eax,$0020     { Blank in AX }
+  rep     stosw         { Store blanks }
+  jmp     @@Next        { Back for next input }
+
+@@Done:
+  xor     ax,ax         { Store final null terminator }
+  stosw
+{$ELSE}
 @@Next:
   lodsb                 { Get next input character }
   or      al, al        { Is it a null? }
@@ -918,6 +946,7 @@ asm
 @@Done:
   xor     al,al         { Store final null terminator }
   stosb
+{$ENDIF}
 
   pop     ebx           { Restore caller's EBX, ESI and EDI }
   pop     esi

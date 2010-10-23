@@ -24,12 +24,13 @@ type
   published
     procedure TestBMSearch;
     procedure TestBMSearchUC;
+    procedure TestDetabPChar;
   end;
 
 implementation
 
 uses
-  OvcStr;
+  SysUtils, OvcStr;
 
 { TTestOVCStr }
 
@@ -105,6 +106,28 @@ begin
     CheckTrue(iPos=Results[i]);
   end;
 end;
+
+procedure TTestOVCStr.TestDetabPChar;
+const
+  TestStrings: array[0..13] of string =
+    ('Tab>'#9'<Tab',  'Tab>    <Tab',
+     'Ohne Tab',      'Ohne Tab',
+     #9#9#9,          '                        ',
+     #9'abc',         '        abc',
+     'xyz'#9,         'xyz     ',
+     '1234567'#9'1',  '1234567 1',
+     '12345678'#9'1', '12345678        1');
+var
+  i: Integer;
+  dest, src: array[0..50] of Char;
+begin
+  for i := 0 to High(TestStrings) div 2 do begin
+    StrCopy(src,@TestStrings[2*i][1]);
+    DetabPChar(dest, src, 8);
+    CheckTrue(dest=TestStrings[2*i+1],Format('DeTab failed for "%s"',[TestStrings[2*i]]));
+  end;
+end;
+
 
 initialization
   RegisterTest(TTestOVCStr.Suite);
