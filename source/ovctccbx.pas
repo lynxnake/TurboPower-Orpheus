@@ -242,6 +242,11 @@ var
 
 implementation
 
+{$IFDEF VERSION2010}
+uses
+  Themes;
+{$ENDIF}
+
 const
   ComboBoxHeight = 24;
 
@@ -503,6 +508,10 @@ procedure TOvcTCCustomComboBox.DrawButton(Canvas       : TCanvas;
     RightPixel   : Integer;
     SrcRect      : TRect;
     DestRect     : TRect;
+{$IFDEF VERSION2010}
+  Details: TThemedElementDetails;
+  BtnRect: TRect;
+{$ENDIF}
   begin
     {Calculate the effective cell width (the cell width less the size
      of the button)}
@@ -514,6 +523,16 @@ procedure TOvcTCCustomComboBox.DrawButton(Canvas       : TCanvas;
     TopPixel := CellRect.Top + 1;
     BotPixel := CellRect.Bottom - 1;
 
+    {$IFDEF VERSION2010}
+    if ThemeServices.ThemesEnabled then
+    begin
+      Details := ThemeServices.GetElementDetails(tcDropDownButtonNormal);
+      BtnRect := CellRect;
+      BtnRect.Left := CellRect.Right - OvcComboBoxButtonWidth;
+      ThemeServices.DrawElement(canvas.handle, Details, BtnRect);
+    end
+    else
+    {$ENDIF}
     {Paint the button}
     with Canvas do
       begin
