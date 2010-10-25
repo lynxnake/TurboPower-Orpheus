@@ -1958,6 +1958,8 @@ var
 
       CurNode.ButtonRect := Rect(0, 0, 0, 0);
 
+      LineCanvas.Canvas.Brush.Bitmap := nil; //SZ clear brush bitmap, otherwise paint problem when OvcOutLine1.Color = clWhite (brush image fills entire rectangle)
+
       if ShowButtons and (CurNode.HasChildren or ((CurNode.Mode <> omPreload)
         and not CurNode.ExpandEventCalled)) then begin
         {draw button}
