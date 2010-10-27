@@ -216,6 +216,7 @@ type
     edRectSelect        : Boolean;    { 4.08 True if we are selecting a        }
                                       {      rectangular block of text         }
     edRectSelectDiff    : Integer;
+
     {property methods}
     function GetFirstEditor : TOvcCustomEditor;
     function GetInsCaretType : TOvcCaret;
@@ -611,7 +612,7 @@ type
                         BufSize : LongInt) : LongInt;
       {-copy text in editor into Buffer; limit is Size (includes null)}
     function GetTextLen : LongInt;
-      {-get the total number of bytes of text}
+      {-get the total number of characters}
     function HasSelection : Boolean;
       {-return True if any text is selected}
     procedure Insert(S : PChar);
@@ -841,7 +842,10 @@ type
     FFileName   : string;
     FMakeBackup : Boolean;
     FIsOpen     : Boolean;
-
+{$IFDEF UNICODE}
+    FEncoding   : TEncoding;          {encoding of the file}
+                                      {see LoadFromFile}
+{$ENDIF}
     {property methods}
     procedure SetFileName(const Value : string);
       {-set name of file being edited}
@@ -854,14 +858,16 @@ type
       {-fixup file name}
 
   protected
-    procedure CreateWnd;
-      override;
     procedure Loaded;
       override;
 
   public
     constructor Create(AOwner : TComponent);
       override;
+{$IFDEF UNICODE}
+    destructor Destroy;
+      override;
+{$ENDIF}
 
     procedure Attach(Editor : TOvcCustomEditor);
       override;
@@ -876,12 +882,14 @@ type
       {-open the file for editing}
 
 {$IFDEF UNICODE}
+    function suggestEncoding: TEncoding;
+      {-suggest an encoding for SaveToFile based on FEncoding and the
+        content of the editor. }
     procedure SaveToFile(const Name : string; const AEncoding: TEncoding = nil); dynamic;
 {$ELSE}
     procedure SaveToFile(const Name : string); dynamic;
 {$ENDIF}
       {-write the text in the specified file}
-
 
     {public properties}
     property BackupExt : string
@@ -1417,13 +1425,8 @@ begin
       GP^ := #0;
 
       {strip control chars}
-  (*
-      for I := 0 to StrLen(GPs)-1 do
-        if GPs[I] < #10 then
-          GPs[I] := #32;
-  *)
       for I := 0 to StrLen(GPs)-1 do begin
-        if (FKeepClipboardChars) then begin
+        if FKeepClipboardChars then begin
           if not ovcCharInSet(GPs[I], FClipboardChars) and
                  (GPs[I] <= #32) then
             GPs[I] := #32;
@@ -4479,9 +4482,9 @@ begin
 end;
 
 function TOvcCustomEditor.GetTextLen : LongInt;
-  {-get the total number of bytes of text}
+  {-get the total number of characters of text}
 begin
-  Result := edParas.ByteCount;
+  Result := edParas.CharCount;
 end;
 
 function TOvcCustomEditor.GetTopLine : LongInt;
@@ -4563,9 +4566,9 @@ var
   FR, CR      : TRect;
   TC, BC      : TColor;
   HTC, HBC    : TColor;
-  SA          : PChar;     {actual string, w/o tab expansion}
+  SA          : PChar;         {actual string, w/o tab expansion}
   SALen       : Word;          {length of SA}
-  ST          : PChar;     {string with tab expansion}
+  ST          : PChar;         {string with tab expansion}
   NoHighlight : Boolean;
   FirstRow    : Integer;
   LastRow     : Integer;
@@ -4580,6 +4583,8 @@ var
   OldColor    : TColor;
   OldWidth    : Integer;
   OldStyle    : TPenStyle;
+  lpDxVal     : Integer;
+  lpDx        : array of Integer;
 
   procedure NormalColors;
   begin
@@ -4673,7 +4678,7 @@ var
     Save := FR.Left;
     if FMargins.Left.Enabled then
       FR.Left := FR.Left + MARGINPAD - 1;
-    ExtTextOut(Canvas.Handle, FR.Left, FR.Top+1, etoFlags, @FR, S, Len, nil);
+    ExtTextOut(Canvas.Handle, FR.Left, FR.Top+1, etoFlags, @FR, S, Len, @lpDX[0]);
     FR.Left := Save;
   end;
 
@@ -4838,6 +4843,7 @@ var
         ST := T;
         Len := HEmax-1;
       end;
+
       if edHDelta >= Len then begin
         S := '';
         SA := S;
@@ -4849,6 +4855,20 @@ var
         if Len > edCols then
           Len := edCols;
       end;
+
+      { 4.08: Some characters in S might not be printable or will not have the
+              proper width; Depending on the Windows version, ExtTextout handles these
+              characters differently - which might cause trouble. For example
+              S = 'X'#152'X'  -> XP: 'X X'  Vista: 'XX'
+              S = 'x'#152'a'  -> XP: 'x a'  Vista: 'xã'
+        If the width of a character ist not fix, strange effects will show up
+        especially when selecting text. Therefore, we force ExtTextOut to strictly use
+        a constant character-spacing using the parameter lpDx. }
+      if Length(lpDx)<Len then begin
+        SetLength(lpDx,Len);
+        for I := 0 to Len-1 do lpDx[I] := lpDxVal;
+      end;
+
       if Assigned(FOnDrawLine) then begin
         {set bounding rectangle}
         SetRowRect(Row);
@@ -4867,7 +4887,7 @@ var
           DrawComplexRow(S, Len, Row, N);
       end;
       if (T <> nil) and (AllocSize > 0) then
-        FreeMem(T{, AllocSize * SizeOf(Char)});
+        FreeMem(T, AllocSize * SizeOf(Char));
     end;
     {reset FR}
     FR.Left := CR.Left + GetLeftMargin;
@@ -4996,6 +5016,9 @@ begin
   NormalColors;
 
   {display the text}
+  SetLength(lpDx,512);
+  lpDxVal := Canvas.TextWidth('x');
+  for I := 0 to 511 do lpDx[I] := lpDxVal;
   for I := 1 to edRows do
     DrawRow(edTopLine + Pred(I), I);
 
@@ -5553,7 +5576,7 @@ procedure TOvcCustomEditor.SetSelection(Line1 : LongInt; Col1 : Integer;
                                Line2 : LongInt; Col2 : Integer;
                                CaretAtEnd : Boolean);
 begin
-  if edParas.ByteCount > 0 then begin
+  if edParas.CharCount > 0 then begin
 
     {force valid selection range}
     if Line1 < 1 then
@@ -6016,7 +6039,7 @@ begin
   if not Focused and CanFocus then
     Windows.SetFocus(Handle);
 
-  if (edParas.ByteCount <> 0) then begin
+  if edParas.CharCount > 0 then begin
     { activate RectSelection if ALt-Key is pressed }
     edRectSelect := not WordWrap and (GetKeyState(VK_MENU)<0);
 
@@ -6292,15 +6315,21 @@ begin
   FBackupExt  := 'BAK';
   FIsOpen     := False;
   FMakeBackup := False;
+{$IFDEF UNICODE}
+  FEncoding   := TEncoding.Default;
+{$ENDIF}
 end;
 
-procedure TOvcCustomTextFileEditor.CreateWnd;
+{$IFDEF UNICODE}
+destructor TOvcCustomTextFileEditor.Destroy;
 begin
-  inherited CreateWnd;
+  if not TEncoding.IsStandardEncoding(FEncoding) then
+    FEncoding.Free;
 
-  {if FIsOpen then}
-    {LoadFromFile(FFileName);}
+  inherited Destroy;
 end;
+{$ENDIF}
+
 
 procedure TOvcCustomTextFileEditor.Loaded;
 begin
@@ -6310,53 +6339,78 @@ begin
     LoadFromFile(FFileName);
 end;
 
+
 {$IFDEF UNICODE}
 procedure TOvcCustomTextFileEditor.LoadFromFile(const Name : string; const AEncoding: TEncoding);
 var
-  pFile: TStringList;
-  sLine: string;
-  iCount: Integer;
+  FileStream      : TFileStream;
+  Buffer          : TBytes;
+  sBuffer, P1, P2 : PChar;
+  sLine           : string;
+  BOMSize         : Integer;
+  Encoding        : TEncoding;
 begin
   if Name = '' then
     Exit;
 
   {save FileName}
   FFileName := teFixFileName(Name);
-  pFile := nil;
   try
     {display hourglass}
     Screen.Cursor := crHourGlass;
     try
-      {open the file}
-      pFile := TStringList.Create;
-      pFile.LoadFromFile(Name, AEncoding);
-
       {delete existing text and allow display to be refreshed}
-      {if HandleAllocated then begin}
-        DeleteAll(True);
-        Update;
-      {end;}
+      DeleteAll(True);
+      Update;
 
-      {read the file}
-      for iCount := 0 to pFile.Count - 1 do
-      begin
-        sLine := pFile[iCount];
+      FileStream := TFileStream.Create(Name, fmOpenRead or fmShareDenyWrite);
+      try
+        {read text from file into Buffer}
+        SetLength(Buffer, FileStream.Size);
+        FileStream.Read(Buffer[0], FileStream.Size);
+      finally
+        FileStream.Free;
+      end;
 
-        case AppendPara(PChar(sLine)) of
-          0              : {};
-          oeTooManyBytes : raise EEditorError.Create(GetOrphStr(SCTooManyBytes), 0);
-          oeTooManyParas : raise EEditorError.Create(GetOrphStr(SCTooManyParas), 0);
-          oeParaTooLong  : raise EEditorError.Create(GetOrphStr(SCParaTooLong), 0);
-        else
-          raise EEditorError.Create(GetOrphStr(SCOutOfMemory), 0);
+      {get the Encoding and decode Buffer to sBuffer}
+      Encoding := nil;
+      BOMSize := TEncoding.GetBufferEncoding(Buffer, Encoding, TEncoding.Default);
+      {setting FEncoding is not that simple...}
+      if not TEncoding.IsStandardEncoding(FEncoding) then
+        FEncoding.Free;
+      if TEncoding.IsStandardEncoding(Encoding) then
+        FEncoding := Encoding
+      else
+        FEncoding := Encoding.Clone;
+      sBuffer := PChar(FEncoding.GetString(Buffer, BOMSize, Length(Buffer) - BOMSize));
+
+      {extract lines from sBuffer and append}
+      if Assigned(sBuffer) then begin
+        P1 := sBuffer;
+        while P1^<>#0 do begin
+          {Find the end of the next line}
+          P2 := P1;
+          while (P2^<>#0) and (P2^<>#10) and (P2^<>#13) do Inc(P2);
+          SetString(sLine, P1, P2 - P1);
+          {Append the line}
+          case AppendPara(PChar(sLine)) of
+            0              : {};
+            oeTooManyBytes : raise EEditorError.Create(GetOrphStr(SCTooManyBytes), 0);
+            oeTooManyParas : raise EEditorError.Create(GetOrphStr(SCTooManyParas), 0);
+            oeParaTooLong  : raise EEditorError.Create(GetOrphStr(SCParaTooLong), 0);
+          else
+            raise EEditorError.Create(GetOrphStr(SCOutOfMemory), 0);
+          end;
+          {go to the beginning of the next line}
+          P1 := P2;
+          if P1^ = #13 then Inc(P1);
+          if P1^ = #10 then Inc(P1);
         end;
       end;
 
       {reset the scroll bars}
       ResetScrollBars(True);
     finally
-      {free the List}
-      pFile.Free;
       {restore original cursor}
       Screen.Cursor := crDefault;
     end;
@@ -6465,32 +6519,76 @@ begin
 
   {reset file name}
   FileName := Name;
-end;
 
 {$IFDEF UNICODE}
+  FreeAndNil(FEncoding);
+  FEncoding := TEncoding.Default;
+{$ENDIF}
+end;
+
+
+procedure MakeBakFile(const NewName,BackupExt : string);
+  {-make a backup file}
+var
+  BakName : string;
+begin
+  if FileExists(NewName) then begin
+    BakName := ChangeFileExt(NewName, '.' + BackupExt);
+    if NewName = BakName then
+      Exit;
+
+    DeleteFile(BakName);
+    RenameFile(NewName, BakName);
+  end;
+end;
+
+
+{$IFDEF UNICODE}
+
+function hasIntChar(P:PChar): Boolean; register;
+  {-determine whether P contains characters c with Ord(c)>255}
+asm
+  push   esi            {save}
+  mov    esi,eax        {esi := P}
+  xor    eax,eax        {eax := 0}
+  cld
+  mov    ecx,-1
+@loop:
+  lodsw
+  and    ax,ax
+  jz @end               {end of string}
+  and    ah,ah
+  loopz @loop
+  mov    eax,-1         {ax>255; return true}
+@end:
+  pop    esi            {restore}
+end;
+
+
+function TOvcCustomTextFileEditor.suggestEncoding: TEncoding;
+  {-suggest an encoding for SaveToFile (either FEncoding or
+    TEncoding.UTF8) - based on the content of the editor. }
+var
+  I : LongInt;
+begin
+  I := ParaCount;
+  while (I>0) and (not hasIntChar(GetParaPointer(I))) do
+    Dec(I);
+  if (I>0) and FEncoding.IsSingleByte then
+    result := TEncoding.UTF8
+  else
+    result := FEncoding.Clone;
+end;
+
 
 procedure TOvcCustomTextFileEditor.SaveToFile(const Name : string; const AEncoding: TEncoding);
   {-write the current file to disk}
 var
-  I, PC : LongInt;
-  J     : Longint;
-  sBuffer: string;
-  pFile: TStringList;
-  procedure MakeBakFile(const NewName : string);
-    {-make a backup file}
-  var
-    BakName : string;
-  begin
-    if FileExists(NewName) then begin
-      BakName := ChangeFileExt(NewName, '.' + FBackupExt);
-      if NewName = BakName then
-        Exit;
-
-      DeleteFile(BakName);
-      RenameFile(NewName, BakName);
-    end;
-  end;
-
+  I, PC, J         : LongInt;
+  sBuffer          : string;
+  FileStream       : TFileStream;
+  Buffer, Preamble : TBytes;
+  Encoding         : TEncoding;
 begin
   if csDesigning in ComponentState then
     Exit;
@@ -6498,47 +6596,53 @@ begin
   if Name = '' then
     Exit;
 
-  pFile := nil;
   {display hourglass}
   Screen.Cursor := crHourGlass;
   try
     {make backup file if appropriate}
     if FMakeBackup then
-      MakeBakFile(Name);
+      MakeBakFile(Name,FBackupExt);
 
-    {get number of paragraphs}
-    PC := ParaCount;
+    {determine the encoding to be used}
+    if Assigned(AEncoding) then
+      Encoding := AEncoding
+    else
+      Encoding := suggestEncoding;
 
-    pFile := TStringList.Create;
+    FileStream := TFileStream.Create(Name, fmCreate);
+    try
+      { Write BOM }
+      Preamble := Encoding.GetPreamble;
+      if Length(Preamble) > 0 then
+        FileStream.WriteBuffer(Preamble[0], Length(Preamble));
 
-    {create the file}
-    I := 1;
-    repeat
-      sBuffer := GetParaPointer(I);
-
-      for J := 1 to Length(sBuffer) do
-      begin
-        if (FKeepClipboardChars) then
-        begin
+      {get number of paragraphs}
+      PC := ParaCount;
+      I := 1;
+      repeat
+        {get next paragraph}
+        sBuffer := GetParaPointer(I);
+        for J := 1 to Length(sBuffer) do begin
+          if FKeepClipboardChars then begin
           if not ovcCharInSet(sBuffer[J], FClipboardChars) and
                  (sBuffer[J] <= #32) then
             sBuffer[J] := #32;
-        end
-        else
-          if (sBuffer[J] < #10) then
+          end else if sBuffer[J] < #10 then
             sBuffer[J] := #32;
-      end;
-
-      if (I < PC) or (sBuffer <> '') then
-        pFile.Add(sBuffer);
-
-      Inc(I);
-    until (I > PC);
-
-    pFile.SaveToFile(Name, AEncoding);
-
+        end;
+        {encode sBuffer and write to file}
+        if (I < PC) or (sBuffer <> '') then begin
+          if I < PC then
+            sBuffer := sBuffer + #13#10;
+          Buffer  := Encoding.GetBytes(sBuffer);
+          FileStream.WriteBuffer(Buffer[0], Length(Buffer));
+        end;
+        Inc(I);
+      until (I > PC);
+    finally
+      FileStream.Free;
+    end;
   finally
-    pFile.Free;
     {restore cursor}
     Screen.Cursor := crDefault;
   end;
@@ -6549,7 +6653,7 @@ end;
 
 {$ELSE}
 
-procedure TOvcCustomTextFileEditor.SaveToFile(const Name : string);   //SZ FIXME: write correct text files Ansi/Unicode
+procedure TOvcCustomTextFileEditor.SaveToFile(const Name : string);
   {-write the current file to disk}
 const
   BufSize = 8192 * SizeOf(Char);
@@ -6560,21 +6664,6 @@ var
   Buf   : Pointer;
   S     : PChar;
   S2    : PChar;
-
-  procedure MakeBakFile(const NewName : string);
-    {-make a backup file}
-  var
-    BakName : string;
-  begin
-    if FileExists(NewName) then begin
-      BakName := ChangeFileExt(NewName, '.' + FBackupExt);
-      if NewName = BakName then
-        Exit;
-
-      DeleteFile(BakName);
-      RenameFile(NewName, BakName);
-    end;
-  end;
 
 begin
   if csDesigning in ComponentState then
@@ -6590,7 +6679,7 @@ begin
   try
     {make backup file if appropriate}
     if FMakeBackup then
-      MakeBakFile(Name);
+      MakeBakFile(Name,FBackupExt);
 
     {open the file}
     System.Assign(F, Name);
@@ -6620,16 +6709,6 @@ begin
 
           {make a copy to alter}
           StrCopy(S2, S);
-
-(*
-          {strip control chars}
-          for J := 0 to LongInt(StrLen(S2))-1 do
-            if S2[J] < #10 then
-              S2[J] := #32;
-*)
-(*
-          for J := 0 to LongInt(StrLen(S2)-1) do begin
-*)
           for J := 0 to LongInt(StrLen(S2))-1 do begin
             if (FKeepClipboardChars) then begin
               if not ovcCharInSet(S2[J], FClipboardChars) and

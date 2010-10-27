@@ -62,7 +62,7 @@ type
     LastN      : LongInt;      {last line found}
     LastO      : Integer;      {lastO is line offset into LastNode for LastN}
     ParaCount  : LongInt;      {total number of paragraphs}
-    ByteCount  : LongInt;      {total number of bytes}
+    CharCount  : LongInt;      {total number of characters}
     LineCount  : LongInt;      {total number of lines}
     MaxParas   : LongInt;      {max number of paragraphs}
     MaxBytes   : LongInt;      {max number of bytes}
@@ -314,9 +314,9 @@ begin
   else begin
     PlaceBefore(PPN, Tail);
     SetLastNode(Head, 1, 1, 1);
-    Inc(ByteCount, SLen+2);
+    Inc(CharCount, SLen+2);
     if Trim then
-      Dec(ByteCount, PPN.TrimWhiteSpace);
+      Dec(CharCount, PPN.TrimWhiteSpace);
     Inc(LineCount, PPN.LineCount);
     Result := 0;
   end;
@@ -415,8 +415,14 @@ begin
   UndoBuffer.BeginComplexOp(SaveLinking);
   if (Pos1 = 1) and (Pos2 = 1) then begin
     {these are whole paragraphs that need to be deleted}
-    for I := Para2-1 downto Para1 do
+    { 4.08 FixMarkers=True will slow down the loop drastically
+           (especially when deleting a lot of paragraphs); so
+           just set FixMarkers=True for the last paragraph }
+    FixMarkers := False;
+    for P := Para2-1 downto Para1+1 do
       DeletePara(Editor, Para1);
+    FixMarkers := True;
+    DeletePara(Editor, Para1);
   end else begin
     {delete text in 1st paragraph}
     I := Succ(ParaLength(Para1)-Pos1);
@@ -428,8 +434,13 @@ begin
       DeleteText(Editor, Para2, 1, Pos2-1);
 
     {now scan and delete all intervening paragraphs}
-    for P := Para2-1 downto Para1+1 do
+    if Para2-1 <= Para1+1 then begin
+      FixMarkers := False;
+      for P := Para2-1 downto Para1+2 do
+        DeletePara(Editor, Para1+1);
+      FixMarkers := True;
       DeletePara(Editor, Para1+1);
+    end;
 
     {splice}
     JoinWithNext(Editor, Para1, ParaLength(Para1)+1);
@@ -468,7 +479,7 @@ begin
   {adjust counters}
   Dec(ParaCount);
   Dec(LineCount, PPN.LineCount);
-  Dec(ByteCount, PPN.SLen+2);
+  Dec(CharCount, PPN.SLen+2);
 
   {dispose of the node if we didn't create an undo record}
   if not InUndo then
@@ -498,7 +509,7 @@ begin
   LC := PPN.LineCount;
   MakeUndoRec(utDelete, P, Pos, @PPN.S[Pos-1], Count);
   PPN.DeleteText(Pos, Count, GetWrapColumn, TabSize, FL, LL);
-  Dec(ByteCount, Count);
+  Dec(CharCount, Count);
   Dec(LineCount, LC-PPN.LineCount);
   FLine := Pred(LastN)+FL;
   if PPN.LineCount <> LC then
@@ -738,7 +749,7 @@ begin
   Tail := nil;
   ParaCount := 0;
   LineCount := 1;
-  ByteCount := 0;
+  CharCount := 0;
   MaxParas := MaxLongInt;
   MaxBytes := MaxLongInt;
   MaxParaLen := High(SmallInt);
@@ -859,7 +870,7 @@ var
   PPN : TParaNode;
 begin
   PPN := NthPara(P);
-  Inc(ByteCount, NPN.SLen+2);
+  Inc(CharCount, NPN.SLen+2);
   NPN.Recalc(GetWrapColumn, TabSize);
   Inc(LineCount, NPN.LineCount);
   if PPN = nil then
@@ -926,7 +937,7 @@ begin
       MakeUndoRec(utInsert, P, Pos-Delta, @NS[OLen], Delta+SLen)
     else
       MakeUndoRec(utInsert, P, Pos, S, SLen);
-    Inc(ByteCount, NLen-OLen);
+    Inc(CharCount, NLen-OLen);
     Inc(LineCount, PPN.LineCount-LC);
     FLine := Pred(LastN)+FL;
     if PPN.LineCount <> LC then
@@ -1225,7 +1236,7 @@ begin
   end;
 
   {check for too many total bytes}
-  if ByteCount+Bytes > MaxBytes then begin
+  if CharCount+Bytes > MaxBytes then begin
     Result := oeTooManyBytes;
     Exit;
   end;
@@ -1299,7 +1310,7 @@ begin
   if PPN = nil then
     Exit;
 
-  Inc(ByteCount, NPN.SLen+2);
+  Inc(CharCount, NPN.SLen+2);
   NPN.Recalc(GetWrapColumn, TabSize);
   Inc(LineCount, NPN.LineCount);
   Place(NPN, PPN);
@@ -1336,7 +1347,7 @@ var
   WC  : Integer;
 begin
   {switch cursors if this is going to take a while}
-  if ByteCount > 10000 then
+  if CharCount > 10000 then
     Screen.Cursor := crHourGlass;
   try
     {recalculate the total number of lines}
@@ -1352,7 +1363,7 @@ begin
     SetLastNode(Head, 1, 1, 1);
   finally
     {restore cursor}
-    if ByteCount > 10000 then
+    if CharCount > 10000 then
       Screen.Cursor := crDefault;
   end;
 end;
@@ -1438,7 +1449,7 @@ begin
   if Result = 0 then begin
     Modified := True;
     Inc(LineCount, PPN.LineCount-LC);
-    Inc(ByteCount, StLen-Count);
+    Inc(CharCount, StLen-Count);
 
     FLine := Pred(LastN)+FL;
     if PPN.LineCount <> LC then
@@ -1618,11 +1629,11 @@ begin
   Inc(Last^.DSize, DLen);
 
   {adjust the BufAvail figure}
-  Dec(BufAvail, DLen);
+  Dec(BufAvail, DLen * SizeOf(Char));
 end;
 
 procedure TOvcUndoBuffer.AppendReplace(D : PChar; DLen : Word;
-                                    R : PChar; RLen : Word);
+                                       R : PChar; RLen : Word);
 var
   S : PChar;
   Len : Word;
@@ -1647,7 +1658,7 @@ begin
   Inc(Last^.DSize, RLen);
 
   {adjust the BufAvail figure}
-  Dec(BufAvail, DLen+RLen);
+  Dec(BufAvail, (DLen+RLen) * SizeOf(Char));
 end;
 
 procedure TOvcUndoBuffer.BeginComplexOp(var SaveLinking : Boolean);
@@ -1693,7 +1704,7 @@ begin
       {get rid of this group}
       Inc(I);
       GUN.Done(PUR);
-      Sz := PUR^.DSize + UndoRecSize;
+      Sz := PUR^.DSize * SizeOf(Char) + UndoRecSize;
       Inc(BufAvail, Sz);
       PtrInc(PUR, Sz);
     until (I = Undos) or (PUR^.LinkNum <> LN);
@@ -1780,7 +1791,7 @@ begin
   end;
   Dec(Redos);
   Inc(Undos);
-  Dec(BufAvail, DLen + UndoRecSize);
+  Dec(BufAvail, DLen * SizeOf(Char) + UndoRecSize);
   Last := PUR;
 end;
 
@@ -1799,7 +1810,7 @@ begin
   end;
   Dec(Undos);
   Inc(Redos);
-  Inc(BufAvail, DLen + UndoRecSize);
+  Inc(BufAvail, DLen * SizeOf(Char) + UndoRecSize);
   PtrDec(Last, Last^.PrevSize);
 end;
 
@@ -1851,7 +1862,7 @@ asm
 @@1:
   mov    ax,[esi].TUndoRec.DSize {size of next record}
 {$IFDEF UNICODE}
-  shl    ax,1
+  shl    ax,1                    {DSize is size in chars}
 {$ENDIF}
   add    esi,eax                 {point to next record}
   add    esi,UndoRecSize         {undo record size}
@@ -1905,7 +1916,7 @@ begin
   Inc(Last^.DSize, DLen);
 
   {adjust the BufAvail figure}
-  Dec(BufAvail, DLen);
+  Dec(BufAvail, DLen * SizeOf(Char));
 end;
 
 procedure TOvcUndoBuffer.Push(UT : UndoType; MF : Boolean;
@@ -1929,7 +1940,7 @@ begin
       Inc(CurLink);
 
   {make sure there's room}
-  Size := LongInt(DLen)*SizeOF(Char) + UndoRecSize;
+  Size := LongInt(DLen)*SizeOf(Char) + UndoRecSize;
   if not CheckSize(Size) then
     Exit;
 
@@ -1944,7 +1955,7 @@ begin
   GUN.Init(PUR, UT, CurLink, MF, PSize, P, Pos, D, DLen);
   Last := PUR;
   Redos := 0;
-  Dec(BufAvail, Size);
+  Dec(BufAvail, Size * SizeOf(Char));
 end;
 
 procedure TOvcUndoBuffer.PushReplace(MF : Boolean; P : LongInt; Pos : Integer;
@@ -1980,7 +1991,7 @@ begin
   GUN.InitReplace(PUR, CurLink, MF, PSize, P, Pos, D, DLen, R, RLen);
   Last := PUR;
   Redos := 0;
-  Dec(BufAvail, Size);
+  Dec(BufAvail, Size * SizeOf(Char));
 end;
 
 function TOvcUndoBuffer.SameOperation(UT : UndoType; var Before : Boolean;

@@ -65,7 +65,7 @@ type
   TUndoRec = packed record
     PNum     : LongInt;    {paragraph number}
     PPos     : Integer;    {position in paragraph}
-    DSize    : Word;       {data size}
+    DSize    : Word;       {data size in characters (unicode: not bytes)}
     PrevSize : Word;       {size of previous record}
     Flags    : Byte;       {contains undo type and flags}
     LinkNum  : Byte;       {link number}

@@ -14,10 +14,10 @@ object Form1: TForm1
   PixelsPerInch = 96
   TextHeight = 13
   object OvcEditor: TOvcEditor
-    Left = 14
-    Top = 14
-    Width = 200
-    Height = 150
+    Left = 8
+    Top = 6
+    Width = 227
+    Height = 78
     CaretOvr.Shape = csBlock
     FixedFont.Color = clWindowText
     FixedFont.Name = 'Terminal'
@@ -30,5 +30,24 @@ object Form1: TForm1
     MarginOptions.Left.LinePosition = 15
     RightMargin = 5
     TabOrder = 0
+  end
+  object OvcTextFileEditor: TOvcTextFileEditor
+    Left = 8
+    Top = 90
+    Width = 227
+    Height = 93
+    AutoIndent = False
+    CaretOvr.Shape = csBlock
+    FixedFont.Color = clWindowText
+    FixedFont.Name = 'Terminal'
+    FixedFont.Size = 8
+    FixedFont.Style = []
+    HighlightColors.BackColor = clHighlight
+    HighlightColors.TextColor = clHighlightText
+    LeftMargin = 15
+    MarginOptions.Right.LinePosition = 5
+    MarginOptions.Left.LinePosition = 15
+    RightMargin = 5
+    TabOrder = 1
   end
 end

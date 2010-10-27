@@ -197,7 +197,7 @@ asm
 end;
 {$ENDIF}
 
-function edFindNextLine(S : PChar; WrapCol : Integer) : PChar; register; // FIXME
+function edFindNextLine(S : PChar; WrapCol : Integer) : PChar; register;
   {-find the start of the next line}
 {$IFDEF UNICODE}
 asm
@@ -316,7 +316,7 @@ asm
 end;
 {$ENDIF}
 
-function edFindPosInMap(Map : Pointer; Lines, Pos : Integer) : Integer; register;       // Tiburon FIXME
+function edFindPosInMap(Map : Pointer; Lines, Pos : Integer) : Integer; register;
   {-return the para position}
 asm
   push   esi            {save}
@@ -568,57 +568,29 @@ begin
   Result := edPadChPrim(S, ' ', Len);
 end;
 
-function edScanToEnd(P : PChar; Len : Word) : Word; register;  // FIXME
-  {-return position of end of para P}
+function edScanToEnd(P : PChar; Len : Word) : Word; register;
+  {-return position of end of para P
+    (The smallest index 0<i<Len for which P[i-1]=#10; i=Len if there is no #10.) }
+asm
+  movzx  ecx,dx         {ecx = Len}
+  jecxz  @@9            {if Len=0 then result := 0 }
+
+  push   edi            {save edi}
+  mov    edi,eax        {edi = P}
+  cld
 {$IFDEF UNICODE}
-asm
-  push   edi            {save}
-  push   ebx            {save}
-
-  mov    edi,eax        {edi = P}
-  mov    ebx,edi        {save edi}
-  mov    ecx,edx        {ecx = Len}
-  and    ecx,0FFFFh     {clear high word}
-  mov    edx,ecx        {default for exit}
-  mov    ax, 0Ah
-  cld
-  jecxz  @@9
-  repne  scasw
-  jne    @@9
-  mov    edx,edi
-  sub    edx,ebx        {find difference}
-  shr    edx,1          {!!WK}
-@@9:
-  mov    eax,edx
-
-  pop    ebx            {restore}
-  pop    edi            {restore}
-end;
-
+  mov    ax, 0Ah        {ax  = $0a (char we are looking for)}
+  repne  scasw          {search for ax}
 {$ELSE}
-asm
-  push   edi            {save}
-  push   ebx            {save}
-
-  mov    edi,eax        {edi = P}
-  mov    ebx,edi        {save edi}
-  mov    ecx,edx        {ecx = Len}
-  and    ecx,0FFFFh     {clear high word}
-  mov    edx,ecx        {default for exit}
-  mov    al, 0Ah
-  cld
-  jecxz  @@9
-  repne  scasb
-  jne    @@9
-  mov    edx,edi
-  sub    edx,ebx        {find difference}
-@@9:
-  mov    eax,edx
-
-  pop    ebx            {restore}
-  pop    edi            {restore}
-end;
+  mov    al, 0Ah        {al  = $0a (char we are looking for)}
+  repne  scasb          {search for al}
 {$ENDIF}
+  sub    dx, cx         {dx = Len-cx}
+  pop    edi            {restore}
+@@9:
+  mov    ax,dx
+end;
+
 
 function edStrStInsert(Dest, S : PChar; DLen, SLen, Pos : Word) : PChar; register;
   {-insert S into Dest}
