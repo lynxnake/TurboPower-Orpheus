@@ -136,7 +136,8 @@ function UpCaseChar(C : Char) : Char;
 
 function ovcCharInSet(C: Char; const CharSet: TOvcCharSet): Boolean;
 
-function ovc32StringIsCurrentCodePage(const S: WideString): Boolean;
+function ovc32StringIsCurrentCodePage(const S: {$IFDEF UNICODE}UnicodeString{$ELSE}WideString{$ENDIF}): Boolean; overload;
+function ovc32StringIsCurrentCodePage(const S: PWideChar): Boolean; overload;
 
 
 implementation
@@ -1763,7 +1764,7 @@ begin
 {$ENDIF}
 end;
 
-function ovc32StringIsCurrentCodePage(const S: WideString): Boolean;
+function ovc32StringIsCurrentCodePage(const S: {$IFDEF UNICODE}UnicodeString{$ELSE}WideString{$ENDIF}): Boolean;
 // returns True if a string can be displayed using the current system codepage
 const
   WC_NO_BEST_FIT_CHARS = $00000400;
@@ -1772,8 +1773,37 @@ var
   UsedDefaultChar: BOOL;   // not Boolean!!
   Len: Integer;
 begin
+  if Length(S) = 0 then
+  begin
+    Result := True;
+    Exit;
+  end;
+
   UsedDefaultChar := False;
   Len := WideCharToMultiByte(CP_APC, WC_NO_BEST_FIT_CHARS, PWideChar(S), Length(S), nil, 0, nil, @UsedDefaultChar);
+  if Len <> 0 then
+    Result := not UsedDefaultchar
+  else
+    Result := False;
+end;
+
+function ovc32StringIsCurrentCodePage(const S: PWideChar): Boolean;
+// returns True if a string can be displayed using the current system codepage
+const
+  WC_NO_BEST_FIT_CHARS = $00000400;
+  CP_APC = 0;
+var
+  UsedDefaultChar: BOOL;   // not Boolean!!
+  Len: Integer;
+begin
+  if StrLen(S) = 0 then
+  begin
+    Result := True;
+    Exit;
+  end;
+
+  UsedDefaultChar := False;
+  Len := WideCharToMultiByte(CP_APC, WC_NO_BEST_FIT_CHARS, S, StrLen(S), nil, 0, nil, @UsedDefaultChar);
   if Len <> 0 then
     Result := not UsedDefaultchar
   else

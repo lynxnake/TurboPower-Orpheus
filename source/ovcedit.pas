@@ -6374,15 +6374,20 @@ begin
 
       {get the Encoding and decode Buffer to sBuffer}
       Encoding := nil;
-      BOMSize := TEncoding.GetBufferEncoding(Buffer, Encoding, TEncoding.Default);
+      BOMSize := TEncoding.GetBufferEncoding(Buffer, Encoding {$IFDEF VERSIONXE}, TEncoding.Default{$ENDIF});
+      sBuffer := PChar(Encoding.GetString(Buffer, BOMSize, Length(Buffer) - BOMSize));
+
       {setting FEncoding is not that simple...}
       if not TEncoding.IsStandardEncoding(FEncoding) then
         FEncoding.Free;
       if TEncoding.IsStandardEncoding(Encoding) then
         FEncoding := Encoding
       else
+        {$IFDEF VERSIONXE}
         FEncoding := Encoding.Clone;
-      sBuffer := PChar(FEncoding.GetString(Buffer, BOMSize, Length(Buffer) - BOMSize));
+        {$ELSE}
+        FEncoding := TEncoding.Default; // we cannot clone the encoding in Delphi 2010 or less, so use default
+        {$ENDIF}
 
       {extract lines from sBuffer and append}
       if Assigned(sBuffer) then begin
@@ -6521,7 +6526,9 @@ begin
   FileName := Name;
 
 {$IFDEF UNICODE}
-  FreeAndNil(FEncoding);
+  if not TEncoding.IsStandardEncoding(FEncoding) then
+    FreeAndNil(FEncoding);
+
   FEncoding := TEncoding.Default;
 {$ENDIF}
 end;
@@ -6564,7 +6571,6 @@ asm
   pop    esi            {restore}
 end;
 
-
 function TOvcCustomTextFileEditor.suggestEncoding: TEncoding;
   {-suggest an encoding for SaveToFile (either FEncoding or
     TEncoding.UTF8) - based on the content of the editor. }
@@ -6572,12 +6578,12 @@ var
   I : LongInt;
 begin
   I := ParaCount;
-  while (I>0) and (not hasIntChar(GetParaPointer(I))) do
+  while (I>0) and (ovc32StringIsCurrentCodePage(GetParaPointer(I))) do  //SZ: hasIntChar fails for few characters (for example Unicode #0338 is #154 in CodeTable 1252)
     Dec(I);
   if (I>0) and FEncoding.IsSingleByte then
     result := TEncoding.UTF8
   else
-    result := FEncoding.Clone;
+    Result := FEncoding; //SZ: don't clone it, because we don't free it later
 end;
 
 
