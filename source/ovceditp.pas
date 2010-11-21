@@ -429,16 +429,18 @@ begin
     if I > 0 then
       DeleteText(Editor, Para1, Pos1, I);
 
-    {delete text in 2st paragraph}
+    {delete text in last paragraph}
     if Pos2 > 1 then
       DeleteText(Editor, Para2, 1, Pos2-1);
 
     {now scan and delete all intervening paragraphs}
-    if Para2-1 <= Para1+1 then begin
-      FixMarkers := False;
-      for P := Para2-1 downto Para1+2 do
-        DeletePara(Editor, Para1+1);
-      FixMarkers := True;
+    if Para2-1 >= Para1+1 then begin
+      if Para2-1 > Para1+1 then begin
+        FixMarkers := False;
+        for P := Para2-1 downto Para1+2 do
+          DeletePara(Editor, Para1+1);
+        FixMarkers := True;
+      end;
       DeletePara(Editor, Para1+1);
     end;
 
