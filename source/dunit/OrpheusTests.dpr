@@ -5,7 +5,7 @@ program OrpheusTests;
 {$ENDIF}
 
 uses
-//FastMM4,
+  //FastMM4,
   MidasLib,
   Forms,
   TestFramework,
@@ -17,6 +17,7 @@ uses
   TestOvcFormatSettings in 'TestOvcFormatSettings.pas',
   TestOvcDbPictureField in 'TestOvcDbPictureField.pas',
   TestOvcDbSimpleField in 'TestOvcDbSimpleField.pas',
+  TestOvcPictureField in 'TestOvcPictureField.pas' {frmTestOvcPictureField},
   TestOVCStr in 'TestOVCStr.pas',
   TestOVCEdit in 'TestOVCEdit.pas' {Form1};
 
