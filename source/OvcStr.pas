@@ -137,7 +137,7 @@ function UpCaseChar(C : Char) : Char;
 function ovcCharInSet(C: Char; const CharSet: TOvcCharSet): Boolean;
 
 function ovc32StringIsCurrentCodePage(const S: {$IFDEF UNICODE}UnicodeString{$ELSE}WideString{$ENDIF}): Boolean; overload;
-function ovc32StringIsCurrentCodePage(const S: PWideChar): Boolean; overload;
+function ovc32StringIsCurrentCodePage(const S: PWideChar; CP:Cardinal=0): Boolean; overload;
 
 
 implementation
@@ -1787,23 +1787,32 @@ begin
     Result := False;
 end;
 
-function ovc32StringIsCurrentCodePage(const S: PWideChar): Boolean;
+function ovc32StringIsCurrentCodePage(const S: PWideChar; CP:Cardinal=0{CP_APC}): Boolean;
 // returns True if a string can be displayed using the current system codepage
 const
   WC_NO_BEST_FIT_CHARS = $00000400;
-  CP_APC = 0;
 var
   UsedDefaultChar: BOOL;   // not Boolean!!
-  Len: Integer;
+  LenS, Len: Integer;
 begin
-  if StrLen(S) = 0 then
+  // A.B. StrLen(S)=0 does not work in Delphi 2006
+  {$IFDEF UNICODE}
+  LenS := StrLen(S);
+  {$ELSE}
+  LenS := 0;
+  if Assigned(S) then begin
+    while S[LenS]<>#0 do Inc(LenS);
+  end;
+  {$ENDIF}
+
+  if LenS=0 then
   begin
     Result := True;
     Exit;
   end;
 
   UsedDefaultChar := False;
-  Len := WideCharToMultiByte(CP_APC, WC_NO_BEST_FIT_CHARS, S, StrLen(S), nil, 0, nil, @UsedDefaultChar);
+  Len := WideCharToMultiByte(CP, WC_NO_BEST_FIT_CHARS, S, LenS, nil, 0, nil, @UsedDefaultChar);
   if Len <> 0 then
     Result := not UsedDefaultchar
   else
