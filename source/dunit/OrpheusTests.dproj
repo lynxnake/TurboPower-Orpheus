@@ -52,6 +52,9 @@
 			<DCCReference Include="TestOvcFormatSettings.pas"/>
 			<DCCReference Include="TestOvcDbPictureField.pas"/>
 			<DCCReference Include="TestOvcDbSimpleField.pas"/>
+			<DCCReference Include="TestOvcPictureField.pas">
+				<Form>frmTestOvcPictureField</Form>
+			</DCCReference>
 			<DCCReference Include="TestOVCStr.pas"/>
 			<DCCReference Include="TestOVCEdit.pas">
 				<Form>Form1</Form>

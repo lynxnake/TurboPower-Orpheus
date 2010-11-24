@@ -2,27 +2,23 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
   Left = 0
   Top = 0
   Caption = 'Test'
-  ClientHeight = 112
-  ClientWidth = 443
+  ClientHeight = 86
+  ClientWidth = 460
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -14
+  Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
   OnCreate = FormCreate
-  PixelsPerInch = 120
-  TextHeight = 17
+  PixelsPerInch = 96
+  TextHeight = 13
   object OvcTable1: TOvcTable
-    Left = 24
-    Top = 21
-    Width = 401
-    Height = 59
-    Margins.Left = 4
-    Margins.Top = 4
-    Margins.Right = 4
-    Margins.Bottom = 4
+    Left = 18
+    Top = 16
+    Width = 413
+    Height = 45
     LockedRows = 0
     TopRow = 0
     ActiveRow = 0
@@ -45,23 +41,33 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     OnGetCellData = OvcTable1GetCellData
     CellData = (
       'frmTestOvcPictureField.OvcTCPictureField1'
-      'frmTestOvcPictureField.OvcTCString1')
+      'frmTestOvcPictureField.OvcTCString1'
+      'frmTestOvcPictureField.OvcTCNumericField1'
+      'frmTestOvcPictureField.OvcTCPictureField2')
     RowData = (
-      39)
+      30)
     ColData = (
-      196
+      100
       False
       True
       'frmTestOvcPictureField.OvcTCString1'
-      196
+      100
       False
       True
-      'frmTestOvcPictureField.OvcTCPictureField1')
+      'frmTestOvcPictureField.OvcTCPictureField1'
+      100
+      False
+      True
+      'frmTestOvcPictureField.OvcTCPictureField2'
+      100
+      False
+      True
+      'frmTestOvcPictureField.OvcTCNumericField1')
   end
   object OvcTCString1: TOvcTCString
     Table = OvcTable1
-    Left = 72
-    Top = 26
+    Left = 52
+    Top = 34
   end
   object OvcTCPictureField1: TOvcTCPictureField
     PictureMask = 'XXXXXXXXXXXXXXX'
@@ -73,9 +79,42 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     EFColors.Highlight.BackColor = clHighlight
     EFColors.Highlight.TextColor = clHighlightText
     Table = OvcTable1
-    Left = 214
+    Left = 156
     Top = 32
     RangeHigh = {00000000000000000000}
     RangeLow = {00000000000000000000}
+  end
+  object OvcTCPictureField2: TOvcTCPictureField
+    DataType = pftLongInt
+    PictureMask = 'iiiiiiiiiii'
+    MaxLength = 11
+    CaretOvr.Shape = csBlock
+    EFColors.Disabled.BackColor = clWindow
+    EFColors.Disabled.TextColor = clGrayText
+    EFColors.Error.BackColor = clRed
+    EFColors.Error.TextColor = clBlack
+    EFColors.Highlight.BackColor = clHighlight
+    EFColors.Highlight.TextColor = clHighlightText
+    Table = OvcTable1
+    Left = 256
+    Top = 32
+    RangeHigh = {FFFFFF7F000000000000}
+    RangeLow = {00000080000000000000}
+  end
+  object OvcTCNumericField1: TOvcTCNumericField
+    DataType = nftDouble
+    EFColors.Disabled.BackColor = clWindow
+    EFColors.Disabled.TextColor = clGrayText
+    EFColors.Error.BackColor = clRed
+    EFColors.Error.TextColor = clBlack
+    EFColors.Highlight.BackColor = clHighlight
+    EFColors.Highlight.TextColor = clHighlightText
+    Options = [efoCaretToEnd]
+    PictureMask = '#,###.##'
+    Table = OvcTable1
+    Left = 352
+    Top = 32
+    RangeHigh = {73B2DBB9838916F2FE43}
+    RangeLow = {73B2DBB9838916F2FEC3}
   end
 end

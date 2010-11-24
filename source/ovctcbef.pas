@@ -178,6 +178,7 @@ type
 implementation
 
 uses
+  OvcData, OvcConst, // A.B.
   Dialogs;
 
 type {for typecast to get around protected clause}
@@ -270,6 +271,10 @@ procedure TOvcTCBaseEntryField.EditMove(CellRect : TRect);
       end;
   end;
 {--------}
+// A.B.
+type
+  TPOvcBaseEntryField = class(TOvcBaseEntryField);
+
 procedure TOvcTCBaseEntryField.tcPaint(TableCanvas : TCanvas;
                                  const CellRect    : TRect;
                                        RowNum      : TRowNum;
@@ -289,7 +294,15 @@ procedure TOvcTCBaseEntryField.tcPaint(TableCanvas : TCanvas;
         FEditDisplay.Parent := FTable;
         SetWindowPos(FEditDisplay.Handle, HWND_TOP, 0, 0, 0, 0,
                      SWP_HIDEWINDOW or SWP_NOREDRAW or SWP_NOZORDER);
-        FEditDisplay.SetValue(Data);
+  // A.B. The way SetValue is coded, it needs a Pointer to the actual data in case of a
+  //      string - but the data itself in any other case. As 'Data' is a Pointer to the
+  //      actual data, we need to dereference Data except in case of a string.
+  //      The problem is, that we have no type-information on Data so we need to access
+  //      FEditDisplay's protected field efDataType...
+        if (TPOvcBaseEntryField(FEditDisplay).efDataType mod fcpDivisor) = fsubString then
+          FEditDisplay.SetValue(Data)
+        else
+          FEditDisplay.SetValue(Data^);
         S := Trim(FEditDisplay.DisplayString);
         inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, PChar(S));
       end;
@@ -299,7 +312,11 @@ procedure TOvcTCBaseEntryField.SaveEditedData(Data : pointer);
   begin
     if Assigned(Data) then
       begin
-        FEdit.GetValue(CopyOfData^);
+        //A.B. see 'TOvcTCBaseEntryField.tcPaint'
+        if (TPOvcBaseEntryField(FEdit).efDataType mod fcpDivisor) = fsubString then
+          FEdit.GetValue(CopyOfData)
+        else
+          FEdit.GetValue(CopyOfData^);
         Move(CopyOfData^, Data^, CopyOfDataSize);
       end;
   end;
@@ -339,7 +356,11 @@ procedure TOvcTCBaseEntryField.StartEditing(RowNum : TRowNum; ColNum : TColNum;
         Controller := TOvcTable(FTable).Controller;
         if (Controller = nil) then
           ShowMessage('NIL in StartEditing');
-        SetValue(CopyOfData^);
+        //A.B. see 'TOvcTCBaseEntryField.tcPaint'
+        if (TPOvcBaseEntryField(FEdit).efDataType mod fcpDivisor) = fsubString then
+          SetValue(CopyOfData)
+        else
+          SetValue(CopyOfData^);
         Visible := true;
 
         OnChange := Self.OnChange;
@@ -367,7 +388,11 @@ procedure TOvcTCBaseEntryField.StopEditing(SaveValue : boolean;
   begin
     if SaveValue and Assigned(Data) then
       begin
-        FEdit.GetValue(CopyOfData^);
+        //A.B. see 'TOvcTCBaseEntryField.tcPaint'
+        if (TPOvcBaseEntryField(FEdit).efDataType mod fcpDivisor) = fsubString then
+          FEdit.GetValue(CopyOfData)
+        else
+          FEdit.GetValue(CopyOfData^);
         Move(CopyOfData^, Data^, CopyOfDataSize);
       end;
     FreeMem(CopyOfData {, CopyOfDataSize});
