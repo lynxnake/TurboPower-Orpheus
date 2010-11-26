@@ -1,5 +1,63 @@
+Revision 166: (2010/11/26 Armin Biernaczyk)
+- TOvcTextFileEditor
+  New property 'Encoding' (unicode-version)
+  improved handling of encodings when loading/saving files:
+  a) TOvcCustomTextFileEditor.SaveToFile
+     If an encoding is passed to this method, it will be used even if not all the
+     characters can be coded.
+     If no encoding is specified, 'suggestEncoding' will be used to determine a suitable
+     encoding: If possible 'Encoding' will be used. However, if not all characters can be
+     coded, the method will use UTF8-encoding.
+     One can check in advance whether 'Encoding' will not be used by comparing 'Encoding'
+     with 'suggestEncoding'.
+  b) TOvcCustomTextFileEditor.LoadFromFile
+     If no encoding is passed to this method, it tries to derive the file's encoding from
+     it's BOM and uses TEncoding.Default as default. Otherwise the given encoding is
+     used as default. However, the given encoding will be ignored if the file's BOM indicates
+     a different encoding.
+
+     The used encoding is stored in 'Encoding' an will therefore be used when the file
+     is saved later (see a).
+
+- TOvcEditor
+  Selecting/copying/pasting of rectangular blocks of text did not work properly when the text
+  contained <tab>-characters
+
+Revision 164: (2010/11/24 Armin Biernaczyk)
+- TOvcTCBaseEntryField
+  Fixed a bug in TOvcTCBaseEntryField: Datatransfer did not work and caused exceptions.
+
+Revision 160: (2010/10/26 Armin Biernaczyk)
+- TOvcEditor
+  fixed wrong handling of TOvcUndoBuffer.BufAvail (unicode) that caused the TOvcEditor to
+  crash after some editing.
+  Improved performance of TOvcParaList.DeleteBlock (was quite slow when deleting a huge
+  amount of paragraphs)
+- TOvcCustomTextFileEditor
+  Improved handling of different encodings (unicode)
+
+Revision 156/157: (2010/10/23 Armin Biernaczyk)
+- TOvcEditor
+  Fixed unicode-version of ovcstr.DetabPChar and ovceditu.edGetActualCol
+  (TOvcEditor (unicode-version) now displays texts containing tab-characters correctly)
+
+Revision 149: (2010/10/04 Armin Biernaczyk)
+- TOvcEditor
+  Added support for selecting/copying/pasting rectangular blocks of text (as in the Delphi IDE)
+  does not yet work properly in case the text contains <tab>-characters.
+  (As in the Delphi-IDE press <AltGr> when selecting text with the mouse)
+
+Revision 147/148: (2010/10/04 Armin Biernaczyk)
+- TOvcEditor
+  Some bugs fixed in the Editor (unicode-version)
+
+Revision 142: (2010/10/03 Armin Biernaczyk)
+- TOvcEditor
+  Implemented search functions (unicode-version)
+
 Revision 49: (2009/11/28 Roman Kassebaum)
-- TOvcTCCustomString and with it TOvcTCString uses PString. This means the in the OnGetCellText event handler should look like the following:
+- TOvcTCCustomString and with it TOvcTCString uses PString. This means the in the OnGetCellText
+  event handler should look like the following:
   Data := @FString; (with FString: string, not a ShortString or AnsiString).
   This is the first revision that allows to use the TOvcTCString under unicode.
   

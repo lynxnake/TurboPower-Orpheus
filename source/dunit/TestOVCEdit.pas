@@ -17,7 +17,7 @@ unit TestOVCEdit;
 interface
 
 uses
-  TestFramework,
+  TestFramework, ClipBrd,
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ovcbase, ovceditu, ovcedit;
 
@@ -31,6 +31,8 @@ type
   published
     procedure TestUndo;
     procedure TestInsert;
+    procedure TestCopy;
+    procedure TestCopyRect;
 {$IFDEF UNICODE}
     procedure TestsuggestEncoding;
 {$ENDIF}
@@ -42,7 +44,7 @@ implementation
 
 {$R *.dfm}
 
-{ TTestOVCEdit }
+{ Test inserting text into an TOvcEditor }
 
 procedure TTestOVCEdit.TestInsert;
 var
@@ -65,6 +67,127 @@ begin
     Form1.Free;
   end;
 end;
+
+{ test copying text from an TOvcEditor }
+
+type
+  TCopytestRec = record
+    l1,c1,l2,c2: Integer;
+    s: string;
+  end;
+  TPOvcEditor = class(TOvcEditor);
+
+const
+  Content: array[1..9] of string =
+    ('123456781234567812345678123456781234567812345678',
+     'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRTSUVWXYZ',
+     '12345678'#9+   '12345678'#9+   '12345678',
+     '1234'#9'1234'#9'1234'#9'1234'#9'1234'#9'1234',
+     '12'#9+ '12'#9+ '12'#9+ '12'#9+ '12'#9+ '12',
+     '+-------+-------+-------+-------+-------+-------',
+     '+-------+-------+-------',
+     '',
+     '12345678123456781234567812345678');
+
+{ test for "normal" copy-mode }
+
+procedure TTestOVCEdit.TestCopy;
+const
+  Copies: array[1..6] of TCopytestRec =
+      // text from a single line
+    ((l1:1; c1: 9; l2:1; c2:17; s:'12345678'),
+      // text from two lines
+     (l1:1; c1:41; l2:2; c2: 4; s:'12345678'#13#10'abc'),
+      // text from a single line containing a <tab> character
+     (l1:3; c1: 5; l2:3; c2:10; s:'5678'#9),
+     // a complete line
+     (l1:7; c1: 1; l2:8; c2: 1; s:'+-------+-------+-------'#13#10),
+     // a complete line containing <tab> characters
+     (l1:4; c1: 1; l2:5; c2: 1; s:'1234'#9'1234'#9'1234'#9'1234'#9'1234'#9'1234'#13#10),
+     // an empty  line
+     (l1:8; c1: 1; l2:9; c2: 1; s:#13#10));
+var
+  i: Integer;
+  s: string;
+  Form1: TForm1;
+begin
+  Form1 := TForm1.Create(nil);
+  try
+    { Initialise the Editor and add 'Content'. As we are going to copy text containing
+      <tb>-characters, we need to set 'TOvcEditor.ClipboardChars' (otherwise <tab>-
+      characters would be converted into (single) spaces) }
+    Form1.OvcEditor.WordWrap := False;
+    Form1.Ovceditor.KeepClipboardChars := True;
+    Form1.OvcEditor.ClipboardChars := Form1.OvcEditor.ClipboardChars + [#9];
+    for i := Low(Content) to High(Content) do
+      Form1.OvcEditor.AppendPara(PChar(Content[i]));
+
+    { copy some texts from the editor and check the results }
+    for i := Low(Copies) to High(Copies) do begin
+      with Copies[i] do
+        Form1.OvcEditor.SetSelection(l1,c1,l2,c2,true);
+      Form1.OvcEditor.CopyToClipboard;
+      s := Clipboard.AsText;
+      CheckEqualsString(s, Copies[i].s);
+    end;
+  finally
+    Form1.Free;
+  end;
+end;
+
+{ test for "rectangular" copy-mode }
+
+procedure TTestOVCEdit.TestCopyRect;
+const
+  Copies: array[1..7] of TCopytestRec =
+     // test from a singe line
+    ((l1:1; c1: 9; l2:1; c2:17; s:'12345678'),
+     // block of text containing two lines
+     (l1:1; c1: 5; l2:2; c2:11; s:'567812'#13'efghij'),
+     // rectangular blocks containing <tab> characters
+     (l1:3; c1: 1; l2:6; c2:10; s:'12345678 '#13'1234    1'#13'12      1'#13'+-------+'),
+     (l1:4; c1: 5; l2:5; c2: 5; s:'    1'#13'    1'),
+     (l1:4; c1: 5; l2:6; c2: 13; s:'    1234'#13'    12  '#13'----+---'),
+     // rectangular block containing lines that are "too short"
+     (l1:6; c1:20; l2:9; c2:30; s:'-----+----'#13'-----     '#13'          '#13'4567812345'),
+     // a single column of text
+     (l1:2; c1:17; l2:9; c2: 18; s:'q'#13'1'#13'1'#13'1'#13'+'#13'+'#13' '#13'1'));
+
+var
+  i: Integer;
+  s: string;
+  Form1: TForm1;
+begin
+  Form1 := TForm1.Create(nil);
+  try
+    { Initialise the Editor and add 'Content'. As we are going to copy text containing
+      <tab>-characters, we need to set 'TOvcEditor.ClipboardChars' (otherwise <tab>-
+      characters would be converted into (single) spaces) }
+    Form1.OvcEditor.WordWrap := False;
+    Form1.Ovceditor.KeepClipboardChars := True;
+    Form1.OvcEditor.ClipboardChars := Form1.OvcEditor.ClipboardChars + [#9];
+    for i := Low(Content) to High(Content) do
+      Form1.OvcEditor.AppendPara(PChar(Content[i]));
+
+    { copy some texts from the editor using "rectangular mode" and check the results. }
+    for i := Low(Copies) to High(Copies) do begin
+      with Copies[i] do begin
+        Form1.OvcEditor.SetSelection(l1,c1,l2,c2,true);
+        TPOvcEditor(Form1.OvcEditor).edRectSelect := True;
+      end;
+      Form1.OvcEditor.CopyToClipboard;
+      s := Clipboard.AsText;
+      if s<>Copies[i].s then
+        showmessage(s);
+      CheckEqualsString(s, Copies[i].s);
+    end;
+  finally
+    Form1.Free;
+  end;
+end;
+
+
+{ test undo operation }
 
 procedure TTestOVCEdit.TestUndo;
 var

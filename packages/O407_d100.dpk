@@ -54,20 +54,21 @@ requires
   Vcl,
   Vclx,
   designide,
-  O407_r100;
+  O407_r100,
+  rtl;
 
 contains
-  OvcAbot0 in '..\source\Ovcabot0.pas' {OvcfrmAboutForm},
+  Ovcabot0 in '..\source\Ovcabot0.pas' {OvcfrmAboutForm},
   ovcaepe in '..\source\ovcaepe.pas' {OvcfrmAeRange},
   ovcbtnh0 in '..\source\ovcbtnh0.pas',
   ovccmdp0 in '..\source\ovccmdp0.pas',
   ovccmdp1 in '..\source\ovccmdp1.pas',
   ovccolr0 in '..\source\ovccolr0.pas',
   ovcdock0 in '..\source\ovcdock0.pas' {OvcfrmDock},
-  OvcDRpVE in '..\source\Ovcdrpve.pas' {OvcfrmRvDataItemEditor},
+  Ovcdrpve in '..\source\Ovcdrpve.pas' {OvcfrmRvDataItemEditor},
   OvcEfPe in '..\source\OvcEfPe.pas',
   ovcfnpe in '..\source\ovcfnpe.pas',
-  OvcFxFPE in '..\source\ovcfxfpe.pas',
+  ovcfxfpe in '..\source\ovcfxfpe.pas',
   ovclbl0 in '..\source\ovclbl0.pas' {OvcLabelFrm},
   ovclbl1 in '..\source\ovclbl1.pas' {SaveSchemeFrm},
   ovclbl2 in '..\source\ovclbl2.pas',
@@ -75,7 +76,7 @@ contains
   ovclkou1 in '..\source\ovclkou1.pas' {OvcfrmLkOutEd},
   ovcnbk0 in '..\source\ovcnbk0.pas',
   OvcNfPe in '..\source\OvcNfPe.pas',
-  OvcOutlE in '..\source\Ovcoutle.pas' {OvcfrmOLItemsEditor},
+  Ovcoutle in '..\source\Ovcoutle.pas' {OvcfrmOLItemsEditor},
   o32vldpe in '..\source\o32vldpe.pas' {TO32FrmValidatorExpression},
   ovcreg in '..\source\ovcreg.pas',
   ovcrvced in '..\source\ovcrvced.pas' {RVCmpEd},
@@ -88,10 +89,11 @@ contains
   ovcxfrc0 in '..\source\ovcxfrc0.pas',
   ovcxfrc1 in '..\source\ovcxfrc1.pas',
   ovcpfpe in '..\source\ovcpfpe.pas' {OvcfrmPictureMask},
-  OvcColE0 in '..\source\ovccole0.pas' {OvcfrmCollEditor},
+  ovccole0 in '..\source\ovccole0.pas' {OvcfrmCollEditor},
   O32LobEd in '..\source\O32LobEd.pas' {O32frmLkOutEd},
   o32coled in '..\source\o32coled.pas' {O32frmCollEditor},
   O32IGridEditor1 in '..\source\O32IGridEditor1.pas',
-  O32IGridItemEd in '..\source\O32IGridItemEd.pas' {FormIGridItemEditor};
+  O32IGridItemEd in '..\source\O32IGridItemEd.pas' {FormIGridItemEditor},
+  ovctccustomedt in '..\source\ovctccustomedt.pas';
 
 end.

@@ -101,7 +101,11 @@ function IsBidi: Boolean;
 var
   LocaleSig: TLocaleSignature;
   Len: Integer;
+  {$IFDEF VER180}
+  Buf: array of Byte;
+  {$ELSE}
   Buf: TBytes;
+  {$ENDIF}
 begin
   Result := False;
 

@@ -41,7 +41,7 @@ unit ovcver;
 interface
 
 const
-  OrVersionStr = 'v4.06';
+  OrVersionStr = 'v4.08';
 
 implementation
 

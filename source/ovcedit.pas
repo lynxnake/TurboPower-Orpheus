@@ -518,7 +518,6 @@ type
       read FWrapToWindow write SetWrapToWindow;
     property WheelDelta : Integer
       read FWheelDelta write SetWheelDelta;
-
     {events}
     property OnChange : TNotifyEvent
       read FOnChange write FOnChange;
@@ -852,6 +851,9 @@ type
     procedure SetIsOpen(Value : Boolean);
       {-set if the file is open or not}
     procedure SetBackupExt(Value: string);
+{$IFDEF UNICODE}
+    procedure SetEncoding(Value: TEncoding);
+{$ENDIF}
 
     {internal methods}
     function teFixFileName(const Value : string) : string;
@@ -875,7 +877,7 @@ type
       {-create a new file}
 
 {$IFDEF UNICODE}
-    procedure LoadFromFile(const Name : string; const AEncoding: TEncoding = nil); dynamic;
+    procedure LoadFromFile(const Name : string; const AEncoding : TEncoding = nil); dynamic;
 {$ELSE}
     procedure LoadFromFile(const Name : string); dynamic;
 {$ENDIF}
@@ -907,7 +909,13 @@ type
     property MakeBackup : Boolean
       read FMakeBackup
       write FMakeBackup;
-  end;
+
+{$IFDEF UNICODE}
+    property Encoding : TEncoding
+      read FEncoding
+      write SetEncoding;
+{$ENDIF}
+end;
 
   TOvcTextFileEditor = class(TOvcCustomTextFileEditor)
   published
@@ -1354,14 +1362,12 @@ end;
 procedure TOvcCustomEditor.CopyToClipboard;
   {-copy highlighted text to clipboard}
 var
-  I    : LongInt;
-  Size : LongInt;
+  I, Size   : LongInt;
   N, N1, N2 : LongInt;
   C, C1, C2 : Integer;
-  H    : THandle;
-  S    : PChar;
-  GP,
-  GPs  : PChar;
+  H         : THandle;
+  S, T      : PChar;
+  GP, GPs   : PChar;
   Len, Len1 : Word;
 begin
   if not edHaveHighlight then
@@ -1438,14 +1444,17 @@ begin
       GlobalUnlock(H);
     end;
   end else begin
-    { b) 4.08: Rect selection mode: select a rectangular block of text }
-    C1 := edHltBgn.Pos;
-    C2 := edHltEnd.Pos;
+    { b) 4.08: Rect selection mode: a rectangular block of text has been selected }
+    {    There might be tabs in the selected text; these have to be transformed to spaces. }
+    N1 := edHltBgn.Para;
+    N2 := edHltEnd.Para;
+    S  := GetPara(N1, Len);
+    C1 := edParas.EffCol(S,Len,edHltBgn.Pos);
+    S  := GetPara(N2, Len);
+    C2 := edParas.EffCol(S,Len,edHltEnd.Pos);
     {calculate size of highlighted section}
     if C1=C2 then Exit;
     if C1>C2 then begin C:=C1; C1:=C2; C2:=C; end;
-    N1 := edHltBgn.Para;
-    N2 := edHltEnd.Para;
     Size := (C2-C1+1) * (Abs(N1-N2)+1);
 
     {allocate global memory block}
@@ -1455,34 +1464,39 @@ begin
       Exit;
     end;
 
-    {copy selected text to global memory block}
-    GP := GlobalLock(H);
-    repeat
-      S := GetPara(N1, Len);
-      if C1>Len then
-        Len1 := 0
-      else if C2>Len then
-        Len1 := Len-C1+1
-      else
-        Len1 := C2-C1;
-      Move(S[C1-1], GP^, Len1 * SizeOf(Char));
-      Inc(GP, Len1);
-      {Fill lines that are too short with blanks}
-      while Len1<C2-C1 do begin
-        GP^ := ' ';
-        Inc(GP);
-        Inc(Len1);
-      end;
-      {use CR instead of CRLF at the end of lines so that we know it's
-       a rectangular block of text when pasting it. }
-      if N1<N2 then begin
-        GP^ := ^M;
-        Inc(GP);
-      end;
-      Inc(N1);
-    until (N1 > N2);
-    GP^ := #0;
-    GlobalUnlock(H);
+    GetMem(T, C2 * SizeOf(Char));
+    try
+      {copy selected text to global memory block}
+      GP := GlobalLock(H);
+      repeat
+        Len := GetPrintableLine(N1, T, C2-1);
+        if C1>Len then
+          Len1 := 0
+        else if C2>Len then
+          Len1 := Len-C1+1
+        else
+          Len1 := C2-C1;
+        Move(T[C1-1], GP^, Len1 * SizeOf(Char));
+        Inc(GP, Len1);
+        {Fill lines that are too short with blanks}
+        while Len1<C2-C1 do begin
+          GP^ := ' ';
+          Inc(GP);
+          Inc(Len1);
+        end;
+        {use CR instead of CRLF at the end of lines so that we know it's
+         a rectangular block of text when pasting it. }
+        if N1<N2 then begin
+          GP^ := ^M;
+          Inc(GP);
+        end;
+        Inc(N1);
+      until (N1 > N2);
+      GP^ := #0;
+      GlobalUnlock(H);
+    finally
+      FreeMem(T);
+    end;
   end;
 
   {give the handle to the clipboard}
@@ -2480,13 +2494,14 @@ var
   CurPos  : Integer;
   S       : PChar;
   SaveLen : LongInt;
+  Len     : Word;
   Pos     : LongInt;
   Offset  : LongInt;
   Ch      : Char;
   P2, P3  : PChar;
   SaveLinking : Boolean;
-  CP      : LongInt;
   CC      : Integer;
+  effCurCol: Integer;
 begin
   { 4.08 In case P contains several lines that are separated by
          CR (instead of CRLF), we assume that it's a rectangular
@@ -2495,7 +2510,8 @@ begin
   while (P2^<>#0) and (P2^<>#13) do Inc(P2);
   if P2^=#13 then Inc(P2);
 
-  if (P2^=#0) or (P2^=#10) then begin
+  { rectangular insert mode will not work if wordwrap is true. }
+  if (P2^=#0) or (P2^=#10) or WordWrap then begin
     { a) Normal insert mode }
     Result := 0;
     if (P = nil) or (P^ = #0) then
@@ -2541,16 +2557,18 @@ begin
     edMoveCaretToPP(CurPara, CurPos, False);
     Update;
   end else begin
-    { 4.08 Rectangular insert mode }
+    { 4.08 Rectangular insert mode
+           will only be used if WordWrap=False; so paragraphs and lines coincide }
     Result := 0;
     if (P = nil) or (P^ = #0) then Exit;
 
     edParas.UndoBuffer.BeginComplexOp(SaveLinking);
     edRedrawPending := True;
-    CP := edCurPara;
-    CC := edLinePos+edCurCol;
+    S := GetPara(edCurPara, Len);
+    effCurCol := edParas.EffCol(S,Len,edCurCol);
     P2 := P;
     repeat
+      { Get one line from P and insert it }
       P := P2;
       while (P2^<>#0) and (P2^<>#13) do Inc(P2);
       if P2^=#13 then begin
@@ -2560,24 +2578,23 @@ begin
         if P2^=#10 then Inc(P2);
       end else
         P3 := nil;
-      CurPara := CP;
-      CurPos  := CC;
-      Result := edParas.InsertBlock(Self, CurPara, CurPos, P);
+      Result := edParas.InsertBlock(Self, edCurPara, edCurCol, P);
       if P3<>nil then P3^:=#13;
       edSetVScrollRange;
-      edMoveCaretToPP(CurPara, CurPos, False);
+//      edMoveCaretToPP(CurPara, CurPos, False);
+      { If there are more lines, set the Cursor to the next position }
       if P2^<>#0 then begin
-        if CP=GetLineCount then begin
+        { if we have reached the last line, insert a new line first }
+        if edCurPara=GetLineCount then begin
           edMoveToEndOfLine(False);
-          CurPos := edLinePos+edCurCol;
-          Result := edParas.InsertBlock(Self, CurPara, CurPos, #13#10#0);
+          Result := edParas.InsertBlock(Self, edCurPara, edCurCol, #13#10#0);
+          edMoveCaretTo(edCurPara-1, edCurCol, False);
         end;
-        Inc(CP);
-        edMoveCaretTo(CP, CC, False);
-        CurPara := edCurPara;
-        CurPos  := edLinePos+edCurCol;
-        while CC > CurPos do
-          Result := edParas.InsertBlock(Self, CurPara, CurPos, ' ');
+        S  := GetPara(edCurPara+1, Len);
+        CC := edParas.ActualCol(S,Len,effCurCol);
+        edMoveCaretTo(edCurPara+1, CC, False);
+        while CC > edCurCol do
+          Result := edParas.InsertBlock(Self, edCurPara, edCurCol, ' ');
       end;
     until P2^=#0;
     edParas.UndoBuffer.EndComplexOp(SaveLinking);
@@ -4745,8 +4762,8 @@ var
       if NoHighlight or (N < HBLine) or (N > HELine) then
         Len1 := Len
       else begin
-        Len1 := edParas.EffCol(SA, SALen, HBCol)-Col1;
-        Len2 := edParas.EffCol(SA, SALen, HECol)-Col1;
+        Len1 := effHBCol-Col1;
+        Len2 := effHECol-Col1;
         if Len2<Len1 then begin Lhilf:=Len1; Len1:=Len2; Len2:=Lhilf; end;
         if Len1 < 0 then Len1 := 0 else if Len1 > Len then Len1 := Len;
         Len2 := Len2-Len1;
@@ -4785,16 +4802,19 @@ var
     end;
   end;
 
+  function max(k,l:Integer): Integer;
+  begin
+    if k>l then result := k else result := l;
+  end;
 
   procedure DrawRow(N : LongInt; Row : Integer);
     {-draw line N on the specified Row of the window}
   var
-    S, T      : PChar;
-    I, Len    : Word;
-    HEmax     : Word;
-    AllocSize : Word;
-    C         : Char;
-    OldColor  : TColor;
+    S, T                : PChar;
+    I, J, Len, effHEmax : Word;
+    C                   : Char;
+    AllocSize           : Word;
+    OldColor            : TColor;
   begin
     if (Row < FirstRow) or (Row > LastRow) then
       Exit;
@@ -4819,29 +4839,31 @@ var
       ST := S;
       SALen := Len;
       { 4.08 }
-      if HECol>HBCol then HEmax := HECol else HEmax := HBCol;
+      effHEmax := max(effHECol,effHBCol);
       if (Len > 0) and edHaveTabs(S, Len) then begin
-        I := edEffectiveLen(S, Len, edParas.TabSize);
-        AllocSize := I+1;
+        J := edEffectiveLen(S, Len, edParas.TabSize);
+        AllocSize := max(effHEmax,J)+1;
         GetMem(T, AllocSize * SizeOf(Char));
         C := S[Len];
         S[Len] := #0;
         DetabPChar(T, S, edParas.TabSize);
+        for I := J to AllocSize-2 do T[I] := ' ';
+        T[AllocSize-1] := #0;
         S[Len] := C;
         S := T;
         ST := T;
-        Len := I;
+        Len := AllocSize-1;
       { 4.08 to display "nice" rectangular blocks of text if edRectSelect
              is True, we need to "enlarge" lines that are too short. }
-      end else if (HEmax>Len+1) and edRectSelect then begin
-        AllocSize := HEmax;
+      end else if (effHEmax>Len+1) and edRectSelect then begin
+        AllocSize := effHEmax;
         GetMem(T, AllocSize * SizeOf(Char));
         StrCopy (T, S);
-        for I := Len to HEmax-2 do T[I] := ' ';
-        T[HEmax-1] := #0;
+        for I := Len to effHEmax-2 do T[I] := ' ';
+        T[effHEmax-1] := #0;
         S := T;
         ST := T;
-        Len := HEmax-1;
+        Len := effHEmax-1;
       end;
 
       if edHDelta >= Len then begin
@@ -6328,6 +6350,13 @@ begin
 
   inherited Destroy;
 end;
+
+procedure TOvcCustomTextFileEditor.SetEncoding(Value: TEncoding);
+begin
+  if not TEncoding.IsStandardEncoding(FEncoding) then
+    FEncoding.Free;
+  FEncoding := Value;
+end;
 {$ENDIF}
 
 
@@ -6341,14 +6370,21 @@ end;
 
 
 {$IFDEF UNICODE}
-procedure TOvcCustomTextFileEditor.LoadFromFile(const Name : string; const AEncoding: TEncoding);
+
+{ Load text from file 'Name'
+  If no encoding 'AEncoding' is given, the method tries to derive the file's encoding from
+  it's BOM and uses TEncoding.Default as default. Otherwise 'AEncoding' is used as default.
+  (In case an encoding is given but the file's BOM indicates a different encoding, 'AEncoding'
+  will be ignored) }
+
+procedure TOvcCustomTextFileEditor.LoadFromFile(const Name: string; const AEncoding: TEncoding=nil);
 var
   FileStream      : TFileStream;
   Buffer          : TBytes;
   sBuffer, P1, P2 : PChar;
   sLine           : string;
   BOMSize         : Integer;
-  Encoding        : TEncoding;
+  DefEncoding     : TEncoding;
 begin
   if Name = '' then
     Exit;
@@ -6363,6 +6399,7 @@ begin
       DeleteAll(True);
       Update;
 
+      { Read file into 'Buffer'; don't do any decoding yet}
       FileStream := TFileStream.Create(Name, fmOpenRead or fmShareDenyWrite);
       try
         {read text from file into Buffer}
@@ -6372,22 +6409,20 @@ begin
         FileStream.Free;
       end;
 
-      {get the Encoding and decode Buffer to sBuffer}
-      Encoding := nil;
-      BOMSize := TEncoding.GetBufferEncoding(Buffer, Encoding {$IFDEF VERSIONXE}, TEncoding.Default{$ENDIF});
-      sBuffer := PChar(Encoding.GetString(Buffer, BOMSize, Length(Buffer) - BOMSize));
-
-      {setting FEncoding is not that simple...}
+      {Set the default encoding}
+      if Assigned(AEncoding) then
+        DefEncoding := AEncoding
+      else
+        DefEncoding := TEncoding.Default;
+      {clear the current encoding and set it according to the buffer's content (the
+       BOM at the beginning of the buffer)}
       if not TEncoding.IsStandardEncoding(FEncoding) then
         FEncoding.Free;
-      if TEncoding.IsStandardEncoding(Encoding) then
-        FEncoding := Encoding
-      else
-        {$IFDEF VERSIONXE}
-        FEncoding := Encoding.Clone;
-        {$ELSE}
-        FEncoding := TEncoding.Default; // we cannot clone the encoding in Delphi 2010 or less, so use default
-        {$ENDIF}
+      FEncoding := nil;
+      BOMSize := TEncoding.GetBufferEncoding(Buffer, FEncoding {$IFDEF VERSIONXE}, DefEncoding{$ENDIF});
+
+      {decode the buffer}
+      sBuffer := PChar(FEncoding.GetString(Buffer, BOMSize, Length(Buffer) - BOMSize));
 
       {extract lines from sBuffer and append}
       if Assigned(sBuffer) then begin
@@ -6552,38 +6587,27 @@ end;
 
 {$IFDEF UNICODE}
 
-function hasIntChar(P:PChar): Boolean; register;
-  {-determine whether P contains characters c with Ord(c)>255}
-asm
-  push   esi            {save}
-  mov    esi,eax        {esi := P}
-  xor    eax,eax        {eax := 0}
-  cld
-  mov    ecx,-1
-@loop:
-  lodsw
-  and    ax,ax
-  jz @end               {end of string}
-  and    ah,ah
-  loopz @loop
-  mov    eax,-1         {ax>255; return true}
-@end:
-  pop    esi            {restore}
-end;
-
 function TOvcCustomTextFileEditor.suggestEncoding: TEncoding;
   {-suggest an encoding for SaveToFile (either FEncoding or
     TEncoding.UTF8) - based on the content of the editor. }
 var
   I : LongInt;
 begin
-  I := ParaCount;
-  while (I>0) and (ovc32StringIsCurrentCodePage(GetParaPointer(I))) do  //SZ: hasIntChar fails for few characters (for example Unicode #0338 is #154 in CodeTable 1252)
-    Dec(I);
-  if (I>0) and FEncoding.IsSingleByte then
-    result := TEncoding.UTF8
-  else
-    Result := FEncoding; //SZ: don't clone it, because we don't free it later
+  if not FEncoding.IsSingleByte then
+    {if 'FEncoding' is not a single-byte encoding it can be used independent of the
+     contents of the editor.}
+    result := FEncoding
+  else begin
+    {otherwise we have to check whether the text can be represented by the codepage}
+    I := ParaCount;
+    while (I>0) and (ovc32StringIsCurrentCodePage(GetParaPointer(I),FEncoding.Codepage)) do
+      Dec(I);
+    if I>0 then
+      {'FEncoding' cannot be used - suggest UTF8 instead}
+      result := TEncoding.UTF8
+    else
+      result := FEncoding; //SZ: don't clone it, because we don't free it later
+  end;
 end;
 
 
@@ -6627,12 +6651,15 @@ begin
       I := 1;
       repeat
         {get next paragraph}
+        {Armin: Why is the text modified when ist is saved?? By default, any <Tab> (#9)
+         characters are being replaced by spaces - this appears to be a very strange
+         behavior. To me this looks more like a bug than a feature...}
         sBuffer := GetParaPointer(I);
         for J := 1 to Length(sBuffer) do begin
           if FKeepClipboardChars then begin
-          if not ovcCharInSet(sBuffer[J], FClipboardChars) and
-                 (sBuffer[J] <= #32) then
-            sBuffer[J] := #32;
+            if (not ovcCharInSet(sBuffer[J], FClipboardChars)) and
+               (sBuffer[J] <= #32) then
+              sBuffer[J] := #32;
           end else if sBuffer[J] < #10 then
             sBuffer[J] := #32;
         end;
