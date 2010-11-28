@@ -636,7 +636,6 @@ var
   iCount: Integer;
   sOldValue: string;
   sNewValue: string;
-  pBuffer: Pointer;
 begin
   if efdbBusy then
     Exit;
@@ -664,7 +663,7 @@ begin
                        if sNewValue <> '' then
                        begin
                          pbMergePicture(F, PChar(sNewValue));
-                         sNewValue := F;       
+                         sNewValue := F;
                        end;
                      end else if not (efoTrimBlanks in Options) and
                                  not (efoStripLiterals in Options) then
@@ -702,12 +701,8 @@ begin
     try
       {get copy of current field value}
 
-      //R.K. GetValue expects a PString
       if Field.DataType in [ftString {$IFDEF VERSION5}, ftWideString{$ENDIF}] then
-      begin
-        pBuffer := @sOldValue;
-        Self.GetValue(pBuffer);
-      end
+        Self.GetValue(sOldValue)
       else
         Self.GetValue(F);
 
@@ -723,17 +718,10 @@ begin
         ftDate     : Self.AsDateTime := DT;
         ftTime     : Self.AsDateTime := DT;
         ftDateTime : Self.AsDateTime := DT;
-      else
-        begin
-          //R.K. SetValue expects a PString
-          if Field.DataType in [ftString {$IFDEF VERSION5}, ftWideString{$ENDIF}] then
-          begin
-            pBuffer := @sNewValue;
-            Self.SetValue(pBuffer);
-          end
-          else
-            Self.SetValue(S);
-        end;
+        ftString {$IFDEF VERSION5}, ftWideString{$ENDIF}:
+          Self.SetValue(sNewValue);
+        else
+          Self.SetValue(S);
       end;
 
       {restore modified states}

@@ -645,7 +645,6 @@ var
   F  : array[0..255] of Byte; {used to compare old and new value}
   sNewValue: string;
   sOldValue: string;
-  pBuffer: PString;
 begin
   if efdbBusy then
     Exit;
@@ -678,10 +677,7 @@ begin
     try
       {get copy of current field value}
       if FFieldType in [ftString {$IFDEF VERSION5}, ftWideString{$ENDIF}] then
-      begin
-        pBuffer := @sOldValue;
-        GetValue(pBuffer);
-      end
+        GetValue(sOldValue)
       else
         Self.GetValue(F);
       SS := efSelStart;
@@ -694,10 +690,7 @@ begin
       {set field value}
       case FFieldType of
         ftString {$IFDEF VERSION5}, ftWideString{$ENDIF}:
-        begin
-          pBuffer := @sNewValue;
-          SetValue(pBuffer);
-        end;
+          SetValue(sNewValue);
         ftSmallInt,
         ftInteger,
         ftWord,

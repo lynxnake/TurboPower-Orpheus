@@ -3206,12 +3206,10 @@ function TOvcBaseEntryField.GetAsString : string;
 var
   Buf : TEditString;
   S   : string;
-  pBuffer: PString;
 begin
   Result := '';
   if (efDataType mod fcpDivisor) = fsubString then begin
-    pBuffer := @S;
-    FLastError := GetValue(pBuffer);
+    FLastError := GetValue(S);
     if FLastError = 0 then
       Result := S;
   end else begin
@@ -3413,8 +3411,8 @@ begin
       Exit;
 
     case efDataType mod fcpDivisor of
-      fsubString   : efTransfer(PString(Data), otf_GetData);
-      fsubChar     : efTransfer(@Char(Data), otf_GetData);
+      fsubString   : efTransfer(@string(Data),   otf_GetData);
+      fsubChar     : efTransfer(@Char(Data),     otf_GetData);
       fsubBoolean  : efTransfer(@Boolean(Data),  otf_GetData);
       fsubYesNo    : efTransfer(@Boolean(Data),  otf_GetData);
       fsubLongInt  : efTransfer(@LongInt(Data),  otf_GetData);
@@ -3855,18 +3853,14 @@ var
   fSub : Byte;
   B    : Boolean;
   Ch   : Char;
-  S    : string;
-  pBuffer: PString;
 begin
   if sefUserValidating in sefOptions then
     Exit;
 
   fSub := (efDataType mod fcpDivisor);
-  if fSub = fsubString then begin
-    S := Value;
-    pBuffer := @S;
-    SetValue(pBuffer);
-  end else if fSub in [fsubBoolean, fsubYesNo] then begin
+  if fSub = fsubString then
+    SetValue(Value)
+  else if fSub in [fsubBoolean, fsubYesNo] then begin
     B := False;
     if Length(Value) > 0 then begin
       Ch := UpCaseChar(Value[1]);
@@ -4309,9 +4303,7 @@ begin
   Include(sefOptions, sefUpdating);
   try
     case efDataType mod fcpDivisor of
-      //R.K. efTransfer expetcs a PString
-      fsubString   : efTransfer(PString(Data), otf_SetData);
-//      fsubString   : efTransfer(@string(Data), otf_SetData);
+      fsubString   : efTransfer(@string(Data),   otf_SetData);
       fsubChar     : efTransfer(@AnsiChar(Data), otf_SetData);
       fsubBoolean  : efTransfer(@Boolean(Data),  otf_SetData);
       fsubYesNo    : efTransfer(@Boolean(Data),  otf_SetData);
