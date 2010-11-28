@@ -215,7 +215,7 @@ type
     Owner    : TOvcParaList;
     Buffer   : Pointer;   {pointer to the undo/redo buffer}
     BufSize  : Word;      {size of the undo/redo buffer}
-    BufAvail : Word;      {free space in the buffer}
+    BufAvail : Word;      {free space in the buffer in bytes}
     Last     : PUndoRec;  {points to the last TUndoRec in the buffer}
     Undos    : Word;      {number of undo entries}
     Redos    : Word;      {number of redo entries}
@@ -798,7 +798,6 @@ var
 begin
   GetMem(Buffer, (StrLen(S) + 2) * SizeOf(Char));
   try
-    { begin}
     {strip CRs}
     Tmp := Buffer;
     repeat
@@ -809,13 +808,14 @@ begin
       inc(S);
     until S^ = #0;
     Tmp^ := #0;
+
     S := Buffer;
-    { end}
     Max := StrLen(S);
+    {get the smallest index 0<Len<Max for which S[Len-1]=#10;
+     Len=Max if there is no #10.}
     Len := edScanToEnd(S, Max);
-    L := Len;
-    while (L > 0) and ((S[L-1] = ^M) or (S[L-1] = ^J)) do
-      Dec(L);
+    if (Len>0) and (S[Len-1]=#10) then L := Len-1 else L := Len;
+
     if (Len = Max) and (L = Len) then begin
       Result := InsertTextPrim(Editor, P, Pos, S, Len);
       if Result = 0 then
@@ -849,9 +849,7 @@ begin
         end;
         if S^ <> #0 then begin
           Len := edScanToEnd(S, Max);
-          L := Len;
-          while (L > 0) and ((S[L-1] = ^M) or (S[L-1] = ^J)) do
-            Dec(L);
+          if (Len>0) and (S[Len-1]=#10) then L := Len-1 else L := Len;
         end;
       end;
       UndoBuffer.EndComplexOp(SaveLinking);
@@ -1615,11 +1613,12 @@ end;
 {*** TOvcUndoBuffer ***}
 
 procedure TOvcUndoBuffer.Append(D : PChar; DLen : Word);
+{- append DLen characters to the data of the last undo-record}
 var
   S : PChar;
 begin
   {make sure there's room}
-  if not CheckSize(DLen) then
+  if not CheckSize(DLen * SizeOf(Char)) then
     Exit;
 
   {append the data}
@@ -1627,7 +1626,7 @@ begin
   Inc(S, Last^.DSize);
   Move(D^, S^, DLen * SizeOf(Char));
 
-  {adjust the record size}
+  {adjust the record size; DSize is the number of characters (not bytes) }
   Inc(Last^.DSize, DLen);
 
   {adjust the BufAvail figure}
@@ -1640,7 +1639,7 @@ var
   S : PChar;
   Len : Word;
 begin
-  if not CheckSize(DLen+RLen) then
+  if not CheckSize((DLen+RLen) * SizeOf(Char)) then
     Exit;
 
   {get a pointer to the existing data}
@@ -1674,7 +1673,7 @@ end;
 
 function TOvcUndoBuffer.CheckSize(Bytes : LongInt) : Boolean;
 var
-  MinAvail, I, Sz, LN : Word;
+  MinAvail, I, SizeInBytes, LN : Word;
   PUR : PUndoRec;
 begin
   Result := False;
@@ -1706,9 +1705,9 @@ begin
       {get rid of this group}
       Inc(I);
       GUN.Done(PUR);
-      Sz := PUR^.DSize * SizeOf(Char) + UndoRecSize;
-      Inc(BufAvail, Sz);
-      PtrInc(PUR, Sz);
+      SizeInBytes := PUR^.DSize * SizeOf(Char) + UndoRecSize;
+      Inc(BufAvail, SizeInBytes);
+      PtrInc(PUR, SizeInBytes);
     until (I = Undos) or (PUR^.LinkNum <> LN);
   end;
 
@@ -1720,8 +1719,8 @@ begin
     Error := Linking;
     Result := not Linking;
   end else begin
-    Sz := BufSize - (PAnsiChar(PUR) - PAnsiChar(Buffer)); //SZ: Sz := BufSize - PtrDiff(PUR, Buffer);
-    Move(PUR^, Buffer^, Sz);
+    SizeInBytes := BufSize - (PAnsiChar(PUR) - PAnsiChar(Buffer));
+    Move(PUR^, Buffer^, SizeInBytes);
     PUndoRec(Buffer)^.PrevSize := 0;
     Dec(Undos, I);
     Redos := 0;
@@ -1903,7 +1902,7 @@ var
   S : PChar;
 begin
   {make sure there's room}
-  if not CheckSize(DLen) then
+  if not CheckSize(DLen * SizeOf(Char)) then
     Exit;
 
   {prepend the data}
@@ -1927,7 +1926,7 @@ procedure TOvcUndoBuffer.Push(UT : UndoType; MF : Boolean;
 var
   PUR    : PUndoRec;
   PSize  : Word;
-  Size   : LongInt;
+  SizeInBytes : LongInt;
   Before : Boolean;
 begin
   if not Linking then
@@ -1942,8 +1941,8 @@ begin
       Inc(CurLink);
 
   {make sure there's room}
-  Size := LongInt(DLen)*SizeOf(Char) + UndoRecSize;
-  if not CheckSize(Size) then
+  SizeInBytes := LongInt(DLen)*SizeOf(Char) + UndoRecSize;
+  if not CheckSize(SizeInBytes) then
     Exit;
 
   {get pointer to the undo record and initialize it}
@@ -1957,17 +1956,17 @@ begin
   GUN.Init(PUR, UT, CurLink, MF, PSize, P, Pos, D, DLen);
   Last := PUR;
   Redos := 0;
-  Dec(BufAvail, Size * SizeOf(Char));
+  Dec(BufAvail, SizeInBytes);
 end;
 
 procedure TOvcUndoBuffer.PushReplace(MF : Boolean; P : LongInt; Pos : Integer;
                                   D : PChar; DLen : Word;
                                   R : PChar; RLen : Word);
 var
-  PUR    : PUndoRec;
-  PSize  : Word;
-  Size   : LongInt;
-  Before : Boolean;
+  PUR         : PUndoRec;
+  PSize       : Word;
+  SizeInBytes : LongInt;
+  Before      : Boolean;
 begin
   if not Linking then
     if SameOperation(utReplace, Before, P, Pos, DLen) then begin
@@ -1978,8 +1977,8 @@ begin
       Inc(CurLink);
 
   {make sure there's room}
-  Size := LongInt(DLen)+RLen+2 + UndoRecSize;
-  if not CheckSize(Size) then
+  SizeInBytes := (LongInt(DLen)+RLen+2) * SizeOf(Char) + UndoRecSize;
+  if not CheckSize(SizeInBytes) then
     Exit;
 
   {get pointer to the undo record and initialize it}
@@ -1993,7 +1992,7 @@ begin
   GUN.InitReplace(PUR, CurLink, MF, PSize, P, Pos, D, DLen, R, RLen);
   Last := PUR;
   Redos := 0;
-  Dec(BufAvail, Size * SizeOf(Char));
+  Dec(BufAvail, SizeInBytes);
 end;
 
 function TOvcUndoBuffer.SameOperation(UT : UndoType; var Before : Boolean;
