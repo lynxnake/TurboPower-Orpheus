@@ -23,6 +23,7 @@ object Form1: TForm1
     FixedFont.Name = 'Terminal'
     FixedFont.Size = 8
     FixedFont.Style = []
+    HideSelection = False
     HighlightColors.BackColor = clHighlight
     HighlightColors.TextColor = clHighlightText
     LeftMargin = 15

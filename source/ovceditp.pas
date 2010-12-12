@@ -312,7 +312,10 @@ begin
   if PPN = nil then
     Result := oeOutOfMemory
   else begin
-    PlaceBefore(PPN, Tail);
+    if (Tail<>nil) and (Tail.SLen>0) then
+      Place(PPN, Tail)
+    else
+      PlaceBefore(PPN, Tail);
     SetLastNode(Head, 1, 1, 1);
     Inc(CharCount, SLen+2);
     if Trim then

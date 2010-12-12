@@ -550,7 +550,7 @@ type
       override;
 
     {public methods}
-    function  AppendPara(Para : PChar) : Word;
+    function AppendPara(Para : PChar) : Word;
       {-append Para to the list of paragraphs}
     procedure Attach(Editor : TOvcCustomEditor);
       virtual;
@@ -2056,17 +2056,32 @@ begin
   edParas.UndoBuffer.EndComplexOp(SaveLinking);
 end;
 
+
+function min(x,y:Integer): Integer;
+begin
+  if x<y then result := x else result := y;
+end;
+
+
+procedure edInsertSpaces(Editor:TOvcCustomEditor; P:LongInt; Pos:Integer; Len:Word);
+const
+  spaces: PChar = '        ';
+begin
+  while Len>0 do begin
+    Editor.edParas.InsertTextPrim(Editor, P, Pos, spaces, min(Len,8));
+    if Len>8 then Len := Len - 8 else Len := 0;
+  end;
+end;
+
+
 procedure TOvcCustomEditor.edDeleteSelection;
 var
-  BC, EC : Integer;
-  BCmax, ECmax: Integer;
-  CurPos : Integer;
-  BP     : LongInt;
-  EP     : LongInt;
-  I      : LongInt;
-  hC, L  : Integer;
-  hP, b  : LongInt;
-  SaveLinking : Boolean;
+  BP, EP, I, hP, P, dBC, dEC         : LongInt;
+  BC, EC, effBC, effEC, BCmax, ECmax : Integer;
+  hC, CurPos                         : Integer;
+  S                                  : PChar;
+  Len                                : Word;
+  SaveLinking                        : Boolean;
 begin
   if ReadOnly then
     Exit;
@@ -2102,18 +2117,57 @@ begin
         edMoveCaretToPP(BP, BC, False);
       end;
     end else begin
-      {4.08 Delete the selected, rectangular block }
-      if EC=BC then Exit;
-      edParas.UndoBuffer.BeginComplexOp(SaveLinking);
+      {4.08 Delete the selected, rectangular block
+            will only be used if WordWrap=False; so paragraphs and lines coincide:
+            BP = first paragraph/line  EP = last paragraph/line }
+      { As there may be <tab>-characters in these paragraphs, we need to work with
+        effective colums. }
+      S := GetPara(BP, Len);
+      effBC := edParas.EffCol(S,Len,BC);
+      S := GetPara(EP, Len);
+      effEC := edParas.EffCol(S,Len,EC);
       if EP<BP then begin hP:=EP; EP:=BP; BP:=hP; end;
-      if EC<BC then begin hC:=EC; EC:=BC; BC:=hC; end;
-      for b := BP to EP do begin
-        L := edParas.LineLength(b);
-        if L>=BC then begin
-          if EC<=L+1 then
-            edParas.DeleteText(Self, b, BC, EC-BC)
-          else
-            edParas.DeleteText(Self, b, BC, L+1-BC);
+      if effEC<effBC then begin hC:=effEC; effEC:=effBC; effBC:=hC; end;
+      { we delete colums effBC to effEC-1; so if effEC=effBC there is nothing to do...}
+      if effEC=effBC then Exit;
+
+      edParas.UndoBuffer.BeginComplexOp(SaveLinking);
+      for P := BP to EP do begin
+        { delete the text line by line }
+        S := GetPara(P, Len);
+        if not edHaveTabs(S, Len) then begin
+          {if there are no <tab>-characters in the paragraph/line, deleting is easy}
+          if Len>=effBC then begin
+            edParas.DeleteText(Self, P, effBC, min(effEC,Len+1)-effBC);
+            edRefreshLines(edParas.FLine, edParas.LLine);
+          end;
+        end else begin
+          {otherwise, things get difficult: effBC/effEC may be "within" a <tab>-character; so
+           we may need to insert some spaces: Consider effBC=7, effEC=16 and
+           S = 'abcd    rstu    vwxy'
+           where the four "spaces" are actually single <tab>-characters. Deleting the <tab>-
+           characters yields
+           S = 'abcdvwxy'
+           so we would have deleted "too much"; we have to inserst three spaces here:
+           S = 'abdc   vwxy' }
+          {Get the position of the first character to be deleted an the position behind the
+           last character to be deleted. If effBC/effEC are "within" a <tab>-character,
+           BC/EC will give the position of the <tab>-character.
+           In the example above BC=5, EC=10 }
+          BC := edParas.ActualCol(S,Len,effBC);
+          EC := edParas.ActualCol(S,Len,effEC);
+          {Get the "error" that would be made by deleting from BC to EC:
+           dBC/dEC = number of space at the beginning/end to be inserted}
+          dBC := effBC - edParas.EffCol(S,Len,BC);
+          dEC := effEC - edParas.EffCol(S,Len,EC);
+          if dEC>0 then begin
+            Inc(EC);
+            dEC := edParas.EffCol(S,Len,EC) - effEC;
+          end;
+          edParas.DeleteText(Self, P, BC, min(EC,Len+1)-BC);
+          {Insert spaces as needed}
+          if dBC+dEC>0 then
+            edInsertSpaces(Self, P, BC, dBC+dEC);
           edRefreshLines(edParas.FLine, edParas.LLine);
         end;
       end;
@@ -2492,16 +2546,14 @@ const
 var
   CurPara : LongInt;
   CurPos  : Integer;
-  S       : PChar;
+  S, P2   : PChar;
   SaveLen : LongInt;
   Len     : Word;
   Pos     : LongInt;
   Offset  : LongInt;
   Ch      : Char;
-  P2, P3  : PChar;
   SaveLinking : Boolean;
-  CC      : Integer;
-  effCurCol: Integer;
+  CurCol, effCurCol, dCurCol: Integer;
 begin
   { 4.08 In case P contains several lines that are separated by
          CR (instead of CRLF), we assume that it's a rectangular
@@ -2557,46 +2609,59 @@ begin
     edMoveCaretToPP(CurPara, CurPos, False);
     Update;
   end else begin
-    { 4.08 Rectangular insert mode
-           will only be used if WordWrap=False; so paragraphs and lines coincide }
+    { b) 4.08 Rectangular insert mode
+              will only be used if WordWrap=False; so paragraphs and lines coincide }
     Result := 0;
     if (P = nil) or (P^ = #0) then Exit;
 
     edParas.UndoBuffer.BeginComplexOp(SaveLinking);
     edRedrawPending := True;
-    S := GetPara(edCurPara, Len);
-    effCurCol := edParas.EffCol(S,Len,edCurCol);
-    P2 := P;
+
+    { each line in P has to be inserted at the current cursor-column of the corresponding
+      paragraph/line. However, we have to use the effectiv column (because of possible <tab>-
+      characters). Consider inserting the 2x3-block
+        xxx
+        yyy
+      at line 1, colum 7 of
+        123456781234
+        1234    1234
+      where the "spaces" are a single <tab>-character. The second line 'yyy' has to be
+      inserted "into" the <tab>-character; so we have to replace the <tab> by spaces first. }
+    CurPara := edCurPara;
+    CurCol := edCurCol;
+    S := GetPara(CurPara, Len);
+    effCurCol := edParas.EffCol(S,Len,CurCol);
     repeat
-      { Get one line from P and insert it }
-      P := P2;
+      { Get the length of the first line in P }
+      P2 := P;
       while (P2^<>#0) and (P2^<>#13) do Inc(P2);
-      if P2^=#13 then begin
-        P2^:=#0;
-        P3 := P2;
-        Inc(P2);
-        if P2^=#10 then Inc(P2);
-      end else
-        P3 := nil;
-      Result := edParas.InsertBlock(Self, edCurPara, edCurCol, P);
-      if P3<>nil then P3^:=#13;
-      edSetVScrollRange;
-//      edMoveCaretToPP(CurPara, CurPos, False);
-      { If there are more lines, set the Cursor to the next position }
-      if P2^<>#0 then begin
-        { if we have reached the last line, insert a new line first }
-        if edCurPara=GetLineCount then begin
-          edMoveToEndOfLine(False);
-          Result := edParas.InsertBlock(Self, edCurPara, edCurCol, #13#10#0);
-          edMoveCaretTo(edCurPara-1, edCurCol, False);
+      Len := P2 - P;
+      { insert the line and set P to the beginning of the next line
+        n.b. 'InsertTextPrim' takes care of 'CurCol' being "behind" the end of the line }
+      edParas.InsertTextPrim(Self,CurPara,CurCol,P,Len);
+      P := P2;
+      if P^=#13 then begin
+        Inc(P);
+        { go to the next paragraph/line, if the last paragraph has been reached, insert a new
+          one first. }
+        if CurPara=edParas.ParaCount then
+          edParas.AppendParaEof('', 0, False);
+        Inc(CurPara);
+        { The effective column remains the same; the actual column 'CurCol' may change due
+          to <tab>-characters in the current paragraph/line. }
+        S := GetPara(CurPara, Len);
+        CurCol := edParas.ActualCol(S,Len,effCurCol);
+        { If the effective column lies "within" a <tab>-character, we need to add some
+          spaces first. }
+        dCurCol := effCurCol - edParas.EffCol(S,Len,CurCol);
+        if dCurCol>0 then begin
+          edInsertSpaces(Self,CurPara,CurCol,dCurCol);
+          Inc(CurCol, dCurCol);
         end;
-        S  := GetPara(edCurPara+1, Len);
-        CC := edParas.ActualCol(S,Len,effCurCol);
-        edMoveCaretTo(edCurPara+1, CC, False);
-        while CC > edCurCol do
-          Result := edParas.InsertBlock(Self, edCurPara, edCurCol, ' ');
       end;
-    until P2^=#0;
+    until P^=#0;
+
+    edSetVScrollRange;
     edParas.UndoBuffer.EndComplexOp(SaveLinking);
     edRedrawPending := False;
     edRedraw(True);

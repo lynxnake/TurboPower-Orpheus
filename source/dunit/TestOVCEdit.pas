@@ -33,6 +33,7 @@ type
     procedure TestInsert;
     procedure TestCopy;
     procedure TestCopyRect;
+    procedure TestDeleteRect;
 {$IFDEF UNICODE}
     procedure TestsuggestEncoding;
 {$ENDIF}
@@ -140,7 +141,7 @@ end;
 procedure TTestOVCEdit.TestCopyRect;
 const
   Copies: array[1..7] of TCopytestRec =
-     // test from a singe line
+     // text from a singe line
     ((l1:1; c1: 9; l2:1; c2:17; s:'12345678'),
      // block of text containing two lines
      (l1:1; c1: 5; l2:2; c2:11; s:'567812'#13'efghij'),
@@ -160,7 +161,7 @@ var
 begin
   Form1 := TForm1.Create(nil);
   try
-    { Initialise the Editor and add 'Content'. As we are going to copy text containing
+    { Initialise the editor and add 'Content'. As we are going to copy text containing
       <tab>-characters, we need to set 'TOvcEditor.ClipboardChars' (otherwise <tab>-
       characters would be converted into (single) spaces) }
     Form1.OvcEditor.WordWrap := False;
@@ -171,15 +172,95 @@ begin
 
     { copy some texts from the editor using "rectangular mode" and check the results. }
     for i := Low(Copies) to High(Copies) do begin
-      with Copies[i] do begin
+      with Copies[i] do
         Form1.OvcEditor.SetSelection(l1,c1,l2,c2,true);
-        TPOvcEditor(Form1.OvcEditor).edRectSelect := True;
-      end;
+      TPOvcEditor(Form1.OvcEditor).edRectSelect := True;
       Form1.OvcEditor.CopyToClipboard;
       s := Clipboard.AsText;
-      if s<>Copies[i].s then
-        showmessage(s);
       CheckEqualsString(s, Copies[i].s);
+    end;
+  finally
+    Form1.Free;
+  end;
+end;
+
+
+{ test for "rectangular"-mode delete }
+
+const
+  content2: array[1..6] of string =
+    ('abcdefghijklmnopqrstuvwxyz',
+     '12345678'#9+   '12345678',
+     '12'#9+ '12'#9+ '12',
+     '+-------+-------',
+     '',
+     '123456781234567812345678');
+
+procedure TTestOVCEdit.TestDeleteRect;
+var
+  i, j: Integer;
+  Form1: TForm1;
+  P: array[0..2048] of Char;
+const
+  remainders: array[1..6] of TCopytestRec =
+     // delete all text from column 2 to (and including) column 23
+    ((l1:1; c1: 2; l2:6; c2:24; s:'axyz'#13#10'18'#13#10'1'#13#10'+'#13#10#13#10'18'#13#10#13#10),
+     // delete all text starting from (effective) column 19 in lines 2-6
+     (l1:2; c1:12; l2:6; c2:48; s:'abcdefghijklmnopqrstuvwxyz'#13#10+
+                                  '12345678'#9+   '12'#13#10+
+                                  '12'#9+ '12'#9+ '12'#13#10+
+                                  '+-------+-------'#13#10+
+                                  #13#10+
+                                  '123456781234567812'#13#10#13#10),
+     // delete the first 16 columns from lines 2-4
+     (l1:2; c1: 1; l2:4; c2:17; s:'abcdefghijklmnopqrstuvwxyz'#13#10+
+                                  '12345678'#13#10+
+                                  '12'#13#10+
+                                  #13#10+
+                                  #13#10+
+                                  '123456781234567812345678'#13#10#13#10),
+     // test deleting text when start/end columns and lines are given in the "wrong" order
+     // here delete the first 16 columns from lines 1-3
+     (l1:3; c1: 7; l2:1; c2: 1; s:'qrstuvwxyz'#13#10+
+                                  '12345678'#13#10+
+                                  '12'#13#10+
+                                  '+-------+-------'#13#10+
+                                  #13#10+
+                                  '123456781234567812345678'#13#10#13#10),
+     // test deleting "parts of tabs"
+     // delete columns 6 to (and including) column 11
+     (l1:1; c1: 6; l2:6; c2:12; s:'abcdelmnopqrstuvwxyz'#13#10+
+                                  '12345     12345678'#13#10+
+                                  '12        12'#13#10+
+                                  '+---------'#13#10+
+                                  #13#10+
+                                  '123454567812345678'#13#10#13#10),
+     // test deleting "parts of tabs" (2)
+     // delete column 5 from lines 2-4 (removing a single space from the <tab> in line 3)
+     (l1:4; c1: 5; l2:2; c2: 6; s:'abcdefghijklmnopqrstuvwxyz'#13#10+
+                                  '1234678'#9+   '12345678'#13#10+
+                                  '12     12'#9+ '12'#13#10+
+                                  '+------+-------'#13#10+
+                                  #13#10+
+                                  '123456781234567812345678'#13#10#13#10));
+begin
+  Form1 := TForm1.Create(nil);
+  try
+    Form1.OvcEditor.WordWrap := False;
+    Form1.OvcEditor.ScrollPastEnd := True;
+    for i := Low(remainders) to High(remainders) do begin
+      { Initialise the editor and add 'Content2'. }
+      Form1.OvcEditor.Clear;
+      for j := Low(content2) to High(content2) do
+        Form1.OvcEditor.AppendPara(PChar(content2[j]));
+      { Delete some text as defined in 'remainders'. }
+      with remainders[i] do
+        Form1.OvcEditor.SetSelection(l1,c1,l2,c2,true);
+      TPOvcEditor(Form1.OvcEditor).edRectSelect := True;
+      TPOvcEditor(Form1.OvcEditor).edDeleteSelection;
+      { check whether we have the predicted remainder }
+      Form1.OvcEditor.GetText(@P[0],High(P));
+      CheckEqualsString(remainders[i].s, P);
     end;
   finally
     Form1.Free;
