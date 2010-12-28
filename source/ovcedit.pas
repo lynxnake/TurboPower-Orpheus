@@ -25,6 +25,7 @@
 {* Contributor(s):                                                            *}
 {*   Armin Biernaczyk (selection, copy, paste & delete of rectangular blocks  *}
 {*                     of text)                                               *}
+{*   Roman Kassebaum                                                          *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -6449,7 +6450,9 @@ var
   sBuffer, P1, P2 : PChar;
   sLine           : string;
   BOMSize         : Integer;
+{$IFDEF VERSIONXE}
   DefEncoding     : TEncoding;
+{$ENDIF}
 begin
   if Name = '' then
     Exit;
@@ -6475,10 +6478,12 @@ begin
       end;
 
       {Set the default encoding}
+{$IFDEF VERSIONXE}
       if Assigned(AEncoding) then
         DefEncoding := AEncoding
       else
         DefEncoding := TEncoding.Default;
+{$ENDIF}
       {clear the current encoding and set it according to the buffer's content (the
        BOM at the beginning of the buffer)}
       if not TEncoding.IsStandardEncoding(FEncoding) then
@@ -6665,7 +6670,7 @@ begin
   else begin
     {otherwise we have to check whether the text can be represented by the codepage}
     I := ParaCount;
-    while (I>0) and (ovc32StringIsCurrentCodePage(GetParaPointer(I),FEncoding.Codepage)) do
+    while (I>0) and (ovc32StringIsCurrentCodePage(GetParaPointer(I){$IFDEF VERSIONXE}, FEncoding.Codepage{$ENDIF})) do
       Dec(I);
     if I>0 then
       {'FEncoding' cannot be used - suggest UTF8 instead}
