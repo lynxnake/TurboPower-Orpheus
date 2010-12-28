@@ -24,6 +24,8 @@
 {*                                                                            *}
 {* Contributor(s):                                                            *}
 {*                                                                            *}
+{* Roman Kassebaum                                                            *}
+{*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
 {$I OVC.INC}
@@ -328,11 +330,16 @@ procedure TOvcTCCustomGlyph.StartEditing(RowNum : TRowNum; ColNum : TColNum;
 {--------}
 procedure TOvcTCCustomGlyph.StopEditing(SaveValue : boolean;
                                         Data : pointer);
+var
+  pEdit: TOvcTCGlyphEdit;
   begin
-    if SaveValue and Assigned(Data) then
+    if SaveValue and Assigned(Data) and (FEdit <> nil) then
       Integer(Data^) := FEdit.Value;
-    FEdit.Free;
-    FEdit := nil;
+    begin
+      pEdit := FEdit;
+      FEdit := nil;
+      pEdit.Free;
+    end;
   end;
 {====================================================================}
 
