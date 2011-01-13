@@ -1017,7 +1017,7 @@ implementation
 
 const
   MaxHScrollRange     = 512;   {maximum horizontal scroll range}
-  CRLF : array[1..2] of Char = ^M^J;
+  CRLF : array[1..2] of Char = (#13,#10); // For the sake of error insight don't use ^M^J;
   MaxSmallInt         = High(SmallInt);
   DefUndoBufferSize   = 8*1024;
 
@@ -1552,7 +1552,7 @@ begin
   FUndoBufferSize     := DefUndoBufferSize;
   FWantEnter          := True;
   FWantTab            := False;
-  FWordDelimiters     := ^I#39#13#10' ,./?;:`"<>[]{}-=\+|()%@&^$#!~*';
+  FWordDelimiters     := #9#39#13#10' ,./?;:`"<>[]{}-=\+|()%@&^$#!~*';
   FWordWrap           := False;
   FWrapAtLeft         := True;
   FWrapColumn         := 80;
@@ -2588,7 +2588,7 @@ begin
                 (Pos+BlockSize+Offset < SaveLen) do
             Inc(Offset);
           {save character at block end}
-          CH := S[BlockSize+Offset];
+          Ch := S[BlockSize+Offset];
           {mark end of block}
           S[BlockSize+Offset] := #0;
           {do the insertion}
@@ -4617,11 +4617,11 @@ var
   Buf : array[0..255] of Char;
   {$ENDIF}
 begin
-  {$IFOPT H+}
-    P := PChar(S);
-  {$ELSE}
+  {$IFOPT H-}
     P := @Buf;
     StrPCopy(Buf, S);
+  {$ELSE}
+    P := PChar(S);
   {$ENDIF}
   edReplaceSelection(P);
 end;
@@ -6449,7 +6449,7 @@ var
   Buffer          : TBytes;
   sBuffer, P1, P2 : PChar;
   sLine           : string;
-  BOMSize         : Integer;
+  BOMSize, i      : Integer;
 {$IFDEF VERSIONXE}
   DefEncoding     : TEncoding;
 {$ENDIF}
@@ -6490,6 +6490,18 @@ begin
         FEncoding.Free;
       FEncoding := nil;
       BOMSize := TEncoding.GetBufferEncoding(Buffer, FEncoding {$IFDEF VERSIONXE}, DefEncoding{$ENDIF});
+
+      {there might be null-characters (nc's) in the buffer; 'GetString' will cut off the
+       input at this point - which might not be wanted. So we transform nc's into spaces
+       except for nc's at the end of the file.}
+      if FEncoding.IsSingleByte and (BOMSize=0) then begin
+        i := Length(Buffer)-1;
+        while (i>=0) and (Buffer[i]=0) do Dec(i);
+        while i>=0 do begin
+          if Buffer[i]=0 then Buffer[i] := 32;
+          Dec(i);
+        end;
+      end;
 
       {decode the buffer}
       sBuffer := PChar(FEncoding.GetString(Buffer, BOMSize, Length(Buffer) - BOMSize));

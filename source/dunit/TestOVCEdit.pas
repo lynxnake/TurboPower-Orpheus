@@ -19,7 +19,7 @@ interface
 uses
   TestFramework, ClipBrd,
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ovcbase, ovceditu, ovcedit;
+  Dialogs, ovcbase, ovceditu, ovcedit, ovceditp, ovceditn;
 
 type
   TForm1 = class(TForm)
@@ -39,6 +39,8 @@ type
 {$ENDIF}
     procedure TestLoadFromFile;
     procedure TestSaveToFile;
+    procedure TestUndoBufferFull;
+    procedure TestUndoBufferFail;
   end;
 
 implementation
@@ -464,6 +466,83 @@ begin
     DeleteFile(FileName);
   end;
 end;
+
+
+{ test undo-buffer-overflow
+  specific test for a former bug in the handling of the undo-buffer:
+  When typing characters a single undo-record will be put in the undo-buffer and will be
+  extended for each character that is typed. However, if the undo-buffer is full, this
+  record will be deleted an further attempts to extend the (now non-existent) undo-record
+  will lead to a corrupt buffer - an eventually to a crash.
+  Due to it's nature, this effect will only show up if the undo-buffer is relatively
+  small. }
+
+procedure TTestOVCEdit.TestUndoBufferFull;
+
+  function TestUndoBuffer(OvcEditor: TOvcEditor): Boolean;
+  var
+    j, s, SizeInBytes: Word;
+    UBuf: TOvcUndoBuffer;
+    PUR : PUndoRec;
+  begin
+    result := False;
+    UBuf := TPOvcEditor(ovceditor).edParas.UndoBuffer;
+    PUR := UBuf.Buffer;
+    s := 0;
+    for j := 1 to UBuf.Undos do begin
+      SizeInBytes := PUR^.DSize * SizeOf(Char) + UndoRecSize;
+      Inc(s, SizeInBytes);
+      Inc(PAnsiChar(PUR), SizeInBytes);
+      if (j<UBuf.Undos) and (PUR^.PrevSize<>SizeInBytes) then Exit;
+    end;
+    if UBuf.BufAvail + s = UBuf.BufSize then
+      result := True;
+  end;
+
+var
+  Form1: TForm1;
+  i: Integer;
+begin
+  Form1 := TForm1.Create(nil);
+  Form1.OvcEditor.UndoBufferSize := 64;
+  try
+    for i := 1 to 128 do begin
+      Form1.OvcEditor.Perform(WM_CHAR, 65, 0);
+      CheckTrue(TestUndoBuffer(Form1.OvcEditor),'Undo-Buffer corrupt');
+    end;
+  finally
+    Form1.Free;
+  end;
+end;
+
+{ test undo-buffer-failure
+  test for a unicode-bugfix (13.01.2011): Replacing characters led to a corruption of the
+  undo-buffer }
+
+procedure TTestOVCEdit.TestUndoBufferFail;
+var
+  Form1: TForm1;
+begin
+  Form1 := TForm1.Create(nil);
+  try
+    with Form1.OvcEditor do begin
+      InsertMode := True;
+      Perform(WM_char, 65, 0);
+      Perform(WM_char, 65, 0);
+      Perform(WM_char, 65, 0);
+      Perform(WM_KEYDOWN, 8, 0); // delete third 'A'
+      SetSelection(1,1,1,1,false);
+      InsertMode := False;
+      perform(WM_char, 66, 0);  // replace first 'A'
+      Undo;
+      Undo;
+    end;
+    CheckEqualsString('AAA',Form1.OvcEditor.GetCurrentWord);
+  finally
+    Form1.Free;
+  end;
+end;
+
 
 
 initialization

@@ -1624,6 +1624,15 @@ begin
   if not CheckSize(DLen * SizeOf(Char)) then
     Exit;
 
+  {Bugfix 12.01.2011: CheckSize will delete undo-records if there is not
+   enough space left in the undo-buffer. It is possible (especially if the
+   undo-buffer is small) that there was just one undo-record in the buffer.
+   In this case, there is no record left now to which D can be appended -
+   whichs results in a corrupt buffer and - eventually - in an access-
+   violation. So: }
+  if Undos=0 then
+    Exit;
+
   {append the data}
   S := @Last^.Data;
   Inc(S, Last^.DSize);
@@ -1644,6 +1653,9 @@ var
 begin
   if not CheckSize((DLen+RLen) * SizeOf(Char)) then
     Exit;
+
+  {Bugfix 12.01.2011, see TOvcUndoBuffer.Append}
+  if Undos=0 then Exit;
 
   {get a pointer to the existing data}
   S := @Last^.Data;
@@ -1908,6 +1920,9 @@ begin
   if not CheckSize(DLen * SizeOf(Char)) then
     Exit;
 
+  {Bugfix 12.01.2011, see TOvcUndoBuffer.Append}
+  if Undos=0 then Exit;
+
   {prepend the data}
   S := @Last^.Data;
   Move(S[0], S[DLen], Last^.DSize * SizeOf(Char));
@@ -1988,7 +2003,7 @@ begin
   Inc(Undos);
   PUR := Last;
   if Undos > 1 then begin
-    PSize := PUR^.DSize + UndoRecSize;
+    PSize := PUR^.DSize * SizeOf(Char) + UndoRecSize;
     PtrInc(PUR, PSize);
   end else
     PSize := 0;
