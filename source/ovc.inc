@@ -109,6 +109,9 @@
 {$ENDIF}
 
 {$IFDEF VERSION7}
+   {$IF compilerversion >= 20} // Delphi 2009 or higher
+     {$DEFINE VERSION2009}
+   {$IFEND}
    {$IF compilerversion >= 21} // Delphi 2010 or higher
      {$DEFINE VERSION2010}
    {$IFEND}
