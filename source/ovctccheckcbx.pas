@@ -77,6 +77,7 @@ type
     procedure SetValue(const Value: string);
   public
     procedure Assign(Source: TPersistent); override;
+  published
     property DisplayValue: string read FDisplayValue write SetDisplayValue;
     property DisplayValueShort: string read FDisplayValueShort write SetDisplayValueShort;
     property Value: string read FValue write SetValue;
