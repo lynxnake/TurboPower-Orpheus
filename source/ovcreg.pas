@@ -184,6 +184,7 @@ uses
   OvcTCPic,               {table cell}
   OvcTCNum,               {table cell}
   OvcTCCBx,               {table cell}
+  OvcTCCheckCBx,          {table cell}
   OvcTCIco,               {table cell}
   ovctccustomedt,         {table cell}
   OvcLabel,               {custom label component}
@@ -753,6 +754,7 @@ begin
     TOvcTCMemo,
     TOvcTCCheckBox,
     TOvcTCComboBox,
+    TOvcTCCheckComboBox,
     TOvcTCBitMap,
     TOvcTCGlyph,
     TOvcTCIcon,
