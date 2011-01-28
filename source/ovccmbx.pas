@@ -233,6 +233,8 @@ type
     procedure WndProc(var Message: TMessage); override;
 
     procedure SelectionChanged; virtual;
+    procedure Select; override;
+    procedure SetItemIndex(const Value: Integer); override;
 
     procedure BorderChanged(ABorder : TObject);
     procedure Paint;
@@ -1384,6 +1386,12 @@ begin
   SetItemHeight(M.tmHeight{ - 1}); //SZ 09.06.2010 removed "- 1" because "q" is cut off at bottom
 end;
 
+procedure TOvcBaseComboBox.Select;
+begin
+  inherited;
+  Invalidate; // must invalidate after selecting item using CBFindString
+end;
+
 procedure TOvcBaseComboBox.SelectionChanged;
 var
   L        : Integer;
@@ -1469,6 +1477,12 @@ begin
 //    *)
     RecreateWnd;
   end;
+end;
+
+procedure TOvcBaseComboBox.SetItemIndex(const Value: Integer);
+begin
+  inherited;
+  Invalidate; // must repaint after SetItemIndex when themed
 end;
 
 procedure TOvcBaseComboBox.SetMRUListCount(Value: Integer);
