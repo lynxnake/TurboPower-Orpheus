@@ -1926,11 +1926,11 @@ var
 
         SP^ := StrPas(A);
       end;
-    end else if Length(SP^) <> MaxLength then begin
-      if String(DataPtr^) = '' then     // SZ
+    end else if Length(PString(DataPtr)^) <> MaxLength then begin
+      if PString(DataPtr)^ = '' then     // SZ
         efEditSt[0] := #0
       else
-        StrPLCopy(efEditSt, SP^, MaxLength);
+        StrPLCopy(efEditSt, PString(DataPtr)^, MaxLength);
       pbMergePicture(efEditSt, efEditSt);
     end else
       StrPLCopy(efEditSt, SP^, MaxLength);
