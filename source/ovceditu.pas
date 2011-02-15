@@ -24,6 +24,8 @@
 {*                                                                            *}
 {* Contributor(s):                                                            *}
 {*                                                                            *}
+{* Roman Kassebaum                                                            *}
+{*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
 {$I OVC.INC}
@@ -360,7 +362,7 @@ asm
   mov    esi,eax        {esi = S}
   movzx  edi,dx         {edi = Col}
   xor    ebx,ebx        {length = 0}
-  movzx  edx,cx         {dx = TabSize}
+  movzx  edx,cl         {dx = TabSize}
   xor    ecx,ecx        {ecx = actual column}
 
   cld                   {go forward}
