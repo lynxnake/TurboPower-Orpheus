@@ -146,6 +146,7 @@ type
       tbMustUpdate : boolean;           {scrolling has left an invalid region}
       tbMustFinishLoading : boolean;    {finish loading data in CreateWnd}
       ProcessingVScrollMessage: Boolean;{Internal flag}
+      FHasBorderWidth: Boolean;         {true if CellAttr.BorderWidth > 1 in any cell}
 
     protected
       {property read routines}
@@ -208,6 +209,9 @@ type
       procedure tbDrawRow(RowInx : integer; ColInxStart, ColInxEnd : integer);
       procedure tbDrawSizeLine;
       procedure tbDrawUnusedBit;
+      procedure tbDrawCellBorder(RowInx: TRowNum; ColInx: TColNum; CellAttr: TOvcCellAttributes);
+      procedure tbDrawCellBorders(RowInxStart, RowInxEnd : integer;
+                                  ColInxStart, ColInxEnd : integer);
 
 { - HWnd changed to TOvcHWnd for BCB Compatibility }
       function  tbEditCellHasFocus(FocusHandle : TOvcHWnd{HWND}) : boolean;
@@ -4573,7 +4577,85 @@ procedure TOvcCustomTable.tbDrawActiveCell;
           end;
       end;
   end;
+
 {--------}
+procedure TOvcCustomTable.tbDrawCellBorder(RowInx: TRowNum; ColInx: TColNum;
+  CellAttr: TOvcCellAttributes);
+var
+  RowOfs    : integer;
+  RowHt     : integer;
+  RowNum    : TRowNum;
+  ColNum    : TColNum;
+  ColOfs    : integer;
+  ColWd     : integer;
+  DestRect  : TRect;
+begin
+  with tbRowNums^ do
+    begin
+      RowNum := Ay[RowInx].Number;
+      RowOfs := Ay[RowInx].Offset;
+      RowHt := Ay[succ(RowInx)].Offset - RowOfs;
+    end;
+    with tbColNums^ do
+      begin
+        ColNum := Ay[ColInx].Number;
+        ColOfs := Ay[ColInx].Offset;
+        ColWd := Ay[succ(ColInx)].Offset - ColOfs;
+      end;
+
+  if (CellAttr.caBorderColor <> clOvcTableDefault) or (CellAttr.caBorderStyle <> psSolid) then
+  begin
+    if CellAttr.caBorderColor <> clOvcTableDefault then
+      Canvas.Pen.Color := CellAttr.caBorderColor
+    else
+      Canvas.Pen.Color := GridPenSet.NormalGrid.NormalColor;
+    Canvas.Pen.Width := CellAttr.caBorderWidth;
+    Canvas.Pen.Style := CellAttr.caBorderStyle;
+    Canvas.MoveTo(ColOfs, RowOfs);
+    Canvas.LineTo(ColOfs + ColWd - 1, RowOfs);
+    Canvas.LineTo(ColOfs + ColWd - 1, RowOfs + RowHt - 1);
+    Canvas.LineTo(ColOfs, RowOfs + RowHt - 1);
+    Canvas.LineTo(ColOfs, RowOfs);
+  end;
+end;
+
+procedure TOvcCustomTable.tbDrawCellBorders(RowInxStart, RowInxEnd, ColInxStart,
+  ColInxEnd: integer);
+var
+  RowInx: TRowNum;
+  ColInx: TColNum;
+  CellAttr: TOvcCellAttributes;
+  RowNum    : TRowNum;
+  ColNum    : TColNum;
+begin
+  {Delphi bug fix - refresh the canvas handle to force brush to be recreated}
+  Canvas.Refresh;
+  {draw cells that need it}
+
+  if (RowInxStart < 0) or (RowInxEnd < 0) or
+     (ColInxStart < 0) or (ColInxEnd < 0) then
+    Exit;
+
+  FillChar(CellAttr, SizeOf(CellAttr), 0);
+  CellAttr.caFont := TFont.Create;
+  try
+    with tbRowNums^ do
+      for RowInx := RowInxStart to RowInxEnd do
+        for ColInx := ColInxStart to ColInxEnd do
+        begin
+          CellAttr.caBorderColor := clOvcTableDefault;
+          CellAttr.caBorderStyle := psSolid;
+          CellAttr.caBorderWidth := 1;
+          RowNum := tbRowNums^.Ay[RowInx].Number;
+          ColNum := tbColNums^.Ay[ColInx].Number;
+          ResolveCellAttributes(RowNum, ColNum, CellAttr);
+          tbDrawCellBorder(RowInx, ColInx, CellAttr);
+        end;
+  finally
+    FreeAndNil(CellAttr.caFont);
+  end;
+end;
+
 procedure TOvcCustomTable.tbDrawCells(RowInxStart, RowInxEnd : integer;
                                       ColInxStart, ColInxEnd : integer);
   var
@@ -4604,7 +4686,21 @@ procedure TOvcCustomTable.tbDrawInvalidCells(InvCells : TOvcCellArray);
     NewCellAddr: TOvcCellAddress;
     EndCol     : TColNum;
     ContinueTrying : boolean;
+    GR: TRect;
   begin
+    if FHasBorderWidth then // draw the entire table if borderwidth > 1; this could be optimized
+    begin
+      if tbCalcCellsFromRect(ClientRect, GR) = 2 then
+        Exit;
+
+      GR.Top := tbFindRowInx(GR.Top);
+      tbDrawCells(GR.Top, GR.Bottom, GR.Left, GR.Right);
+      DoPaintUnusedArea;
+      tbDrawCellBorders(GR.Top, GR.Bottom, GR.Left, GR.Right);
+      InvCells.Clear;
+      Exit;
+    end;
+
     if (InvCells.Count > 0) then
       begin
         {Delphi bug fix - refresh the canvas handle to force brush to be recreated}
@@ -4756,6 +4852,9 @@ procedure TOvcCustomTable.tbDrawRow(RowInx : integer; ColInxStart, ColInxEnd : i
     {for all required cells}
     for ColInx := ColInxEnd downto ColInxStart do
       begin
+        {set up the cell border attributes}
+        CellAttr.caBorderColor := clOvcTableDefault;
+        CellAttr.caBorderStyle := psSolid;
         {calculate data about the column, tell the user we're entering the column}
         with tbColNums^ do
           begin
@@ -4823,7 +4922,12 @@ procedure TOvcCustomTable.tbDrawRow(RowInx : integer; ColInxStart, ColInxEnd : i
             Canvas.Brush.Color := CellAttr.caColor;
             Canvas.FillRect(DestRect);
           end;
-
+        // Custom Cell Border (Grid) current cell
+        if CellAttr.caBorderWidth > 1 then
+          FHasBorderWidth := True; // from now on we must invalid the entire visible area
+        if (CellAttr.caBorderColor <> clOvcTableDefault) or (CellAttr.caBorderStyle <> psSolid) then
+          tbDrawCellBorder(RowInx, ColInx, CellAttr)
+        else
         {Check to see if there is a grid to display}
         if (GridPen.Effect <> geNone) then
           with Canvas do
@@ -4972,6 +5076,9 @@ procedure TOvcCustomTable.Paint;
 
         if (WhatToPaint <> 0) then
           DoPaintUnusedArea;
+
+        if FHasBorderWidth then // draw cell border if borderwidth > 1; otherwise drawn in tbDrawRow
+          tbDrawCellBorders(GR.Top, GR.Bottom, GR.Left, GR.Right);
 
         tbDrawActiveCell;
       end

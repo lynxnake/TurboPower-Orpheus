@@ -186,6 +186,11 @@ type
     caFontColor   : TColor;          {..text color}
     caFontHiColor : TColor;          {..text highlight color}
     caTextStyle   : TOvcTextStyle;   {..text style}
+
+    // SZ new attributes for cell border 15.02.2011
+    caBorderColor : TColor;          {..Border Color - clOvcTableDefault}
+    caBorderStyle : TPenStyle;       {..Border Style (solid, dotted, ...}
+    caBorderWidth : Integer;         {..Border Thickness}
   end;
 
 
