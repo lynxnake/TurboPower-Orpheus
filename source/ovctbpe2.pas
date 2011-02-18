@@ -23,6 +23,8 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{* Roman Kassebaum                                                            *}
+{* Patrick Lajko/CDE Software                                                 *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -69,6 +71,8 @@ type
     DefaultController: TOvcController;
     OvcSpinner1: TOvcSpinner;
     OvcSpinner2: TOvcSpinner;
+    ctlShowRightLine: TCheckBox;
+    Label5: TLabel;
     procedure ctlColNumberExit(Sender: TObject);
     procedure ApplyButtonClick(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
@@ -154,14 +158,15 @@ procedure TOvcfrmColEditor.AddCellComponentName(const S : string);
 {--------}
 procedure TOvcfrmColEditor.ApplyButtonClick(Sender: TObject);
   begin
-    with FCols[ColNum] do
-      begin
-        Hidden := ctlHidden.Checked;
-        FCols[ColNum].Width := ctlWidth.AsInteger;
-        if (ctlDefaultCell.ItemIndex <> CurCellIndex) then
-          begin
-            CurCellIndex := ctlDefaultCell.ItemIndex;
-            FCols[FColNum].DefaultCell := TOvcBaseTableCell(Cells.Objects[CurCellIndex]);
+	  with FCols[ColNum] do
+		 begin
+			Hidden := ctlHidden.Checked;
+			ShowRightLine := ctlShowRightLine.Checked; //CDE
+			FCols[ColNum].Width := ctlWidth.AsInteger;
+			if (ctlDefaultCell.ItemIndex <> CurCellIndex) then
+			  begin
+				 CurCellIndex := ctlDefaultCell.ItemIndex;
+				 FCols[FColNum].DefaultCell := TOvcBaseTableCell(Cells.Objects[CurCellIndex]);
           end;
       end;
   end;

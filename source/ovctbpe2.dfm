@@ -5,32 +5,42 @@ object OvcfrmColEditor: TOvcfrmColEditor
   BorderIcons = [biSystemMenu]
   BorderStyle = bsDialog
   Caption = 'Columns Editor'
-  ClientHeight = 190
-  ClientWidth = 386
+  ClientHeight = 248
+  ClientWidth = 505
+  Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -14
   Font.Name = 'Default'
   Font.Style = []
+  OldCreateOrder = True
   Position = poScreenCenter
   OnShow = FormShow
-  PixelsPerInch = 96
-  TextHeight = 13
+  PixelsPerInch = 120
+  TextHeight = 17
   object Panel1: TPanel
     Left = 0
     Top = 0
-    Width = 386
-    Height = 41
+    Width = 505
+    Height = 54
+    Margins.Left = 4
+    Margins.Top = 4
+    Margins.Right = 4
+    Margins.Bottom = 4
     Align = alTop
     Alignment = taLeftJustify
     BevelInner = bvLowered
     TabOrder = 0
     object SpeedButton1: TSpeedButton
-      Left = 8
-      Top = 8
-      Width = 25
-      Height = 25
+      Left = 10
+      Top = 10
+      Width = 33
+      Height = 33
       Hint = 'Previous column'
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       Glyph.Data = {
         76010000424D7601000000000000760000002800000020000000100000000100
         0400000000000001000000000000000000001000000010000000000000000000
@@ -50,11 +60,15 @@ object OvcfrmColEditor: TOvcfrmColEditor
       OnClick = SpeedButton1Click
     end
     object SpeedButton2: TSpeedButton
-      Left = 32
-      Top = 8
-      Width = 25
-      Height = 25
+      Left = 42
+      Top = 10
+      Width = 33
+      Height = 33
       Hint = 'Next column'
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       Glyph.Data = {
         76010000424D7601000000000000760000002800000020000000100000000100
         0400000000000001000000000000000000001000000010000000000000000000
@@ -74,11 +88,15 @@ object OvcfrmColEditor: TOvcfrmColEditor
       OnClick = SpeedButton2Click
     end
     object SpeedButton3: TSpeedButton
-      Left = 72
-      Top = 8
-      Width = 25
-      Height = 25
+      Left = 94
+      Top = 10
+      Width = 33
+      Height = 33
       Hint = 'First column'
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       Glyph.Data = {
         76010000424D7601000000000000760000002800000020000000100000000100
         0400000000000001000000000000000000001000000010000000000000000000
@@ -98,11 +116,15 @@ object OvcfrmColEditor: TOvcfrmColEditor
       OnClick = SpeedButton3Click
     end
     object SpeedButton4: TSpeedButton
-      Left = 96
-      Top = 8
-      Width = 25
-      Height = 25
+      Left = 126
+      Top = 10
+      Width = 32
+      Height = 33
       Hint = 'Last column'
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       Glyph.Data = {
         76010000424D7601000000000000760000002800000020000000100000000100
         0400000000000001000000000000000000001000000010000000000000000000
@@ -122,11 +144,15 @@ object OvcfrmColEditor: TOvcfrmColEditor
       OnClick = SpeedButton4Click
     end
     object SpeedButton5: TSpeedButton
-      Left = 136
-      Top = 8
-      Width = 25
-      Height = 25
+      Left = 178
+      Top = 10
+      Width = 33
+      Height = 33
       Hint = 'Insert column'
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       Glyph.Data = {
         76010000424D7601000000000000760000002800000020000000100000000100
         0400000000000001000000000000000000001000000010000000000000000000
@@ -146,11 +172,15 @@ object OvcfrmColEditor: TOvcfrmColEditor
       OnClick = SpeedButton5Click
     end
     object SpeedButton6: TSpeedButton
-      Left = 160
-      Top = 8
-      Width = 25
-      Height = 25
+      Left = 209
+      Top = 10
+      Width = 33
+      Height = 33
       Hint = 'Delete column'
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       Glyph.Data = {
         76010000424D7601000000000000760000002800000020000000100000000100
         0400000000000001000000000000000000001000000010000000000000000000
@@ -170,20 +200,28 @@ object OvcfrmColEditor: TOvcfrmColEditor
       OnClick = SpeedButton6Click
     end
     object Label1: TLabel
-      Left = 200
-      Top = 12
-      Width = 105
-      Height = 16
+      Left = 262
+      Top = 16
+      Width = 137
+      Height = 21
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       AutoSize = False
       Caption = 'Column &number'
       FocusControl = ctlColNumber
     end
     object ctlColNumber: TOvcSimpleField
-      Left = 312
-      Top = 11
-      Width = 49
-      Height = 21
+      Left = 408
+      Top = 14
+      Width = 64
+      Height = 25
       Cursor = crIBeam
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       DataType = sftInteger
       CaretOvr.Shape = csBlock
       ControlCharColor = clRed
@@ -196,6 +234,7 @@ object OvcfrmColEditor: TOvcfrmColEditor
       EFColors.Highlight.BackColor = clHighlight
       EFColors.Highlight.TextColor = clHighlightText
       MaxLength = 5
+      Options = [efoCaretToEnd]
       PictureMask = '9'
       TabOrder = 0
       OnChange = ctlColNumberChange
@@ -204,76 +243,125 @@ object OvcfrmColEditor: TOvcfrmColEditor
       RangeLow = {00000000000000000000}
     end
     object OvcSpinner2: TOvcSpinner
-      Left = 361
-      Top = 11
-      Width = 16
-      Height = 21
-      Acceleration = 5
+      Left = 472
+      Top = 14
+      Width = 21
+      Height = 28
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       AutoRepeat = True
       Delta = 1.000000000000000000
-      DelayTime = 500
       FocusedControl = ctlColNumber
-      ShowArrows = True
-      Style = stNormalVertical
-      WrapMode = True
     end
   end
   object GroupBox1: TGroupBox
-    Left = 8
-    Top = 48
-    Width = 273
-    Height = 137
+    Left = 10
+    Top = 63
+    Width = 357
+    Height = 179
+    Margins.Left = 4
+    Margins.Top = 4
+    Margins.Right = 4
+    Margins.Bottom = 4
     Caption = 'Column details'
     TabOrder = 1
     object Label2: TLabel
-      Left = 8
-      Top = 20
-      Width = 75
-      Height = 16
+      Left = 10
+      Top = 26
+      Width = 99
+      Height = 21
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       AutoSize = False
       Caption = 'De&fault Cell'
       FocusControl = ctlDefaultCell
     end
     object Label3: TLabel
-      Left = 8
-      Top = 108
-      Width = 75
-      Height = 16
+      Left = 10
+      Top = 141
+      Width = 99
+      Height = 21
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       AutoSize = False
       Caption = '&Width'
       FocusControl = ctlWidth
     end
     object Label4: TLabel
-      Left = 8
-      Top = 72
-      Width = 34
-      Height = 13
+      Left = 10
+      Top = 94
+      Width = 42
+      Height = 17
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       Caption = '&Hidden'
       FocusControl = ctlHidden
     end
+    object Label5: TLabel
+      Left = 199
+      Top = 94
+      Width = 98
+      Height = 17
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
+      Caption = '&Show Right Line'
+      FocusControl = ctlShowRightLine
+    end
     object ctlDefaultCell: TComboBox
-      Left = 8
-      Top = 40
-      Width = 257
-      Height = 21
+      Left = 10
+      Top = 52
+      Width = 337
+      Height = 25
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       Style = csDropDownList
       DropDownCount = 16
-      ItemHeight = 13
       TabOrder = 0
     end
     object ctlHidden: TCheckBox
-      Left = 96
-      Top = 72
-      Width = 17
-      Height = 17
+      Left = 126
+      Top = 94
+      Width = 22
+      Height = 22
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       TabOrder = 1
     end
+    object ctlShowRightLine: TCheckBox
+      Left = 314
+      Top = 94
+      Width = 22
+      Height = 22
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
+      TabOrder = 3
+    end
     object ctlWidth: TOvcSimpleField
-      Left = 96
-      Top = 106
-      Width = 49
-      Height = 21
+      Left = 126
+      Top = 139
+      Width = 64
+      Height = 25
       Cursor = crIBeam
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       DataType = sftInteger
       CaretOvr.Shape = csBlock
       ControlCharColor = clRed
@@ -286,47 +374,59 @@ object OvcfrmColEditor: TOvcfrmColEditor
       EFColors.Highlight.BackColor = clHighlight
       EFColors.Highlight.TextColor = clHighlightText
       MaxLength = 5
+      Options = [efoCaretToEnd]
       PictureMask = '9'
       TabOrder = 2
       RangeHigh = {FF7F0000000000000000}
       RangeLow = {05000000000000000000}
     end
     object OvcSpinner1: TOvcSpinner
-      Left = 145
-      Top = 106
-      Width = 16
-      Height = 21
-      Acceleration = 5
+      Left = 190
+      Top = 139
+      Width = 21
+      Height = 27
+      Margins.Left = 4
+      Margins.Top = 4
+      Margins.Right = 4
+      Margins.Bottom = 4
       AutoRepeat = True
       Delta = 1.000000000000000000
-      DelayTime = 500
       FocusedControl = ctlWidth
-      ShowArrows = True
-      Style = stNormalVertical
-      WrapMode = True
     end
   end
   object DoneButton: TBitBtn
-    Left = 304
-    Top = 160
-    Width = 75
-    Height = 25
+    Left = 398
+    Top = 209
+    Width = 98
+    Height = 33
+    Margins.Left = 4
+    Margins.Top = 4
+    Margins.Right = 4
+    Margins.Bottom = 4
     Caption = '&Done'
+    DoubleBuffered = True
     ModalResult = 1
+    NumGlyphs = 2
+    ParentDoubleBuffered = False
     TabOrder = 3
     OnClick = DoneButtonClick
-    NumGlyphs = 2
   end
   object ApplyButton: TBitBtn
-    Left = 304
-    Top = 56
-    Width = 75
-    Height = 25
+    Left = 398
+    Top = 73
+    Width = 98
+    Height = 33
+    Margins.Left = 4
+    Margins.Top = 4
+    Margins.Right = 4
+    Margins.Bottom = 4
     Caption = '&Apply'
     Default = True
+    DoubleBuffered = True
+    NumGlyphs = 2
+    ParentDoubleBuffered = False
     TabOrder = 2
     OnClick = ApplyButtonClick
-    NumGlyphs = 2
   end
   object DefaultController: TOvcController
     EntryCommands.TableList = (
@@ -340,7 +440,7 @@ object OvcfrmColEditor: TOvcfrmColEditor
       False
       ())
     Epoch = 1900
-    Left = 288
-    Top = 128
+    Left = 384
+    Top = 120
   end
 end

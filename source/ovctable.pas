@@ -23,6 +23,8 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{* Roman Kassebaum                                                            *}
+{* Patrick Lajko/CDE Software                                                 *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -287,6 +289,7 @@ type
 
       {row/col data retrieval}
       function tbIsColHidden(ColNum : TColNum) : boolean;
+	  function tbIsColShowRightLine(ColNum : TColNum) : boolean; //CDE
       function tbIsRowHidden(RowNum : TRowNum) : boolean;
       procedure tbQueryColData(ColNum : TColNum;
                            var W : integer;
@@ -3404,6 +3407,14 @@ function TOvcCustomTable.tbIsColHidden(ColNum : TColNum) : boolean;
       Result := FCols[ColNum].Hidden;
   end;
 {--------}
+function TOvcCustomTable.tbIsColShowRightLine(ColNum : TColNum) : boolean; //CDE
+	begin
+//	  if (ColNum < 0) or (ColNum >= FCols.Count) then
+//		 Result := True
+//	  else
+		 Result := FCols[ColNum].ShowRightLine;
+	end;
+{--------}
 function TOvcCustomTable.tbIsOnGridLine(MouseX, MouseY : integer;
                                     var VerticalGrid : boolean) : boolean;
   var
@@ -4830,6 +4841,7 @@ procedure TOvcCustomTable.tbDrawRow(RowInx : integer; ColInxStart, ColInxEnd : i
     RowIsLocked : boolean;
     ColIsLocked : boolean;
     IsActiveRow : boolean;
+	  DrawRightLine: boolean; //CDE
   begin
     {calculate data about the row, tell the user we're entering the row}
     with tbRowNums^ do
@@ -4863,6 +4875,7 @@ procedure TOvcCustomTable.tbDrawRow(RowInx : integer; ColInxStart, ColInxEnd : i
             ColWd := Ay[succ(ColInx)].Offset - ColOfs;
           end;
         ColIsLocked := (ColNum < LockedCols);
+		DrawRightLine:=tbIsColShowRightLine(ColNum); //CDE
     { Don't fire the OnEnteringCol when we are painting, unless }
     { OldRowColBehavior is true                                 }
     if OldRowColBehavior then
@@ -4955,8 +4968,15 @@ procedure TOvcCustomTable.tbDrawRow(RowInx : integer; ColInxStart, ColInxEnd : i
               Pen.Color := GridPen.NormalColor;
 
               {draw right line}
-              if (GridPen.Effect <> geHorizontal) then
-                begin
+              if (GridPen.Effect <> geHorizontal) then begin
+                  // CDE START
+				  if drawrightline then begin
+						//brush.color:=pen.color;
+				  end
+				  else begin
+				    pen.color:=brush.color;
+			      end;
+				  //END CDE
                   MoveTo(ColOfs+ColWd-1, RowOfs);
                   LineTo(ColOfs+ColWd-1, RowOfs+RowHt);
                 end;

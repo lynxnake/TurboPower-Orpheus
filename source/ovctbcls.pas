@@ -23,6 +23,8 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{* Roman Kassebaum                                                            *}
+{* Patrick Lajko/CDE Software                                                 *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -56,12 +58,13 @@ type
       FWidth    : Integer;
       {property fields-odd size}
       FHidden   : boolean;
-      Filler    : byte;
+	  FShowRightLine{Filler}    : boolean {byte};
 
     protected
       {property access}
       procedure SetDefCell(BTC : TOvcBaseTableCell);
       procedure SetHidden(H : boolean);
+	  procedure SetShowRightLine(H : boolean); //CDE
       procedure SetWidth(W : Integer);
 
       {miscellaneous}
@@ -91,6 +94,8 @@ type
 
       property Hidden : boolean
         read FHidden write SetHidden;
+		 property ShowRightLine : boolean
+			read FShowRightLine write SetShowRightLine; //CDE
 
       property Width  : Integer
          read FWidth write SetWidth;
@@ -113,12 +118,14 @@ type
       function GetCount : Integer;
       function GetDefaultCell(ColNum : TColNum) : TOvcBaseTableCell;
       function GetHidden(ColNum : TColNum) : boolean;
+	  function GetShowRightLine(ColNum : TColNum) : boolean; //CDE
       function GetWidth(ColNum : TColNum) : Integer;
 
       procedure SetCol(ColNum : TColNum; C : TOvcTableColumn);
       procedure SetCount(C : Integer);
       procedure SetDefaultCell(ColNum : TColNum; C : TOvcBaseTableCell);
       procedure SetHidden(ColNum : TColNum; H : boolean);
+	  procedure SetShowRightLine(ColNum : TColNum; H : boolean); //CDE
       procedure SetWidth(ColNum : TColNum; W : Integer);
 
       {event access}
@@ -157,6 +164,8 @@ type
       property Hidden [ColNum : TColNum] : boolean
          read GetHidden write SetHidden;
 
+	  property ShowRightLinex [ColNum : TColNum] : boolean
+	     read GetShowRightLine write SetShowRightLine;  //CDE
       property List [ColNum : TColNum] : TOvcTableColumn
          read GetCol write SetCol;
          default;
@@ -176,6 +185,7 @@ constructor TOvcTableColumn.Create(ATable : TOvcTableAncestor);
   begin
     inherited Create;
     FWidth := tbDefColWidth;
+	fShowRightLine:=true; //CDE
     FDefCell := nil;
     FTable := ATable;
   end;
@@ -194,6 +204,7 @@ procedure TOvcTableColumn.Assign(Source : TPersistent);
       Exit;
     FWidth := Src.Width;
     FHidden := Src.Hidden;
+	FShowRightLine:=src.showrightLine; //CDE
     DefaultCell := Src.DefaultCell;
   end;
 {--------}
@@ -247,6 +258,16 @@ procedure TOvcTableColumn.SetHidden(H : boolean);
         tcDoColumnChanged;
       end;
   end;
+{--------}
+//CDE
+procedure TOvcTableColumn.SetShowRightLine(H : boolean);
+	begin
+	  if (H <> FShowRightLine) then
+		 begin
+			FShowRightLine := H;
+			tcDoColumnChanged;
+		 end;
+	end;
 {--------}
 procedure TOvcTableColumn.SetWidth(W : Integer);
   begin
@@ -375,6 +396,14 @@ function TOvcTableColumns.GetHidden(ColNum : TColNum) : boolean;
       Result := TOvcTableColumn(FList[ColNum]).Hidden;
   end;
 {--------}
+//CDE
+function TOvcTableColumns.GetShowRightLine(ColNum : TColNum) : boolean;
+	begin
+	  Result := True;
+	  if (0 <= ColNum) and (ColNum < FList.Count) then
+		 Result := TOvcTableColumn(FList[ColNum]).ShowRightLine;
+	end;
+{--------}
 function TOvcTableColumns.GetWidth(ColNum : TColNum) : Integer;
   begin
     Result := 0;
@@ -468,6 +497,13 @@ procedure TOvcTableColumns.SetHidden(ColNum : TColNum; H : boolean);
     if (0 <= ColNum) and (ColNum < FList.Count) then
       TOvcTableColumn(FList[ColNum]).Hidden := H;
   end;
+{--------}
+//CDE
+procedure TOvcTableColumns.SetShowRightLine(ColNum : TColNum; H : boolean);
+	begin
+	  if (0 <= ColNum) and (ColNum < FList.Count) then
+		 TOvcTableColumn(FList[ColNum]).ShowRightLine := H;
+	end;
 {--------}
 procedure TOvcTableColumns.SetOnColumnChanged(OC : TColChangeNotifyEvent);
   var
