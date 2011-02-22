@@ -4968,27 +4968,25 @@ procedure TOvcCustomTable.tbDrawRow(RowInx : integer; ColInxStart, ColInxEnd : i
               Pen.Color := GridPen.NormalColor;
 
               {draw right line}
-              if (GridPen.Effect <> geHorizontal) then begin
-                  // CDE START
-				  if drawrightline then begin
-						//brush.color:=pen.color;
-				  end
-				  else begin
-				    pen.color:=brush.color;
-			      end;
-				  //END CDE
-                  MoveTo(ColOfs+ColWd-1, RowOfs);
-                  LineTo(ColOfs+ColWd-1, RowOfs+RowHt);
-                end;
+					if (GridPen.Effect <> geVertical) then
+					  begin
+						 MoveTo(ColOfs, pred(RowOfs+RowHt));
+						 LineTo(ColOfs+ColWd, pred(RowOfs+RowHt));
+					  end;
 
-              {draw bottom line}
-              if (GridPen.Effect <> geVertical) then
-                begin
-                  MoveTo(ColOfs, pred(RowOfs+RowHt));
-                  LineTo(ColOfs+ColWd, pred(RowOfs+RowHt));
-                end;
-            end;
-      end;
+					{draw right line}
+					if (GridPen.Effect <> geHorizontal) then begin
+						 // CDE START
+						if not drawrightline then
+						  begin
+							 pen.color:=brush.color;
+						  end;
+						 //END CDE
+						 MoveTo(ColOfs+ColWd-1, RowOfs);
+						 LineTo(ColOfs+ColWd-1, RowOfs+RowHt);
+					  end;
+				 end;
+		 end;
   end;
 {--------}
 procedure TOvcCustomTable.tbDrawSizeLine;
