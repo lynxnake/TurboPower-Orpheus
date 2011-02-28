@@ -25,6 +25,7 @@
 {* Contributor(s):                                                            *}
 {*                                                                            *}
 {* Roman Kassebaum                                                            *}
+{* Armin Biernaczyk                                                           *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -70,18 +71,12 @@ function edEffectiveLen(S : PChar; Len : Word; TabSize : Byte) : Word;
   {-compute effective length of S, accounting for tabs}
 function edFindNextLine(S : PChar; WrapCol : Integer) : PChar;
   {-find the start of the next line}
-function edFindPosInMap(Map : Pointer; Lines, Pos : Integer) : Integer;
+function edFindPosInMap(Map: Pointer; Lines, Pos : Word) : Word;
   {-return the para position}
 function edGetActualCol(S : PChar; Col : Word; TabSize : Byte) : Word;
   {-compute actual column for effective column Col, accounting for tabs}
 function edHaveTabs(S : PChar; Len : Word) : Boolean;
   {Return True if tab are found in S}
-procedure edMoveBlock(var Src, Dest; Count : Word);
-  {-move block of data from Src to Dest}
-procedure edMoveFast(var Src, Dest; Count : Word);
-  {-move block of data from Src to Dest fastly}
-function edPadChPrim(S : PChar; C : Char; Len : Word) : PChar;
-  {-return S padded with C to length Len}
 function edPadPrim(S : PChar; Len : Word) : PChar;
   {-return a string right-padded to length len with blanks}
 function edScanToEnd(P : PChar; Len : Word) : Word;
@@ -100,66 +95,46 @@ uses
 
 function edBreakPoint(S : PChar; MaxLen : Word): Word;
   {-return the position to word break S}
-var
-  I : Word;
 begin
-  I := MaxLen;
-  while (I > 0) and not edWhiteSpace(S[I-1]) do
-    Dec(I);
-  if I = 0 then
-    Result := MaxLen
-  else
-    Result := I;
+  result := MaxLen;
+  while (result > 0) and not edWhiteSpace(S[result-1]) do
+    Dec(result);
+  if result = 0 then
+    result := MaxLen;
 end;
+
 
 procedure edDeleteSubString(S : PChar; SLen, Count, Pos : Integer);
   {-delete Count characters from S starting at Pos}
 begin
-  if SLen+1 >= 1024 then
-    edMoveBlock(S[Pos+Count], S[Pos], ((SLen+1)-(Pos+Count)) * SizeOf(Char))
-  else
-    edMoveFast(S[Pos+Count], S[Pos], ((SLen+1)-(Pos+Count)) * SizeOf(Char));
+  if Pos<SLen then
+    Move(S[Pos+Count], S[Pos], ((SLen+1)-(Pos+Count)) * SizeOf(Char));
 end;
+
 
 function edEffectiveLen(S : PChar; Len : Word; TabSize : Byte) : Word; register;
-  {-compute effective length of S, accounting for tabs}
-{$IFDEF UNICODE}
-asm
-  push   edi            {save}
-  push   esi            {save}
-  push   ebx            {save}
-
-  mov    esi,eax        {esi = S}
-  xor    ebx,ebx        {clear}
-  mov    bl,cl          {ebx = TabSize}
-  xor    ecx,ecx        {clear}
-  mov    cx,dx          {ecx = Len}
-  xor    edi,edi        {temp length storage}
-  xor    edx,edx
-
-@@1:
-  jcxz   @@2            {done if ecx is 0}
-  dec    ecx            {decrement length}
-  lodsw                 {get next character}
-  or     ax,ax          {is it a null?}
-  jz     @@2            {done if so}
-  inc    edi            {increment length}
-  cmp    ax,9           {is it a tab?}
-  jne    @@1            {if not, get next}
-  dec    edi            {decrement length}
-  mov    eax,edi        {ax has length}
-  div    ebx            {divide by tabsize}
-  inc    eax            {add one}
-  mul    ebx            {multiply by tabsize}
-  mov    edi,eax        {save result in edi}
-  jmp    @@1            {get next character}
-@@2:
-  mov    eax,edi        {put effective length in eax}
-
-  pop    ebx            {restore}
-  pop    esi            {restore}
-  pop    edi            {restore}
+  {-compute effective length of S, accounting for tabs
+    The function returns the length of S with <tab>-characters expanded to spaces; only the
+    first 'Len' characters of S are taken into account. Examples
+    S = '1234567890'; Len=20            -> result = 10
+    S = '1234567890'; Len= 5            -> result =  5
+    S = '1234'#9'90'; Len=20; TabSize=8 -> result = 10
+    S = '1234'#9'90'; Len= 5; TabSize=8 -> result =  8 }
+{$IFDEF PUREPASCAL}
+var
+  i: Word;
+begin
+  result := 0;
+  i := 0;
+  while (i<Len) and (S[i]<>#0) do begin
+    if S[i]<>#9 then
+      Inc(result)
+    else
+      result := ((result div TabSize) + 1) * TabSize;
+    Inc(i);
+  end;
 end;
+
 {$ELSE}
 asm
   push   edi            {save}
@@ -170,18 +145,26 @@ asm
   xor    ebx,ebx        {clear}
   mov    bl,cl          {ebx = TabSize}
   xor    ecx,ecx        {clear}
-  mov    cx,dx          {ecx = Len}
+  mov    cx,dx          {cx = Len}
   xor    edi,edi        {temp length storage}
   xor    edx,edx
 
 @@1:
   jcxz   @@2            {done if ecx is 0}
   dec    ecx            {decrement length}
+{$IFDEF UNICODE}
+  lodsw                 {get next character}
+  or     ax,ax          {is it a null?}
+  jz     @@2            {done if so}
+  inc    edi            {increment length}
+  cmp    ax,9           {is it a tab?}
+{$ELSE}
   lodsb                 {get next character}
   or     al,al          {is it a null?}
   jz     @@2            {done if so}
   inc    edi            {increment length}
   cmp    al,9           {is it a tab?}
+{$ENDIF}
   jne    @@1            {if not, get next}
   dec    edi            {decrement length}
   mov    eax,edi        {ax has length}
@@ -199,15 +182,42 @@ asm
 end;
 {$ENDIF}
 
+
 function edFindNextLine(S : PChar; WrapCol : Integer) : PChar; register;
-  {-find the start of the next line}
-{$IFDEF UNICODE}
+  {-find the start of the next line
+    1) Find the last '-'/' '/#9 before or at position WrapCol
+       If there is none, return pointer to S[WrapCol]
+    2) Find the first character behind the ohne found in step 1 that is neither ' '
+       nor #9. Return a pointer to this character. }
+{$IFDEF PUREPASCAL}
+var
+  c: Char;
+begin
+  result := @S[WrapCol];
+  if S[WrapCol]<>#0 then begin
+    repeat
+      c := S[WrapCol];
+      if (c<>'-') and (c<>' ') and (c<>#9) then
+        Dec(WrapCol)
+      else begin
+        Inc(WrapCol);
+        while (S[WrapCol]=' ') or (S[WrapCol]=#9) do Inc(WrapCol);
+        result := @S[WrapCol];
+        break;
+      end;
+    until WrapCol=0;
+  end;
+end;
+
+{$ELSE}
 asm
   push   esi            {save}
   push   edi            {save}
 
   mov    esi,eax        {esi = S}
   mov    ecx,edx        {ecx = WrapCol}
+
+{$IFDEF UNICODE}
   add    esi,ecx        {point to default wrap point}
   add    esi,ecx
   mov    edi,esi        {save esi in edi}
@@ -225,9 +235,9 @@ asm
   ja     @@2
   je     @@3
   cmp    ax,' '         {is it a space?}
-  je     @@4
+  je     @@3
   cmp    ax,9           {is it a tab?}
-  je     @@4
+  je     @@3
 
 @@2:
   loop   @@1            {try previous character}
@@ -235,38 +245,24 @@ asm
   jmp    @@7
 
 @@3:
-  inc    esi            {skip the hyphen}
-  inc    esi
-
-@@4:
   cld                   {clear direction flag}
-  inc    esi            {point to next character}
-  inc    esi
+  add    esi,4          {go to next character}
 
 @@5:
   lodsw                 {next character into ax}
   cmp    ax,' '         {is it > than a space?}
   ja     @@6            {if so, we're done}
   je     @@5            {if it's a space, keep going}
-  cmp    al,9           {if it's a tab, keep going}
+  cmp    ax,9           {if it's a tab, keep going}
   je     @@5            {otherwise, we're done}
 
 @@6:
+  dec    esi
   dec    esi            {point to previous character}
   mov    eax,esi        {wrap point in eax}
 
-@@7:
-  pop    edi            {restore}
-  pop    esi            {restore}
-  cld                   {clear direction flag}
-end;
 {$ELSE}
-asm
-  push   esi            {save}
-  push   edi            {save}
 
-  mov    esi,eax        {esi = S}
-  mov    ecx,edx        {ecx = WrapCol}
   add    esi,ecx        {point to default wrap point}
   mov    edi,esi        {save esi in edi}
 
@@ -283,9 +279,9 @@ asm
   ja     @@2
   je     @@3
   cmp    al,' '         {is it a space?}
-  je     @@4
+  je     @@3
   cmp    al,9           {is it a tab?}
-  je     @@4
+  je     @@3
 
 @@2:
   loop   @@1            {try previous character}
@@ -293,10 +289,8 @@ asm
   jmp    @@7
 
 @@3:
-  inc    esi            {skip the hyphen}
-
-@@4:
   cld                   {clear direction flag}
+  inc    esi
   inc    esi            {point to next character}
 
 @@5:
@@ -310,6 +304,7 @@ asm
 @@6:
   dec    esi            {point to previous character}
   mov    eax,esi        {wrap point in eax}
+{$ENDIF}
 
 @@7:
   pop    edi            {restore}
@@ -318,19 +313,30 @@ asm
 end;
 {$ENDIF}
 
-function edFindPosInMap(Map : Pointer; Lines, Pos : Integer) : Integer; register;
+
+function edFindPosInMap(Map: Pointer; Lines, Pos : Word) : Word; register;
   {-return the para position}
+{$IFDEF PUREPASCAL}
+type
+  PLineMap = ^LineMap;
+  LineMap  = array[1..High(SmallInt)] of Word;
+begin
+  result := Lines;
+  Dec(Pos);
+  while (result>=1) and (Pos<PLineMap(Map)^[result]) do
+    Dec(result);
+end;
+
+{$ELSE}
 asm
   push   esi            {save}
   push   ebx            {save}
 
   mov    esi,eax        {esi = Map}
-  mov    ebx,ecx        {ebx = Pos}
-  and    ebx,0FFFFh     {clear high word}
-  dec    ebx            {ebx = Pos-1}
-  mov    ecx,edx        {ecx = Lines}
-  and    ecx,0FFFFh     {clear high word}
-  mov    eax,ecx        {eax = Lines}
+  mov    bx,cx          {bx = Pos}
+  dec    bx             {bx = Pos-1}
+  mov    cx,dx          {cx = Lines}
+  movzx  eax,cx         {eax = Lines}
   dec    eax            {prepare for word access}
   shl    eax,1
   add    esi,eax        {point to position in Map}
@@ -343,29 +349,52 @@ asm
   loop   @@1
 
 @@2:
-  mov    eax,ecx        {result in eax}
-  and    eax,0FFFFh     {clear high word}
+  mov    ax,cx          {result in ax}
 
   pop    ebx            {restore}
   pop    esi            {restore}
   cld                   {clear direction flag}
 end;
+{$ENDIF}
+
 
 function edGetActualCol(S : PChar; Col : Word; TabSize : Byte) : Word; register;
   {-compute actual column for effective column Col, accounting for tabs}
+{$IFDEF PUREPASCAL}
+var
+  c: Word;
+begin
+  result := 1;
+  c := 0;
+  repeat
+    if S^=#0 then
+      Break
+    else if S^=#9 then begin
+      c := (c div TabSize + 1) * TabSize;
+      if c+1<=Col then Inc(result);
+    end else begin
+      Inc(c);
+      Inc(result);
+    end;
+    Inc(S);
+  until c+1 >= Col;
+end;
+
+{$ELSE}
 asm
   push   esi            {save}
   push   edi            {save}
   push   ebx            {save}
 
-{$IFDEF UNICODE}
+  cld                   {go forward}
+
   mov    esi,eax        {esi = S}
   movzx  edi,dx         {edi = Col}
   xor    ebx,ebx        {length = 0}
-  movzx  edx,cl         {dx = TabSize}
+  mov    dl,cl          {dl = TabSize}
   xor    ecx,ecx        {ecx = actual column}
 
-  cld                   {go forward}
+{$IFDEF UNICODE}
 
 @@1:
   inc    ecx            {increment column}
@@ -374,40 +403,10 @@ asm
   jz     @@3            {done if so}
   inc    ebx            {increment effective length}
   cmp    ax, 09         {is it a tab?}
-  jne    @@2            {if not, check the column}
-  dec    ebx            {decrement length}
-  mov    eax,ebx        {eax has length}
-
-  {determine integral offset}
-  push   edx            {save}
-  push   ecx            {save}
-  mov    cx,dx          {cx=tab size}
-  xor    dx,dx          {clear remainder register}
-  div    cx             {divide by tabsize}
-  inc    ax             {add one}
-  mul    cx             {multiply by tabsize}
-  pop    ecx            {restore}
-  pop    edx            {restore - ignore upper 16 bits}
-
-  mov    ebx,eax        {put result in ebx}
-
-@@2:
-  cmp    ebx,edi        {have we reached the target column yet?}
-  jb     @@1            {get next character}
 
 {$ELSE}
 
-  mov    esi,eax        {esi = S}
-  and    edx,0FFFFh     {clear high word}
-  mov    edi,edx        {edi = Col}
-  {and    edi,0FFh}       {clear all except low byte}
-  xor    ebx,ebx        {length = 0}
-  mov    edx,ecx        {dl = TabSize}
   mov    dh,9           {dh = Tab char}
-  and    edx,0FFFFh     {clear high word}
-  xor    ecx,ecx        {ecx = actual column}
-
-  cld                   {go forward}
 @@1:
   inc    ecx            {increment column}
   lodsb                 {get next character}
@@ -415,6 +414,8 @@ asm
   jz     @@3            {done if so}
   inc    ebx            {increment effective length}
   cmp    al,dh          {is it a tab?}
+{$ENDIF}
+
   jne    @@2            {if not, check the column}
   dec    ebx            {decrement length}
   mov    eax,ebx        {eax has length}
@@ -422,22 +423,19 @@ asm
   {determine integral offset}
   push   edx            {save}
   push   ecx            {save}
-  xor    cx,cx          {use cx for division}
-  mov    cl,dl          {cx=tab size}
+  movzx  cx,dl          {cx=tab size}
   xor    dx,dx          {clear remainder register}
   div    cx             {divide by tabsize}
   inc    ax             {add one}
   mul    cx             {multiply by tabsize}
   pop    ecx            {restore}
   pop    edx            {restore - ignore upper 16 bits}
-
   mov    ebx,eax        {put result in ebx}
 
 @@2:
   cmp    ebx,edi        {have we reached the target column yet?}
   jb     @@1            {get next character}
 
-{$ENDIF}
 @@3:
   mov    eax,ecx        {put result in eax}
 
@@ -445,35 +443,37 @@ asm
   pop    edi            {restore}
   pop    esi            {restore}
 end;
+{$ENDIF}
+
 
 function edHaveTabs(S : PChar; Len : Word) : Boolean; register;
-  {-return True if tabs are found in S}
-{$IFDEF UNICODE}
-asm
-  {Note: this routine returns true if Len=0}
-  push   edi            {save}
-  mov    edi,eax        {edi = S}
-  mov    ax,9           {al = Tab character}
-  mov    ecx,edx        {ecx = Len}
-  and    ecx,0FFFFh     {clear high word}
-  cld                   {go forward}
-  repne  scasw          {search for the character}
-  mov    eax,0          {assume False}
-  jne    @@1
-  inc    eax            {else return True}
-@@1:
-  pop    edi            {restore}
+  {-return True if tabs are found in S
+    Note: this routine returns true if Len=0}
+{$IFDEF PUREPASCAL}
+begin
+  if Len=0 then
+    result := True
+  else begin
+    while (Len>0) and (S^<>#9) do begin
+      Inc(S);
+      Dec(Len);
+    end;
+    result := Len>0;
+  end;
 end;
+
 {$ELSE}
 asm
-  {Note: this routine returns true if Len=0}
   push   edi            {save}
   mov    edi,eax        {edi = S}
-  mov    al,9           {al = Tab character}
-  mov    ecx,edx        {ecx = Len}
-  and    ecx,0FFFFh     {clear high word}
+  mov    ax,9           {ax = Tab character}
+  movzx  ecx,dx         {ecx = Len}
   cld                   {go forward}
+{$IFDEF UNICODE}
+  repne  scasw          {search for the character}
+{$ELSE}
   repne  scasb          {search for the character}
+{$ENDIF}
   mov    eax,0          {assume False}
   jne    @@1
   inc    eax            {else return True}
@@ -482,97 +482,86 @@ asm
 end;
 {$ENDIF}
 
-procedure edMoveBlock(var Src, Dest; Count : Word);
-  {-move block of data from Src to Dest}          //SZ: string only
-begin
-  Move(Src, Dest, Count);
-end;
 
-procedure edMoveFast(var Src, Dest; Count : Word);
-  {-move block of data from Src to Dest fastly}
-begin
-  Move(Src, Dest, Count);
-end;
-
-function edPadChPrim(S : PChar; C : Char; Len : Word) : PChar; register;
+function edPadPrim(S : PChar; Len : Word) : PChar; register;
   {-return S padded with C to length Len}
-{$IFDEF UNICODE}
+{$IFDEF PUREPASCAL}
+var
+  i: Integer;
+begin
+  i := 0;
+  while S[i]<>#0 do Inc(i);
+  if i<Len then begin
+    while i<Len do begin
+      S[i] := ' ';
+      Inc(i);
+    end;
+    S[i] := #0;
+  end;
+  result := S;
+end;
+
+{$ELSE}
 asm
   push   esi            {save}
   push   edi            {save}
-  push   ebx            {save}
 
   mov    edi,eax        {edi = S}
   mov    esi,eax        {esi = S}
-  mov    ebx,ecx        {save Len}
-  and    ebx,0FFFFh     {clear high word}
 
   cld
   xor    eax, eax        {null}
   or     ecx, -1
+{$IFDEF UNICODE}
   repne  scasw           {find null terminator}
   not    ecx             {calc length of S}
   dec    ecx             {backup one character}
   sub    edi, 2
-  mov    eax,ebx         {eax = Len}
+  movzx  eax,dx          {eax = Len}
   sub    eax,ecx         {find difference}
   jbe    @@ExitPoint     {nothing to do}
   mov    ecx,eax         {count of character to add}
-  mov    ax,dx           {al=C}
+  mov    ax,' '          {ax = ' '}
   rep    stosw           {add ecx characters}
 
 @@ExitPoint:
   mov    word ptr [edi],0
-  mov    eax,esi
-
-  pop    ebx            {restore}
-  pop    edi            {restore}
-  pop    esi            {restore}
-end;
 {$ELSE}
-asm
-  push   esi            {save}
-  push   edi            {save}
-  push   ebx            {save}
-
-  mov    edi,eax        {edi = S}
-  mov    esi,eax        {esi = S}
-  mov    ebx,ecx        {save Len}
-  and    ebx,0FFFFh     {clear high word}
-
-  cld
-  xor    eax, eax        {null}
-  or     ecx, -1
   repne  scasb           {find null terminator}
   not    ecx             {calc length of S}
   dec    ecx             {backup one character}
   dec    edi
-  mov    eax,ebx         {eax = Len}
+  movzx  eax,dx          {eax = Len}
   sub    eax,ecx         {find difference}
   jbe    @@ExitPoint     {nothing to do}
   mov    ecx,eax         {count of character to add}
-  mov    al,dl           {al=C}
+  mov    al,' '          {al = ' '}
   rep    stosb           {add ecx characters}
 
 @@ExitPoint:
   mov    byte ptr [edi],0
+{$ENDIF}
   mov    eax,esi
 
-  pop    ebx            {restore}
   pop    edi            {restore}
   pop    esi            {restore}
 end;
 {$ENDIF}
 
-function edPadPrim(S : PChar; Len : Word) : PChar;
-  {-return a string right-padded to length len with blanks}
-begin
-  Result := edPadChPrim(S, ' ', Len);
-end;
 
 function edScanToEnd(P : PChar; Len : Word) : Word; register;
   {-return position of end of para P
-    (The smallest index 0<i<Len for which P[i-1]=#10; i=Len if there is no #10.) }
+    (The smallest index 0<i<=Len for which P[i-1]=#10; i=Len if there is no #10.) }
+{$IFDEF PUREPASCAL}
+begin
+  result := 0;
+  while (result<Len) and (P[result]<>#10) do
+    Inc(result);
+  if result<Len then
+    Inc(result);
+end;
+
+{$ELSE}
 asm
   movzx  ecx,dx         {ecx = Len}
   jecxz  @@9            {if Len=0 then result := 0 }
@@ -592,21 +581,32 @@ asm
 @@9:
   mov    ax,dx
 end;
+{$ENDIF}
 
 
 function edStrStInsert(Dest, S : PChar; DLen, SLen, Pos : Word) : PChar; register;
-  {-insert S into Dest}
-{$IFDEF UNICODE}
-var
-  Tmp: string;
+  {-insert S into Dest
+    Dest must point to a buffer for DLen+SLen+1 characters. S will be inserted into Dest
+    at position Pos (Pos=0: insert at the beginning).
+    The function will do nothing if SLen=0 or Pos>DLen. }
+{$IFDEF PUREPASCAL}
 begin
-  if Pos > DLen then
-    Exit(Dest);
+  result := Dest;
+  if (Pos <= DLen) and (SLen > 0) then begin
+    SysUtils.StrMove(Dest+(Pos+SLen), Dest+Pos, DLen+1-Pos);
+    SysUtils.StrMove(Dest+Pos, S, SLen);
+  end;
+end;
 
-  Tmp := Dest;
-  Insert(Copy(S, 1, SLen), Tmp, Pos+1);
-  StrPLCopy(Dest, Tmp, DLen+SLen);
-  Result := Dest;
+{$ELSE}
+{$IFDEF UNICODE}
+// same code as for PUREPASCAL
+begin
+  result := Dest;
+  if (Pos <= DLen) and (SLen > 0) then begin
+    SysUtils.StrMove(Dest+(Pos+SLen), Dest+Pos, DLen+1-Pos);
+    SysUtils.StrMove(Dest+Pos, S, SLen);
+  end;
 end;
 {$ELSE}
 asm
@@ -617,15 +617,13 @@ asm
   push   eax            {save Dest}
   push   edx            {save S}
 
-  mov    bx,Pos         {ebx = Pos}
-  and    ebx,0FFFFh     {clear high word}
+  movzx  ebx,Pos        {ebx = Pos}
   mov    esi,eax        {eax = Dest}
   mov    edi,eax        {eax = Dest}
   and    ecx,0FFFFh     {ecx = DLen}
   inc    ecx            {ecx = DLen+1}
-  add    edi,ecx        {point di one past terminating null}
-  mov    dx,SLen
-  and    edx,0FFFFh     {clear high word}
+  add    edi,ecx        {point edi one past terminating null}
+  movzx  edx,SLen
   cmp    dx,0           {if str to insert has 0 len then exit}
   je     @@1
   std                   {backwards string ops}
@@ -634,7 +632,7 @@ asm
   add    esi,ecx
   dec    esi            {point to end of source string}
   sub    ecx,ebx        {calculate number to do}
-  jb     @@1            {exit if Pos greater than strlen + 1}
+  jbe    @@1            {exit if Pos greater than strlen}
   test   edi,1
   jnz    @@0
   movsb
@@ -669,28 +667,27 @@ asm
   pop    esi            {restore}
 end;
 {$ENDIF}
+{$ENDIF}
+
 
 function edWhiteSpace(C : Char) : Boolean; register;
   {-return True if C is a white space character}
-{$IFDEF UNICODE}
+{$IFDEF PUREPASCAL}
+begin
+  result := (C = ' ') or (C = #9);
+end;
+
+{$ELSE}
 asm
-  {Result := C in [' ', #9];}
+{$IFDEF UNICODE}
   cmp    ax,' '
   je     @@001
   cmp    ax,09
-  je     @@001
-  xor    eax,eax
-  jmp    @@002
-@@001:
-  mov    eax,01
-@@002:
-end;
 {$ELSE}
-asm
-  {Result := C in [' ', #9];}
   cmp    al,' '
   je     @@001
   cmp    al,09
+{$ENDIF}
   je     @@001
   xor    eax,eax
   jmp    @@002

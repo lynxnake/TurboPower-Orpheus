@@ -23,6 +23,11 @@
 			<CfgParent>Base</CfgParent>
 			<Base>true</Base>
 		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Purepascal' or '$(Cfg_3)'!=''">
+			<Cfg_3>true</Cfg_3>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
 			<DCC_DependencyCheckOutputName>..\..\..\Compile\OrpheusTests.exe</DCC_DependencyCheckOutputName>
@@ -38,6 +43,9 @@
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
 			<DCC_Optimize>false</DCC_Optimize>
 			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_3)'!=''">
+			<DCC_Define>DEBUG;PUREPASCAL;$(DCC_Define)</DCC_Define>
 		</PropertyGroup>
 		<ItemGroup>
 			<DelphiCompile Include="OrpheusTests.dpr">
@@ -58,6 +66,10 @@
 			</DCCReference>
 			<BuildConfiguration Include="Debug">
 				<Key>Cfg_2</Key>
+				<CfgParent>Base</CfgParent>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Purepascal">
+				<Key>Cfg_3</Key>
 				<CfgParent>Base</CfgParent>
 			</BuildConfiguration>
 			<BuildConfiguration Include="Basis">

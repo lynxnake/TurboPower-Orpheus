@@ -4595,21 +4595,21 @@ procedure TOvcCustomTable.tbDrawCellBorder(RowInx: TRowNum; ColInx: TColNum;
 var
   RowOfs    : integer;
   RowHt     : integer;
-  RowNum    : TRowNum;
-  ColNum    : TColNum;
+//  RowNum    : TRowNum;
+//  ColNum    : TColNum;
   ColOfs    : integer;
   ColWd     : integer;
-  DestRect  : TRect;
+//  DestRect  : TRect;
 begin
   with tbRowNums^ do
     begin
-      RowNum := Ay[RowInx].Number;
+//      RowNum := Ay[RowInx].Number;
       RowOfs := Ay[RowInx].Offset;
       RowHt := Ay[succ(RowInx)].Offset - RowOfs;
     end;
     with tbColNums^ do
       begin
-        ColNum := Ay[ColInx].Number;
+//        ColNum := Ay[ColInx].Number;
         ColOfs := Ay[ColInx].Offset;
         ColWd := Ay[succ(ColInx)].Offset - ColOfs;
       end;

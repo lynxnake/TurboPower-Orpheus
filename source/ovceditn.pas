@@ -346,7 +346,7 @@ begin
   GetMem(NMap, NMS*SizeOf(Word));
   FillChar(NMap^, NMS*SizeOf(Word), 0);
 
-  edMoveFast(Map^, NMap^, MapSize*SizeOf(Word));
+  Move(Map^, NMap^, MapSize*SizeOf(Word));
 
   FreeMem(Map, MapSize*SizeOf(Word));
 
@@ -366,12 +366,8 @@ begin
     if P = nil then
       Exit;
     if (BufSize <> 0) then begin
-      if SLen+1 >= 1024 then
-        edMoveBlock(S^, P^, (SLen+1) * SizeOf(Char))
-      else
-        edMoveFast(S^, P^, (SLen+1) * SizeOf(Char));
-
-      FreeMem(S{, BufSize});
+      Move(S^, P^, (SLen+1) * SizeOf(Char));
+      FreeMem(S);
     end else
       P^ := #0;
     S := P;
@@ -642,7 +638,7 @@ begin
         if (RplLen = 0) and (Abs(Count) <= WC) and (ML <> 0) then
           {was a whole line deleted?}
           if (ML = PO-Count) and (Count < 0) and (Pos < O) then begin
-            edMoveFast(Map^[L+1], Map^[L], (LineCount-L)*SizeOf(Word));
+            Move(Map^[L+1], Map^[L], (LineCount-L)*SizeOf(Word));
             Dec(LineCount);
             for I := L to LineCount do
               Inc(Map^[I], Count);
@@ -651,7 +647,7 @@ begin
             {a whole line inserted?}
             Inc(LineCount);
             ExpandLineMap(LineCount);
-            edMoveFast(Map^[L], Map^[L+1], (LineCount-L)*SizeOf(Word));
+            Move(Map^[L], Map^[L+1], (LineCount-L)*SizeOf(Word));
             Map^[L] := O;
             for I := L+1 to LineCount do
               Inc(Map^[I], Count);
