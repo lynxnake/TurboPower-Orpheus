@@ -25,6 +25,7 @@
 {* Contributor(s):                                                            *}
 {* Roman Kassebaum                                                            *}
 {* Patrick Lajko/CDE Software                                                 *}
+{* Sebastian Zierer                                                           *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -58,13 +59,13 @@ type
       FWidth    : Integer;
       {property fields-odd size}
       FHidden   : boolean;
-	  FShowRightLine{Filler}    : boolean {byte};
+      FShowRightLine{Filler}    : Boolean {byte};
 
     protected
       {property access}
       procedure SetDefCell(BTC : TOvcBaseTableCell);
       procedure SetHidden(H : boolean);
-	  procedure SetShowRightLine(H : boolean); //CDE
+      procedure SetShowRightLine(H : boolean); //CDE
       procedure SetWidth(W : Integer);
 
       {miscellaneous}
@@ -94,8 +95,8 @@ type
 
       property Hidden : boolean
         read FHidden write SetHidden;
-		 property ShowRightLine : boolean
-			read FShowRightLine write SetShowRightLine; //CDE
+      property ShowRightLine : boolean
+        read FShowRightLine write SetShowRightLine default true; //CDE
 
       property Width  : Integer
          read FWidth write SetWidth;
@@ -118,14 +119,14 @@ type
       function GetCount : Integer;
       function GetDefaultCell(ColNum : TColNum) : TOvcBaseTableCell;
       function GetHidden(ColNum : TColNum) : boolean;
-	  function GetShowRightLine(ColNum : TColNum) : boolean; //CDE
+      function GetShowRightLine(ColNum : TColNum) : boolean; //CDE
       function GetWidth(ColNum : TColNum) : Integer;
 
       procedure SetCol(ColNum : TColNum; C : TOvcTableColumn);
       procedure SetCount(C : Integer);
       procedure SetDefaultCell(ColNum : TColNum; C : TOvcBaseTableCell);
       procedure SetHidden(ColNum : TColNum; H : boolean);
-	  procedure SetShowRightLine(ColNum : TColNum; H : boolean); //CDE
+      procedure SetShowRightLine(ColNum : TColNum; H : boolean); //CDE
       procedure SetWidth(ColNum : TColNum; W : Integer);
 
       {event access}
@@ -164,8 +165,8 @@ type
       property Hidden [ColNum : TColNum] : boolean
          read GetHidden write SetHidden;
 
-	  property ShowRightLinex [ColNum : TColNum] : boolean
-	     read GetShowRightLine write SetShowRightLine;  //CDE
+      property ShowRightLinex [ColNum : TColNum] : boolean
+        read GetShowRightLine write SetShowRightLine;  //CDE
       property List [ColNum : TColNum] : TOvcTableColumn
          read GetCol write SetCol;
          default;
@@ -185,7 +186,7 @@ constructor TOvcTableColumn.Create(ATable : TOvcTableAncestor);
   begin
     inherited Create;
     FWidth := tbDefColWidth;
-	fShowRightLine:=true; //CDE
+    FShowRightLine := True; //CDE
     FDefCell := nil;
     FTable := ATable;
   end;
@@ -204,7 +205,7 @@ procedure TOvcTableColumn.Assign(Source : TPersistent);
       Exit;
     FWidth := Src.Width;
     FHidden := Src.Hidden;
-	FShowRightLine:=src.showrightLine; //CDE
+    FShowRightLine := Src.ShowRightLine; //CDE
     DefaultCell := Src.DefaultCell;
   end;
 {--------}

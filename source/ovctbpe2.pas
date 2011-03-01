@@ -229,6 +229,7 @@ procedure TOvcfrmColEditor.RefreshColData;
     ctlColNumber.RangeHi := IntToStr(pred(FCols.Count));
 
     ctlHidden.Checked := FCols[ColNum].Hidden;
+    ctlShowRightLine.Checked := FCols[ColNum].ShowRightLine;
     ctlWidth.AsInteger := FCols[ColNum].Width;
     ctlDefaultCell.ItemIndex := CurCellIndex;
   end;
