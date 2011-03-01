@@ -158,15 +158,15 @@ procedure TOvcfrmColEditor.AddCellComponentName(const S : string);
 {--------}
 procedure TOvcfrmColEditor.ApplyButtonClick(Sender: TObject);
   begin
-	  with FCols[ColNum] do
-		 begin
-			Hidden := ctlHidden.Checked;
-			ShowRightLine := ctlShowRightLine.Checked; //CDE
-			FCols[ColNum].Width := ctlWidth.AsInteger;
-			if (ctlDefaultCell.ItemIndex <> CurCellIndex) then
-			  begin
-				 CurCellIndex := ctlDefaultCell.ItemIndex;
-				 FCols[FColNum].DefaultCell := TOvcBaseTableCell(Cells.Objects[CurCellIndex]);
+    with FCols[ColNum] do
+      begin
+        Hidden := ctlHidden.Checked;
+        ShowRightLine := ctlShowRightLine.Checked; // CDE
+        FCols[ColNum].Width := ctlWidth.AsInteger;
+        if (ctlDefaultCell.ItemIndex <> CurCellIndex) then
+          begin
+            CurCellIndex := ctlDefaultCell.ItemIndex;
+            FCols[FColNum].DefaultCell := TOvcBaseTableCell(Cells.Objects[CurCellIndex]);
           end;
       end;
   end;
