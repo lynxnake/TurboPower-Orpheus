@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{* Armin Biernaczyk                                                           *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -1864,6 +1865,18 @@ begin
 end;
 
 function TOvcUndoBuffer.NthRec(N : Integer) : PUndoRec; register;
+  {-Get a Pointer to the Nth undo-record in the undo-buffer
+    N=0 and N=1 both return a pointer to the first record.
+    Warning: The buffer MUST contain (at least) N records }
+{$IFDEF PUREPASCAL}
+begin
+  result := PUndoRec(self.Buffer);
+  while N>1 do begin
+    result := PUndoRec(Cardinal(result) + UndoRecSize + result^.DSize*SizeOf(Char));
+    Dec(N);
+  end;
+end;
+{$ELSE}
 asm
   push   esi                     {save}
 
@@ -1878,7 +1891,7 @@ asm
 @@1:
   mov    ax,[esi].TUndoRec.DSize {size of next record}
 {$IFDEF UNICODE}
-  shl    ax,1                    {DSize is size in chars}
+  shl    eax,1                   {DSize is size in chars}
 {$ENDIF}
   add    esi,eax                 {point to next record}
   add    esi,UndoRecSize         {undo record size}
@@ -1889,6 +1902,8 @@ asm
 
   pop    esi                     {restore}
 end;
+{$ENDIF}
+
 
 procedure TOvcUndoBuffer.PeekRedoLink(var Link : Byte);
 var

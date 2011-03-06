@@ -1,3 +1,17 @@
+Revision 187: (2011/03/06 Armin Biernaczyk)
+- OvcStr.pas
+  a) Added assember-free code for all functions/procedures in this unit (PUREPASCAL)
+  b) Serveral bugfixes:
+     LoCaseChar         - returned upper case character
+     OctalLPChar        - unicode version did not work
+     StrChDeletePrim    - both unicode & ansi-version failed for Pos=StrLen(P)
+     StrChInsertPrim    - ansi-Version failed for Pos=StrLen(Dest)
+     StrInsertChars     - did not work for Count>1024
+     TrimEmbeddedZeros  - result was undefined for Pos('E',S)=0 
+     TrimTrailingZeros  - result was undefined for S='' 
+     TrimTrailPrimPChar - unicode-version deleted spaces only
+                        - ansi-version did work properly for S = '  '
+
 Revision 166: (2010/11/26 Armin Biernaczyk)
 - TOvcTextFileEditor
   New property 'Encoding' (unicode-version)
@@ -60,17 +74,17 @@ Revision 49: (2009/11/28 Roman Kassebaum)
   event handler should look like the following:
   Data := @FString; (with FString: string, not a ShortString or AnsiString).
   This is the first revision that allows to use the TOvcTCString under unicode.
-  
+
 Revision 48: (2009/11/28 Roman Kassebaum)
 - Added the properties Adjust, Color and Font to the editor TOvcTCCustomControl.
-  
-Revision 47: (2009/11/25 Roman Kassebaum)  
+
+Revision 47: (2009/11/25 Roman Kassebaum)
 - TOvcTCColHead: Introduced the new property ShowEllipsis.
 
-Revision 46: (2009/11/24 Roman Kassebaum)  
+Revision 46: (2009/11/24 Roman Kassebaum)
 - TOvcTCColHead: Fixed a big problem that occurs if the Ellipsis was shown.
   Previous revisions shouldn't be used any longer.
-  
+
 Revision 45: (2009/11/18 Roman Kassebaum)
 - Added the new editor TOvcTCCustomInt for Integers. The OnGetCellText event handler should look like the following:
   OvcTCCustomInt1.IntToData(FInteger, Data, Purpose);
@@ -82,5 +96,5 @@ Revision 44: (2009/11/18 Roman Kassebaum)
   OvcTCCustomStr1.StringToData(FString, Data, Purpose);
   Cause the TOvcTCCustomStr uses a PChar, the DoneEdit event handler must be assigned in the following way:
   FString := OvcTCCustomStr1.StringValue;
-  
-  
+
+

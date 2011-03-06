@@ -41,6 +41,8 @@ type
     procedure TestSaveToFile;
     procedure TestUndoBufferFull;
     procedure TestUndoBufferFail;
+    procedure TestUndoBufferCopyPaste;
+    procedure TestUndoBufferTyping;
   end;
 
 implementation
@@ -468,6 +470,38 @@ begin
 end;
 
 
+{ Test the integrity of the undo-buffer
+  The undo-buffer is a block of memory that contains undo-records of variable size. The
+  size of a record in bytes is given by UndoRecSize + SizeOf(Char)*DSize.
+  To get the next record, you have do add this value to the records address.
+  The number of records in the buffer is given by 'Undos'.
+  The following test are performed:
+  - The difference between 'BufSize' and the overall size of the records must be 'BufAvail'.
+  - The size of a record must coincide with the value of the next record's 'PrevSize'-field.
+  - 'Last' must point to the last record in the buffer. }
+
+function TestUndoBuffer(UBuf: TOvcUndoBuffer): Boolean;
+var
+  j, s, SizeInBytes: Word;
+  PUR : PUndoRec;
+begin
+  result := False;
+  PUR := UBuf.Buffer;
+  s := 0;
+  for j := 1 to UBuf.Undos do begin
+    SizeInBytes := PUR^.DSize * SizeOf(Char) + UndoRecSize;
+    Inc(s, SizeInBytes);
+    if j<UBuf.Undos then begin
+      Inc(PAnsiChar(PUR), SizeInBytes);
+      if PUR^.PrevSize<>SizeInBytes then Exit;
+    end;
+  end;
+  if (UBuf.BufAvail + s = UBuf.BufSize) and
+     (PUR = UBuf.Last) then
+    result := True;
+end;
+
+
 { test undo-buffer-overflow
   specific test for a former bug in the handling of the undo-buffer:
   When typing characters a single undo-record will be put in the undo-buffer and will be
@@ -478,27 +512,6 @@ end;
   small. }
 
 procedure TTestOVCEdit.TestUndoBufferFull;
-
-  function TestUndoBuffer(OvcEditor: TOvcEditor): Boolean;
-  var
-    j, s, SizeInBytes: Word;
-    UBuf: TOvcUndoBuffer;
-    PUR : PUndoRec;
-  begin
-    result := False;
-    UBuf := TPOvcEditor(ovceditor).edParas.UndoBuffer;
-    PUR := UBuf.Buffer;
-    s := 0;
-    for j := 1 to UBuf.Undos do begin
-      SizeInBytes := PUR^.DSize * SizeOf(Char) + UndoRecSize;
-      Inc(s, SizeInBytes);
-      Inc(PAnsiChar(PUR), SizeInBytes);
-      if (j<UBuf.Undos) and (PUR^.PrevSize<>SizeInBytes) then Exit;
-    end;
-    if UBuf.BufAvail + s = UBuf.BufSize then
-      result := True;
-  end;
-
 var
   Form1: TForm1;
   i: Integer;
@@ -508,7 +521,8 @@ begin
   try
     for i := 1 to 128 do begin
       Form1.OvcEditor.Perform(WM_CHAR, 65, 0);
-      CheckTrue(TestUndoBuffer(Form1.OvcEditor),'Undo-Buffer corrupt');
+      CheckTrue(TestUndoBuffer(TPOvcEditor(Form1.OvcEditor).edParas.UndoBuffer),
+                'Undo-Buffer corrupt');
     end;
   finally
     Form1.Free;
@@ -533,7 +547,7 @@ begin
       Perform(WM_KEYDOWN, 8, 0); // delete third 'A'
       SetSelection(1,1,1,1,false);
       InsertMode := False;
-      perform(WM_char, 66, 0);  // replace first 'A'
+      Perform(WM_char, 66, 0);  // replace first 'A'
       Undo;
       Undo;
     end;
@@ -543,6 +557,184 @@ begin
   end;
 end;
 
+
+{ test undo-buffer integrity when copying&pasting text }
+
+procedure TTestOVCEdit.TestUndoBufferCopyPaste;
+const
+  Content: array[1..9] of string = (
+     '+-------+-------+-------+-------+-------+-------+',
+     '|1234567|1234567|1234567|1234567|1234567|1234567|',
+     '|       |       |       |       |       |       |',
+     '+-------+-------+-------+-------+-------+-------+',
+     '|abcdefg|abcdefg|abcdefg|abcdefg|abcdefg|abcdefg|',
+     '|'#9+  '|'#9+  '|'#9+  '|'#9+  '|'#9+  '|'#9+  '|',
+     '+-------+-------+-------+-------+-------+-------+',
+     '|123'#9'|123'#9'|123'#9'|123'#9'|123'#9'|123'#9'|',
+     '+-------+-------+-------+-------+-------+-------+');
+var
+  i, c1, c2, l1, l2: Integer;
+  Form1: TForm1;
+  Editor: TPOvcEditor;
+  UBuf: TOvcUndoBuffer;
+  extBuffer: array[0..10000] of Byte;
+  orgBuffer: PByte;
+
+  { Extended test for the undo-Buffer: In addition to the basic test we make sure that
+    not "overflow" of the buffer has occurred. }
+  function TestUndoBufferExt: Boolean;
+  var
+    i: Integer;
+  begin
+    result := TestUndoBuffer(UBuf);
+    i := 0;
+    while result and (i<8) do begin
+      result := (extBuffer[i] = $AA) and
+                (extBuffer[UBuf.BufSize-i+15] = $AA);
+      Inc(i);
+    end;
+  end;
+
+begin
+  { To make sure we always use the same sequence of copy & paste operations, we
+    need to set RandSeed to a fix value. }
+  RandSeed := 42;
+  { create the editor an insert the test-content }
+  Form1 := TForm1.Create(nil);
+  Editor := TPOvcEditor(Form1.OvcEditor);
+
+  try
+    { We want to make sure that the undo-buffer works fine; due to the implementation, there
+      is a certain risk that TOvcUndoBuffer accesses memory "outside" the buffer. We try to
+      detect these flaws by placing some bytes before an behind the actual buffer. }
+    UBuf := Editor.edParas.UndoBuffer;
+    for i := 0 to 7 do begin
+      extBuffer[i] := $AA;
+      extBuffer[UBuf.BufSize-i+15] := $AA;
+    end;
+    orgBuffer := UBuf.Buffer;
+    UBuf.Buffer := @extBuffer[8];
+    UBuf.Last := UBuf.Buffer;
+
+    for i := Low(Content) to High(Content) do
+      Editor.AppendPara(PChar(Content[i]));
+
+    try
+      for i := 1 to 1000 do begin
+        l1 := Random(Editor.LineCount) + 1;
+        c1 := Random(50) + 1;
+        l2 := l1 + Random(100);
+        c2 := Random(50) + 1;
+        Editor.edRectSelect := Random(2)=0;
+        Editor.SetSelection(l1, c1, l2, c2, true);
+        Editor.CopyToClipboard;
+        l1 := Random(Editor.LineCount) + 1;
+        c1 := Random(40) + 1;
+        l2 := Random(Editor.LineCount) + 1;
+        c2 := Random(40) + 1;
+        Editor.SetSelection(l1, c1, l2, c2, true);
+        Editor.PasteFromClipboard;
+        CheckTrue(TestUndoBufferExt,
+                  Format('Undobuffer corrupt after copy/paste #%d', [i]));
+        if i mod 4 = 0 then begin
+          Editor.Undo;
+          Editor.Undo;
+          Editor.Undo;
+          Editor.Undo;
+          CheckTrue(TestUndoBufferExt,
+                    Format('Undobuffer corrupt after undo following copy/paste #%d', [i]));
+        end;
+      end;
+
+    finally
+      UBuf.Last := PUndoRec(Cardinal(orgBuffer) + (Cardinal(UBuf.Last) - Cardinal(UBuf.Last)));
+      UBuf.Buffer := orgBuffer;
+      Move(extBuffer[8], UBuf.Buffer^, UBuf.BufSize);
+    end;
+  finally
+    Form1.Free;
+  end;
+end;
+
+
+{ test undo-buffer integrity when typing text }
+
+procedure TTestOVCEdit.TestUndoBufferTyping;
+var
+  l1, c1, ch, i: Integer;
+  Form1: TForm1;
+  Editor: TPOvcEditor;
+  UBuf: TOvcUndoBuffer;
+  extBuffer: array[0..10000] of Byte;
+  orgBuffer: PByte;
+
+  { Extended test for the undo-Buffer: In addition to the basic test we make sure that
+    not "overflow" of the buffer has occurred. }
+  function TestUndoBufferExt: Boolean;
+  var
+    i: Integer;
+  begin
+    result := TestUndoBuffer(UBuf);
+    i := 0;
+    while result and (i<8) do begin
+      result := (extBuffer[i] = $AA) and
+                (extBuffer[UBuf.BufSize-i+15] = $AA);
+      Inc(i);
+    end;
+  end;
+
+begin
+  { To make sure we always use the same sequence of copy & paste operations, we
+    need to set RandSeed to a fix value. }
+  RandSeed := 42;
+  { create the editor an insert the test-content }
+  Form1 := TForm1.Create(nil);
+  Editor := TPOvcEditor(Form1.OvcEditor);
+
+  try
+    { We want to make sure that the undo-buffer works fine; due to the implementation, there
+      is a certain risk that TOvcUndoBuffer accesses memory "outside" the buffer. We try to
+      detect these flaws by placing some bytes before an behind the actual buffer. }
+    UBuf := Editor.edParas.UndoBuffer;
+    for i := 0 to 7 do begin
+      extBuffer[i] := $AA;
+      extBuffer[UBuf.BufSize-i+15] := $AA;
+    end;
+    orgBuffer := UBuf.Buffer;
+    UBuf.Buffer := @extBuffer[8];
+    UBuf.Last := UBuf.Buffer;
+
+    try
+      for i := 0 to 10000 do begin
+        if Random(10)=0 then begin
+          ch := 32;
+          Editor.perform(WM_char, ch, 0);
+        end else if Random(80)=0 then begin
+          ch := 13;
+          Editor.perform(WM_keydown, ch, 0);
+        end else begin
+          ch := Random(190);
+          if ch<=93 then ch := ch + 33 else ch := ch + 66;
+          Editor.perform(WM_char, ch, 0);
+        end;
+        if ch mod 200 = 0 then begin
+          l1 := Random(Editor.LineCount) + 1;
+          c1 := Random(50) + 1;
+          Editor.SetSelection(l1, c1, l1, c1, true);
+        end;
+        CheckTrue(TestUndoBufferExt,
+                  Format('Undobuffer corrupt after loop #%d', [i]));
+      end;
+
+    finally
+      UBuf.Last := PUndoRec(Cardinal(orgBuffer) + (Cardinal(UBuf.Last) - Cardinal(UBuf.Last)));
+      UBuf.Buffer := orgBuffer;
+      Move(extBuffer[8], UBuf.Buffer^, UBuf.BufSize);
+    end;
+  finally
+    Form1.Free;
+  end;
+end;
 
 
 initialization
