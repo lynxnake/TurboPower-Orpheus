@@ -166,21 +166,43 @@ end;
 
 
 procedure TestOvcEditUClass.TestedGetActualCol;
+type
+  TData = record
+    S: string;
+    Col: Word;
+    TabSize: Byte;
+    res: Word;
+  end;
 const
-  cSomeStrings: array[0..4] of string =
-    ('1234567890123456789012345',
-     #9'90123456789012345',
-     'abcd'#9#9#9'abcd',
-     '',
-     'abcdef');
-  cResults: array[0..4] of Integer =
-    (20, 13, 7, 1, 7);
+  cSomeData: array[0..20] of TData =
+    ((S: '1234567890123456789012345'; Col: 20; TabSize: 8; res: 20),
+     (S: #9'90123456789012345';       Col: 20; TabSize: 8; res: 13),
+     (S: 'abcd'#9#9#9'abcd';          Col: 20; TabSize: 8; res:  7),
+     (S: '';                          Col: 20; TabSize: 8; res:  1),
+     (S: 'abcdef';                    Col: 20; TabSize: 8; res:  7),
+     (S: 'abcdef';                    Col:  1; TabSize: 8; res:  1),
+     { example given in the function's documentation in ovceditu.pas. }
+     (S: 'abc'#9'x'#9'rst';           Col:  1; TabSize: 6; res:  1),
+     (S: 'abc'#9'x'#9'rst';           Col:  2; TabSize: 6; res:  2),
+     (S: 'abc'#9'x'#9'rst';           Col:  3; TabSize: 6; res:  3),
+     (S: 'abc'#9'x'#9'rst';           Col:  4; TabSize: 6; res:  4),
+     (S: 'abc'#9'x'#9'rst';           Col:  5; TabSize: 6; res:  4),
+     (S: 'abc'#9'x'#9'rst';           Col:  6; TabSize: 6; res:  4),
+     (S: 'abc'#9'x'#9'rst';           Col:  7; TabSize: 6; res:  5),
+     (S: 'abc'#9'x'#9'rst';           Col:  8; TabSize: 6; res:  6),
+     (S: 'abc'#9'x'#9'rst';           Col:  9; TabSize: 6; res:  6),
+     (S: 'abc'#9'x'#9'rst';           Col: 10; TabSize: 6; res:  6),
+     (S: 'abc'#9'x'#9'rst';           Col: 11; TabSize: 6; res:  6),
+     (S: 'abc'#9'x'#9'rst';           Col: 12; TabSize: 6; res:  6),
+     (S: 'abc'#9'x'#9'rst';           Col: 13; TabSize: 6; res:  7),
+     (S: 'abc'#9'x'#9'rst';           Col: 14; TabSize: 6; res:  8),
+     (S: 'abc'#9'x'#9'rst';           Col: 15; TabSize: 6; res:  9));
 var
   i, res: Integer;
 begin
-  for i := 0 to High(cSomeStrings) do begin
-    res := edGetActualCol(@cSomeStrings[i][1],20,8);
-    CheckEquals(cResults[i], res, Format('edGetActualCol failed for "%s"',[cSomeStrings[i]]));
+  for i := 0 to High(cSomeData) do begin
+    res := edGetActualCol(@cSomeData[i].S[1], cSomeData[i].Col, cSomeData[i].TabSize);
+    CheckEquals(cSomeData[i].res, res, Format('edGetActualCol failed for test %d',[i]));
   end;
 end;
 

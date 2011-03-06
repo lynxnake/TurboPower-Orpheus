@@ -359,7 +359,17 @@ end;
 
 
 function edGetActualCol(S : PChar; Col : Word; TabSize : Byte) : Word; register;
-  {-compute actual column for effective column Col, accounting for tabs}
+  {-compute actual column for effective column Col, accounting for tabs
+    (If Col is the column in S with "expanded" tabs, the function returns the column in S:
+     e.g. for TabSize=6:
+
+                              1  2  3  4  5  6  7  8  9
+                          S = a  b  c #9  x #9  r  s  t
+
+     S (with expanded tabs) = a  b  c  _  _  _  x  _  _  _  _  _  r  s  t
+                        Col = 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15
+                     result = 1  2  3  4  4  4  5  6  6  6  6  6  7  8  9  }
+
 {$IFDEF PUREPASCAL}
 var
   c: Word;
@@ -369,12 +379,12 @@ begin
   repeat
     if S^=#0 then
       Break
-    else if S^=#9 then begin
-      c := (c div TabSize + 1) * TabSize;
+    else begin
+      if S^=#9 then
+        c := (c div TabSize + 1) * TabSize
+      else
+        Inc(c);
       if c+1<=Col then Inc(result);
-    end else begin
-      Inc(c);
-      Inc(result);
     end;
     Inc(S);
   until c+1 >= Col;
