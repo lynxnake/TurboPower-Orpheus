@@ -75,7 +75,7 @@ function edFindPosInMap(Map: Pointer; Lines, Pos : Word) : Word;
   {-return the para position}
 function edGetActualCol(S : PChar; Col : Word; TabSize : Byte) : Word;
   {-compute actual column for effective column Col, accounting for tabs}
-function edHaveTabs(S : PChar; Len : Word) : Boolean;
+function edHaveTabs(S : PChar; Len : Cardinal) : Boolean;
   {Return True if tab are found in S}
 function edPadPrim(S : PChar; Len : Word) : PChar;
   {-return a string right-padded to length len with blanks}
@@ -456,7 +456,7 @@ end;
 {$ENDIF}
 
 
-function edHaveTabs(S : PChar; Len : Word) : Boolean; register;
+function edHaveTabs(S : PChar; Len : Cardinal) : Boolean; register;
   {-return True if tabs are found in S
     Note: this routine returns true if Len=0}
 {$IFDEF PUREPASCAL}
@@ -477,7 +477,12 @@ asm
   push   edi            {save}
   mov    edi,eax        {edi = S}
   mov    ax,9           {ax = Tab character}
-  movzx  ecx,dx         {ecx = Len}
+  mov    ecx,edx        {ecx = Len}
+  or     ecx,ecx
+  jnz    @@1
+  mov    eax,1          {return True if Len=0}
+  jmp    @@2
+@@1:
   cld                   {go forward}
 {$IFDEF UNICODE}
   repne  scasw          {search for the character}
@@ -485,9 +490,9 @@ asm
   repne  scasb          {search for the character}
 {$ENDIF}
   mov    eax,0          {assume False}
-  jne    @@1
+  jne    @@2
   inc    eax            {else return True}
-@@1:
+@@2:
   pop    edi            {restore}
 end;
 {$ENDIF}

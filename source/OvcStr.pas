@@ -1467,7 +1467,6 @@ begin
   repeat
     if Count<=1024 then Count1024 := Count else Count1024 := 1024;
     StrPCopy(A, StringOfChar(Ch, Count1024));
-    A[Count1024] := #0;
     StrStInsertPrim(Dest, A, Pos);
     Count := Count - Count1024;
   until Count=0;

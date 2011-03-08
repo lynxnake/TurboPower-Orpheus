@@ -19,7 +19,9 @@ uses
   TestOvcPictureField in 'TestOvcPictureField.pas' {frmTestOvcPictureField},
   TestOVCStr in 'TestOVCStr.pas',
   TestOVCEdit in 'TestOVCEdit.pas' {Form1},
-  OvcStr in '..\OvcStr.pas';
+  OvcStr in '..\OvcStr.pas',
+  TestOvcUtils in 'TestOvcUtils.pas',
+  TestOvcFileViewer in 'TestOvcFileViewer.pas' {OvcFileViewerForm};
 
 {$R *.RES}
 

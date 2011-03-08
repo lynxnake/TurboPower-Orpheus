@@ -23,7 +23,13 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
-{*                                                                            *}
+{*   Armin Biernaczyk: Fixed UNICODE-problems:                                *}
+{*                     - Test was not displayed properly                      *}
+{*                     - CopytoClipboard did not work                         *}
+{*                     The viewer can still only handle Ansi-Files as         *}
+{*                     FileOpen/FileRead/etc, are used to read the file.      *}
+{*                     At least the text is displayed properly.               *}
+{*                     - Added PUREPASCAL-code for some Assembler-functions   *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
 {$I OVC.INC}
@@ -43,7 +49,7 @@ interface
 uses
   Windows, Classes, Controls, Forms, Graphics, Menus, Messages, StdCtrls,
   SysUtils, OvcBase, OvcCaret, OvcCmd, OvcColor, OvcConst, OvcData, OvcExcpt,
-  OvcFxFnt, OvcMisc, OvcStr, OvcBordr;
+  OvcFxFnt, OvcMisc, OvcStr, OvcBordr, OvcEditU;
 
 type
   {text position record for viewer}
@@ -92,9 +98,9 @@ type
 
     {other internal fields}
     vwAmFocused       : Boolean;         {True if focused}
-    vwAnchor          : TOvcTextPos;      {anchor for highlighting}
+    vwAnchor          : TOvcTextPos;     {anchor for highlighting}
     vwBMGlyphs        : TBitMap;         {marker glyphs}
-    vwCaret           : TOvcSingleCaret;  {our caret}
+    vwCaret           : TOvcSingleCaret; {our caret}
     vwCols            : integer;         {number of columns in window}
     vwColWid          : integer;         {width of one column}
     vwDefaultChar     : Char;            {replacement Char for current font}
@@ -102,7 +108,7 @@ type
     vwDivisor         : LongInt;         {divisor for scroll bars}
     vwFile            : Integer;         {handle of file being browsed}
     vwFirstChar       : Char;            {first Char in current font}
-    vwHighlight       : TOvcViewerRange;        {highlight range}
+    vwHighlight       : TOvcViewerRange; {highlight range}
     vwHDelta          : integer;         {horizontal scroll delta}
     vwHScroll         : Boolean;         {True if we have a horizontal scroll bar}
     vwHSHigh          : integer;         {horizontal scroll limit}
@@ -577,7 +583,7 @@ type
     fvWorkBlk        : TBlockNum;   {Working block number}
     fvWorkEnd        : integer;     {Next invalid offset of fvWorkPtr}  {actual ptr in 32-bit}
     fvWorkOffset     : LongInt;     {Working file position}
-    fvWorkPtr        : PChar;   {Pointer to working character}
+    fvWorkPtr        : PAnsiChar;   {Pointer to working character}
 
     {property access methods}
     function GetFileName : string;
@@ -752,14 +758,33 @@ begin
   DisposeString(Temp);
 end;
 
-function CalcActCol(S : PChar; EffCol : integer; TabSize : integer) : integer; register;
+function CalcActCol(S : PChar; EffCol : Word; TabSize : Byte) : Word; register; inline;
+  {-Compute actual column for effective column EffCol in S, accounting for
+    tabs embedded in S.
+
+   Changes:
+     03/2011, AB: This function is basicially the same function as 'edGetActualCol' in
+                  ovceditu.pas - except that in edGetActualCol the column numbers (and result)
+                  are 1-based:
+                  edGetActualCol(S, EffCol+1, Tabsize) - 1 = CalcActCol(S, EffCol, Tabsize)
+
+                  So we simply refer to edGetActualCol now. }
+
+begin
+  result := edGetActualCol(S, EffCol+1, TabSize) - 1;
+end;
+
+(*
+function CalcActCol(S : PChar; EffCol : integer; TabSize : Byte) : integer; register;
   {-Compute actual column for effective column EffCol in S, accounting for
     tabs embedded in S. EffCol can range from 0 onwards, negatives are an
-    error, but are not checked for.}
+    error, but are not checked for.
+
+    Remark, AB 03/2011:
+       This is basicially the same function as 'edGetActualCol' in ovceditu.pas - except
+       that edGetActualCol the column numbers (and result) are 1-based:
+       edGetActualCol(S, EffCol+1, Tabsize) - 1 = CalcActCol(S, EffCol, Tabsize) }
 {$IFDEF UNICODE}
-  {-Compute actual column for effective column EffCol in S, accounting for
-    tabs embedded in S. EffCol can range from 0 onwards, negatives are an
-    error, but are not checked for.}
 asm
   push ebx
   push edi
@@ -857,6 +882,7 @@ asm
   pop  ebx
 end;
 {$ENDIF}
+*)
 
 function CalcEffCol(S : PChar; ActCol : integer; TabSize : integer) : integer; register;
   {-Compute effective column for actual column ActCol in S, accounting for
@@ -948,28 +974,28 @@ end;
 
 
 function IsWhiteSpace(C : Char) : Boolean;
-  {-Return True if a Char is 'white' space}
-{$IFDEF UNICODE}
-asm
-  mov  edx, eax
-  xor  eax, eax
-  cmp  dx, 9h
-  je   @@ReturnTrue
-  cmp  dx, 20h
-  jne  @@Exit
+  {-Return True if a Char is 'white' space
 
-@@ReturnTrue:
-  inc  eax
+   Changes:
+     03/2011, AB: Added PUREPASCAL-version }
 
-@@Exit:
+{$IFDEF PUREPASCAL}
+begin
+  result := (C=' ') or (C=#9);
 end;
 {$ELSE}
 asm
   mov  edx, eax
   xor  eax, eax
+{$IFDEF UNICODE}
+  cmp  dx, 9h
+  je   @@ReturnTrue
+  cmp  dx, 20h
+{$ELSE}
   cmp  dl, 9h
   je   @@ReturnTrue
   cmp  dl, 20h
+{$ENDIF}
   jne  @@Exit
 
 @@ReturnTrue:
@@ -979,11 +1005,21 @@ asm
 end;
 {$ENDIF}
 
-procedure InsertHexPair(var Dest; C : AnsiChar); register;
-  {-Convert C to hex and store in Dest}
+
+procedure InsertHexPair(Dest : PChar; C : AnsiChar); register;
+  {-Convert C to hex and store in Dest[0] and Dest[1]
+
+   Changes:
+     03/2011, AB: Added PUREPASCAL-version }
+
 const
   HexDigits : array[0..$F] of AnsiChar = '0123456789ABCDEF';
-{$IFDEF UNICODE}
+{$IFDEF PUREPASCAL}
+begin
+  Dest[0] := Char(HexDigits[Ord(C) shr 4]);
+  Dest[1] := Char(HexDigits[Ord(C) and 15]);
+end;
+{$ELSE}
   asm
   push edi
 
@@ -998,34 +1034,17 @@ const
   mov  al, dh
   mov  dh, [ecx+eax]
   mov  ax, dx
-
+{$IFDEF UNICODE}
   shl eax, 8
   shr ax, 8
-
   stosd
-
-  pop  edi
-end;
 {$ELSE}
-asm
-  push edi
-
-  mov  edi, eax
-  mov  ecx, offset HexDigits
-  mov  dh, dl
-  and  dh, 0Fh
-  shr  dl, 4
-  xor  eax, eax
-  mov  al, dl
-  mov  dl, [ecx+eax]
-  mov  al, dh
-  mov  dh, [ecx+eax]
-  mov  ax, dx
   stosw
-
+{$ENDIF}
   pop  edi
 end;
 {$ENDIF}
+
 
 function MinI(X, Y : integer) : integer;
   {Return the minimum of two integers}
@@ -1089,6 +1108,8 @@ begin
     ((R.Start.Line = R.Stop.Line) and (R.Start.Col > R.Stop.Col));
 end;
 
+(* Changes:
+     03/2011 AB, This function is redundant; we now use edHaveTabs from OvcEditU.pas
 function LineHasTabs(S : PChar; Len : integer) : Boolean; register;
   {-Return True if a string has tab characters}
 {$IFDEF UNICODE}
@@ -1124,6 +1145,8 @@ asm
   pop   edi
 end;
 {$ENDIF}
+*)
+
 
 procedure MapUnknownChars(S : PChar; Len : integer;
                           FirstChar, LastChar, DefChar : Char); register;
@@ -1248,7 +1271,6 @@ begin
   if ExpandTabs and (EffectiveCol >= 0) then begin
     P := GetLinePtr(Line, L);
     Result := CalcActCol(P, EffectiveCol, TabSize);
-    {minus result indicates EffectiveCol was invalid given the tabs encountered}
   end else
     Result := EffectiveCol;
 end;
@@ -1301,7 +1323,7 @@ end;
 
 procedure TOvcBaseViewer.CopyToClipboard;
 const
-  CRLF : array[1..2] of Char = ^M^J;
+  CRLF : array[1..2] of Char = #13#10;
 var
   Size      : LongInt;
   MemHandle : THandle;
@@ -1320,7 +1342,7 @@ begin
   Size := 0;
   while (LineNum < vwHighlight.Stop.Line) do begin
     GetLinePtr(LineNum, ActLen);
-    inc(Size, ActLen - Col + sizeof(CRLF));
+    inc(Size, ActLen - Col + 2);
     inc(LineNum);
     Col := 0;
   end;
@@ -1347,7 +1369,7 @@ begin
         Move(S[Col], Buf^, (ActLen - Col) * SizeOf(Char));
         inc(Buf, ActLen - Col);
         Move(CRLF, Buf^, sizeof(CRLF));
-        inc(Buf, sizeof(CRLF));
+        inc(Buf, 2); // not 'sizeof(CRLF)'!
         inc(LineNum);
         Col := 0;
       end;
@@ -1367,11 +1389,19 @@ begin
   if not OpenClipboard(Handle) then
     GlobalFree(MemHandle)
   else begin
-    EmptyClipboard;
-    SetClipboardData(CF_TEXT, MemHandle);
-    CloseClipboard;
+    try
+      EmptyClipboard;
+      {$IFDEF UNICODE}
+      SetClipboardData(CF_UNICODETEXT, MemHandle);
+      {$ELSE}
+      SetClipboardData(CF_TEXT, MemHandle);
+      {$ENDIF}
+    finally
+      CloseClipboard;
+    end;
   end;
 end;
+
 
 constructor TOvcBaseViewer.Create(AOwner : TComponent);
 begin
@@ -1574,7 +1604,7 @@ begin
     Result := 0;
     Dest[0] := #0;
   end else begin
-    if (not LineHasTabs(S, ActLen)) then
+    if (not edHaveTabs(S, ActLen)) then
       StrLCopy(Dest, S, DestLen)
     else begin
       EffLen := CalcEffCol(S, ActLen, TabSize);
@@ -1817,7 +1847,7 @@ var
     else begin
       S := GetLinePtr(LineNum, Len);
       StartOfS := S;
-      HasTabs := LineHasTabs(S, Len);
+      HasTabs := edHaveTabs(S, Len);
       if HasTabs and (Len > 0) and ExpandTabs then begin
         EffLen := CalcEffCol(S, Len, FTabSize);
         T := StrAlloc(EffLen+1);
@@ -3659,6 +3689,7 @@ begin
   end;
 end;
 
+
 function TOvcCustomFileViewer.fvGetLineAsText(LineNum : LongInt; var Len : integer) : PChar;
 var
   CharsLeft : integer;
@@ -3695,7 +3726,6 @@ begin
       mov  esi, [edi].fvWorkPtr
       mov  edi, [edi].fvLnBuf
       mov  ebx, CharsLeft
-      xor  ecx, ecx
       mov  ecx, LineBufSize-1
 
     @@GetNextChar:
@@ -3714,7 +3744,6 @@ begin
       or   al, al                          {check for EOF: set zero flag}
       pop  ecx                             {restore registers}
       pop  eax
-      {xor  edx, edx}
       mov  edx, [edi].fvWorkEnd            {reload registers}
       mov  esi, [edi].fvWorkPtr
       mov  edi, eax
@@ -3730,14 +3759,24 @@ begin
       mov  al, ' '                         {if so, translate to space}
 
     @@DoInsert:
+{$IFDEF UNICODE}
+      xor ah,ah
+      stosw                                {store the character}
+{$ELSE}
       stosb                                {store the character}
+{$ENDIF}
       sub  ebx,1                           {decrement CharsLeft count}
       jb   @@AppendNull                    {any chars left?}
       loop @@GetNextChar                   {do it again if room in fvLnBuf}
 
     @@AppendNull:
+{$IFDEF UNICODE}
+      xor  ax,ax                            {append a null}
+      stosw
+{$ELSE}
       xor  al,al                            {append a null}
       stosb
+{$ENDIF}
       pop  esi
       pop  edi
       pop  ebx
@@ -3758,7 +3797,7 @@ var
   ColAscii  : integer;
   i         : integer;
   HexLongIntStr : array[0..9] of Char;
-  WorkChr   : Char;
+  WorkChr   : AnsiChar;
 begin
   {go to the specified line (it exists)}
   fvGotoHexLine(LineNum);
@@ -3772,7 +3811,7 @@ begin
   {initialize line to all spaces}
   Result := fvLnBuf;
   Len := HexWidth;
-  StrPCopy(fvLnBuf, StringOfChar(#32, HexWidth)); // FillChar(fvLnBuf[0], HexWidth, ' ');
+  for i := 0 to HexWidth-1 do fvLnBuf[i] := ' ';
   fvLnBuf[HexWidth] := #0;
   fvLnBufLen := HexWidth;
 
@@ -3789,7 +3828,7 @@ begin
     WorkChr := fvWorkPtr^;
 
     {plug in the hex value of the character}
-    InsertHexPair(fvLnBuf[ColHex], AnsiChar(WorkChr));   // Tiburon FIXME
+    InsertHexPair(@fvLnBuf[ColHex], WorkChr);
 
     {Can't have nulls or tabs in the ASCII part so convert them}
     if (WorkChr = #0) or
@@ -3801,7 +3840,7 @@ begin
         WorkChr := '.';
 
     {plug in the ASCII value of the character}
-    fvLnBuf[ColAscii] := WorkChr;
+    fvLnBuf[ColAscii] := Char(WorkChr);
 
     {advance counters}
     Inc(ColHex, 3);

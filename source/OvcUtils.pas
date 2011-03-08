@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{*  Armin Biernaczyk: Bugfixes                                                *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -36,23 +37,44 @@ procedure StripCharFromEnd(Chr: Char; var Str: string);
 procedure StripCharFromFront(Chr: Char; var Str: string);
 
 implementation
-{ Strips specified character(s) from the string and returns the modified string}
+
 procedure StripCharSeq(CharSeq: string; var Str: string);
+  {-Strips specified character(s) from the string and returns the modified string }
 begin
   while Pos(CharSeq, Str) > 0 do
     Delete(Str, Pos(CharSeq, Str), Length(CharSeq));
 end;
 
-{ Strips the specified character from the end of the string }
+
 procedure StripCharFromEnd(Chr: Char; var Str: string);
+  {-Strips the specified character from the end of the string
+   Changes:
+     03/2011, AB: Bugfix: procedure failed if Str = Chr }
+var
+  l, i: Cardinal;
 begin
-  while Str[Length(Str)] = Chr do Delete(Str, Length(Str), 1);
+  l := Length(Str);
+  i := l;
+  while (i>0) and (Str[i] = Chr) do
+    Dec(i);
+  if i<l then
+    Delete(Str, i+1, l-i);
 end;
 
-{ Strips the specified character from the beginning of the string }
+
 procedure StripCharFromFront(Chr: Char; var Str: string);
+  {-Strips the specified character from the beginning of the string
+   Changes:
+     03/2011, AB: Bugfix: procedure failed if Str = Chr }
+var
+  l, i: Cardinal;
 begin
-  while Str[1] = Chr do Delete(Str, 1, 1);
+  l := Length(Str);
+  i := 1;
+  while (i<=l) and (Str[i] = Chr) do
+    Inc(i);
+  if i>1 then
+    Delete(Str, 1, i-1);
 end;
 
 
