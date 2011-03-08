@@ -41,7 +41,7 @@
 {$ENDIF}
 
 unit ovctccbx;
-  {-Orpheus Table Cell - combo box type}
+  {-Orpheus Table Cell - check combo box type}
 
 interface
 

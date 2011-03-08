@@ -76,6 +76,7 @@ type
     {event variables}
     FOnStateChange  : TOvcStateChangeEvent;
     FOwnerDrawCheck : TOvcOwnerDrawCheckEvent;
+    FMultiCheck: Boolean;
 
     {internal variables}
     clGrayBitmap    : TBitmap;        {gray brush bitmap}
@@ -92,6 +93,7 @@ type
     procedure SetShowGlyphs(Value : Boolean);
     procedure SetStates(Index : Integer; State : TCheckBoxState);
     procedure SetWantDblClicks(Value : Boolean);
+    procedure SetMultiCheck(const Value: Boolean);
 
     {internal methods}
     procedure InvalidateItem(Index : Integer);
@@ -184,6 +186,7 @@ type
     property WantDblClicks : Boolean
       read FWantDblClicks write SetWantDblClicks
       default True;
+    property MultiCheck: Boolean read FMultiCheck write SetMultiCheck default True;
 
     {events}
     property OnStateChange  : TOvcStateChangeEvent
@@ -340,6 +343,7 @@ begin
   FShowGlyphs     := False;
   FThreeState     := False;
   FWantDblClicks  := True;
+  FMultiCheck     := True;
 
   FGlyphIndex := TList.Create;
   FStates := TList.Create; {list of check states}
@@ -603,6 +607,7 @@ end;
 
 procedure TOvcCheckList.KeyPress(var Key: Char);
 var
+  I: Integer;
   State : TCheckBoxState;
   Tmp : TNotifyEvent;
 begin
@@ -623,6 +628,12 @@ begin
       cbGrayed: State := cbChecked;
     end;
     Self.States[ItemIndex] := State;
+
+    if not FMultiCheck then
+      for I := 0 to Count - 1 do
+        if I <> ItemIndex then
+          if States[I] <> cbUnchecked then
+            States[I] := cbUnchecked;
 
     Tmp := OnClick;
     if (Assigned(Tmp)) then
@@ -674,6 +685,11 @@ begin
     FGlyphs := Value;
     Invalidate;
   end;
+end;
+
+procedure TOvcCheckList.SetMultiCheck(const Value: Boolean);
+begin
+  FMultiCheck := Value;
 end;
 
 procedure TOvcCheckList.SetShowGlyphs(Value : Boolean);
@@ -741,7 +757,7 @@ end;
 
 procedure TOvcCheckList.WMLButtonDown(var Msg : TWMLButtonDown);
 var
-  I : Integer;
+  I, J : Integer;
   P : TPoint;
   R : TRect;
 begin
@@ -759,9 +775,11 @@ begin
   end else
     InvalidateRect(Handle, @R, True);
 
-  if not FReadOnly and (I > -1) then begin
+  if not FReadOnly and (I > -1) then
+  begin
     if (not FBoxclickOnly) or ((Msg.XPos >= R.Left) and
-       (Msg.XPos <= R.Left + ItemHeight - BoxMargin div 2)) then begin
+       (Msg.XPos <= R.Left + ItemHeight - BoxMargin div 2)) then
+    begin
       case States[I] of
         cbUnchecked : if FThreeState then
                         States[I] := cbGrayed
@@ -770,6 +788,12 @@ begin
         cbGrayed    : States[I] := cbChecked;
         cbChecked   : States[I] := cbUnchecked;
       end;
+      // if MultiCheck is not enabled uncheck other items
+      if not FMultiCheck then
+        for J := 0 to Count - 1 do
+          if J <> I then
+            if States[J] <> cbUnchecked then
+              States[J] := cbUnchecked;
     end;
     inherited;
   end;

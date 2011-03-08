@@ -36,6 +36,7 @@
 {$X+} {Extended Syntax}
 
 {$R OVCREG.RES}
+{$R OVCREG2.RES}
 
 {Changes}
 

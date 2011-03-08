@@ -129,6 +129,9 @@ type
     procedure SetCellAttr(const Value: TOvcCellAttributes);
     procedure SetDropDownCount(const Value: Integer);
     procedure SetCheckedItems(const Value: TStrings);
+    procedure CheckListMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    function GetMultiCheck: Boolean;
+    procedure SetMultiCheck(const Value: Boolean);
   protected
     procedure Paint; override;
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X: Integer;
@@ -150,6 +153,7 @@ type
     property CheckedItems: TStrings read FCheckedItems write SetCheckedItems;
     property OnStateChange: TOvcStateChangeEvent read FOnStateChange write SetOnStateChange;
     property DropDownCount: Integer read FDropDownCount write SetDropDownCount default 8;
+    property MultiCheck: Boolean read GetMultiCheck write SetMultiCheck default True;
   end;
 
   TOvcTCCustomCheckComboBox = class(TOvcTCBaseString)
@@ -175,7 +179,9 @@ type
     FOnDrawItem           : TDrawItemEvent;
     FOnMeasureItem        : TMeasureItemEvent;
   private
+    FMultiCheck: Boolean;
     procedure SetItems(const Value: TCellCheckComboBoxItems);
+    procedure SetMultiCheck(const Value: Boolean);
   protected
     function GetCellEditor : TControl; override;
 
@@ -207,6 +213,7 @@ type
     property OnDropDown: TNotifyEvent read FOnDropDown write FOnDropDown;
     property OnDrawItem: TDrawItemEvent read FOnDrawItem write FOnDrawItem;
     property OnMeasureItem: TMeasureItemEvent read FOnMeasureItem write FOnMeasureItem;
+    property MultiCheck: Boolean read FMultiCheck write SetMultiCheck default True;
   public
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
@@ -224,50 +231,50 @@ type
 
   TOvcTCCheckComboBox = class(TOvcTCCustomCheckComboBox)
   published
-    published
-      property AcceptActivationClick default True;
-      property Access default otxDefault;
-      property Adjust default otaDefault;
+    property AcceptActivationClick default True;
+    property Access default otxDefault;
+    property Adjust default otaDefault;
 //      property AutoAdvanceChar default False;
 //      property AutoAdvanceLeftRight default False;
-      property Color;
-      property DropDownCount default 8;
-      property Font;
-      property HideButton default False;
-      property Hint;
-      property Items;
-      property ShowHint default False;
-      property Margin default 4;
+    property Color;
+    property DropDownCount default 8;
+    property Font;
+    property HideButton default False;
+    property Hint;
+    property Items;
+    property ShowHint default False;
+    property Margin default 4;
+    property MultiCheck;
 //      property MaxLength default 0;
 //      property SaveStringValue default False;
 //      property ShowArrow default False;
 //      property Sorted default False;
-      property Table;
-      property TableColor default True;
-      property TableFont default True;
-      property TextHiColor default clBtnHighlight;
-      property TextStyle default tsFlat;
-      property UseRunTimeItems default False;
+    property Table;
+    property TableColor default True;
+    property TableFont default True;
+    property TextHiColor default clBtnHighlight;
+    property TextStyle default tsFlat;
+    property UseRunTimeItems default False;
 
-      {events inherited from custom ancestor}
-      property OnChange;
-      property OnClick;
-      property OnDblClick;
-      property OnDragDrop;
-      property OnDragOver;
-      property OnDrawItem;
-      property OnDropDown;
-      property OnEndDrag;
-      property OnEnter;
-      property OnExit;
-      property OnKeyDown;
-      property OnKeyPress;
-      property OnKeyUp;
-      property OnMeasureItem;
-      property OnMouseDown;
-      property OnMouseMove;
-      property OnMouseUp;
-      property OnOwnerDraw;
+    {events inherited from custom ancestor}
+    property OnChange;
+    property OnClick;
+    property OnDblClick;
+    property OnDragDrop;
+    property OnDragOver;
+    property OnDrawItem;
+    property OnDropDown;
+    property OnEndDrag;
+    property OnEnter;
+    property OnExit;
+    property OnKeyDown;
+    property OnKeyPress;
+    property OnKeyUp;
+    property OnMeasureItem;
+    property OnMouseDown;
+    property OnMouseMove;
+    property OnMouseUp;
+    property OnOwnerDraw;
   end;
 
 implementation
@@ -327,6 +334,17 @@ procedure TOvcTCCheckComboBoxEdit.CheckedItemsChange(Sender: TObject);
 begin
   if not FInUpdate then
     Invalidate;
+end;
+
+procedure TOvcTCCheckComboBoxEdit.CheckListMouseMove(Sender: TObject;
+  Shift: TShiftState; X, Y: Integer);
+var
+  I: Integer;
+begin
+  I := FCheckList.ItemAtPos(Point(x, y), True);
+  if I <> -1 then
+    if not FCheckList.Selected[I] then
+      FCheckList.Selected[I] := True;
 end;
 
 procedure TOvcTCCheckComboBoxEdit.CheckListStateChange(Sender: TObject;
@@ -397,6 +415,8 @@ begin
   FCheckList.Parent := FDropDown;
   FCheckList.BoxClickOnly := False;
   FCheckList.WantDblClicks := False;
+  FCheckList.OnMouseMove := CheckListMouseMove;
+  FCheckList.MultiCheck := True;
   FDropDown.ActiveControl := FCheckList;
   TabStop := True;
 end;
@@ -602,6 +622,11 @@ begin
   Invalidate;
 end;
 
+function TOvcTCCheckComboBoxEdit.GetMultiCheck: Boolean;
+begin
+  Result := FCheckList.MultiCheck;
+end;
+
 procedure TOvcTCCheckComboBoxEdit.MouseDown(Button: TMouseButton;
   Shift: TShiftState; X, Y: Integer);
 begin
@@ -642,6 +667,11 @@ procedure TOvcTCCheckComboBoxEdit.SetItems(
   const Value: TCellCheckComboBoxItems);
 begin
   FItems.Assign(Value);
+end;
+
+procedure TOvcTCCheckComboBoxEdit.SetMultiCheck(const Value: Boolean);
+begin
+  FCheckList.MultiCheck := Value;
 end;
 
 procedure TOvcTCCheckComboBoxEdit.SetOnStateChange(
@@ -755,6 +785,7 @@ begin
   FAcceptActivationClick := true;
   FShowArrow := False;
   FHideButton := False;
+  FMultiCheck := True;
   FItems := TCellCheckComboBoxItems.Create;
 end;
 
@@ -885,6 +916,11 @@ begin
   FItems.Assign(Value);
 end;
 
+procedure TOvcTCCustomCheckComboBox.SetMultiCheck(const Value: Boolean);
+begin
+  FMultiCheck := Value;
+end;
+
 procedure TOvcTCCustomCheckComboBox.StartEditing(RowNum: TRowNum;
   ColNum: TColNum; CellRect: TRect; const CellAttr: TOvcCellAttributes;
   CellStyle: TOvcTblEditorStyle; Data: pointer);
@@ -911,6 +947,7 @@ begin
       TabStop := False;
       Parent := FTable;
       DropDownCount := Self.DropDownCount;
+      FEdit.MultiCheck := Self.FMultiCheck;
 //      Sorted := Self.Sorted;
       if UseRunTimeItems then
         Items := ItemRec^.RTItems
