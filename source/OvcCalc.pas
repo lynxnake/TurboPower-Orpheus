@@ -2406,8 +2406,10 @@ procedure TOvcCustomCalculator.PressButton(Button : TOvcCalculatorButton);
     end else if cEngine.AddOperand(LastOperand, CalcButtontoOperation[Button]) then begin
       cEvaluate(Button);
 
-    {remove special operations from stack}
-      if Button in [cbInvert, cbSqrt, cbEqual] then
+    {remove special operations from stack
+     03/2011: added cmMemRecall to fix the following bug:
+     "3" [MS] "10" [-] [MR] [=]  -> "-7" }
+      if Button in [cbInvert, cbSqrt, cbEqual, cbMemRecall] then
         LastOperand := cEngine.PopOperand;
     end;
   end;
