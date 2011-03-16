@@ -55,9 +55,6 @@ type
       FOnUserCommand    : TUserCommandEvent;
       FOnUserValidation : TUserValidationEvent;
 
-      CopyOfData     : pointer;
-      CopyOfDataSize : Integer;
-
     protected
       function GetCaretIns : TOvcCaret;
       function GetCaretOvr : TOvcCaret;
@@ -147,8 +144,6 @@ type
 
     public
       constructor Create(AOwner : TComponent); override;
-      destructor Destroy;
-        override;
       function CreateEntryField(AOwner : TComponent) : TOvcBaseEntryField; virtual; abstract;
 
       function  EditHandle : THandle; override;
@@ -199,6 +194,7 @@ type {for typecast to get around protected clause}
   end;
 
 {===TOvcTCBaseEntryField=============================================}
+
 constructor TOvcTCBaseEntryField.Create(AOwner : TComponent);
   begin
     inherited Create(AOwner);
@@ -209,14 +205,6 @@ constructor TOvcTCBaseEntryField.Create(AOwner : TComponent);
     FEditDisplay := CreateEntryField(Self);
     FEditDisplay.Visible := false;
   end;
-
-destructor TOvcTCBaseEntryField.Destroy;
-begin
-  if (CopyOfData <> nil) and (CopyOfDataSize > 0) then
-    FreeMem(CopyOfData {, CopyOfDataSize});
-
-  inherited Destroy;
-end;
 
 {--------}
 function TOvcTCBaseEntryField.CanSaveEditedData(SaveValue : boolean) : boolean;
@@ -232,6 +220,7 @@ function TOvcTCBaseEntryField.CanSaveEditedData(SaveValue : boolean) : boolean;
       else
         FEdit.Restore;
   end;
+
 {--------}
 function TOvcTCBaseEntryField.EditHandle : THandle;
   begin
@@ -240,6 +229,7 @@ function TOvcTCBaseEntryField.EditHandle : THandle;
     else
       Result := 0;
   end;
+
 {--------}
 procedure TOvcTCBaseEntryField.EditHide;
   begin
@@ -252,6 +242,7 @@ procedure TOvcTCBaseEntryField.EditHide;
         end;
 
   end;
+
 {--------}
 procedure TOvcTCBaseEntryField.EditMove(CellRect : TRect);
   var
@@ -269,8 +260,8 @@ procedure TOvcTCBaseEntryField.EditMove(CellRect : TRect);
 
       end;
   end;
-{--------}
 
+{--------}
 procedure TOvcTCBaseEntryField.tcPaint(TableCanvas : TCanvas;
                                  const CellRect    : TRect;
                                        RowNum      : TRowNum;
@@ -295,15 +286,14 @@ procedure TOvcTCBaseEntryField.tcPaint(TableCanvas : TCanvas;
         inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, PChar(S));
       end;
   end;
+
 {--------}
 procedure TOvcTCBaseEntryField.SaveEditedData(Data : pointer);
   begin
     if Assigned(Data) then
-      begin
-        FEdit.GetValue(CopyOfData^);
-        Move(CopyOfData^, Data^, CopyOfDataSize);
-      end;
+      FEdit.GetValue(Data^);
   end;
+
 {--------}
 procedure TOvcTCBaseEntryField.StartEditing(RowNum : TRowNum; ColNum : TColNum;
                                            CellRect : TRect;
@@ -311,13 +301,6 @@ procedure TOvcTCBaseEntryField.StartEditing(RowNum : TRowNum; ColNum : TColNum;
                                            CellStyle: TOvcTblEditorStyle;
                                            Data : pointer);
   begin
-    CopyOfDataSize := FEdit.DataSize;
-    GetMem(CopyOfData, CopyOfDataSize);
-    if (Data = nil) then
-      FillChar(CopyOfData^, CopyOfDataSize, 0)
-    else
-      Move(Data^, CopyOfData^, CopyOfDataSize);
-
     with TOvcBEF(FEdit) do
       begin
         Parent := FTable;
@@ -340,7 +323,8 @@ procedure TOvcTCBaseEntryField.StartEditing(RowNum : TRowNum; ColNum : TColNum;
         Controller := TOvcTable(FTable).Controller;
         if (Controller = nil) then
           ShowMessage('NIL in StartEditing');
-        SetValue(CopyOfData^);
+        if Assigned(Data) then
+          SetValue(Data^);
         Visible := true;
 
         OnChange := Self.OnChange;
@@ -362,20 +346,16 @@ procedure TOvcTCBaseEntryField.StartEditing(RowNum : TRowNum; ColNum : TColNum;
         OnUserValidation := Self.OnUserValidation;
       end;
   end;
+
 {--------}
 procedure TOvcTCBaseEntryField.StopEditing(SaveValue : boolean;
                                            Data : pointer);
   begin
     if SaveValue and Assigned(Data) then
-      begin
-        FEdit.GetValue(CopyOfData^);
-        Move(CopyOfData^, Data^, CopyOfDataSize);
-      end;
-    FreeMem(CopyOfData {, CopyOfDataSize});
-    CopyOfData := nil;
-    CopyOfDataSize := 0;
+      FEdit.GetValue(Data^);
     EditHide;
   end;
+
 {====================================================================}
 
 
@@ -391,6 +371,7 @@ procedure TOvcTCBaseEntryField.DefineProperties(Filer: TFiler);
            TOvcBEF(FEdit).efReadRangeLo, TOvcBEF(FEdit).efWriteRangeLo, true);
       end;
   end;
+
 {--------}
 function TOvcTCBaseEntryField.GetOptions : TOvcEntryFieldOptions;
   begin
@@ -399,12 +380,15 @@ function TOvcTCBaseEntryField.GetOptions : TOvcEntryFieldOptions;
     else
       Result := [];
   end;
+
+{--------}
 function TOvcTCBaseEntryField.GetCaretIns : TOvcCaret;
   begin
     if Assigned(FEdit) then
          Result := TOvcBEF(FEdit).CaretIns
     else Result := nil;
   end;
+
 {--------}
 function TOvcTCBaseEntryField.GetCaretOvr : TOvcCaret;
   begin
@@ -412,6 +396,7 @@ function TOvcTCBaseEntryField.GetCaretOvr : TOvcCaret;
          Result := TOvcBEF(FEdit).CaretOvr
     else Result := nil;
   end;
+
 {--------}
 function TOvcTCBaseEntryField.GetControlCharColor : TColor;
   begin
@@ -419,6 +404,7 @@ function TOvcTCBaseEntryField.GetControlCharColor : TColor;
          Result := TOvcBEF(FEdit).ControlCharColor
     else Result := clRed;
   end;
+
 {--------}
 function TOvcTCBaseEntryField.GetDataSize : integer;
   begin

@@ -3,7 +3,7 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
   Top = 0
   Caption = 'Test'
   ClientHeight = 86
-  ClientWidth = 460
+  ClientWidth = 709
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -17,7 +17,7 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
   object OvcTable1: TOvcTable
     Left = 18
     Top = 16
-    Width = 413
+    Width = 623
     Height = 45
     LockedRows = 0
     TopRow = 0
@@ -43,7 +43,8 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
       'frmTestOvcPictureField.OvcTCPictureField1'
       'frmTestOvcPictureField.OvcTCString1'
       'frmTestOvcPictureField.OvcTCNumericField1'
-      'frmTestOvcPictureField.OvcTCPictureField2')
+      'frmTestOvcPictureField.OvcTCPictureField2'
+      'frmTestOvcPictureField.OvcTCSimpleField1')
     RowData = (
       30)
     ColData = (
@@ -59,10 +60,14 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
       False
       True
       'frmTestOvcPictureField.OvcTCPictureField2'
+      150
+      False
+      True
+      'frmTestOvcPictureField.OvcTCNumericField1'
       100
       False
       True
-      'frmTestOvcPictureField.OvcTCNumericField1')
+      'frmTestOvcPictureField.OvcTCSimpleField1')
   end
   object OvcTCString1: TOvcTCString
     Table = OvcTable1
@@ -78,6 +83,7 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     EFColors.Error.TextColor = clBlack
     EFColors.Highlight.BackColor = clHighlight
     EFColors.Highlight.TextColor = clHighlightText
+    Options = [efoCaretToEnd, efoTrimBlanks]
     Table = OvcTable1
     Left = 156
     Top = 32
@@ -112,9 +118,24 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     Options = [efoCaretToEnd]
     PictureMask = '#,###.##'
     Table = OvcTable1
-    Left = 352
+    Left = 370
     Top = 32
     RangeHigh = {73B2DBB9838916F2FE43}
     RangeLow = {73B2DBB9838916F2FEC3}
+  end
+  object OvcTCSimpleField1: TOvcTCSimpleField
+    CaretOvr.Shape = csBlock
+    EFColors.Disabled.BackColor = clWindow
+    EFColors.Disabled.TextColor = clGrayText
+    EFColors.Error.BackColor = clRed
+    EFColors.Error.TextColor = clBlack
+    EFColors.Highlight.BackColor = clHighlight
+    EFColors.Highlight.TextColor = clHighlightText
+    MaxLength = 20
+    Table = OvcTable1
+    Left = 504
+    Top = 34
+    RangeHigh = {00000000000000000000}
+    RangeLow = {00000000000000000000}
   end
 end
