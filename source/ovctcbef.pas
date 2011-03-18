@@ -324,7 +324,9 @@ procedure TOvcTCBaseEntryField.StartEditing(RowNum : TRowNum; ColNum : TColNum;
         if (Controller = nil) then
           ShowMessage('NIL in StartEditing');
         if Assigned(Data) then
-          SetValue(Data^);
+          SetValue(Data^)
+        else
+          ClearContents;
         Visible := true;
 
         OnChange := Self.OnChange;

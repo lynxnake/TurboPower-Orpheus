@@ -2,7 +2,7 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
   Left = 0
   Top = 0
   Caption = 'Test'
-  ClientHeight = 86
+  ClientHeight = 131
   ClientWidth = 709
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -18,11 +18,11 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     Left = 18
     Top = 16
     Width = 623
-    Height = 45
+    Height = 79
     LockedRows = 0
     TopRow = 0
     ActiveRow = 0
-    RowLimit = 1
+    RowLimit = 2
     LockedCols = 0
     LeftCol = 0
     GridPenSet.NormalGrid.NormalColor = clBtnShadow
@@ -40,11 +40,11 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     TabOrder = 0
     OnGetCellData = OvcTable1GetCellData
     CellData = (
-      'frmTestOvcPictureField.OvcTCPictureField1'
-      'frmTestOvcPictureField.OvcTCString1'
-      'frmTestOvcPictureField.OvcTCNumericField1'
+      'frmTestOvcPictureField.OvcTCSimpleField1'
       'frmTestOvcPictureField.OvcTCPictureField2'
-      'frmTestOvcPictureField.OvcTCSimpleField1')
+      'frmTestOvcPictureField.OvcTCNumericField1'
+      'frmTestOvcPictureField.OvcTCString1'
+      'frmTestOvcPictureField.OvcTCPictureField1')
     RowData = (
       30)
     ColData = (
@@ -83,7 +83,6 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     EFColors.Error.TextColor = clBlack
     EFColors.Highlight.BackColor = clHighlight
     EFColors.Highlight.TextColor = clHighlightText
-    Options = [efoCaretToEnd, efoTrimBlanks]
     Table = OvcTable1
     Left = 156
     Top = 32
@@ -115,7 +114,6 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     EFColors.Error.TextColor = clBlack
     EFColors.Highlight.BackColor = clHighlight
     EFColors.Highlight.TextColor = clHighlightText
-    Options = [efoCaretToEnd]
     PictureMask = '#,###.##'
     Table = OvcTable1
     Left = 370

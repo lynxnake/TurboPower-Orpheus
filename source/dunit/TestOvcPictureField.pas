@@ -45,6 +45,7 @@ type
     procedure TestOvcTCPictureField_pftLongInt;
     procedure TestOvcTCNumericField_nftDouble;
     procedure TestOvcTCSimpleField_sftString;
+    procedure TestOvcTCSimpleField_sftString_DataNIL;
   end;
 
 implementation
@@ -76,15 +77,19 @@ end;
 procedure TfrmTestOvcPictureField.OvcTable1GetCellData(Sender: TObject; RowNum, ColNum: Integer;
   var Data: Pointer; Purpose: TOvcCellDataPurpose);
 begin
-  case ColNum of
-    0: data := @Data_OvcTCString1;
-    1: data := @Data_OvcTCPictureField1;
-    2: data := @Data_OvcTCPictureField2;
-    3: data := @Data_OvcTCNumericField1;
-    4: data := @Data_OvcTCSimpleField1;
-    else
-      data := nil;
-  end;
+  if RowNum=0 then begin
+    case ColNum of
+      0: data := @Data_OvcTCString1;
+      1: data := @Data_OvcTCPictureField1;
+      2: data := @Data_OvcTCPictureField2;
+      3: data := @Data_OvcTCNumericField1;
+      4: data := @Data_OvcTCSimpleField1;
+      else
+        data := nil;
+    end;
+  end else
+    { special case for 'TestOvcTCSimpleField_sftString_DataNIL' }
+    data := nil;
 end;
 
 { TTestOvcPictureField }
@@ -174,6 +179,26 @@ begin
   FForm.OvcTable1.StopEditingState(True);
   CheckEquals('sft field test', Trim(FForm.Data_OvcTCSimpleField1));
   CheckEquals(-1, FForm.Data_Overflow_OvcTCSimpleField1, 'Data overflow for OvcTCSimpleField1');
+end;
+
+
+procedure TTestOvcPictureField.TestOvcTCSimpleField_sftString_DataNIL;
+  {- test for a corner case that was handled incorrectly in rev 191}
+var
+  s: string;
+begin
+  FForm.Data_OvcTCSimpleField1 := 'Cell(0,4)';
+  { Go to cell (0,4) and start editing state to make sure the content of the cell ('Cell(0,4)')
+    is transfered to the underlying TOvcBaseEntryField. }
+  FForm.OvcTable1.SetActiveCell(0,4);
+  FForm.OvcTable1.StartEditingState;
+  FForm.OvcTable1.StopEditingState(False);
+  { go to the next line an start editing again; OvcTable1GetCellData will provide no data
+    here; the ovctable must take care to clear the contents of the edit field in this case }
+  FForm.OvcTable1.SetActiveCell(1,4);
+  FForm.OvcTable1.StartEditingState;
+  FForm.OvcTCSimpleField1.SaveEditedData(@s);
+  CheckEqualsString('', s);
 end;
 
 

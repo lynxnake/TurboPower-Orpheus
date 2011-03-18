@@ -4875,11 +4875,11 @@ procedure TOvcCustomTable.tbDrawRow(RowInx : integer; ColInxStart, ColInxEnd : i
             ColWd := Ay[succ(ColInx)].Offset - ColOfs;
           end;
         ColIsLocked := (ColNum < LockedCols);
-		DrawRightLine:=tbIsColShowRightLine(ColNum); //CDE
-    { Don't fire the OnEnteringCol when we are painting, unless }
-    { OldRowColBehavior is true                                 }
-    if OldRowColBehavior then
-        DoEnteringColumn(ColNum);
+		    DrawRightLine:=tbIsColShowRightLine(ColNum); //CDE
+        { Don't fire the OnEnteringCol when we are painting, unless }
+        { OldRowColBehavior is true                                 }
+        if OldRowColBehavior then
+          DoEnteringColumn(ColNum);
 
         {get the gridpen for the cell}
         if (RowIsLocked or ColIsLocked) then
