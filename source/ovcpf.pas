@@ -24,6 +24,7 @@
 {*                                                                            *}
 {* Contributor(s):                                                            *}
 {*   Sebastian Zierer                                                         *}
+{*   Armin Biernaczyk                                                         *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -1901,18 +1902,20 @@ end;
 function TOvcCustomPictureField.efTransfer(DataPtr : Pointer; TransferFlag : Word) : Word;
   {-transfer data to/from the entry fields}
 var
-//  P      : PChar absolute DataPtr; //SZ not used
-  SP     : ^String absolute DataPtr;
-  Code   : Integer;
+  Code : Integer;
 
   procedure TransferString;
-    {-transfer data to/from string type entry fields}
+    {-transfer data to/from string type entry fields
+
+     Changes:
+       03/2011, AB: Bugfix: When transfering data to the PicturField with Length=MaxLength,
+                    the picuturemask was not merged with the data. }
   var
     A : TEditString;
   begin
     if TransferFlag = otf_GetData then begin
       if (efoTrimBlanks in Options) and efFieldIsEmpty then
-         SP^ := ''
+         PString(DataPtr)^ := ''
       else begin
         {get copy of the edit string}
         if (efoStripLiterals in Options) then
@@ -1924,16 +1927,15 @@ var
         if (efoTrimBlanks in Options) then
           TrimAllSpacesPChar(A);
 
-        SP^ := StrPas(A);
+        PString(DataPtr)^ := StrPas(A);
       end;
-    end else if Length(PString(DataPtr)^) <> MaxLength then begin
-      if PString(DataPtr)^ = '' then     // SZ
+    end else begin
+      if (DataPtr=nil) or (PString(DataPtr)^ = '') then     // SZ
         efEditSt[0] := #0
       else
         StrPLCopy(efEditSt, PString(DataPtr)^, MaxLength);
       pbMergePicture(efEditSt, efEditSt);
-    end else
-      StrPLCopy(efEditSt, SP^, MaxLength);
+    end;
   end;
 
   procedure TransferChar;

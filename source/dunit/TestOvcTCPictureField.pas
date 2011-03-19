@@ -1,4 +1,4 @@
-unit TestOvcPictureField;
+unit TestOvcTCPictureField;
 
 interface
 
@@ -34,7 +34,7 @@ type
     Data_Overflow_OvcTCSimpleField1: Integer;
   end;
 
-  TTestOvcPictureField = class(TTestCase)
+  TTestOvcTCPictureField = class(TTestCase)
   private
     FForm: TfrmTestOvcPictureField;
   protected
@@ -106,7 +106,7 @@ begin
 end;
 
 
-procedure TTestOvcPictureField.TestOvcTCPictureField_pftString;
+procedure TTestOvcTCPictureField.TestOvcTCPictureField_pftString;
   {- test OvcTCPictureField with datatype 'pftString' }
 begin
   { Test reading data }
@@ -125,7 +125,7 @@ begin
 end;
 
 
-procedure TTestOvcPictureField.TestOvcTCPictureField_pftLongInt;
+procedure TTestOvcTCPictureField.TestOvcTCPictureField_pftLongInt;
   {- test OvcTCPictureField with datatype 'pftLongInt' }
 begin
   { Test reading data }
@@ -144,7 +144,7 @@ begin
 end;
 
 
-procedure TTestOvcPictureField.TestOvcTCNumericField_nftDouble;
+procedure TTestOvcTCPictureField.TestOvcTCNumericField_nftDouble;
   {- test OvcTCNumericField with datatype 'nftDouble' }
 begin
   { Test reading data }
@@ -163,7 +163,7 @@ begin
 end;
 
 
-procedure TTestOvcPictureField.TestOvcTCSimpleField_sftString;
+procedure TTestOvcTCPictureField.TestOvcTCSimpleField_sftString;
   {- test OvcTCSimpleField with datatype 'sftString' }
 begin
   { Test reading data }
@@ -182,7 +182,7 @@ begin
 end;
 
 
-procedure TTestOvcPictureField.TestOvcTCSimpleField_sftString_DataNIL;
+procedure TTestOvcTCPictureField.TestOvcTCSimpleField_sftString_DataNIL;
   {- test for a corner case that was handled incorrectly in rev 191}
 var
   s: string;
@@ -202,7 +202,7 @@ begin
 end;
 
 
-procedure TTestOvcPictureField.SetUp;
+procedure TTestOvcTCPictureField.SetUp;
 begin
   inherited SetUp;
   FForm := TfrmTestOvcPictureField.Create(nil);
@@ -210,13 +210,13 @@ begin
   Application.ProcessMessages;
 end;
 
-procedure TTestOvcPictureField.TearDown;
+procedure TTestOvcTCPictureField.TearDown;
 begin
   FForm.Free;
   inherited TearDown;
 end;
 
 initialization
-  RegisterTest(TTestOvcPictureField.Suite);
+  RegisterTest(TTestOvcTCPictureField.Suite);
 
 end.

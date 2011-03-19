@@ -1,3 +1,17 @@
+Revision 191: (2011/03/16 Armin Biernaczyk)
+- TOvcTCBaseEntryField
+  Bugfix: data transfer between TOvcTCBaseEntryField and TOvcBaseEntryField did not work in
+  case of strings.
+
+Revision190: (2011/03/08 Armin Biernaczyk)
+- OvcUtils.pas
+  Bugfixes for StripCharFromEnd and StripCharFromFront
+- TOvcBaseViewer
+  Several bugfixes for unicode-version:
+  + component displayed only garbage
+  + CopyToClipboard did not work
+  + PUREPASCAL-code added for several (not yet all) assembler-functions
+
 Revision 187: (2011/03/06 Armin Biernaczyk)
 - OvcStr.pas
   a) Added assember-free code for all functions/procedures in this unit (PUREPASCAL)
@@ -7,7 +21,7 @@ Revision 187: (2011/03/06 Armin Biernaczyk)
      StrChDeletePrim    - both unicode & ansi-version failed for Pos=StrLen(P)
      StrChInsertPrim    - ansi-Version failed for Pos=StrLen(Dest)
      StrInsertChars     - did not work for Count>1024
-     TrimEmbeddedZeros  - result was undefined for Pos('E',S)=0 
+     TrimEmbeddedZeros  - result was undefined for Pos('E',S)=0
      TrimTrailingZeros  - result was undefined for S='' 
      TrimTrailPrimPChar - unicode-version deleted spaces only
                         - ansi-version did work properly for S = '  '

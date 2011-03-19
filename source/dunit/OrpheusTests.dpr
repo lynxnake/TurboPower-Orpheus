@@ -16,12 +16,13 @@ uses
   TestOvcFormatSettings in 'TestOvcFormatSettings.pas',
   TestOvcDbPictureField in 'TestOvcDbPictureField.pas',
   TestOvcDbSimpleField in 'TestOvcDbSimpleField.pas',
-  TestOvcPictureField in 'TestOvcPictureField.pas' {frmTestOvcPictureField},
+  TestOvcTCPictureField in 'TestOvcTCPictureField.pas' {frmTestOvcPictureField},
   TestOVCStr in 'TestOVCStr.pas',
   TestOVCEdit in 'TestOVCEdit.pas' {Form1},
   OvcStr in '..\OvcStr.pas',
   TestOvcUtils in 'TestOvcUtils.pas',
-  TestOvcFileViewer in 'TestOvcFileViewer.pas' {OvcFileViewerForm};
+  TestOvcFileViewer in 'TestOvcFileViewer.pas' {OvcFileViewerForm},
+  TestOvcPictureField in 'TestOvcPictureField.pas' {TestOvcPictureFieldForm};
 
 {$R *.RES}
 

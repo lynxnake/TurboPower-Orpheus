@@ -40,11 +40,11 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     TabOrder = 0
     OnGetCellData = OvcTable1GetCellData
     CellData = (
-      'frmTestOvcPictureField.OvcTCSimpleField1'
-      'frmTestOvcPictureField.OvcTCPictureField2'
-      'frmTestOvcPictureField.OvcTCNumericField1'
+      'frmTestOvcPictureField.OvcTCPictureField1'
       'frmTestOvcPictureField.OvcTCString1'
-      'frmTestOvcPictureField.OvcTCPictureField1')
+      'frmTestOvcPictureField.OvcTCNumericField1'
+      'frmTestOvcPictureField.OvcTCPictureField2'
+      'frmTestOvcPictureField.OvcTCSimpleField1')
     RowData = (
       30)
     ColData = (
@@ -83,6 +83,7 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     EFColors.Error.TextColor = clBlack
     EFColors.Highlight.BackColor = clHighlight
     EFColors.Highlight.TextColor = clHighlightText
+    Options = [efoCaretToEnd, efoTrimBlanks]
     Table = OvcTable1
     Left = 156
     Top = 32
@@ -114,6 +115,7 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     EFColors.Error.TextColor = clBlack
     EFColors.Highlight.BackColor = clHighlight
     EFColors.Highlight.TextColor = clHighlightText
+    Options = [efoCaretToEnd]
     PictureMask = '#,###.##'
     Table = OvcTable1
     Left = 370
