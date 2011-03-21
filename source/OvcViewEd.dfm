@@ -14,6 +14,8 @@ object frmViewEd: TfrmViewEd
   Font.Style = []
   OldCreateOrder = True
   Position = poScreenCenter
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 13
   object StaticText1: TStaticText
@@ -121,7 +123,7 @@ object frmViewEd: TfrmViewEd
     object Label1: TLabel
       Left = 4
       Top = 9
-      Width = 23
+      Width = 24
       Height = 13
       Caption = 'Title:'
     end
@@ -149,7 +151,7 @@ object frmViewEd: TfrmViewEd
     object Label3: TLabel
       Left = 3
       Top = 1
-      Width = 73
+      Width = 74
       Height = 13
       Caption = 'Sample Layout:'
     end
@@ -183,49 +185,49 @@ object frmViewEd: TfrmViewEd
     object Label2: TLabel
       Left = 4
       Top = 10
-      Width = 25
+      Width = 28
       Height = 13
       Caption = 'Filter:'
     end
     object Label4: TLabel
       Left = 235
       Top = 13
-      Width = 51
+      Width = 56
       Height = 13
       Caption = 'Insert field:'
     end
     object Label5: TLabel
       Left = 236
       Top = 36
-      Width = 71
+      Width = 78
       Height = 13
       Caption = 'Insert operator:'
     end
     object Label6: TLabel
       Left = 424
       Top = 13
-      Width = 44
+      Width = 47
       Height = 13
       Caption = 'at cursor.'
     end
     object Label7: TLabel
       Left = 424
       Top = 36
-      Width = 44
+      Width = 47
       Height = 13
       Caption = 'at cursor.'
     end
     object Label8: TLabel
       Left = 236
       Top = 60
-      Width = 70
+      Width = 75
       Height = 13
       Caption = 'Insert function:'
     end
     object Label9: TLabel
       Left = 425
       Top = 60
-      Width = 44
+      Width = 47
       Height = 13
       Caption = 'at cursor.'
     end
@@ -240,11 +242,11 @@ object frmViewEd: TfrmViewEd
       Left = 312
       Top = 8
       Width = 97
-      Height = 22
+      Height = 19
       Hint = 'Insert field at cursor location in filter expression'
       DropDownCount = 9
       DroppedWidth = 360
-      ItemHeight = 12
+      ItemHeight = 13
       MRUListCount = 0
       ParentShowHint = False
       ShowHint = True
@@ -257,10 +259,10 @@ object frmViewEd: TfrmViewEd
       Left = 312
       Top = 32
       Width = 97
-      Height = 22
+      Height = 19
       Hint = 'Insert operator at cursor location in filter expression'
       DropDownCount = 9
-      ItemHeight = 12
+      ItemHeight = 13
       Items.Strings = (
         ' - '
         ' ( ) '
@@ -287,9 +289,9 @@ object frmViewEd: TfrmViewEd
       Left = 312
       Top = 56
       Width = 97
-      Height = 22
+      Height = 19
       DroppedWidth = 200
-      ItemHeight = 12
+      ItemHeight = 13
       Items.Strings = (
         'BETWEEN  AND'
         'CASE'

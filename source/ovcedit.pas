@@ -1434,12 +1434,10 @@ begin
       {strip control chars}
       for I := 0 to StrLen(GPs)-1 do begin
         if FKeepClipboardChars then begin
-          if not ovcCharInSet(GPs[I], FClipboardChars) and
-                 (GPs[I] <= #32) then
+          if not ovcCharInSet(GPs[I], FClipboardChars) and (GPs[I] <= #32) then
             GPs[I] := #32;
-        end else
-          if (GPs[I] < #10) then
-            GPs[I] := #32;
+        end else if GPs[I] < #9 then
+          GPs[I] := #32;
       end;
     finally
       GlobalUnlock(H);
@@ -6694,7 +6692,10 @@ end;
 
 
 procedure TOvcCustomTextFileEditor.SaveToFile(const Name : string; const AEncoding: TEncoding);
-  {-write the current file to disk}
+  {-write the current file to disk
+
+   Changes:
+     03/2011, AB: <tab>-characters have been transformed to spaces when saving the file }
 var
   I, PC, J         : LongInt;
   sBuffer          : string;
@@ -6733,16 +6734,12 @@ begin
       I := 1;
       repeat
         {get next paragraph}
-        {Armin: Why is the text modified when ist is saved?? By default, any <Tab> (#9)
-         characters are being replaced by spaces - this appears to be a very strange
-         behavior. To me this looks more like a bug than a feature...}
         sBuffer := GetParaPointer(I);
         for J := 1 to Length(sBuffer) do begin
           if FKeepClipboardChars then begin
-            if (not ovcCharInSet(sBuffer[J], FClipboardChars)) and
-               (sBuffer[J] <= #32) then
+            if not ovcCharInSet(sBuffer[J], FClipboardChars) and (sBuffer[J] <= #32) then
               sBuffer[J] := #32;
-          end else if sBuffer[J] < #10 then
+          end else if sBuffer[J] < #9 then
             sBuffer[J] := #32;
         end;
         {encode sBuffer and write to file}
@@ -6825,13 +6822,11 @@ begin
           {make a copy to alter}
           StrCopy(S2, S);
           for J := 0 to LongInt(StrLen(S2))-1 do begin
-            if (FKeepClipboardChars) then begin
-              if not ovcCharInSet(S2[J], FClipboardChars) and
-                     (S2[J] <= #32) then
+            if FKeepClipboardChars then begin
+              if not ovcCharInSet(S2[J], FClipboardChars) and (S2[J] <= #32) then
                 S2[J] := #32;
-            end else
-              if (S2[J] < #10) then
-                S2[J] := #32;
+            end else if S2[J] < #9 then
+              S2[J] := #32;
           end;
 
           if (I < PC) or (S2[0] <> #0) then

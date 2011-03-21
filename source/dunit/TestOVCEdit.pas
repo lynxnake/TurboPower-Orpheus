@@ -449,14 +449,21 @@ begin
     SL.LoadFromFile(FileName{$IFDEF UNICODE},TEncoding.Default{$ENDIF});
     Form1.OvcTextFileEditor.GetText(@Buf[0],SizeOf(Buf));
     CheckEqualsString(SL.Text+#13#10, Buf);
+    { 2. Ansi-Textfile containing <tab>-characters }
+    SL := TStringList.Create;
+    Form1.OvcTextFileEditor.AppendPara(line+#9+line+#9);
+    Form1.OvcTextFileEditor.SaveToFile(FileName);
+    SL.LoadFromFile(FileName{$IFDEF UNICODE},TEncoding.Default{$ENDIF});
+    Form1.OvcTextFileEditor.GetText(@Buf[0],SizeOf(Buf));
+    CheckEqualsString(SL.Text+#13#10, Buf);
 {$IFDEF UNICODE}
-    { 2. UTF-8 Textfile }
+    { 3. UTF-8 Textfile }
     Form1.OvcTextFileEditor.AppendPara(unicodeline);
     Form1.OvcTextFileEditor.SaveToFile(FileName);
     SL.LoadFromFile(FileName,TEncoding.UTF8);
     Form1.OvcTextFileEditor.GetText(@Buf[0],SizeOf(Buf));
     CheckEqualsString(SL.Text+#13#10, Buf);
-    { 3. Unicode Textfile }
+    { 4. Unicode Textfile }
     Form1.OvcTextFileEditor.SaveToFile(FileName,TEncoding.Unicode);
     SL.LoadFromFile(FileName,TEncoding.Unicode);
     Form1.OvcTextFileEditor.GetText(@Buf[0],SizeOf(Buf));

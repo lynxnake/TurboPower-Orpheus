@@ -94,6 +94,8 @@ type
     procedure cbxOpClick(Sender: TObject);
     procedure cbxFuncClick(Sender: TObject);
     procedure btnAdditionalClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
   private
     { Private declarations }
     PopupColumn : TOvcRvViewField;
@@ -200,6 +202,30 @@ begin
 end;
 
 { TfrmViewEd }
+
+procedure TfrmViewEd.FormCreate(Sender: TObject);
+  {- fix for issue 1056218: The lists used by TfrmViewEd were not freed when the form
+     was destroyed. }
+begin
+  FieldList := nil;
+  PaintList := nil;
+  GroupList := nil;
+  GPaintList:= nil;
+  ColumnList:= nil;
+  CPaintList:= nil;
+end;
+
+procedure TfrmViewEd.FormDestroy(Sender: TObject);
+begin
+  ClearLists;
+  if Assigned(FieldList)  then FieldList.Free;
+  if Assigned(PaintList)  then PaintList.Free;
+  if Assigned(GroupList)  then GroupList.Free;
+  if Assigned(GPaintList) then GPaintList.Free;
+  if Assigned(ColumnList) then ColumnList.Free;
+  if Assigned(CPaintList) then CPaintList.Free;
+end;
+
 
 procedure TfrmViewEd.ClearLists;
 var
