@@ -4746,21 +4746,33 @@ var
 
 
   procedure DrawAt(S : PChar; Len, Row : Integer);
+  {-Changes:
+    03/2011, AB: fixed issue 947482: When FMargins.Left.Enabled=True, the selected
+                 text was not highlighted properly (text and background were not
+                 aligned properly) }
   const
     etoFlags = ETO_OPAQUE + ETO_CLIPPED;
-  var
-    Save: Integer;
   begin
     {set bounding rectangle}
     SetRowRect(Row);
 
     {draw the string}
-    Canvas.FillRect(FR);
-    Save := FR.Left;
-    if FMargins.Left.Enabled then
-      FR.Left := FR.Left + MARGINPAD - 1;
-    ExtTextOut(Canvas.Handle, FR.Left, FR.Top+1, etoFlags, @FR, S, Len, @lpDX[0]);
-    FR.Left := Save;
+    if FMargins.Left.Enabled then begin
+      FR.Right := FR.Right + MARGINPAD - 1;
+      if FR.Left=FMargins.Left.FLinePosition then begin
+        Canvas.FillRect(FR);
+        FR.Left  := FR.Left  + MARGINPAD - 1;
+      end else begin
+        FR.Left  := FR.Left  + MARGINPAD - 1;
+        Canvas.FillRect(FR);
+      end;
+      ExtTextOut(Canvas.Handle, FR.Left, FR.Top+1, etoFlags, @FR, S, Len, @lpDX[0]);
+      FR.Left  := FR.Left  - MARGINPAD + 1;
+      FR.Right := FR.Right - MARGINPAD + 1;
+    end else begin
+      Canvas.FillRect(FR);
+      ExtTextOut(Canvas.Handle, FR.Left, FR.Top+1, etoFlags, @FR, S, Len, @lpDX[0]);
+    end;
   end;
 
 
@@ -4947,7 +4959,7 @@ var
               characters differently - which might cause trouble. For example
               S = 'X'#152'X'  -> XP: 'X X'  Vista: 'XX'
               S = 'x'#152'a'  -> XP: 'x a'  Vista: 'xã'
-        If the width of a character ist not fix, strange effects will show up
+        If the width of a character is not fix, strange effects will show up
         especially when selecting text. Therefore, we force ExtTextOut to strictly use
         a constant character-spacing using the parameter lpDx. }
       if Length(lpDx)<Len then begin
