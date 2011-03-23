@@ -217,7 +217,8 @@ type
     edRectSelect        : Boolean;    { 4.08 True if we are selecting a        }
                                       {      rectangular block of text         }
     edRectSelectDiff    : Integer;
-
+    edResetingScrollbars: Boolean;    { Flag to prevent infinite recursions
+                                        whilst reseting the scrollbars         }
     {property methods}
     function GetFirstEditor : TOvcCustomEditor;
     function GetInsCaretType : TOvcCaret;
@@ -1581,6 +1582,7 @@ begin
   { 4.08 }
   edRectSelect := False;
   edRectSelectDiff := 0;
+  edResetingScrollbars := False;
 
   {initialize the paragraph list}
   edParas := TOvcParaList.Init(Self, DefUndoBufferSize, False);
@@ -1909,6 +1911,9 @@ begin
 end;
 
 procedure TOvcCustomEditor.edCalcRowColInfo;
+  {-Changes:
+    03/2011, AB: fixed issue 668026: The last line was not diplayed although there is
+                 enough space }
 var
   Metrics : TTextMetric;
   OldRows : LongInt;
@@ -1944,14 +1949,14 @@ begin
     {determine the height of one row}
     edRowHt := Metrics.tmHeight+Metrics.tmExternalLeading+1;
 
-    {determine the number of rows}
-    edRows := trunc(ClientHeight / edGetRowHt - 1);
+    {determine the number of rows }
+    edRows := ClientHeight div edGetRowHt;
     if edRows <= 0 then
       edRows := 1;
-    {if more than 1/4 of the bottom row is showing then we'll include it in the
+    {if more than 1/2 of the bottom row is showing then we'll include it in the
      active rows.}
-    if ClientHeight mod edGetRowHt > trunc(edGetRowHt * 0.25) then
-      EdRows := EdRows + 1;
+    if ClientHeight mod edGetRowHt > edGetRowHt div 2 then
+      Inc(EdRows);
 
     {reset scroll bar range and position}
     if (edRows <> OldRows) and (ClientHeight > 0) then begin
@@ -5404,9 +5409,16 @@ begin
 end;
 
 procedure TOvcCustomEditor.ResetScrollBars(UpdateScreen : Boolean);
-  {-reset scroll bars}
+  {-reset scroll bars
+
+   -Changes:
+    03/2011, AB: fixed issue 755214: In some cases (attaching an editor to another with both
+                 WordWrap and WrapToWindow set to true) ResetScrollBars is called
+                 inside edAdjustWrapColumn causig an infinite recursion.
+                 This is now prevented by using 'edResetingScrollbars'. }
 begin
-  if HandleAllocated then begin
+  if HandleAllocated and not edResetingScrollbars then begin
+    edResetingScrollbars := True;
     edSetVScrollRange;
     edSetVScrollPos;
     edSetHScrollRange;
@@ -5420,6 +5432,7 @@ begin
 
     {update}
     edRedraw(UpdateScreen);
+    edResetingScrollbars := False;
   end;
 end;
 

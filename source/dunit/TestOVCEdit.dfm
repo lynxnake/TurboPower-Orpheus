@@ -20,8 +20,8 @@ object Form1: TForm1
     Height = 78
     CaretOvr.Shape = csBlock
     FixedFont.Color = clWindowText
-    FixedFont.Name = 'Terminal'
-    FixedFont.Size = 8
+    FixedFont.Name = 'Courier New'
+    FixedFont.Size = 10
     FixedFont.Style = []
     HideSelection = False
     HighlightColors.BackColor = clHighlight
@@ -40,8 +40,8 @@ object Form1: TForm1
     AutoIndent = False
     CaretOvr.Shape = csBlock
     FixedFont.Color = clWindowText
-    FixedFont.Name = 'Terminal'
-    FixedFont.Size = 8
+    FixedFont.Name = 'Courier New'
+    FixedFont.Size = 10
     FixedFont.Style = []
     HighlightColors.BackColor = clHighlight
     HighlightColors.TextColor = clHighlightText

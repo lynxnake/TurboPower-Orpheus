@@ -43,6 +43,8 @@ type
     procedure TestUndoBufferFail;
     procedure TestUndoBufferCopyPaste;
     procedure TestUndoBufferTyping;
+    procedure TestAttachWordwrapBug;
+    procedure TestDisplayLastLineBug;
   end;
 
 implementation
@@ -738,6 +740,54 @@ begin
       UBuf.Buffer := orgBuffer;
       Move(extBuffer[8], UBuf.Buffer^, UBuf.BufSize);
     end;
+  finally
+    Form1.Free;
+  end;
+end;
+
+
+{ Test for a fixed bug that caused the application to crash when attaching one editor
+  to another. }
+
+procedure TTestOVCEdit.TestAttachWordwrapBug;
+var
+  Form1: TForm1;
+begin
+  { create the editor an insert the test-content }
+  Form1 := TForm1.Create(nil);
+  try
+    Form1.show;
+    Form1.OvcEditor.WordWrap := True;
+    Form1.OvcEditor.WrapToWindow := True;
+    Form1.OvcEditor.Align := alTop;
+    Form1.OvcEditor.RightMargin := 5;
+    Form1.OvcTextFileEditor.WordWrap := True;
+    Form1.OvcTextFileEditor.WrapToWindow := True;
+    Form1.OvcTextFileEditor.Align := alClient;
+    Form1.OvcTextFileEditor.RightMargin := 20;
+    { this will crash the application (up to rev 198) due to an infinite recursion }
+    Form1.OvcEditor.Attach(Form1.OvcTextFileEditor);
+  finally
+    Form1.Free;
+  end;
+end;
+
+
+{ Test for a fixed bug that caused the editor to hide the last line }
+
+procedure TTestOVCEdit.TestDisplayLastLineBug;
+var
+  Form1: TForm1;
+  Editor: TPOvcEditor;
+begin
+  { create the editor an insert the test-content }
+  Form1 := TForm1.Create(nil);
+  Editor := TPOvcEditor(Form1.OvcEditor);
+  try
+    Editor.edCalcRowColInfo;
+    Editor.ClientHeight := 3*Editor.edGetRowHt + 1;
+    { There is enough space for 3 rows... Let's see what OvcEditor thinks... }
+    CheckEquals(3, Editor.edRows);
   finally
     Form1.Free;
   end;
