@@ -22,7 +22,8 @@ uses
   OvcStr in '..\OvcStr.pas',
   TestOvcUtils in 'TestOvcUtils.pas',
   TestOvcFileViewer in 'TestOvcFileViewer.pas' {OvcFileViewerForm},
-  TestOvcPictureField in 'TestOvcPictureField.pas' {TestOvcPictureFieldForm};
+  TestOvcPictureField in 'TestOvcPictureField.pas' {TestOvcPictureFieldForm},
+  TestOvcDate in 'TestOvcDate.pas';
 
 {$R *.RES}
 

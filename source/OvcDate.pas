@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{* Armin Biernaczyk                                                           *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -283,9 +284,16 @@ begin
 end;
 
 
-
-procedure ExchangeLongInts(var I, J : LongInt);
-register;
+procedure ExchangeLongInts(var I, J : LongInt); register;
+{$IFDEF PUREPASCAL}
+var
+  K : LongInt;
+begin
+  K := I;
+  I := J;
+  J := K;
+end;
+{$ELSE}
 asm
   mov  ecx, [eax]
   push ecx
@@ -294,57 +302,7 @@ asm
   pop  ecx
   mov  [edx], ecx
 end;
-
-procedure ExchangeStructs(var I, J; Size : Cardinal);
-register;
-asm
-  push edi
-  push ebx
-  push ecx
-  shr  ecx, 2
-  jz   @@LessThanFour
-
-@@AgainDWords:
-  mov  ebx, [eax]
-  mov  edi, [edx]
-  mov  [edx], ebx
-  mov  [eax], edi
-  add  eax, 4
-  add  edx, 4
-  dec  ecx
-  jnz  @@AgainDWords
-
-@@LessThanFour:
-  pop  ecx
-  and  ecx, $3
-  jz   @@Done
-  mov  bl, [eax]
-  mov  bh, [edx]
-  mov  [edx], bl
-  mov  [eax], bh
-  inc  eax
-  inc  edx
-  dec  ecx
-  jz   @@Done
-
-  mov  bl, [eax]
-  mov  bh, [edx]
-  mov  [edx], bl
-  mov  [eax], bh
-  inc  eax
-  inc  edx
-  dec  ecx
-  jz   @@Done
-
-  mov  bl, [eax]
-  mov  bh, [edx]
-  mov  [edx], bl
-  mov  [eax], bh
-
-@@Done:
-  pop  ebx
-  pop  edi
-end;
+{$ENDIF}
 
 function ResolveEpoch(Year, Epoch : Integer) : Integer;
   {-Convert 2-digit year to 4-digit year according to Epoch}
@@ -848,8 +806,10 @@ begin
   tDT1 := DT1;
   tDT2 := DT2;
   {swap if tDT1 later than tDT2}
-  if (tDT1.D > tDT2.D) or ((tDT1.D = tDT2.D) and (tDT1.T > tDT2.T)) then
-    ExchangeStructs(tDT1, tDT2,sizeof(TStDateTimeRec));
+  if (tDT1.D > tDT2.D) or ((tDT1.D = tDT2.D) and (tDT1.T > tDT2.T)) then begin
+    ExchangeLongInts(tDT1.D,tDT2.D);
+    ExchangeLongInts(tDT1.T,tDT2.T);
+  end;
 
   {the difference in days is easy}
   Days := tDT2.D-tDT1.D;

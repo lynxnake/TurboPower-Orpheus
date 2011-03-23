@@ -2,7 +2,7 @@
 		<PropertyGroup>
 			<ProjectGuid>{459A19CE-5A97-4276-8E80-1B23858458E0}</ProjectGuid>
 			<ProjectVersion>12.3</ProjectVersion>
-			<Config Condition="'$(Config)'==''">Purepascal</Config>
+			<Config Condition="'$(Config)'==''">Debug</Config>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
 			<MainSource>OrpheusTests.dpr</MainSource>
 			<Basis>True</Basis>
@@ -72,6 +72,7 @@
 			<DCCReference Include="TestOvcPictureField.pas">
 				<Form>TestOvcPictureFieldForm</Form>
 			</DCCReference>
+			<DCCReference Include="TestOvcDate.pas"/>
 			<None Include="TestOvcFileViewer.txt">
 				<ContainerId>WebFile</ContainerId>
 			</None>
