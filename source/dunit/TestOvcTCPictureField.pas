@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, OvcData,
   Dialogs, ovctcbef, ovctcpic, ovctcmmn, ovctcell, ovctcstr, ovctcedt, ovcbase, ovcef,
-  ovctable, TestFramework, ovctcnum, ovctcsim;
+  ovcsf, ovctable, TestFramework, ovctcnum, ovctcsim;
 
 type
   TfrmTestOvcPictureField = class(TForm)
@@ -21,7 +21,7 @@ type
   private
     { Fields for storing the data being displayed in the table. To detect a possible
       "buffer-overflow" (that might occur when data is written back from the table)
-      "Overflow"-Field are used. }
+      "Overflow"-fields are used. }
     Data_OvcTCString1: string;
     Data_Overflow_OvcTCString1: Integer;
     Data_OvcTCPictureField1: string;
@@ -46,6 +46,7 @@ type
     procedure TestOvcTCNumericField_nftDouble;
     procedure TestOvcTCSimpleField_sftString;
     procedure TestOvcTCSimpleField_sftString_DataNIL;
+    procedure TestOvcTCSimpleField_Passwordmode;
   end;
 
 implementation
@@ -59,6 +60,7 @@ type
   TPOvcTCNumericField = class(TOvcTCNumericField);
   TPOvcTCSimpleField  = class(TOvcTCSimpleField);
   TPOvcBaseEntryField = class(TOvcBaseEntryField);
+  TPOvcCustomSimpleField = class(TOvcCustomSimpleField);
 
 procedure TfrmTestOvcPictureField.FormCreate(Sender: TObject);
 begin
@@ -163,6 +165,7 @@ begin
 end;
 
 
+
 procedure TTestOvcTCPictureField.TestOvcTCSimpleField_sftString;
   {- test OvcTCSimpleField with datatype 'sftString' }
 begin
@@ -199,6 +202,26 @@ begin
   FForm.OvcTable1.StartEditingState;
   FForm.OvcTCSimpleField1.SaveEditedData(@s);
   CheckEqualsString('', s);
+end;
+
+
+procedure TTestOvcTCPictureField.TestOvcTCSimpleField_Passwordmode;
+  {- test for a bug that was fixed in rev 201: TOvcTCSimpleField did not display
+     Password-characters properly in unicode. }
+var
+  sf: TPOvcCustomSimpleField;
+  dest: array[0..20] of Char;
+begin
+  FForm.Data_OvcTCSimpleField1 := 'password';
+  try
+    FForm.OvcTCSimpleField1.Options := FForm.OvcTCSimpleField1.Options + [efoPasswordmode];
+    FForm.OvcTable1.Repaint;
+    sf := TPOvcCustomSimpleField(TPOvcTCSimpleField(FForm.OvcTCSimpleField1).FEditDisplay);
+    sf.efGetDisplayString(dest, High(dest));
+    CheckEquals('********', dest);
+  finally
+    FForm.OvcTCSimpleField1.Options := FForm.OvcTCSimpleField1.Options - [efoPasswordmode];
+  end;
 end;
 
 

@@ -889,9 +889,22 @@ begin  {edit}
 end;
 
 function TOvcCustomSimpleField.efGetDisplayString(Dest : PChar; Size : Word) : PChar;
-  {-return the display string in Dest and a pointer as the result}
+  {-return the display string in Dest and a pointer as the result
+
+   -Changes:
+    03/2011, AB: Unicode-Bugfix: efoPasswordMode did not work properly}
+
+  procedure FillDest(ch:Char; Pos,Len:Word);
+  begin
+    Dest[Len] := #0;
+    while Len>Pos do begin
+      Dec(Len);
+      Dest[Len] := ch;
+    end;
+  end;
+
 var
-  Len   : Word;
+  Len: Word;
 begin
   Result := inherited efGetDisplayString(Dest, Size);
 
@@ -900,18 +913,17 @@ begin
     Exit;
 
   if Uninitialized and not (sefHaveFocus in sefOptions) then begin
-    FillChar(Dest[0], Len * SizeOf(Char), ' ');
+    FillDest(' ', 0, Len);
     Exit;
   end;
 
   if (efoPasswordMode in Options) then
-    FillChar(Dest[0], Len * SizeOf(Char), PasswordChar);
+    FillDest(PasswordChar, 0, Len);
 
-  if PadChar <> ' ' then begin
-    FillChar(Dest[Len], (MaxLength-Len) * SizeOf(Char), PadChar);
-    Dest[MaxLength] := #0;
-  end;
+  if (PadChar <> ' ') and (MaxLength>Len) then
+    FillDest(PadChar, Len, MaxLength);
 end;
+
 
 procedure TOvcCustomSimpleField.efIncDecValue(Wrap : Boolean; Delta : Double);
   {-increment field by Delta}
