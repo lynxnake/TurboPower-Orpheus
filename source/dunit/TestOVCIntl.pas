@@ -34,18 +34,80 @@ uses
 type
   TTestOVCIntl = class(TTestCase)
   published
+    procedure TestDateStringToDate;
+    procedure TestDateToDateString;
     procedure TestInternationalTime;
+    procedure TestMonthStringToMonth;
+    procedure TestisMergeIntoPicture;
   end;
 
 implementation
 
 uses
-  OvcIntl;
+  OvcFormatSettings, OvcDate, OvcIntl, SysUtils, StrUtils;
 
 type
   TProtectedIntlSub = class(TOvcIntlSup);
 
+{$I OVC.INC}
+
 { TTestOVCIntl }
+
+procedure TTestOVCIntl.TestDateStringToDate;
+type
+  TData = record
+    p, s: string;
+    res: TStDate;
+  end;
+const
+  cSomeData: array[0..1] of TData =
+    ((p:'dd/mm/yyyy'; s: '14.04.1968'; res: 134513),
+     (p:'DD nnn yy';  s: ' 1 Jan 11';  res: 150115));
+var
+  pIntlSup: TOvcIntlSup;
+  i: Integer;
+  res: TStDate;
+begin
+  pIntlSup := TOvcIntlSup.Create;
+  try
+    for i := 0 to High(cSomeData) do begin
+      res := pIntlSup.DateStringToDate(cSomeData[i].p,cSomeData[i].s,2000);
+      CheckEquals(cSomeData[i].res, res, Format('Test #%d failed',[i]));
+    end;
+  finally
+    pIntlSup.Free;
+  end;
+end;
+
+
+procedure TTestOVCIntl.TestDateToDateString;
+type
+  TData = record
+    p: string;
+    j: TStDate;
+    res: string;
+  end;
+const
+  cSomeData: array[0..1] of TData =
+    ((p:'dd/mm/yyyy'; j: 134513; res: '14.04.1968'),
+     (p:'DD nnn yy';  j: 150115; res: ' 1 Jan 11'));
+var
+  pIntlSup: TOvcIntlSup;
+  i: Integer;
+  res: string;
+begin
+  pIntlSup := TOvcIntlSup.Create;
+  try
+    TProtectedIntlSub(pIntlSup).SlashChar := '.';
+    for i := 0 to High(cSomeData) do begin
+      res := pIntlSup.DateToDateString(cSomeData[i].p,cSomeData[i].j,False);
+      CheckEquals(cSomeData[i].res, res, Format('Test #%d failed',[i]));
+    end;
+  finally
+    pIntlSup.Free;
+  end;
+end;
+
 
 procedure TTestOVCIntl.TestInternationalTime;
 var
@@ -66,8 +128,79 @@ begin
   end;
 end;
 
+
+procedure TTestOVCIntl.TestMonthStringToMonth;
+var
+  pIntlSup: TOvcIntlSup;
+  m, i: Integer;
+  s: string;
+begin
+  pIntlSup := TOvcIntlSup.Create;
+  try
+    for i := 1 to 12 do begin
+      s := FormatSettings.LongMonthNames[i];
+      m := OvcIntlSup.MonthStringToMonth(s,Length(s));
+      CheckEquals(i,m,Format('Test failed for s="%s"',[s]));
+      s := Copy(FormatSettings.LongMonthNames[i],1,3);
+      m := OvcIntlSup.MonthStringToMonth(s,3);
+      CheckEquals(i,m,Format('Test failed for s="%s"',[s]));
+      s := FormatSettings.ShortMonthNames[i];
+      m := OvcIntlSup.MonthStringToMonth(s,Length(s));
+      CheckEquals(i,m,Format('Test failed for s="%s"',[s]));
+    end;
+    m := OvcIntlSup.MonthStringToMonth('foo',3);
+    CheckEquals(0,m,Format('Test failed for s="%s"',[s]));
+  finally
+    pIntlSup.Free;
+  end;
+end;
+
+
+procedure TTestOVCIntl.TestisMergeIntoPicture;
+type
+  TData = record
+    p: string;
+    ch: Char;
+    i: Integer;
+    res: string;
+  end;
+const
+  cSomeData: array[0..6] of TData =
+    ((p:' nnn '; ch:'n'; i:2; res:''),
+     (p:'NNNNNNNNNN'; ch:'n'; i:12; res:''),
+     (p:'ww';         ch:'w'; i:0; res:''),
+     (p:'www';        ch:'w'; i:0; res:''),
+     (p:'WWWWWWWWWW'; ch:'w'; i:1; res:''),
+     (p:'----dd----'; ch:'d'; i:5; res:'----05----'),
+     (p:'----DD----'; ch:'d'; i:5; res:'---- 5----'));
+var
+  pic: array[0..32] of Char;
+  pIntlSup: TOvcIntlSup;
+  i: Integer;
+  res: string;
+begin
+  pIntlSup := TOvcIntlSup.Create;
+  try
+    for i := 0 to High(cSomeData) do begin
+      StrPCopy(pic, cSomeData[i].p);
+      TProtectedIntlSub(OvcIntlSup).isMergeIntoPicture(@pic[0], cSomeData[i].ch, cSomeData[i].i);
+      case i of
+        0: res := Format(' %3.3s ',[FormatSettings.ShortMonthNames[2]]);
+        1: res := UpperCase(Format('%-10.10s',[FormatSettings.LongMonthNames[12]]));
+        2: res := Format('%2.2s',[FormatSettings.ShortDayNames[1]]);
+        3: res := Format('%3.3s',[FormatSettings.LongDayNames[1]]);
+        4: res := UpperCase(Format('%-10.10s',[FormatSettings.LongDayNames[2]]));
+        else res := cSomeData[i].res;
+      end;
+      CheckEqualsString(res, pic, Format('Test #%d failed',[i]));
+    end;
+  finally
+    pIntlSup.Free;
+  end;
+end;
+
+
 initialization
   RegisterTest(TTestOVCIntl.Suite);
-
 
 end.

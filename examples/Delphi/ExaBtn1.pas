@@ -1,12 +1,11 @@
-{$J+} {Writable constants}
-
 unit Exabtn1;
 
 interface
 
 uses
   SysUtils, WinTypes, WinProcs, Messages, Classes, Graphics, Controls,
-  Forms, Dialogs, StdCtrls, Buttons, OvcABtn, OvcBase, OvcEF, OvcPB, OvcPF;
+  Forms, Dialogs, StdCtrls, Buttons, OvcABtn, OvcBase, OvcEF, OvcPB, OvcPF,
+  OvcDate;
 
 type
   TForm1 = class(TForm)
@@ -38,9 +37,9 @@ begin
   P := ClientToScreen(Point(ABtn.Left+ABtn.Width , ABtn.Top + ABtn.Height));
   frmCal.Left := P.X - frmCal.Width;
   frmCal.Top := P.Y;
-  frmCal.Calendar.CalendarDate := PF.AsDateTime{AsStDate};                 {!!.06}
+  frmCal.Calendar.CalendarDate := PF.AsDateTime;
   if frmCal.ShowModal = mrOK then
-    PF.AsStDate := Trunc(frmCal.Calendar.CalendarDate);
+    PF.AsStDate := DateTimeToSTDate(frmCal.Calendar.CalendarDate);
 end;
 
 end.

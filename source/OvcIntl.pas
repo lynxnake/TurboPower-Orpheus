@@ -24,6 +24,7 @@
 {*                                                                            *}
 {* Contributor(s):                                                            *}
 {*    Roman Kassebaum                                                         *}
+{*    Armin Biernaczyk                                                        *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -311,19 +312,6 @@ implementation
 
 uses
   StrUtils, OvcFormatSettings;
-
-{*** Inline routines ***}
-
-function GetMaxWord(A, B : Word) : Word; register;
-  {-Return the greater of A and B}
-asm
-  and    eax,0FFFFH {faster than movzx              }
-  and    edx,0FFFFH {faster than movzx              }
-  cmp    eax,edx    {compare A and B                }
-  jae    @@001      {done if ax is greater or equal }
-  mov    eax,edx    {dx is larger, set result       }
-@@001:
-end;
 
 {*** TOvcIntlSup ***}
 
@@ -756,20 +744,25 @@ var
 
   function LongestMonthName : Word;
   var
-    I : Word;
+    L, I : Word;
   begin
     Result := 0;
-    for I := 1 to 12 do
-      Result := GetMaxWord(Result, Length(FormatSettings.LongMonthNames[I]));
+    for I := 1 to 12 do begin
+      L := Length(FormatSettings.LongMonthNames[I]);
+      if L>Result then Result := L;
+    end;
   end;
 
   function LongestDayName : Word;
   var
+    L: Word;
     D : TDayType;
   begin
     Result := 0;
-    for D := Sunday to Saturday do
-      Result := GetMaxWord(Result, Length(FormatSettings.LongDayNames[Ord(D)+1]));
+    for D := Sunday to Saturday do begin
+      L := Length(FormatSettings.LongDayNames[Ord(D)+1]);
+      if L>Result then Result := L;
+    end;
   end;
 
   procedure FixMask(MC : Char; DL : Integer);
@@ -875,7 +868,7 @@ begin
 
   {handle international AM/PM markers}
   if w12Hour then begin
-    ML := GetMaxWord(Length(w1159), Length(w2359));
+    if Length(w1159)>Length(w2359) then ML := Length(w1159) else ML := Length(w2359);
     if (ML <> 0) then begin
       SL := StrLen(S);
       S[SL] := ' ';
@@ -992,87 +985,66 @@ begin
   end;
 end;
 
-procedure TOvcIntlSup.isMergeIntoPicture(Picture : PChar; Ch : Char;
-                                       I : Integer);
-  {-merge I into location in Picture indicated by format character Ch}
+
+procedure TOvcIntlSup.isMergeIntoPicture(Picture : PChar; Ch : Char; I : Integer);
+  {-merge I into location in Picture indicated by format character Ch
+
+   -Changes:
+    3/2011 AB: Bugfixes and code-sanitization }
 var
-  sBuffer : ShortString;
-  Tmp     : string;
-{$IFNDEF UNICODE}
-  TLen    : Byte absolute Tmp;
-  K       : Word;
-{$ENDIF}
-  J       : Cardinal;
-  L       : Word;
-  UCh, CPJ, CTI : Char;
-  Done    : Boolean;
+  UCh          : Char;
+  J, L, K, PLen: Cardinal;
+  Tmp          : string;
 begin
-  {find the start of the subfield}
+  {find the start 'J' of the subfield}
   UCh := UpCaseChar(Ch);
   if not StrChPos(Picture, Ch, J) then
     if not StrChPos(Picture, UCh, J) then
       Exit;
 
-  {find the end of the subfield}
-{$IFNDEF UNICODE}
-  K := J;
-{$ENDIF}
-  while (J < StrLen(Picture)) and (UpCaseChar(Picture[J]) = UCh) do
-    Inc(J);
-  Dec(J);
+  {find the length 'L' of the subfield}
+  L := 1;
+  PLen := StrLen(Picture);
+  while (J+L < PLen) and (UpCaseChar(Picture[J+L]) = UCh) do
+    Inc(L);
 
-  if (UCh = pmWeekDayU) or (UCh = pmMonthNameU) then begin
-    if UCh = pmWeekDayU then
-      case I of
-        Ord(Sunday)..Ord(Saturday) :
-          Tmp := FormatSettings.LongDayNames[I+1];
-        else
-          Tmp := '';
-      end
+  {find the string 'Tmp' that correnponds to I}
+  if UCh = pmWeekDayU then begin
+    if (I<Ord(Sunday)) or (I>Ord(Saturday)) then
+      Tmp := ''
+    else if L<=Cardinal(Length(FormatSettings.ShortDayNames[I+1])) then
+      Tmp := FormatSettings.ShortDayNames[I+1]
     else
-      case I of
-        1..12 :
-          Tmp := FormatSettings.LongMonthNames[I];
-        else
-          Tmp := '';
-      end;
-{$IFNDEF UNICODE}
-    K := Succ(J-K);
-    if K > TLen then
-      FillChar(Tmp[TLen+1], K-TLen, ' ');
-    TLen := K; // Tiburon; this is probably not needed for the string
-{$ENDIF}    
-  end else
-    {convert I to a string}
-    Str(I:MaxDateLen, sBuffer);
-    Tmp := string(sBuffer);
-//    Str(I:MaxDateLen, Tmp);
+      Tmp := FormatSettings.LongDayNames[I+1];
+  end else if UCh = pmMonthNameU then begin
+    if (I<1) or (I>12) then
+      Tmp := ''
+    else if L<=Cardinal(Length(FormatSettings.ShortMonthNames[I])) then
+      Tmp := FormatSettings.ShortMonthNames[I]
+    else
+      Tmp := FormatSettings.LongMonthNames[I];
+  end else begin
+    Tmp := Format('%*d',[L,I]);
+    { DMYtoDateString('yy', 1, 1, 2012, False, 0) should return '12' (not '20), so we
+      have to use the last digits of 'Tmp' in case Length(Tmp)>L. }
+    if Cardinal(Length(Tmp))>L then Delete(Tmp,1,Cardinal(Length(Tmp))-L);
+  end;
+
+  {adjust length of 'Tmp' to length of the subfield}
+  Tmp := Format('%-*.*s',[L,L,Tmp]);
 
   {now merge}
-  L := Length(Tmp); // TLen;
-  Done := False;
-  CPJ := Picture[J];
-
-  while (UpCaseChar(CPJ) = UCh) and not Done do begin
-    CTI := Tmp[L];
-    if (UCh = pmMonthNameU) or (UCh = pmWeekDayU) then begin
-      case CPJ of
-        pmMonthNameU, pmWeekDayU :
-          CTI := UpCaseChar(CTI);
-      end;
-    end
-    {change spaces to 0's if desired}
-    else if (CPJ >= 'a') and (CTI = ' ') then
-      CTI := '0';
-    Picture[J] := CTI;
-    Done := (J = 0) or (L = 0);
-    if not Done then begin
-      Dec(J);
-      Dec(L);
-    end;
-    CPJ := Picture[J];
+  for K := 0 to L-1 do begin
+    if (Picture[J+K]=pmMonthNameU) or (Picture[J+K]=pmWeekDayU) then
+      Picture[J+K] := UpCaseChar(Tmp[K+1])
+    else if (Picture[J+K]<>pmMonthName) and (Picture[J+K]<>pmWeekDay) and
+            (Picture[J+K] >= 'a') and (Tmp[K+1] = ' ') then
+      Picture[J+K] := '0'
+    else
+      Picture[J+K] := Tmp[K+1];
   end;
 end;
+
 
 procedure TOvcIntlSup.isPackResult(Picture, S : PChar);
   {-remove unnecessary blanks from S}
@@ -1206,69 +1178,38 @@ begin
   Result := Dest;
 end;
 
-function TOvcIntlSup.MonthStringToMonth(const S : string; Width : Byte) : Byte;
-  {-Convert the month name in MSt to a month (1..12)}
-{var
-  I    : Word;
-  Mt   : String[MaxDateLen];
-//  MLen : Byte absolute Mt;
-  St   : string[MaxDateLen];
-//  SLen : Byte absolute St; }
-begin
-{$IFDEF VERSIONXE}
-  Result := AnsiIndexText(S, FormatSettings.LongMonthNames) + 1;
-{$ELSE}
-  Result := AnsiIndexText(S, LongMonthNames) + 1;
-{$ENDIF}
- { Result := 0;
-  Mt := AnsiUpperCase(S);
-  if Width > MLen then
-    FillChar(Mt[MLen+1], Width-MLen, ' ');
-  MLen := Width;
 
-  for I := 1 to 12 do begin
-    St := AnsiUpperCase(FormatSettings.LongMonthNames[I]);
-    if Width > SLen then
-      FillChar(St[SLen+1], Width-SLen, ' ');
-    SLen := Width;
-    if Mt = St then begin
-      Result := I;
-      Break;
-    end;
-  end;  }
+function TOvcIntlSup.MonthStringToMonth(const S : string; Width : Byte) : Byte;
+  {-Convert the month name in 'S' to a month (1..12)
+
+   -Changes:
+    03/2011 AB: This function should only compare the first 'Widht' characters; the
+            new implementation ignored this. This caused trouble in OvcPictureFields with
+            Mask='dd nnn yyyy' and DataType=pftDate as '01 Jan 2000' was not recognised as
+            a valid date. }
+var
+  ps: string;
+begin
+  ps := Format('%*.*s',[Width,Width,S]);
+  result := 12;
+  while (result>0) and
+        (CompareText(ps, Format('%*.*s',[Width,Width,
+                                         FormatSettings.LongMonthNames[result]]))<>0) and
+        (CompareText(ps, Format('%*.*s',[Width,Width,
+                                         FormatSettings.ShortMonthNames[result]]))<>0) do
+    Dec(result);
 end;
+
 
 function TOvcIntlSup.MonthPCharToMonth(S : PChar; Width : Byte) : Byte;
-  {-convert the month name in S to a month (1..12)}
-{var
-  I    : Word;
-  Mt   : string[MaxDateLen];
-//  MLen : Byte absolute Mt;
-  St   : string[MaxDateLen];
-//  SLen : Byte absolute St; }
-begin
-{$IFDEF VERSIONXE}
-  Result := AnsiIndexText(S, FormatSettings.LongMonthNames) + 1;
-{$ELSE}
-  Result := AnsiIndexText(S, LongMonthNames) + 1;
-{$ENDIF}
-{  Result := 0;
-  Mt := AnsiUpperCase(StrPas(S));
-  if Width > MLen then
-    FillChar(Mt[MLen+1], Width-MLen, ' ');
-  MLen := Width;
+  {-convert the month name in S to a month (1..12)
 
-  for I := 1 to 12 do begin
-    St := AnsiUpperCase(FormatSettings.LongMonthNames[I]);
-    if Width > SLen then
-      FillChar(St[SLen+1], Width-SLen, ' ');
-    SLen := Width;
-    if Mt = St then begin
-      Result := I;
-      Break;
-    end;
-  end;   }
+   -Changes:
+    03/2011 AB: Simply use MonthStringToMonth }
+begin
+  result := MonthStringToMonth(StrPas(S), Width);
 end;
+
 
 function TOvcIntlSup.MonthToString(Month : Integer) : string;
   {-return month name as a string for Month}

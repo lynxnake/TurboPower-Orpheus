@@ -41,6 +41,7 @@ unit ovcedcal;
 interface
 
 uses
+  {$IFDEF UNICODE} Types, {$ENDIF}
   Windows, Buttons, Classes, Controls, Forms, Graphics, Menus, Messages,
   StdCtrls, SysUtils, {$IFDEF VERSION4} MultiMon, {$ENDIF} OvcBase, OvcCal,
   OvcConst, OvcData, OvcEdPop, OvcExcpt, OvcIntl, OvcMisc, OvcEditF, OvcDate;

@@ -1594,11 +1594,14 @@ begin
 end;
 
 procedure TOvcCustomCalendar.SetCalendarDate(Value : TDateTime);
+  {-Changes:
+    03/2011, AB: minor bugfix: To compare NewDate and CalenderDate we have to convert
+                 the type of one operand. }
 var
   NewDate : TStDate;
 begin
   NewDate := DateTimeToStDate(Value);
-  if (NewDate = BadDate) or (NewDate = CalendarDate) or
+  if (NewDate = BadDate) or (NewDate = DateTimeToStDate(CalendarDate)) or
      (IncDateTrunc(NewDate,  1, 0) = BadDate) or
      (IncDateTrunc(NewDate, -1, 0) = BadDate) then begin
     Exit;

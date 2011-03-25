@@ -1,5 +1,3 @@
-{$J+} {Writable constants}
-
 unit Exabtn2;
 
 interface
@@ -16,8 +14,6 @@ type
     Panel1: TPanel;
     BitBtn1: TBitBtn;
     BitBtn2: TBitBtn;
-    Spinner1: TOvcSpinner;
-    Spinner2: TOvcSpinner;
     procedure CalendarDblClick(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
@@ -38,22 +34,6 @@ procedure TfrmCal.CalendarDblClick(Sender: TObject);
 begin
   ModalResult := mrOK;
 end;
-
-
-{1
-  case State of
-    ssLeftBtn  : Calendar.IncMonth(-Trunc(Delta));
-    ssRightBtn : Calendar.IncMonth(+Trunc(Delta));
-  end;
-}
-
-
-{2
-  case State of
-    ssLeftBtn  : Calendar.IncYear(-Trunc(Delta));
-    ssRightBtn : Calendar.IncYear(+Trunc(Delta));
-  end;
-}
 
 procedure TfrmCal.FormKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
