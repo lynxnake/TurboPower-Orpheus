@@ -167,7 +167,7 @@
 			<DCCReference Include="..\..\source\ovcurl.pas"/>
 			<DCCReference Include="..\..\source\ovcuser.pas"/>
 			<DCCReference Include="..\..\source\ovcvalid.pas"/>
-			<DCCReference Include="..\..\source\ovcver.pas"/>
+			<DCCReference Include="..\..\source\OvcVer.pas"/>
 			<DCCReference Include="..\..\source\ovcviewr.pas"/>
 			<DCCReference Include="..\..\source\ovcvlb.pas"/>
 			<DCCReference Include="..\..\source\ovcxfer.pas"/>

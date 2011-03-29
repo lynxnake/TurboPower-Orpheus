@@ -39,6 +39,7 @@ type
     procedure TestInternationalTime;
     procedure TestMonthStringToMonth;
     procedure TestisMergeIntoPicture;
+    procedure TestDateTimeToDatePChar;
   end;
 
 implementation
@@ -193,6 +194,42 @@ begin
         else res := cSomeData[i].res;
       end;
       CheckEqualsString(res, pic, Format('Test #%d failed',[i]));
+    end;
+  finally
+    pIntlSup.Free;
+  end;
+end;
+
+
+procedure TTestOVCIntl.TestDateTimeToDatePChar;
+type
+  TData = record
+    p: string;
+    d,m,y,h,min,s: Word;
+    res: string;
+  end;
+const
+  cSomeData: array[0..1] of TData =
+    ((p:'dd/mm/yyyy hh:mm:ss';
+      d: 14; m: 04; y: 1968; h: 23; min: 59; s: 45; res: '14.04.1968 23:59:45'),
+     (p:'hh:mm:ss - DD/MM/yy';
+      d: 01; m: 01; y: 2000; h:  1; min:  2; s:  3; res: '01:02:03 -  1. 1.00'));
+var
+  pic, dest: array[0..32] of Char;
+  DT: TDateTime;
+  pIntlSup: TOvcIntlSup;
+  i: Integer;
+begin
+  pIntlSup := TOvcIntlSup.Create;
+  TProtectedIntlSub(OvcIntlSup).wColonChar := ':';
+  TProtectedIntlSub(OvcIntlSup).SlashChar := '.';
+  try
+    for i := 0 to High(cSomeData) do begin
+      StrPCopy(pic, cSomeData[i].p);
+      DT :=   EncodeDate(cSomeData[i].y, cSomeData[i].m, cSomeData[i].d)
+            + EncodeTime(cSomeData[i].h, cSomeData[i].min, cSomeData[i].s, 0);
+      OvcIntlSup.DateTimeToDatePChar(Dest, pic, DT, False);
+      CheckEqualsString(cSomeData[i].res, dest, Format('Test #%d failed',[i]));
     end;
   finally
     pIntlSup.Free;

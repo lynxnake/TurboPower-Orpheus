@@ -26,8 +26,8 @@ program Addrbook;
 
 uses
   Forms,
-  Adrbook1 in 'ADRBOOK1.PAS' {AddrForm},
-  Adrbook2 in 'ADRBOOK2.PAS' {AdrAbout},
+  Adrbook1 in 'AdrBook1.pas' {AddrForm},
+  Adrbook2 in 'AdrBook2.pas' {AdrAbout},
   CalUnit in 'CalUnit.pas' {CalForm};
 
 {$IFDEF WIN32}

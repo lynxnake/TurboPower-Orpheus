@@ -73,6 +73,9 @@
 				<Form>TestOvcPictureFieldForm</Form>
 			</DCCReference>
 			<DCCReference Include="TestOvcDate.pas"/>
+			<DCCReference Include="TestOvcTransfer.pas">
+				<Form>TestOvcTransferForm</Form>
+			</DCCReference>
 			<None Include="TestOvcFileViewer.txt">
 				<ContainerId>WebFile</ContainerId>
 			</None>

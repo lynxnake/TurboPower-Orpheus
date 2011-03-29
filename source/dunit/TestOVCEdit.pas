@@ -28,6 +28,11 @@ type
   end;
 
   TTestOVCEdit = class(TTestCase)
+  private
+    FForm: TForm1;
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
   published
     procedure TestUndo;
     procedure TestInsert;
@@ -45,6 +50,7 @@ type
     procedure TestUndoBufferTyping;
     procedure TestAttachWordwrapBug;
     procedure TestDisplayLastLineBug;
+    procedure TestTextproperty;
   end;
 
 implementation
@@ -55,24 +61,21 @@ implementation
 
 procedure TTestOVCEdit.TestInsert;
 var
-  Form1: TForm1;
   s: string;
 begin
-  Form1 := TForm1.Create(nil);
-  try
-    Form1.OvcEditor.ScrollPastEnd := True;
-    Form1.OvcEditor.AppendPara('Test');
-    Form1.OvcEditor.SetSelection(1,1,1,5,True);
-    Form1.OvcEditor.CopyToClipboard;
-    Form1.OvcEditor.SetCaretPosition(1,9);
-    Form1.OvcEditor.PasteFromClipboard;
+  with FForm.OvcEditor do begin
+    Clear;
+    ScrollPastEnd := True;
+    AppendPara('Test');
+    SetSelection(1,1,1,5,True);
+    CopyToClipboard;
+    SetCaretPosition(1,9);
+    PasteFromClipboard;
     SetLength(s, 15);
-    s := Form1.OvcEditor.GetLine(1,@s[1],15);
-    { Fails in 4.07 (unicode) }
-    CheckEqualsString(s, 'Test    Test');
-  finally
-    Form1.Free;
+    s := GetLine(1,@s[1],15);
   end;
+  { Fails in 4.07 (unicode) }
+  CheckEqualsString(s, 'Test    Test');
 end;
 
 { test copying text from an TOvcEditor }
@@ -116,29 +119,25 @@ const
 var
   i: Integer;
   s: string;
-  Form1: TForm1;
 begin
-  Form1 := TForm1.Create(nil);
-  try
-    { Initialise the Editor and add 'Content'. As we are going to copy text containing
-      <tb>-characters, we need to set 'TOvcEditor.ClipboardChars' (otherwise <tab>-
-      characters would be converted into (single) spaces) }
-    Form1.OvcEditor.WordWrap := False;
-    Form1.Ovceditor.KeepClipboardChars := True;
-    Form1.OvcEditor.ClipboardChars := Form1.OvcEditor.ClipboardChars + [#9];
+  { Initialize the Editor and add 'Content'. As we are going to copy text containing
+    <tb>-characters, we need to set 'TOvcEditor.ClipboardChars' (otherwise <tab>-
+    characters would be converted into (single) spaces) }
+  with FForm.OvcEditor do begin
+    WordWrap := False;
+    KeepClipboardChars := True;
+    ClipboardChars := ClipboardChars + [#9];
     for i := Low(Content) to High(Content) do
-      Form1.OvcEditor.AppendPara(PChar(Content[i]));
+      AppendPara(PChar(Content[i]));
+  end;
 
-    { copy some texts from the editor and check the results }
-    for i := Low(Copies) to High(Copies) do begin
-      with Copies[i] do
-        Form1.OvcEditor.SetSelection(l1,c1,l2,c2,true);
-      Form1.OvcEditor.CopyToClipboard;
-      s := Clipboard.AsText;
-      CheckEqualsString(s, Copies[i].s);
-    end;
-  finally
-    Form1.Free;
+  { copy some texts from the editor and check the results }
+  for i := Low(Copies) to High(Copies) do begin
+    with Copies[i] do
+      FForm.OvcEditor.SetSelection(l1,c1,l2,c2,true);
+    FForm.OvcEditor.CopyToClipboard;
+    s := Clipboard.AsText;
+    CheckEqualsString(s, Copies[i].s);
   end;
 end;
 
@@ -163,30 +162,25 @@ const
 var
   i: Integer;
   s: string;
-  Form1: TForm1;
 begin
-  Form1 := TForm1.Create(nil);
-  try
-    { Initialise the editor and add 'Content'. As we are going to copy text containing
-      <tab>-characters, we need to set 'TOvcEditor.ClipboardChars' (otherwise <tab>-
-      characters would be converted into (single) spaces) }
-    Form1.OvcEditor.WordWrap := False;
-    Form1.Ovceditor.KeepClipboardChars := True;
-    Form1.OvcEditor.ClipboardChars := Form1.OvcEditor.ClipboardChars + [#9];
+  { Initialise the editor and add 'Content'. As we are going to copy text containing
+    <tab>-characters, we need to set 'TOvcEditor.ClipboardChars' (otherwise <tab>-
+    characters would be converted into (single) spaces) }
+  with FForm.OvcEditor do begin
+    WordWrap := False;
+    KeepClipboardChars := True;
+    ClipboardChars := ClipboardChars + [#9];
     for i := Low(Content) to High(Content) do
-      Form1.OvcEditor.AppendPara(PChar(Content[i]));
-
-    { copy some texts from the editor using "rectangular mode" and check the results. }
-    for i := Low(Copies) to High(Copies) do begin
-      with Copies[i] do
-        Form1.OvcEditor.SetSelection(l1,c1,l2,c2,true);
-      TPOvcEditor(Form1.OvcEditor).edRectSelect := True;
-      Form1.OvcEditor.CopyToClipboard;
-      s := Clipboard.AsText;
-      CheckEqualsString(s, Copies[i].s);
-    end;
-  finally
-    Form1.Free;
+      AppendPara(PChar(Content[i]));
+  end;
+  { copy some texts from the editor using "rectangular mode" and check the results. }
+  for i := Low(Copies) to High(Copies) do begin
+    with Copies[i] do
+      FForm.OvcEditor.SetSelection(l1,c1,l2,c2,true);
+    TPOvcEditor(FForm.OvcEditor).edRectSelect := True;
+    FForm.OvcEditor.CopyToClipboard;
+    s := Clipboard.AsText;
+    CheckEqualsString(s, Copies[i].s);
   end;
 end;
 
@@ -205,7 +199,6 @@ const
 procedure TTestOVCEdit.TestDeleteRect;
 var
   i, j: Integer;
-  Form1: TForm1;
   P: array[0..2048] of Char;
 const
   remainders: array[1..6] of TCopytestRec =
@@ -250,26 +243,23 @@ const
                                   #13#10+
                                   '123456781234567812345678'#13#10#13#10));
 begin
-  Form1 := TForm1.Create(nil);
-  try
-    Form1.OvcEditor.WordWrap := False;
-    Form1.OvcEditor.ScrollPastEnd := True;
-    for i := Low(remainders) to High(remainders) do begin
-      { Initialise the editor and add 'Content2'. }
-      Form1.OvcEditor.Clear;
-      for j := Low(content2) to High(content2) do
-        Form1.OvcEditor.AppendPara(PChar(content2[j]));
-      { Delete some text as defined in 'remainders'. }
-      with remainders[i] do
-        Form1.OvcEditor.SetSelection(l1,c1,l2,c2,true);
-      TPOvcEditor(Form1.OvcEditor).edRectSelect := True;
-      TPOvcEditor(Form1.OvcEditor).edDeleteSelection;
-      { check whether we have the predicted remainder }
-      Form1.OvcEditor.GetText(@P[0],High(P));
-      CheckEqualsString(remainders[i].s, P);
-    end;
-  finally
-    Form1.Free;
+  with FForm.OvcEditor do begin
+    WordWrap := False;
+    ScrollPastEnd := True;
+  end;
+  for i := Low(remainders) to High(remainders) do begin
+    { Initialise the editor and add 'Content2'. }
+    FForm.OvcEditor.Clear;
+    for j := Low(content2) to High(content2) do
+      FForm.OvcEditor.AppendPara(PChar(content2[j]));
+    { Delete some text as defined in 'remainders'. }
+    with remainders[i] do
+      FForm.OvcEditor.SetSelection(l1,c1,l2,c2,true);
+    TPOvcEditor(FForm.OvcEditor).edRectSelect := True;
+    TPOvcEditor(FForm.OvcEditor).edDeleteSelection;
+    { check whether we have the predicted remainder }
+    FForm.OvcEditor.GetText(@P[0],High(P));
+    CheckEqualsString(remainders[i].s, P);
   end;
 end;
 
@@ -278,36 +268,33 @@ end;
 
 procedure TTestOVCEdit.TestUndo;
 var
-  Form1: TForm1;
   s: string;
 const
   line = 'The quick brown fox jumps over the lazy fox';
 begin
-  Form1 := TForm1.Create(nil);
-  try
-    Form1.OvcEditor.AppendPara(line);
-    Form1.OvcEditor.AppendPara(line);
-    Form1.OvcEditor.AppendPara(line);
+  with FForm.OvcEditor do begin
+    Clear;
+    AppendPara(line);
+    AppendPara(line);
+    AppendPara(line);
     SetLength(s, 44);
-    s := Form1.OvcEditor.GetLine(1,@s[1],44);
+    s := GetLine(1,@s[1],44);
     CheckEqualsString(s, line);
 
-    Form1.OvcEditor.SetSelection(1,10,1,25,True);
-    Form1.OvcEditor.CutToClipboard;
-    Form1.OvcEditor.Undo;
+    SetSelection(1,10,1,25,True);
+    CutToClipboard;
+    Undo;
     SetLength(s, 44);
-    s := Form1.OvcEditor.GetLine(1,@s[1],44);
+    s := GetLine(1,@s[1],44);
     CheckEqualsString(s, line);
 
-    Form1.OvcEditor.SetSelection(1,10,2,10,True);
-    Form1.OvcEditor.CutToClipboard;
-    Form1.OvcEditor.Undo;
+    SetSelection(1,10,2,10,True);
+    CutToClipboard;
+    Undo;
     SetLength(s, 44);
-    s := Form1.OvcEditor.GetLine(1,@s[1],44);
+    s := GetLine(1,@s[1],44);
     { Fails in 4.07 (unicode) }
     CheckEqualsString(s, line);
-  finally
-    Form1.Free;
   end;
 end;
 
@@ -316,66 +303,60 @@ end;
 procedure TTestOVCEdit.TestsuggestEncoding;
 var
   SL       : TStringList;
-  Form1    : TForm1;
   TMPDir   : array[0..255] of Char;
   FileName : string;
 const
   line = 'The quick brown fox jumps over the lazy fox';
   unicodeline = 'АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЪЫЬ';
 begin
-  Form1 := TForm1.Create(nil);
+  { 1. suggestEncoding when editor ist empty }
+  CheckEqualsString(TEncoding.Default.EncodingName, FForm.OvcTextFileEditor.suggestEncoding.EncodingName);
+
+  { 2. suggestEncoding should suggest TEncoding.Default if there are no
+       characters with Ord(c)>255 in the text. }
+  FForm.OvcTextFileEditor.AppendPara(line);
+  FForm.OvcTextFileEditor.AppendPara(line);
+  CheckEqualsString(TEncoding.Default.EncodingName, FForm.OvcTextFileEditor.suggestEncoding.EncodingName);
+
+  { 3. suggestEncoding should suggest TEncoding.UTF8 otherwise }
+  FForm.OvcTextFileEditor.AppendPara(unicodeline);
+  CheckEqualsString(TEncoding.UTF8.EncodingName, FForm.OvcTextFileEditor.suggestEncoding.EncodingName);
+
+  { 4. suggestEncoding should (normally) suggest the encoding of the textfile that has
+       been read. }
+  GetTempPath(255,TMPDir);
+  FileName := TMPDir+'OrpheusTests.txt';
+  SL := TStringList.Create;
   try
-    { 1. suggestEncoding when editor ist empty }
-    CheckEqualsString(TEncoding.Default.EncodingName, Form1.OvcTextFileEditor.suggestEncoding.EncodingName);
+    { 4.1 ANSI-Textfile }
+    SL.Add(line);
+    SL.Add(unicodeline);
+    SL.SaveToFile(FileName,TEncoding.Default);
+    FForm.OvcTextFileEditor.LoadFromFile(FileName);
+    CheckEqualsString(TEncoding.Default.EncodingName, FForm.OvcTextFileEditor.suggestEncoding.EncodingName);
 
-    { 2. suggestEncoding should suggest TEncoding.Default if there are no
-         characters with Ord(c)>255 in the text. }
-    Form1.OvcTextFileEditor.AppendPara(line);
-    Form1.OvcTextFileEditor.AppendPara(line);
-    CheckEqualsString(TEncoding.Default.EncodingName, Form1.OvcTextFileEditor.suggestEncoding.EncodingName);
+    { 4.2 UTF8-Textfile }
+    SL.SaveToFile(FileName,TEncoding.UTF8);
+    FForm.OvcTextFileEditor.LoadFromFile(FileName);
+    CheckEqualsString(TEncoding.UTF8.EncodingName, FForm.OvcTextFileEditor.suggestEncoding.EncodingName);
 
-    { 3. suggestEncoding should suggest TEncoding.UTF8 otherwise }
-    Form1.OvcTextFileEditor.AppendPara(unicodeline);
-    CheckEqualsString(TEncoding.UTF8.EncodingName, Form1.OvcTextFileEditor.suggestEncoding.EncodingName);
-
-    { 4. suggestEncoding should (normally) suggest the encoding of the textfile that has
-         been read. }
-    GetTempPath(255,TMPDir);
-    FileName := TMPDir+'OrpheusTests.txt';
-    SL := TStringList.Create;
-    try
-      { 4.1 ANSI-Textfile }
-      SL.Add(line);
-      SL.Add(unicodeline);
-      SL.SaveToFile(FileName,TEncoding.Default);
-      Form1.OvcTextFileEditor.LoadFromFile(FileName);
-      CheckEqualsString(TEncoding.Default.EncodingName, Form1.OvcTextFileEditor.suggestEncoding.EncodingName);
-
-      { 4.2 UTF8-Textfile }
-      SL.SaveToFile(FileName,TEncoding.UTF8);
-      Form1.OvcTextFileEditor.LoadFromFile(FileName);
-      CheckEqualsString(TEncoding.UTF8.EncodingName, Form1.OvcTextFileEditor.suggestEncoding.EncodingName);
-
-      { 4.3 ANSI-Textfile with unicode characters added after loading }
-      SL.SaveToFile(FileName,TEncoding.Default);
-      Form1.OvcTextFileEditor.LoadFromFile(FileName);
-      Form1.OvcTextFileEditor.AppendPara(unicodeline);
-      CheckEqualsString(TEncoding.UTF8.EncodingName, Form1.OvcTextFileEditor.suggestEncoding.EncodingName);
-    finally
-      SL.Free;
-      DeleteFile(FileName)
-    end;
+    { 4.3 ANSI-Textfile with unicode characters added after loading }
+    SL.SaveToFile(FileName,TEncoding.Default);
+    FForm.OvcTextFileEditor.LoadFromFile(FileName);
+    FForm.OvcTextFileEditor.AppendPara(unicodeline);
+    CheckEqualsString(TEncoding.UTF8.EncodingName, FForm.OvcTextFileEditor.suggestEncoding.EncodingName);
   finally
-    Form1.Free;
+    SL.Free;
+    DeleteFile(FileName);
   end;
 end;
+
 {$ENDIF}
 
 
 procedure TTestOVCEdit.TestLoadFromFile;
 var
   SL          : TStringList;
-  Form1       : TForm1;
   TMPDir, Buf : array[0..255] of Char;
   FileName    : string;
 const
@@ -385,7 +366,6 @@ const
 {$ENDIF}
 begin
   SL    := nil;
-  Form1 := TForm1.Create(nil);
   GetTempPath(255,TMPDir);
   FileName := TMPDir+'OrpheusTests.txt';
   try
@@ -395,8 +375,8 @@ begin
     SL.Add(line);
     SL.Add(line);
     SL.SaveToFile(FileName);
-    Form1.OvcTextFileEditor.LoadFromFile(FileName);
-    Form1.OvcTextFileEditor.GetText(@Buf[0],SizeOf(Buf));
+    FForm.OvcTextFileEditor.LoadFromFile(FileName);
+    FForm.OvcTextFileEditor.GetText(@Buf[0],SizeOf(Buf));
     { OvcTextFileEditor puts an extra #13#10 at the end of the text.
       Let's call this a feature, not a bug... }
     CheckEqualsString(SL.Text+#13#10, Buf);
@@ -406,20 +386,19 @@ begin
     SL.Add(line);
     SL.Add(unicodeline);
     SL.SaveToFile(FileName,TEncoding.UTF8);
-    Form1.OvcTextFileEditor.LoadFromFile(FileName);
-    Form1.OvcTextFileEditor.GetText(@Buf[0],SizeOf(Buf));
+    FForm.OvcTextFileEditor.LoadFromFile(FileName);
+    FForm.OvcTextFileEditor.GetText(@Buf[0],SizeOf(Buf));
     CheckEqualsString(SL.Text+#13#10, Buf);
     { 3. Unicode Textfile }
     SL.Clear;
     SL.Add(line);
     SL.Add(unicodeline);
     SL.SaveToFile(FileName,TEncoding.Unicode);
-    Form1.OvcTextFileEditor.LoadFromFile(FileName);
-    Form1.OvcTextFileEditor.GetText(@Buf[0],SizeOf(Buf));
+    FForm.OvcTextFileEditor.LoadFromFile(FileName);
+    FForm.OvcTextFileEditor.GetText(@Buf[0],SizeOf(Buf));
     CheckEqualsString(SL.Text+#13#10, Buf);
 {$ENDIF}
   finally
-    Form1.Free;
     SL.Free;
     DeleteFile(FileName);
   end;
@@ -429,7 +408,6 @@ end;
 procedure TTestOVCEdit.TestSaveToFile;
 var
   SL          : TStringList;
-  Form1       : TForm1;
   TMPDir, Buf : array[0..255] of Char;
   FileName    : string;
 const
@@ -438,41 +416,40 @@ const
   unicodeline = 'Unicode: АБВГДЕЖЗИК';
 {$ENDIF}
 begin
-  SL    := nil;
-  Form1 := TForm1.Create(nil);
+  SL := nil;
   GetTempPath(255,TMPDir);
   FileName := TMPDir+'OrpheusTests.txt';
   try
     { 1. Ansi-Textfile }
     SL := TStringList.Create;
-    Form1.OvcTextFileEditor.AppendPara(line);
-    Form1.OvcTextFileEditor.AppendPara(line);
-    Form1.OvcTextFileEditor.SaveToFile(FileName);
+    FForm.OvcTextFileEditor.Clear;
+    FForm.OvcTextFileEditor.AppendPara(line);
+    FForm.OvcTextFileEditor.AppendPara(line);
+    FForm.OvcTextFileEditor.SaveToFile(FileName);
     SL.LoadFromFile(FileName{$IFDEF UNICODE},TEncoding.Default{$ENDIF});
-    Form1.OvcTextFileEditor.GetText(@Buf[0],SizeOf(Buf));
+    FForm.OvcTextFileEditor.GetText(@Buf[0],SizeOf(Buf));
     CheckEqualsString(SL.Text+#13#10, Buf);
     { 2. Ansi-Textfile containing <tab>-characters }
     SL := TStringList.Create;
-    Form1.OvcTextFileEditor.AppendPara(line+#9+line+#9);
-    Form1.OvcTextFileEditor.SaveToFile(FileName);
+    FForm.OvcTextFileEditor.AppendPara(line+#9+line+#9);
+    FForm.OvcTextFileEditor.SaveToFile(FileName);
     SL.LoadFromFile(FileName{$IFDEF UNICODE},TEncoding.Default{$ENDIF});
-    Form1.OvcTextFileEditor.GetText(@Buf[0],SizeOf(Buf));
+    FForm.OvcTextFileEditor.GetText(@Buf[0],SizeOf(Buf));
     CheckEqualsString(SL.Text+#13#10, Buf);
 {$IFDEF UNICODE}
     { 3. UTF-8 Textfile }
-    Form1.OvcTextFileEditor.AppendPara(unicodeline);
-    Form1.OvcTextFileEditor.SaveToFile(FileName);
+    FForm.OvcTextFileEditor.AppendPara(unicodeline);
+    FForm.OvcTextFileEditor.SaveToFile(FileName);
     SL.LoadFromFile(FileName,TEncoding.UTF8);
-    Form1.OvcTextFileEditor.GetText(@Buf[0],SizeOf(Buf));
+    FForm.OvcTextFileEditor.GetText(@Buf[0],SizeOf(Buf));
     CheckEqualsString(SL.Text+#13#10, Buf);
     { 4. Unicode Textfile }
-    Form1.OvcTextFileEditor.SaveToFile(FileName,TEncoding.Unicode);
+    FForm.OvcTextFileEditor.SaveToFile(FileName,TEncoding.Unicode);
     SL.LoadFromFile(FileName,TEncoding.Unicode);
-    Form1.OvcTextFileEditor.GetText(@Buf[0],SizeOf(Buf));
+    FForm.OvcTextFileEditor.GetText(@Buf[0],SizeOf(Buf));
     CheckEqualsString(SL.Text+#13#10, Buf);
 {$ENDIF}
   finally
-    Form1.Free;
     SL.Free;
     DeleteFile(FileName);
   end;
@@ -543,27 +520,21 @@ end;
   undo-buffer }
 
 procedure TTestOVCEdit.TestUndoBufferFail;
-var
-  Form1: TForm1;
 begin
-  Form1 := TForm1.Create(nil);
-  try
-    with Form1.OvcEditor do begin
-      InsertMode := True;
-      Perform(WM_char, 65, 0);
-      Perform(WM_char, 65, 0);
-      Perform(WM_char, 65, 0);
-      Perform(WM_KEYDOWN, 8, 0); // delete third 'A'
-      SetSelection(1,1,1,1,false);
-      InsertMode := False;
-      Perform(WM_char, 66, 0);  // replace first 'A'
-      Undo;
-      Undo;
-    end;
-    CheckEqualsString('AAA',Form1.OvcEditor.GetCurrentWord);
-  finally
-    Form1.Free;
+  with FForm.OvcEditor do begin
+    Clear;
+    InsertMode := True;
+    Perform(WM_char, 65, 0);
+    Perform(WM_char, 65, 0);
+    Perform(WM_char, 65, 0);
+    Perform(WM_KEYDOWN, 8, 0); // delete third 'A'
+    SetSelection(1,1,1,1,false);
+    InsertMode := False;
+    Perform(WM_char, 66, 0);  // replace first 'A'
+    Undo;
+    Undo;
   end;
+  CheckEqualsString('AAA',FForm.OvcEditor.GetCurrentWord);
 end;
 
 
@@ -583,7 +554,6 @@ const
      '+-------+-------+-------+-------+-------+-------+');
 var
   i, c1, c2, l1, l2: Integer;
-  Form1: TForm1;
   Editor: TPOvcEditor;
   UBuf: TOvcUndoBuffer;
   extBuffer: array[0..10000] of Byte;
@@ -609,59 +579,56 @@ begin
     need to set RandSeed to a fix value. }
   RandSeed := 42;
   { create the editor an insert the test-content }
-  Form1 := TForm1.Create(nil);
-  Editor := TPOvcEditor(Form1.OvcEditor);
+  Editor := TPOvcEditor(FForm.OvcEditor);
 
+  { We want to make sure that the undo-buffer works fine; due to the implementation, there
+    is a certain risk that TOvcUndoBuffer accesses memory "outside" the buffer. We try to
+    detect these flaws by placing some bytes before an behind the actual buffer. }
+  UBuf := Editor.edParas.UndoBuffer;
+  for i := 0 to 7 do begin
+    extBuffer[i] := $AA;
+    extBuffer[UBuf.BufSize-i+15] := $AA;
+  end;
+  orgBuffer := UBuf.Buffer;
+  UBuf.Buffer := @extBuffer[8];
+  UBuf.Last := UBuf.Buffer;
+
+  for i := Low(Content) to High(Content) do
+    Editor.AppendPara(PChar(Content[i]));
+
+  Editor.BeginUpdate;
   try
-    { We want to make sure that the undo-buffer works fine; due to the implementation, there
-      is a certain risk that TOvcUndoBuffer accesses memory "outside" the buffer. We try to
-      detect these flaws by placing some bytes before an behind the actual buffer. }
-    UBuf := Editor.edParas.UndoBuffer;
-    for i := 0 to 7 do begin
-      extBuffer[i] := $AA;
-      extBuffer[UBuf.BufSize-i+15] := $AA;
-    end;
-    orgBuffer := UBuf.Buffer;
-    UBuf.Buffer := @extBuffer[8];
-    UBuf.Last := UBuf.Buffer;
-
-    for i := Low(Content) to High(Content) do
-      Editor.AppendPara(PChar(Content[i]));
-
-    try
-      for i := 1 to 1000 do begin
-        l1 := Random(Editor.LineCount) + 1;
-        c1 := Random(50) + 1;
-        l2 := l1 + Random(100);
-        c2 := Random(50) + 1;
-        Editor.edRectSelect := Random(2)=0;
-        Editor.SetSelection(l1, c1, l2, c2, true);
-        Editor.CopyToClipboard;
-        l1 := Random(Editor.LineCount) + 1;
-        c1 := Random(40) + 1;
-        l2 := Random(Editor.LineCount) + 1;
-        c2 := Random(40) + 1;
-        Editor.SetSelection(l1, c1, l2, c2, true);
-        Editor.PasteFromClipboard;
+    for i := 1 to 1000 do begin
+      l1 := Random(Editor.LineCount) + 1;
+      c1 := Random(50) + 1;
+      l2 := l1 + Random(100);
+      c2 := Random(50) + 1;
+      Editor.edRectSelect := Random(2)=0;
+      Editor.SetSelection(l1, c1, l2, c2, true);
+      Editor.CopyToClipboard;
+      l1 := Random(Editor.LineCount) + 1;
+      c1 := Random(40) + 1;
+      l2 := Random(Editor.LineCount) + 1;
+      c2 := Random(40) + 1;
+      Editor.SetSelection(l1, c1, l2, c2, true);
+      Editor.PasteFromClipboard;
+      CheckTrue(TestUndoBufferExt,
+                Format('Undobuffer corrupt after copy/paste #%d', [i]));
+      if i mod 4 = 0 then begin
+        Editor.Undo;
+        Editor.Undo;
+        Editor.Undo;
+        Editor.Undo;
         CheckTrue(TestUndoBufferExt,
-                  Format('Undobuffer corrupt after copy/paste #%d', [i]));
-        if i mod 4 = 0 then begin
-          Editor.Undo;
-          Editor.Undo;
-          Editor.Undo;
-          Editor.Undo;
-          CheckTrue(TestUndoBufferExt,
-                    Format('Undobuffer corrupt after undo following copy/paste #%d', [i]));
-        end;
+                  Format('Undobuffer corrupt after undo following copy/paste #%d', [i]));
       end;
-
-    finally
-      UBuf.Last := PUndoRec(Cardinal(orgBuffer) + (Cardinal(UBuf.Last) - Cardinal(UBuf.Last)));
-      UBuf.Buffer := orgBuffer;
-      Move(extBuffer[8], UBuf.Buffer^, UBuf.BufSize);
     end;
+
   finally
-    Form1.Free;
+    UBuf.Last := PUndoRec(Cardinal(orgBuffer) + (Cardinal(UBuf.Last) - Cardinal(UBuf.Last)));
+    UBuf.Buffer := orgBuffer;
+    Move(extBuffer[8], UBuf.Buffer^, UBuf.BufSize);
+    Editor.EndUpdate;
   end;
 end;
 
@@ -671,7 +638,6 @@ end;
 procedure TTestOVCEdit.TestUndoBufferTyping;
 var
   l1, c1, ch, i: Integer;
-  Form1: TForm1;
   Editor: TPOvcEditor;
   UBuf: TOvcUndoBuffer;
   extBuffer: array[0..10000] of Byte;
@@ -696,52 +662,48 @@ begin
   { To make sure we always use the same sequence of copy & paste operations, we
     need to set RandSeed to a fix value. }
   RandSeed := 42;
-  { create the editor an insert the test-content }
-  Form1 := TForm1.Create(nil);
-  Editor := TPOvcEditor(Form1.OvcEditor);
+  Editor := TPOvcEditor(FForm.OvcEditor);
 
+  { We want to make sure that the undo-buffer works fine; due to the implementation, there
+    is a certain risk that TOvcUndoBuffer accesses memory "outside" the buffer. We try to
+    detect these flaws by placing some bytes before an behind the actual buffer. }
+  UBuf := Editor.edParas.UndoBuffer;
+  for i := 0 to 7 do begin
+    extBuffer[i] := $AA;
+    extBuffer[UBuf.BufSize-i+15] := $AA;
+  end;
+  orgBuffer := UBuf.Buffer;
+  UBuf.Buffer := @extBuffer[8];
+  UBuf.Last := UBuf.Buffer;
+
+  Editor.BeginUpdate;
   try
-    { We want to make sure that the undo-buffer works fine; due to the implementation, there
-      is a certain risk that TOvcUndoBuffer accesses memory "outside" the buffer. We try to
-      detect these flaws by placing some bytes before an behind the actual buffer. }
-    UBuf := Editor.edParas.UndoBuffer;
-    for i := 0 to 7 do begin
-      extBuffer[i] := $AA;
-      extBuffer[UBuf.BufSize-i+15] := $AA;
-    end;
-    orgBuffer := UBuf.Buffer;
-    UBuf.Buffer := @extBuffer[8];
-    UBuf.Last := UBuf.Buffer;
-
-    try
-      for i := 0 to 10000 do begin
-        if Random(10)=0 then begin
-          ch := 32;
-          Editor.perform(WM_char, ch, 0);
-        end else if Random(80)=0 then begin
-          ch := 13;
-          Editor.perform(WM_keydown, ch, 0);
-        end else begin
-          ch := Random(190);
-          if ch<=93 then ch := ch + 33 else ch := ch + 66;
-          Editor.perform(WM_char, ch, 0);
-        end;
-        if ch mod 200 = 0 then begin
-          l1 := Random(Editor.LineCount) + 1;
-          c1 := Random(50) + 1;
-          Editor.SetSelection(l1, c1, l1, c1, true);
-        end;
-        CheckTrue(TestUndoBufferExt,
-                  Format('Undobuffer corrupt after loop #%d', [i]));
+    for i := 0 to 10000 do begin
+      if Random(10)=0 then begin
+        ch := 32;
+        Editor.perform(WM_char, ch, 0);
+      end else if Random(80)=0 then begin
+        ch := 13;
+        Editor.perform(WM_keydown, ch, 0);
+      end else begin
+        ch := Random(190);
+        if ch<=93 then ch := ch + 33 else ch := ch + 66;
+        Editor.perform(WM_char, ch, 0);
       end;
-
-    finally
-      UBuf.Last := PUndoRec(Cardinal(orgBuffer) + (Cardinal(UBuf.Last) - Cardinal(UBuf.Last)));
-      UBuf.Buffer := orgBuffer;
-      Move(extBuffer[8], UBuf.Buffer^, UBuf.BufSize);
+      if ch mod 200 = 0 then begin
+        l1 := Random(Editor.LineCount) + 1;
+        c1 := Random(50) + 1;
+        Editor.SetSelection(l1, c1, l1, c1, true);
+      end;
+      CheckTrue(TestUndoBufferExt,
+                Format('Undobuffer corrupt after loop #%d', [i]));
     end;
+
   finally
-    Form1.Free;
+    UBuf.Last := PUndoRec(Cardinal(orgBuffer) + (Cardinal(UBuf.Last) - Cardinal(UBuf.Last)));
+    UBuf.Buffer := orgBuffer;
+    Move(extBuffer[8], UBuf.Buffer^, UBuf.BufSize);
+    Editor.EndUpdate;
   end;
 end;
 
@@ -750,25 +712,22 @@ end;
   to another. }
 
 procedure TTestOVCEdit.TestAttachWordwrapBug;
-var
-  Form1: TForm1;
 begin
-  { create the editor an insert the test-content }
-  Form1 := TForm1.Create(nil);
-  try
-    Form1.show;
-    Form1.OvcEditor.WordWrap := True;
-    Form1.OvcEditor.WrapToWindow := True;
-    Form1.OvcEditor.Align := alTop;
-    Form1.OvcEditor.RightMargin := 5;
-    Form1.OvcTextFileEditor.WordWrap := True;
-    Form1.OvcTextFileEditor.WrapToWindow := True;
-    Form1.OvcTextFileEditor.Align := alClient;
-    Form1.OvcTextFileEditor.RightMargin := 20;
-    { this will crash the application (up to rev 198) due to an infinite recursion }
-    Form1.OvcEditor.Attach(Form1.OvcTextFileEditor);
-  finally
-    Form1.Free;
+  with FForm do begin
+    try
+      OvcEditor.WordWrap := True;
+      OvcEditor.WrapToWindow := True;
+      OvcEditor.Align := alTop;
+      OvcEditor.RightMargin := 5;
+      OvcTextFileEditor.WordWrap := True;
+      OvcTextFileEditor.WrapToWindow := True;
+      OvcTextFileEditor.Align := alClient;
+      OvcTextFileEditor.RightMargin := 20;
+      { this will crash the application (up to rev 198) due to an infinite recursion }
+      OvcEditor.Attach(OvcTextFileEditor);
+    finally
+      OvcEditor.Attach(nil);
+    end;
   end;
 end;
 
@@ -777,20 +736,50 @@ end;
 
 procedure TTestOVCEdit.TestDisplayLastLineBug;
 var
-  Form1: TForm1;
   Editor: TPOvcEditor;
 begin
-  { create the editor an insert the test-content }
-  Form1 := TForm1.Create(nil);
-  Editor := TPOvcEditor(Form1.OvcEditor);
-  try
-    Editor.edCalcRowColInfo;
-    Editor.ClientHeight := 3*Editor.edGetRowHt + 1;
-    { There is enough space for 3 rows... Let's see what OvcEditor thinks... }
-    CheckEquals(3, Editor.edRows);
-  finally
-    Form1.Free;
+  Editor := TPOvcEditor(FForm.OvcEditor);
+  Editor.edCalcRowColInfo;
+  Editor.ClientHeight := 3*Editor.edGetRowHt + 1;
+  { There is enough space for 3 rows... Let's see what OvcEditor thinks... }
+  CheckEquals(3, Editor.edRows);
+end;
+
+
+{ Test for the new 'Text' property }
+
+procedure TTestOVCEdit.TestTextproperty;
+const
+  cSomeStrings: array[0..5] of string =
+    ('basic test',
+     '',
+     'x',
+     '123456789'#13#10'123456789'#13#10'123456789'#13#10,
+     #13#10,
+     #9'asdfghjklöä'#13#10#13#10#13#10#9#9#9);
+var
+  i: Integer;
+begin
+  for i := 0 to High(cSomeStrings) do begin
+    FForm.OvcEditor.Text := cSomeStrings[i];
+    CheckEquals(cSomeStrings[i], FForm.OvcEditor.Text, Format('Test #%d failed',[i]));
   end;
+end;
+
+
+procedure TTestOVCEdit.SetUp;
+begin
+  inherited SetUp;
+  FForm := TForm1.Create(nil);
+  FForm.Show;
+  Application.ProcessMessages;
+end;
+
+
+procedure TTestOVCEdit.TearDown;
+begin
+  FForm.Free;
+  inherited TearDown;
 end;
 
 

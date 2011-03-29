@@ -18,24 +18,22 @@ object OvcfrmTransfer: TOvcfrmTransfer
   PixelsPerInch = 96
   TextHeight = 13
   object btnClose: TBitBtn
-    Left = 450
+    Left = 457
     Top = 312
     Width = 75
     Height = 25
     Cancel = True
     Caption = '&Close'
-    DoubleBuffered = True
     ModalResult = 2
-    ParentDoubleBuffered = False
-    Spacing = -1
     TabOrder = 2
+    Spacing = -1
     IsControl = True
   end
   object NB: TOvcNotebook
-    Left = 19
-    Top = 17
-    Width = 513
-    Height = 289
+    Left = 12
+    Top = 12
+    Width = 520
+    Height = 294
     Hint = 'Copy all to clipboard'
     ActiveTabFont.Charset = DEFAULT_CHARSET
     ActiveTabFont.Color = clWindowText
@@ -61,14 +59,14 @@ object OvcfrmTransfer: TOvcfrmTransfer
         Left = 296
         Top = 24
         Width = 185
-        Height = 105
+        Height = 94
         Caption = 'Generate &Options'
         Ctl3D = True
         ParentCtl3D = False
         TabOrder = 0
         object cbTransfer: TCheckBox
           Left = 16
-          Top = 24
+          Top = 20
           Width = 161
           Height = 17
           Caption = 'Transfer record'
@@ -79,7 +77,7 @@ object OvcfrmTransfer: TOvcfrmTransfer
         end
         object cbInitialize: TCheckBox
           Left = 16
-          Top = 48
+          Top = 42
           Width = 161
           Height = 17
           Caption = 'Initialization method'
@@ -90,7 +88,7 @@ object OvcfrmTransfer: TOvcfrmTransfer
         end
         object cbSample: TCheckBox
           Left = 16
-          Top = 72
+          Top = 64
           Width = 161
           Height = 17
           Caption = 'Sample transfer calls'
@@ -102,7 +100,7 @@ object OvcfrmTransfer: TOvcfrmTransfer
       end
       object btnClearAll: TButton
         Left = 152
-        Top = 216
+        Top = 232
         Width = 75
         Height = 25
         Caption = 'Clear all'
@@ -110,31 +108,19 @@ object OvcfrmTransfer: TOvcfrmTransfer
         OnClick = btnClearAllClick
       end
       object btnSelectAll: TButton
-        Left = 48
-        Top = 216
+        Left = 46
+        Top = 232
         Width = 75
         Height = 25
         Caption = 'Select all'
         TabOrder = 2
         OnClick = btnSelectAllClick
       end
-      object btnGenerate: TBitBtn
-        Left = 296
-        Top = 152
-        Width = 185
-        Height = 25
-        Caption = '&Generate source code'
-        DoubleBuffered = True
-        Enabled = False
-        ParentDoubleBuffered = False
-        TabOrder = 3
-        OnClick = btnGenerateClick
-      end
       object lbAllComponents: TOvcListBox
         Left = 8
         Top = 24
         Width = 265
-        Height = 183
+        Height = 197
         Controller = OvcController1
         Ctl3D = True
         Font.Charset = DEFAULT_CHARSET
@@ -147,8 +133,51 @@ object OvcfrmTransfer: TOvcfrmTransfer
         MultiSelect = True
         ParentCtl3D = False
         ParentFont = False
-        TabOrder = 4
+        TabOrder = 3
         OnClick = SelectionChange
+      end
+      object gbStringOptions: TGroupBox
+        Left = 296
+        Top = 127
+        Width = 185
+        Height = 94
+        Caption = 'Method for storing strings'
+        TabOrder = 4
+        object rbString: TRadioButton
+          Left = 16
+          Top = 20
+          Width = 113
+          Height = 17
+          Caption = 'Use string'
+          Checked = True
+          TabOrder = 0
+          TabStop = True
+        end
+        object rbPChar: TRadioButton
+          Left = 16
+          Top = 42
+          Width = 113
+          Height = 17
+          Caption = 'Use array of Char'
+          TabOrder = 1
+        end
+        object rbShortString: TRadioButton
+          Left = 16
+          Top = 64
+          Width = 113
+          Height = 17
+          Caption = 'Use ShortString'
+          TabOrder = 2
+        end
+      end
+      object btnGenerate: TButton
+        Left = 296
+        Top = 232
+        Width = 185
+        Height = 25
+        Caption = 'Generate source code'
+        TabOrder = 5
+        OnClick = btnGenerateClick
       end
     end
     object Page1: TOvcTabPage
@@ -167,8 +196,8 @@ object OvcfrmTransfer: TOvcfrmTransfer
       end
       object memoTransfer: TMemo
         Left = 0
-        Top = 67
-        Width = 510
+        Top = -200
+        Width = 0
         Height = 200
         Align = alBottom
         Ctl3D = True
@@ -181,8 +210,6 @@ object OvcfrmTransfer: TOvcfrmTransfer
         ParentFont = False
         ScrollBars = ssBoth
         TabOrder = 0
-        ExplicitTop = -200
-        ExplicitWidth = 0
       end
     end
     object Page2: TOvcTabPage
@@ -193,16 +220,24 @@ object OvcfrmTransfer: TOvcfrmTransfer
         Left = 8
         Top = 8
         Width = 473
-        Height = 33
+        Height = 16
         AutoSize = False
         Caption = 
           'Copy the method header to the form'#39's "private" section and place' +
-          ' the method declaration in the implementation section.'
+          ' the method declaration'
+      end
+      object Label4: TLabel
+        Left = 8
+        Top = 24
+        Width = 473
+        Height = 16
+        AutoSize = False
+        Caption = 'in the implementation section.'
       end
       object memoInitialize: TMemo
         Left = 0
-        Top = 67
-        Width = 510
+        Top = -200
+        Width = 0
         Height = 200
         Align = alBottom
         Ctl3D = True
@@ -215,8 +250,6 @@ object OvcfrmTransfer: TOvcfrmTransfer
         ParentFont = False
         ScrollBars = ssBoth
         TabOrder = 0
-        ExplicitTop = -200
-        ExplicitWidth = 0
       end
     end
     object Page3: TOvcTabPage
@@ -235,8 +268,8 @@ object OvcfrmTransfer: TOvcfrmTransfer
       end
       object memoSample: TMemo
         Left = 0
-        Top = 67
-        Width = 510
+        Top = -200
+        Width = 0
         Height = 200
         Align = alBottom
         Ctl3D = True
@@ -249,8 +282,6 @@ object OvcfrmTransfer: TOvcfrmTransfer
         ParentFont = False
         ScrollBars = ssBoth
         TabOrder = 0
-        ExplicitTop = -200
-        ExplicitWidth = 0
       end
     end
   end
@@ -260,9 +291,7 @@ object OvcfrmTransfer: TOvcfrmTransfer
     Width = 329
     Height = 25
     Caption = 'Copy all to clipboard'
-    DoubleBuffered = True
     Enabled = False
-    ParentDoubleBuffered = False
     TabOrder = 1
     OnClick = btnCopyToClipboardClick
   end

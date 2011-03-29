@@ -240,6 +240,7 @@ type
     function GetParaLength(ParaNum : LongInt) : Integer;
     function GetPrevEditor : TOvcCustomEditor;
     function GetStringLine(LineNum : LongInt) : string;
+    function GetTextString : string;
     function GetTopLine : LongInt;
     function GetVisibleColumns : Integer;
     function GetVisibleRows : Integer;
@@ -269,6 +270,7 @@ type
 
     procedure SetTabSize(Value : Byte);
     procedure SetTabType(Value : TTabType);
+    procedure SetTextString(const Value : string);
     procedure SetTopLine(Value : LongInt);
     procedure SetUndoBufferSize(Value : Word);
     procedure SetWordDelimiters(const Value : string);
@@ -727,6 +729,10 @@ type
 
     property TextLength : LongInt
       read GetTextLen;
+
+    property Text : string
+      read GetTextString
+      write SetTextString;
 
     property TopLine : LongInt
       read GetTopLine
@@ -4567,6 +4573,31 @@ begin
   Result := GetText(Buffer, BufSize);
 end;
 
+
+function TOvcCustomEditor.GetTextString : string;
+  {-return the content of the editor as a string}
+var
+  size: Integer;
+  buf: PChar;
+begin
+  result := '';
+  { GetText will return an extra #13#10, so we need a little extra space. }
+  size := TextLength + 3;
+  if size>3 then begin
+    GetMem(buf, size*SizeOf(Char));
+    try
+      size := GetText(buf, size);
+      { get rid of the extra #13#10... }
+      if (size>=2) and (buf[size-2]=#13) and (buf[size-1]=#10) then
+        buf[size-2] := #0;
+      result := buf;
+    finally
+      FreeMem(buf);
+    end;
+  end;
+end;
+
+
 function TOvcCustomEditor.GetTextLen : LongInt;
   {-get the total number of characters of text}
 begin
@@ -5838,10 +5869,17 @@ end;
 
 procedure TOvcCustomEditor.SetTextBuf(Buffer : PChar);
   {-set text of editor to Buffer}
-
 begin
   SetText(Buffer);
 end;
+
+
+procedure TOvcCustomEditor.SetTextString(const Value : string);
+  {-set text of editor to Buffer}
+begin
+  SetText(@Value[1]);
+end;
+
 
 procedure TOvcCustomEditor.SetTopLine(Value : LongInt);
   {-set the index of the first visible line}

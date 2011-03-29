@@ -2163,7 +2163,7 @@ var
   StartRow   : Integer;
   TabsUsed   : Integer;
   PC         : TColor;
-  {$IFDEF VERSION7}
+  {$IFDEF VERSION2010}
   CR: TRect;
   Details: TThemedElementDetails;
   {$ENDIF}
@@ -3251,7 +3251,7 @@ var
   StartRow   : Integer;
   TabsUsed   : Integer;
   PC         : TColor;
-  {$IFDEF VERSION7}
+  {$IFDEF VERSION2010}
   CR: TRect;
   Details: TThemedElementDetails;
   {$ENDIF}

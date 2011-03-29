@@ -162,7 +162,7 @@ uses AdrBook2;
 const
   StateError = oeCustomError + 1;
   MaxStates = 51;
-  StateAbbrevs : array[1..MaxStates] of string[2] = (
+  StateAbbrevs : array[1..MaxStates] of string = (
     {01} 'AK', {02} 'AL', {03} 'AR', {04} 'AZ', {05} 'CA', {06} 'CO',
     {07} 'CT', {08} 'DC', {09} 'DE', {10} 'FL', {11} 'GA', {12} 'HI',
     {13} 'IA', {14} 'ID', {15} 'IL', {16} 'IN', {17} 'KS', {18} 'KY',
@@ -370,12 +370,16 @@ begin
         mtInformation, [mbOK, mbCancel], 0) = mrOK;
         if AllowChange then RecState := rsDefault;
     end else begin
-      TransferFromForm;
-      case RecState of
-        rsEdit : UpdateRecord;
-        rsNew  : AddRecord;
+      if homephonefield.efValidateField<>0 then begin
+        AllowChange := False;
+      end else begin
+        TransferFromForm;
+        case RecState of
+          rsEdit : UpdateRecord;
+          rsNew  : AddRecord;
+        end;
+        OvcVirtualListbox1.Repaint;
       end;
-      OvcVirtualListbox1.Repaint;
     end;
   end;
   if OvcNotebook1.PageIndex = 0 then begin
@@ -451,44 +455,37 @@ begin
 end;
 
 procedure TAddrForm.TransferFromForm;
-var
-  Buf : array[0..255] of char;
-  BufSize : word;
 begin
-  OvcTransfer1.TransferFromForm([LastNameField,
-                                 FirstNameField,
-                                 CompanyField,
-                                 StreetField,
-                                 CityField,
-                                 StateField,
-                                 ZipField,
-                                 HomePhoneField,
-                                 WorkPhoneField,
-                                 BirthdayField,
-                                 AnniversaryField], TR);
-  BufSize := OvcEditor1.GetText(Buf, SizeOf(Buf));
-  { Strip off final CR/LF that the editor adds }
-  if Word(Pointer(@Buf[BufSize-3])^) = $0A0D then Buf[BufSize-3] := #0;
-  TR.Memo := StrPas(Buf);
+  OvcTransfer1.TransferFromFormS([LastNameField,
+                                  FirstNameField,
+                                  CompanyField,
+                                  StreetField,
+                                  CityField,
+                                  StateField,
+                                  ZipField,
+                                  HomePhoneField,
+                                  WorkPhoneField,
+                                  BirthdayField,
+                                  AnniversaryField,
+                                  OvcEditor1], TR);
 end;
 
 procedure TAddrForm.TransferToForm;
-var
-  Buf : array[0..255] of char;
 begin
   FlexEdit1.Strings.Clear;
-  FlexEdit1.Editlines.MaxLines := 8;
-  OvcTransfer1.TransferToForm([LastNameField,
-                               FirstNameField,
-                               CompanyField,
-                               StreetField,
-                               CityField,
-                               StateField,
-                               ZipField,
-                               HomePhoneField,
-                               WorkPhoneField,
-                               BirthdayField,
-                               AnniversaryField], TR);
+  FlexEdit1.Editlines.MaxLines := 10;
+  OvcTransfer1.TransferToFormS([LastNameField,
+                                FirstNameField,
+                                CompanyField,
+                                StreetField,
+                                CityField,
+                                StateField,
+                                ZipField,
+                                HomePhoneField,
+                                WorkPhoneField,
+                                BirthdayField,
+                                AnniversaryField,
+                                OvcEditor1], TR);
 
   FlexEdit1.Strings.Add(LastNameField.Text + ', ' + FirstNameField.Text);
   if CompanyField.Text <> '' then
@@ -500,7 +497,7 @@ begin
       + ZipField.Text);
 
   if HomePhoneField.Text <> '' then
-    FlexEdit1.Strings.Add('Home Phone: ' + HomePhoneFIeld.Text);
+    FlexEdit1.Strings.Add('Home Phone: ' + HomePhoneField.Text);
   if WorkPhoneField.Text <> '' then
     FlexEdit1.Strings.Add('WorkPhone: ' + WorkPhoneField.Text);
   if BirthdayField.Text <> '' then
@@ -511,13 +508,6 @@ begin
   FlexEdit1.Editlines.MaxLines := FlexEdit1.Strings.Count;
   FlexEdit1.Editlines.MouseOverLines := FlexEdit1.Strings.Count;
   FlexEdit1.Editlines.FocusedLines := FlexEdit1.Strings.Count;
-
-  if TR.Memo = '' then
-    Buf[0] := #0
-  else
-    StrPCopy(Buf, TR.Memo);
-
-  OvcEditor1.SetText(Buf);
 end;
 
 procedure TAddrForm.UpdateMemoLabel;
@@ -540,7 +530,7 @@ end;
 procedure TAddrForm.OvcSpinner1Click(Sender: TObject; State: TOvcSpinState;
   Delta: Double; Wrap: Boolean);
 var
-  CurState : string[2];
+  CurState : string;
   I : Integer;
 begin
   { Get the current value of the field }
@@ -569,7 +559,7 @@ end;
 
 procedure TAddrForm.StateFieldUserCommand(Sender: TObject; Command: Word);
 var
-  CurState : string[2];
+  CurState : string;
   I : Integer;
 begin
   { Get the current value of the field }
@@ -599,7 +589,7 @@ end;
 procedure TAddrForm.StateFieldUserValidation(Sender: TObject;
   var ErrorCode: Word);
 var
-  CurState : string[2];
+  CurState : string;
 begin
   if ErrorCode <> 0 then Exit;
   CurState := StateField.AsString;

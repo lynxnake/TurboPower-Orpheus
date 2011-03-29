@@ -218,8 +218,6 @@ type
     procedure efWriteRangeHi(Stream : TStream);
     procedure efWriteRangeLo(Stream : TStream);
 
-
-
     {VCL control methods}
     procedure CMCtl3DChanged(var Msg : TMessage);
       message CM_CTL3DCHANGED;
@@ -2966,10 +2964,14 @@ begin
 end;
 
 function TOvcBaseEntryField.GetAsDateTime : TDateTime;
-  {-returns the field value as a Delphi DateTime Value}
+  {-returns the field value as a Delphi DateTime Value
+
+   -Changes:
+    03/2011 AB: Added support for TOvcPictureField with DataType=pftDateTime }
 var
-  D   : TStDate;
-  T   : TStTime;
+  D  : TStDate;
+  T  : TStTime;
+  DT : TDateTime;
 begin
   case (efDataType mod fcpDivisor) of
     fsubDate :
@@ -2987,6 +2989,14 @@ begin
           Result := 0
         else
           Result := StTimeToDateTime(T);
+      end;
+    fsubDouble : { TDateTime }
+      begin
+        FLastError := GetValue(DT);
+        if FLastError <> 0 then
+          Result := 0
+        else
+          Result := DT;
       end;
   else
     raise EInvalidDataType.Create;
@@ -3718,7 +3728,10 @@ begin
 end;
 
 procedure TOvcBaseEntryField.SetAsDateTime(Value : TDateTime);
-  {-sets the field value to a Delphi DateTime value}
+  {-sets the field value to a Delphi DateTime value
+
+   -Changes:
+    03/2011 AB: Added support for TOvcPictureField with DataType=pftDateTime }
 var
   D     : TStDate;
   T     : TStTime;
@@ -3750,6 +3763,10 @@ begin
         if (T <> 0) and (T = DateTimeToStTime(BadTime)) then
           T := BadTime;
         SetValue(T);
+      end;
+    fsubDouble : { = TDateTime }
+      begin
+        SetValue(Value);
       end;
   else
     raise EInvalidDataType.Create;

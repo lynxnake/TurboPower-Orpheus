@@ -118,10 +118,13 @@ type
     procedure SetCurrencyRtStr(const Value : string);
 
     {internal methods}
+    procedure isExtractFromPictureEx(Picture, S : PChar; Ch : Char;
+              var I : Integer; Blank, Default : Integer; ExCh : Char);
     procedure isExtractFromPicture(Picture, S : PChar; Ch : Char;
               var I : Integer; Blank, Default : Integer);
     procedure isIntlWndProc(var Msg : TMessage);
     function isMaskCharCount(P : PChar; MC : Char) : Word;
+    procedure isMergeIntoPictureEx(Picture : PChar; Ch : Char; I : Integer; ExCh : Char);
     procedure isMergeIntoPicture(Picture : PChar; Ch : Char; I : Integer);
     procedure isMergePictureSt(Picture, P : PChar; MC : Char; SP : PChar);
     procedure isPackResult(Picture, S : PChar);
@@ -157,6 +160,8 @@ type
       Pack : Boolean) : PChar;
   {.Z-}
       {-convert Julian to a string of the form indicated by Picture}
+    function DateTimeToDatePChar(Dest : PChar; Picture : PChar;
+      DT : TDateTime; Pack : Boolean) : PChar;
 
     function DateStringToDMY(const Picture, S : string; var Day, Month, Year : Integer;
       Epoch : Integer) : Boolean;
@@ -484,6 +489,15 @@ begin
     {merge the month, day, and year into the picture}
     Result := DMYtoDatePChar(Dest, Picture, Day, Month, Year, Pack, 0);
   end;
+end;
+
+function TOvcIntlSup.DateTimeToDatePChar(Dest : PChar; Picture : PChar;
+         DT : TDateTime; Pack : Boolean) : PChar;
+  {-convert DateTime to a string of the form indicated by Picture}
+begin
+  Move(Picture[0], Dest[0], (StrLen(Picture)+1) * SizeOf(Char));
+  TimeToTimePChar(Dest, Picture, DateTimeToStTime(DT), False);
+  result := DateToDatePChar(Dest, Dest, DateTimeToStDate(DT), Pack);
 end;
 
 function TOvcIntlSup.DayOfWeekToString(WeekDay : TDayType) : string;
@@ -899,13 +913,16 @@ begin
       Result := DefWindowProc(intlHandle, Msg, wParam, lParam);
 end;
 
-procedure TOvcIntlSup.isExtractFromPicture(Picture, S : PChar;
+procedure TOvcIntlSup.isExtractFromPictureEx(Picture, S : PChar;
                              Ch : Char; var I : Integer;
-                             Blank, Default : Integer);
+                             Blank, Default : Integer; ExCh : Char);
   {-extract the value of the subfield specified by Ch from S and return in
     I. I will be set to -1 in case of an error, Blank if the subfield exists
     in Picture but is empty, Default if the subfield doesn't exist in
-    Picture.}
+    Picture.
+
+   -Changes:
+    03/2011 AB: new parameter to support distinguishing Month and Minutes in picture-masks }
 var
   PTmp    : Array[0..20] of Char;
   J, K, W : Cardinal;
@@ -915,9 +932,17 @@ var
 begin
   {find the start of the subfield}
   I := Default;
-  Found := StrChPos(Picture, Ch, J);
+  J := 0;
+  while (Picture[J]<>#0) and
+        ((Picture[J]<>Ch) or ((J>0) and ((Picture[J-1]=ExCh) or (Picture[J-1]=Ch)))) do
+    Inc(J);
+  Found := Picture[J]=Ch;
   Ch := UpCaseChar(Ch);
-  UpFound := StrChPos(Picture, Ch, K);
+  K := 0;
+  while (Picture[K]<>#0) and
+        ((Picture[K]<>Ch) or ((K>0) and ((Picture[K-1]=ExCh) or (Picture[K-1]=Ch)))) do
+    Inc(K);
+  UpFound := Picture[K]=Ch;
 
   if not Found or (UpFound and (K < J)) then begin
     J := K;
@@ -954,6 +979,14 @@ begin
   end;
 end;
 
+
+procedure TOvcIntlSup.isExtractFromPicture(Picture, S : PChar;
+                             Ch : Char; var I : Integer;
+                             Blank, Default : Integer);
+begin
+  isExtractFromPictureEx(Picture, S, Ch, I, Blank, Default, #0);
+end;
+
 function TOvcIntlSup.isMaskCharCount(P : PChar; MC : Char) : Word;
   {-return the number of mask characters (MC) in P}
 var
@@ -986,7 +1019,7 @@ begin
 end;
 
 
-procedure TOvcIntlSup.isMergeIntoPicture(Picture : PChar; Ch : Char; I : Integer);
+procedure TOvcIntlSup.isMergeIntoPictureEx(Picture : PChar; Ch : Char; I : Integer; ExCh : Char);
   {-merge I into location in Picture indicated by format character Ch
 
    -Changes:
@@ -996,11 +1029,23 @@ var
   J, L, K, PLen: Cardinal;
   Tmp          : string;
 begin
-  {find the start 'J' of the subfield}
+  {find the start 'J' of the subfield;
+   this is the index of the first occurance of 'Ch' in 'Picture' given that the character
+   before this subfield is different from 'ExCh'. If there is no such subfield the search
+   is repeated for 'UCh'
+   'ExCh' is used to distinguish subfields for month an minutes, see 'DateTimeToDatePChar'}
   UCh := UpCaseChar(Ch);
-  if not StrChPos(Picture, Ch, J) then
-    if not StrChPos(Picture, UCh, J) then
-      Exit;
+  J := 0;
+  while (Picture[J]<>#0) and
+        ((Picture[J]<>Ch) or ((J>0) and ((Picture[J-1]=ExCh) or (Picture[J-1]=Ch)))) do
+    Inc(J);
+  if Picture[J]=#0 then begin
+    J := 0;
+    while (Picture[J]<>#0) and
+          ((Picture[J]<>UCh) or ((J>0) and ((Picture[J-1]=ExCh) or (Picture[J-1]=UCh)))) do
+      Inc(J);
+  end;
+  if Picture[J]=#0 then Exit;
 
   {find the length 'L' of the subfield}
   L := 1;
@@ -1043,6 +1088,12 @@ begin
     else
       Picture[J+K] := Tmp[K+1];
   end;
+end;
+
+
+procedure TOvcIntlSup.isMergeIntoPicture(Picture : PChar; Ch : Char; I : Integer);
+begin
+  isMergeIntoPictureEx(Picture, Ch, I, #0);
 end;
 
 
@@ -1149,7 +1200,7 @@ begin
   end else begin
     {merge the numbers into the picture}
     isMergeIntoPicture(Dest, pmHour, Hours);
-    isMergeIntoPicture(Dest, pmMinute, Minutes);
+    isMergeIntoPictureEx(Dest, pmMinute, Minutes, pmDateSlash);
     isMergeIntoPicture(Dest, pmSecond, Seconds);
   end;
 
@@ -1514,7 +1565,7 @@ begin
 
   {extract hours, minutes, seconds from St}
   isExtractFromPicture(Picture, S, pmHour, Hour, -1, 0);
-  isExtractFromPicture(Picture, S, pmMinute,  Minute, -1, 0);
+  isExtractFromPictureEx(Picture, S, pmMinute,  Minute, -1, 0, pmDateSlash);
   isExtractFromPicture(Picture, S, pmSecond,  Second, -1, 0);
   if (Hour = -1) or (Minute = -1) or (Second = -1) then begin
     Result := False;

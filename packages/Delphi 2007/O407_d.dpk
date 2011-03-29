@@ -55,7 +55,8 @@ requires
   Vcl,
   Vclx,
   designide,
-  O407_r;
+  O407_r,
+  rtl;
 
 contains
   Ovcabot0 in '..\..\source\Ovcabot0.pas' {OvcfrmAboutForm},

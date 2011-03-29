@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                  ORXFRC1.PAS 4.06                     *}
+{*                  ORXFRC1.PAS 4.08                     *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{* Armin Biernaczyk                                                           *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -42,7 +43,8 @@ interface
 
 uses
   Windows, Classes, ClipBrd, Graphics, Forms, Controls, Buttons, StdCtrls,
-  ExtCtrls, SysUtils, OvcConst, OvcData, OvcEF, OvcRLbl, OvcBase, OvcNbk, OvcLB;
+  ExtCtrls, SysUtils, OvcConst, OvcData, OvcEF, OvcRLbl, OvcBase, OvcNbk, OvcLB,
+  OvcEdit;
 
 type
   TOvcfrmTransfer = class(TForm)
@@ -52,7 +54,6 @@ type
     memoSample: TMemo;
     btnClearAll: TButton;
     btnSelectAll: TButton;
-    btnGenerate: TBitBtn;
     btnCopyToClipboard: TBitBtn;
     btnClose: TBitBtn;
     cbInitialize: TCheckBox;
@@ -64,6 +65,12 @@ type
     Label2: TLabel;
     Label3: TLabel;
     OvcController1: TOvcController;
+    Label4: TLabel;
+    gbStringOptions: TGroupBox;
+    rbString: TRadioButton;
+    rbPChar: TRadioButton;
+    rbShortString: TRadioButton;
+    btnGenerate: TButton;
     procedure FormCreate(Sender: TObject);
     procedure btnSelectAllClick(Sender: TObject);
     procedure btnClearAllClick(Sender: TObject);
@@ -83,6 +90,8 @@ implementation
 
 {$R *.DFM}
 
+uses
+  ovcxfer;
 
 type
   TLocalEF = class(TOvcBaseEntryField);
@@ -144,24 +153,27 @@ end;
 
 procedure TOvcfrmTransfer.btnGenerateClick(Sender: TObject);
 var
-  I    : Integer;
-  J    : Integer;
-  C    : TComponent;
-  Len  : Byte;
-  S    : string;
-  NL   : TStringList;
+  I, J, L, Len : Integer;
+  C            : TComponent;
+  S            : string;
+  NL           : TStringList;
+  stype        : TxfrStringtype;
+
 
   function Spaces(Len : Integer) : string;
   begin
-    Result := '';
-    if Len > 255 then
-      Exit;
-
-    while Length(Result) < Len do
-      Result := Result + ' ';
+    result := StringOfChar(' ', Len);
   end;
 
 begin
+  {get the method for storing strings }
+  if rbString.Checked then
+    stype := xfrString
+  else if rbPChar.Checked then
+    stype := xfrPChar
+  else
+    stype := xfrShortString;
+
   {get length of longest name}
   Len := 0;
   for I := 0 to ComponentList.Count-1 do begin
@@ -173,7 +185,7 @@ begin
     {adjust length for tag added to end of field name}
     {(e.g., the "Text" added to string fields)}
     if (C is TEdit) or (C is TLabel) or
-       (C is TPanel) or (C is TOvcRotatedLabel) then
+       (C is TPanel) or (C is TOvcRotatedLabel) or (C is TOvcEditor) then
       Inc(J, 4)
     else if (C is TMemo) or (C is TOvcBaseEntryField) then
       Inc(J, 5)
@@ -188,6 +200,7 @@ begin
 
   if cbTransfer.Checked then with memoTransfer do begin
     {$IFDEF CBuilder}
+    { FIXME: CBuilder-Code is not up to date... }
     memoTransfer.Clear;
 
     {emit record definition}
@@ -271,33 +284,42 @@ begin
       C := TComponent(ComponentList.Items[I]);
       J := Length(C.Name);
 
-      if (C is TEdit) then begin
-        if TEdit(C).MaxLength = 0 then
-          Lines.Add(Format('    %sText%s : string;',
-           [C.Name, Spaces(Len-J-4)]))
+      if (C is TEdit) or (C is TLabel) or (C is TPanel) or (C is TOvcRotatedLabel) or
+         (C is TOvcEditor) then begin
+        if (C is TEdit) and (TEdit(C).MaxLength > 0) then
+          L := TEdit(C).MaxLength
         else
-          Lines.Add(Format('    %sText%s : string;',
-           [C.Name, Spaces(Len-J-4), TEdit(C).MaxLength]));
-      end else if (C is TLabel) or
-         (C is TPanel) or (C is TOvcRotatedLabel) then begin
-        Lines.Add(Format('    %sText%s : string;',
-         [C.Name, Spaces(Len-J-4)]));
+          L := 255;
+        case stype of
+          xfrString:
+            Lines.Add(Format('    %sText%*s : string;', [C.Name, Len-J-4, ' ']));
+          xfrPChar:
+            Lines.Add(Format('    %sText%*s : array[0..%d] of Char;', [C.Name, Len-J-4, ' ', L]));
+          xfrShortString:
+            Lines.Add(Format('    %sText%*s : string[%d];', [C.Name, Len-J-4, ' ', L]));
+        end;
       end else if (C is TCheckBox) or (C is TRadioButton) then begin
-        Lines.Add(Format('    %sChecked%s : Boolean;',
-         [C.Name, Spaces(Len-J-7)]));
-      end else if (C is TMemo) then begin
-        Lines.Add(Format('    %sLines%s : TStrings;',
-         [C.Name, Spaces(Len-J-5)]));
-      end else if (C is TListBox) then begin
-        Lines.Add(Format('    %sXfer%s : TListBoxTransfer;',
-         [C.Name, Spaces(Len-J-4)]));
-      end else if (C is TComboBox) then begin
-        Lines.Add(Format('    %sXfer%s : TComboBoxTransfer;',
-         [C.Name, Spaces(Len-J-4)]));
-      end else if (C is TOvcBaseEntryField) then begin
+        Lines.Add(Format('    %sChecked%s : Boolean;', [C.Name, Spaces(Len-J-7)]));
+      end else if C is TMemo then begin
+        Lines.Add(Format('    %sLines%s : TStrings;', [C.Name, Spaces(Len-J-5)]));
+      end else if C is TListBox then begin
+        Lines.Add(Format('    %sXfer%s : TListBoxTransfer;', [C.Name, Spaces(Len-J-4)]));
+      end else if C is TComboBox then begin
+        Lines.Add(Format('    %sXfer%s : TComboBoxTransfer;', [C.Name, Spaces(Len-J-4)]));
+      end else if C is TOvcBaseEntryField then begin
         case TLocalEF(C).efDataType mod fcpDivisor of
-          fsubString   :
-            S := Format('string;', [TLocalEF(C).DataSize-1]);
+          fsubString   : begin
+            case stype of
+              xfrString:
+                S := 'string;';
+              xfrPChar:
+                S := Format('array[0..%d] of Char;',[TLocalEF(C).MaxLength]);
+              xfrShortString:
+                S := Format('string[%d];',[TLocalEF(C).MaxLength]);
+              else
+                S := '';
+            end;
+          end;
           fsubChar     : S := 'AnsiChar;';
           fsubBoolean  : S := 'Boolean;';
           fsubYesNo    : S := 'Boolean;';
@@ -311,8 +333,8 @@ begin
           fsubDouble   : S := 'Double;';
           fsubSingle   : S := 'Single;';
           fsubComp     : S := 'Comp;';
-          fsubDate     : S := 'TWdDate;';
-          fsubTime     : S := 'TWdTime;';
+          fsubDate     : S := 'TStDate;';
+          fsubTime     : S := 'TStTime;';
         else
           S := '';
         end;
@@ -337,7 +359,7 @@ begin
     {create initialization method}
     Lines.Add(       '// initialize transfer buffer');
     Lines.Add(Format('void T%s::Init%0:sTransfer(T%0:sTransferRec& Data)',
-     [ComponentForm.Name]));
+                     [ComponentForm.Name]));
     Lines.Add(       '{');
 
     {initialize each field in the record}
@@ -422,7 +444,7 @@ begin
       J := Length(C.Name);
 
       if (C is TEdit) or (C is TLabel) or
-         (C is TPanel) or (C is TOvcRotatedLabel) then begin
+         (C is TPanel) or (C is TOvcRotatedLabel) or (C is TOvcEditor) then begin
         Lines.Add(Format('    %sText%s := '''';',
          [C.Name, Spaces(Len-J-4)]));
       end else if (C is TCheckBox) or (C is TRadioButton) then begin
@@ -459,8 +481,8 @@ begin
           fsubDouble,
           fsubSingle,
           fsubComp     : S := '0;';
-          fsubDate     : S := 'STDate.CurrentDate; {in stdate unit}';
-          fsubTime     : S := 'STDate.CurrentTime; {in stdate unit}';
+          fsubDate     : S := 'OvcDate.CurrentDate; {in OvcDate unit}';
+          fsubTime     : S := 'OvcDate.CurrentTime; {in OvcDate unit}';
         else
           S := '';
         end;
@@ -542,7 +564,11 @@ begin
 
       Lines.Add(#13);
       Lines.Add('{call to transfer data to the form}');
-      S :=      'OrTransfer1.TransferToForm([';
+      case stype of
+        xfrPChar:       S := 'OrTransfer1.TransferToFormZ([';
+        xfrShortString: S := 'OrTransfer1.TransferToFormS([';
+        else            S := 'OrTransfer1.TransferToForm([';
+      end;
       Len := Length(S);
 
       if NL.Count = 1 then
@@ -561,7 +587,11 @@ begin
 
       Lines.Add(#13);
       Lines.Add('{call to transfer data from the form}');
-      S :=      'OrTransfer1.TransferFromForm([';
+      case stype of
+        xfrPChar:       S := 'OrTransfer1.TransferFromFormZ([';
+        xfrShortString: S := 'OrTransfer1.TransferFromFormS([';
+        else            S := 'OrTransfer1.TransferFromForm([';
+      end;
       Len := Length(S);
 
       if NL.Count = 1 then

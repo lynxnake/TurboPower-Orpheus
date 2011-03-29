@@ -1932,8 +1932,11 @@ var
     end else begin
       if (DataPtr=nil) or (PString(DataPtr)^ = '') then     // SZ
         efEditSt[0] := #0
-      else
+      else begin
         StrPLCopy(efEditSt, PString(DataPtr)^, MaxLength);
+        if Length(PString(DataPtr)^)=MaxLength then
+          pbStripPicture(efEditSt,efEditSt);
+      end;
       pbMergePicture(efEditSt, efEditSt);
     end;
   end;
@@ -2278,6 +2281,22 @@ var
     end;
   end;
 
+  procedure TransferDateTime;
+    {-transfer data to or from DateTime fields}
+  var
+    D: TStDate;
+    T: TStTime;
+  begin
+    if TransferFlag = otf_GetData then begin
+      D := IntlSupport.DatePCharToDate(efPicture, efEditSt, GetEpoch);
+      T := IntlSupport.TimePCharToTime(efPicture, efEditSt);
+      TDateTime(DataPtr^) := OvcDate.StDateToDateTime(D) + OvcDate.StTimeToDateTime(T);
+    end else begin
+      IntlSupport.DateTimeToDatePChar(efEditSt, efPicture, TDateTime(DataPtr^), False);
+      ReplaceSubstChars;
+    end;
+  end;
+
 begin  {transfer}
   if DataPtr = nil then begin
     Result := 0;
@@ -2300,7 +2319,7 @@ begin  {transfer}
     pftSingle   : TransferSingle;
     pftComp     : TransferComp;
     pftDate     : TransferDate;
-    pftDateTime : TransferDouble;
+    pftDateTime : TransferDateTime;
     pfTTime     : TransferTime;
   end;
   Result := inherited efTransfer(DataPtr, TransferFlag);
@@ -2666,7 +2685,10 @@ begin
 end;
 
 function TOvcCustomPictureField.pfGetDataType(Value : TPictureDataType) : Byte;
-  {-return a Byte value representing the type of this field}
+  {-return a Byte value representing the type of this field
+
+   -Changes:
+    03/2011 AB: Bugfix: return-value for pftDateTime corrected }
 begin
   case Value of
     pftString    : Result := fidPictureString;
@@ -2684,7 +2706,7 @@ begin
     pftSingle    : Result := fidPictureSingle;
     pftComp      : Result := fidPictureComp;
     pftDate      : Result := fidPictureDate;
-    pftDateTime  : Result := fidPictureDate;
+    pftDateTime  : Result := fidPictureDouble; //fidPictureDate;
     pftTime      : Result := fidPictureTime;
   else
     raise EOvcException.Create(GetOrphStr(SCInvalidParamValue));

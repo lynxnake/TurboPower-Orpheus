@@ -23,7 +23,8 @@ uses
   TestOvcUtils in 'TestOvcUtils.pas',
   TestOvcFileViewer in 'TestOvcFileViewer.pas' {OvcFileViewerForm},
   TestOvcPictureField in 'TestOvcPictureField.pas' {TestOvcPictureFieldForm},
-  TestOvcDate in 'TestOvcDate.pas';
+  TestOvcDate in 'TestOvcDate.pas',
+  TestOvcTransfer in 'TestOvcTransfer.pas' {TestOvcTransferForm};
 
 {$R *.RES}
 

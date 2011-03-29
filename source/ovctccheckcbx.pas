@@ -50,7 +50,9 @@ type
     procedure SetBorderStyle(const Value: TBorderStyle);
   protected
     procedure Deactivate; override;
+    {$IFDEF VERSION2009}
     procedure InitializeNewForm; override;
+    {$ENDIF}
     procedure DoClose(var Action: TCloseAction); override;
     procedure CreateParams(var Params: TCreateParams); override;
   public
@@ -1102,6 +1104,7 @@ begin
   inherited DoClose(Action);
 end;
 
+{$IFDEF VERSION2009}
 procedure TOvcPopupWindow.InitializeNewForm;
 begin
   inherited;
@@ -1110,6 +1113,7 @@ begin
   Color := clWindow;
   FCloseAction := caFree;
 end;
+{$ENDIF}
 
 function TOvcPopupWindow.IsShortCut(var Message: TWMKey): Boolean;
 begin
@@ -1122,7 +1126,7 @@ begin
       Close;
     end;
   if not Result then
-    inherited;
+    result := inherited IsShortCut(Message);
 end;
 
 procedure TOvcPopupWindow.Popup(P: TPoint);

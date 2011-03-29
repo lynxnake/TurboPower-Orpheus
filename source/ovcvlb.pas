@@ -42,7 +42,7 @@ unit ovcvlb;
 interface
 
 uses
-  Windows, Classes, Controls, Forms, Graphics, StdCtrls, Menus, Messages,
+  Windows, Classes, Controls, Forms, Graphics, StdCtrls, Menus, Messages, Types,
   SysUtils, OvcBase, OvcData, OvcCmd, OvcConst, OvcMisc, OvcExcpt, OvcColor;
 
 const

@@ -46,7 +46,7 @@ PACKAGE O407_r;
 {$WRITEABLECONST ON}
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
-{$DESCRIPTION 'TurboPower Orpheus 4.07 runtime package - VCL110'}
+{$DESCRIPTION 'TurboPower Orpheus 4.08 runtime package - VCL110'}
 {$LIBSUFFIX '110'}
 {$RUNONLY}
 {$IMPLICITBUILD OFF}

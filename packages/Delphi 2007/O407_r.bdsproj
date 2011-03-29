@@ -125,7 +125,7 @@
 			<Linker Name="MinStackSize">16384</Linker>
 			<Linker Name="MaxStackSize">1048576</Linker>
 			<Linker Name="ImageBase">4194304</Linker>
-			<Linker Name="ExeDescription">TurboPower Orpheus 4.07 runtime package - VCL110</Linker>
+			<Linker Name="ExeDescription">TurboPower Orpheus 4.08 runtime package - VCL110</Linker>
 		</Linker>
 		<Directories>
 			<Directories Name="OutputDir"></Directories>
@@ -178,6 +178,10 @@
 			<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
 			<VersionInfoKeys Name="Comments"></VersionInfoKeys>
 		</VersionInfoKeys>
-		<buildevents/>
-	</Delphi.Personality>
+		<buildevents/>  <Language>
+      <Language Name="ActiveLang"></Language>
+      <Language Name="ProjectLang">$00000000</Language>
+      <Language Name="RootDir"></Language>
+    </Language>
+  </Delphi.Personality>
 </BorlandProject>
