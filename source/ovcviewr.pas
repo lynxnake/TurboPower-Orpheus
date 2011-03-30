@@ -774,200 +774,70 @@ begin
   result := edGetActualCol(S, EffCol+1, TabSize) - 1;
 end;
 
-(*
-function CalcActCol(S : PChar; EffCol : integer; TabSize : Byte) : integer; register;
-  {-Compute actual column for effective column EffCol in S, accounting for
-    tabs embedded in S. EffCol can range from 0 onwards, negatives are an
-    error, but are not checked for.
 
-    Remark, AB 03/2011:
-       This is basicially the same function as 'edGetActualCol' in ovceditu.pas - except
-       that edGetActualCol the column numbers (and result) are 1-based:
-       edGetActualCol(S, EffCol+1, Tabsize) - 1 = CalcActCol(S, EffCol, Tabsize) }
-{$IFDEF UNICODE}
-asm
-  push ebx
-  push edi
-  push esi
+function CalcEffCol(S : PChar; ActCol : Word; TabSize : Byte) : Word; register;
+  {-Compute effective column for actual column ActCol in S, accounting for
+    tabs embedded in S.
 
-  mov  esi, eax
-  xor  eax, eax
-  and  edx, 0FFFFh
-  or   edx, edx
-  jz   @@ExitNoCalc
+   Changes:
+     03/2011, AB: Added PUREPASCAL-version, changed types of parameters }
 
-  mov  ebx, esi
-  xor  edi, edi
-  and  ecx, 0FFFFh
-  mov  edi, ecx
-  mov  ecx, edx
-
-@@DoNextChar:
-  mov  dx, [esi]
-  or   dx, dx
-  jz   @@Exit
-  inc  esi
-  inc  esi
-  cmp  dx, 9
-  je   @@DoTab
-  inc  eax
-  cmp  eax, ecx
-  jb   @@DoNextChar
-  jmp  @@Exit
-
-@@DoTab:
-  xor  edx, edx
-  div  edi
-  inc  eax
-  mul  edi
-  cmp  eax, ecx
-  jb   @@DoNextChar     {no, go get next Char}
-  je   @@Exit           {exactly right, exit routine}
-  dec  esi              {whoops, overshot due to last tab Char; correct it}
-  dec  esi
-@@Exit:
-  mov  eax, esi         {calc the actual col}
-  sub  eax, ebx
-  shr  eax, 1
-@@ExitNoCalc:
-  pop  esi
-  pop  edi
-  pop  ebx
+{$IFDEF PUREPASCAL}
+begin
+  result := 0;
+  while (ActCol>0) and (S^ <> #0) do begin
+    if S^ <> #9 then
+      Inc(result)
+    else
+      result := (result div TabSize + 1) * TabSize;
+    Inc(S);
+    Dec(ActCol);
+  end;
 end;
+
 {$ELSE}
 asm
-  push ebx
-  push edi
-  push esi
+  push  ebx
+  push  esi
 
-  mov  esi, eax
-  xor  eax, eax
-  and  edx, 0FFFFh
-  or   edx, edx
-  jz   @@ExitNoCalc
+  mov   esi, eax        {esi = S}
+  xor   eax, eax        {eax = 0}
+  or    dx, dx
+  jz    @@Exit          {nothing to do if ActCol=0}
 
-  mov  ebx, esi
-  xor  edi, edi
-  and  ecx, 0FFFFh
-  mov  edi, ecx
-  mov  ecx, edx
+  movzx bx, cl          {bx = TabSize}
+  mov   cx, dx          {cx = ActCol}
 
+{$IFDEF UNICODE}
 @@DoNextChar:
-  mov  dl, [esi]
-  or   dl, dl
-  jz   @@Exit
+  mov  dx, [esi]        {get next char}
+  or   dx, dx
+  jz   @@Exit           {done if end of S reached}
   inc  esi
-  cmp  dl, 9
-  je   @@DoTab
-  inc  eax
-  cmp  eax, ecx
-  jb   @@DoNextChar
-  jmp  @@Exit
-
-@@DoTab:
-  xor  edx, edx
-  div  edi
-  inc  eax
-  mul  edi
-  cmp  eax, ecx
-  jb   @@DoNextChar     {no, go get next Char}
-  je   @@Exit           {exactly right, exit routine}
-  dec  esi              {whoops, overshot due to last tab Char; correct it}
-@@Exit:
-  mov  eax, esi         {calc the actual col}
-  sub  eax, ebx
-@@ExitNoCalc:
-  pop  esi
-  pop  edi
-  pop  ebx
-end;
+  inc  esi
+  cmp  dx, 9            {is it a <tab>?}
+{$ELSE}
+@@DoNextChar:
+  mov  dl, [esi]        {get next char}
+  or   dl, dl
+  jz   @@Exit           {done if end of S reached}
+  inc  esi
+  cmp  dl, 9            {is it a <tab>?}
 {$ENDIF}
-*)
-
-function CalcEffCol(S : PChar; ActCol : integer; TabSize : integer) : integer; register;
-  {-Compute effective column for actual column ActCol in S, accounting for
-    tabs embedded in S. ActCol can range from 0 onwards, negatives are an
-    error, but are not checked for.}
-{$IFDEF UNICODE}
-  {-Compute effective column for actual column ActCol in S, accounting for
-    tabs embedded in S. ActCol can range from 0 onwards, negatives are an
-    error, but are not checked for.}
-asm
-  push ebx
-  push edi
-  push esi
-
-  mov  esi, eax
-  xor  eax, eax
-  and  edx, 0FFFFh
-  or   edx, edx
-  jz   @@Exit
-
-  and  ecx, 0FFFFh
-  mov  edi, ecx
-  mov  ecx, edx
-
-@@DoNextChar:
-  mov  dx, [esi]
-  or   dx, dx
-  jz   @@Exit
-  inc  esi
-  inc  esi
-  cmp  dx, 9
-  je   @@DoTab        {yes, go process tab}
-  inc  eax            {increment eff col}
-  dec  ecx            {decrement actual col}
-  jnz  @@DoNextChar   {go back for next Char if one there}
-  jmp  @@Exit         {otherwise exit}
+  je   @@DoTab          {yes, go process tab}
+  inc  eax              {no:  increment eff col}
+  dec  cx               {     and decrement actual col}
+  jnz  @@DoNextChar     {go back for next char if one there}
+  jmp  @@Exit           {otherwise exit}
 @@DoTab:
-  xor  edx,edx        {dx = 0: prepare for div}
-  div  edi            {divide eff col by tabsize}
-  inc  eax            {add one}
-  mul  edi            {multiply by tabsize}
-  dec  ecx            {decrement actual col}
+  xor  edx,edx          {dx = 0: prepare for div}
+  div  bx               {divide eff col by tabsize}
+  inc  eax              {add one}
+  mul  bx               {multiply by tabsize}
+  dec  cx               {decrement actual col}
   jnz  @@DoNextChar   {go back for next Char if one there}
 @@Exit:
   pop  esi
-  pop  edi
-  pop  ebx
-end;
-{$ELSE}
-asm
-  push ebx
-  push edi
-  push esi
-
-  mov  esi, eax
-  xor  eax, eax
-  and  edx, 0FFFFh
-  or   edx, edx
-  jz   @@Exit
-
-  and  ecx, 0FFFFh
-  mov  edi, ecx
-  mov  ecx, edx
-
-@@DoNextChar:
-  mov  dl, [esi]
-  or   dl, dl
-  jz   @@Exit
-  inc  esi
-  cmp  dl, 9
-  je   @@DoTab        {yes, go process tab}
-  inc  eax            {increment eff col}
-  dec  ecx            {decrement actual col}
-  jnz  @@DoNextChar   {go back for next Char if one there}
-  jmp  @@Exit         {otherwise exit}
-@@DoTab:
-  xor  edx,edx        {dx = 0: prepare for div}
-  div  edi            {divide eff col by tabsize}
-  inc  eax            {add one}
-  mul  edi            {multiply by tabsize}
-  dec  ecx            {decrement actual col}
-  jnz  @@DoNextChar   {go back for next Char if one there}
-@@Exit:
-  pop  esi
-  pop  edi
   pop  ebx
 end;
 {$ENDIF}
@@ -1150,13 +1020,15 @@ end;
 
 procedure MapUnknownChars(S : PChar; Len : integer;
                           FirstChar, LastChar, DefChar : Char); register;
+  {-Map chars outside the font's character set to a default Char}
 var
   I: Integer;
-  {-Map chars outside the font's character set to a default Char}
 begin
   for I := 0 to Len - 1 do
     if (S[I] < FirstChar) or (S[I] > LastChar) then
-      S[I] := DefChar;
+      S[I] := DefChar
+    else if S[I] = #0 then
+      Exit;
 end;
 (*asm
   push ebx              {save ebx}
@@ -3693,6 +3565,9 @@ end;
 function TOvcCustomFileViewer.fvGetLineAsText(LineNum : LongInt; var Len : integer) : PChar;
 var
   CharsLeft : integer;
+{$IFDEF PUREPASCAL}
+  ch: AnsiChar;
+{$ENDIF}
 begin
   {go to the specified line}
   fvGotoTextLine(LineNum);
@@ -3716,6 +3591,27 @@ begin
      greater than LineBufSize}
     CharsLeft := MinL((FileSize - fvWorkOffset - 1), High(integer));
 
+    {$IFDEF PUREPASCAL}
+    repeat
+      if integer(fvWorkPtr)=fvWorkEnd then begin
+        fvWorkOffset := fvWorkOffset + Len;
+        if not fvGetWorkingChar then Break;
+      end;
+      ch := fvWorkPtr^;
+      Inc(fvWorkPtr);
+      if ch=#13 then
+        fvLnBuf[Len] := #0
+      else begin
+        if ch=#0 then ch := ' ';
+        fvLnBuf[Len] := Char(ch);
+      end;
+      Dec(CharsLeft);
+      Inc(Len);
+    until (CharsLeft<=0) and (Len<LineBufSize-1);
+    fvLnBuf[Len] := #0;
+    Dec(Len);
+
+    {$ELSE}
     asm
       push ebx
       push edi
@@ -3759,28 +3655,30 @@ begin
       mov  al, ' '                         {if so, translate to space}
 
     @@DoInsert:
-{$IFDEF UNICODE}
+    {$IFDEF UNICODE}
       xor ah,ah
       stosw                                {store the character}
-{$ELSE}
+    {$ELSE}
       stosb                                {store the character}
-{$ENDIF}
+    {$ENDIF}
       sub  ebx,1                           {decrement CharsLeft count}
       jb   @@AppendNull                    {any chars left?}
       loop @@GetNextChar                   {do it again if room in fvLnBuf}
 
     @@AppendNull:
-{$IFDEF UNICODE}
+    {$IFDEF UNICODE}
       xor  ax,ax                            {append a null}
       stosw
-{$ELSE}
+    {$ELSE}
       xor  al,al                            {append a null}
       stosb
-{$ENDIF}
+    {$ENDIF}
       pop  esi
       pop  edi
       pop  ebx
     end;
+    {$ENDIF}
+
     Len := StrLen(fvLnBuf);
     fvLnBufLen := Len;
   end;
