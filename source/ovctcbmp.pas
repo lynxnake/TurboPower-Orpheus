@@ -41,7 +41,7 @@ unit ovctcbmp;
 interface
 
 uses
-  Windows, SysUtils, Graphics, Classes, OvcTCmmn, OvcTCell;
+  Windows, SysUtils, Graphics, Classes, OvcTCmmn, OvcTCell, OvcMisc;
 
 type
   TOvcTCBaseBitMap = class(TOvcBaseTableCell)

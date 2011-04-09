@@ -5061,11 +5061,6 @@ begin
   if LastRow = edRows then
     LastRow := edRows + 1;
 
-  if copy((self.Parent as tform).Caption,1,1)='+' then
-    (self.Parent as tform).Caption := format('- von %d bis %d',[firstrow,lastrow])
-  else
-    (self.Parent as tform).Caption := format('+ von %d bis %d',[firstrow,lastrow]);
-
   {do we need to highlight text?}
   NoHighlight := (not Enabled) or
                  (not edHaveHighlight) or
