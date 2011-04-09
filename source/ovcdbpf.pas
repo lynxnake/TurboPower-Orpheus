@@ -752,6 +752,7 @@ begin
       if (DT <> StDateToDateTime(TStDate(TL))) then
         inherited DoOnChange;
     end else begin
+{ TODO 1 -oAB : This will not work in unicode! }
       if CompStruct(S, F, Self.DataSize) <> 0 then
         inherited DoOnChange;
     end;

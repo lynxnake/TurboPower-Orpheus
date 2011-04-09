@@ -134,7 +134,7 @@
 			<Directories Name="PackageDCPOutputDir"></Directories>
 			<Directories Name="SearchPath">$(Components)\FastMM;$(Components)\Orpheus\Source</Directories>
 			<Directories Name="Packages"></Directories>
-			<Directories Name="Conditionals"></Directories>
+			<Directories Name="Conditionals">PUREPASCAL</Directories>
 			<Directories Name="DebugSourceDirs"></Directories>
 			<Directories Name="UsePackages">False</Directories>
 		</Directories>

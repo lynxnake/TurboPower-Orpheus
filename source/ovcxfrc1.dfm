@@ -24,9 +24,11 @@ object OvcfrmTransfer: TOvcfrmTransfer
     Height = 25
     Cancel = True
     Caption = '&Close'
+    DoubleBuffered = True
     ModalResult = 2
-    TabOrder = 2
+    ParentDoubleBuffered = False
     Spacing = -1
+    TabOrder = 2
     IsControl = True
   end
   object NB: TOvcNotebook
@@ -196,8 +198,8 @@ object OvcfrmTransfer: TOvcfrmTransfer
       end
       object memoTransfer: TMemo
         Left = 0
-        Top = -200
-        Width = 0
+        Top = 72
+        Width = 516
         Height = 200
         Align = alBottom
         Ctl3D = True
@@ -210,6 +212,8 @@ object OvcfrmTransfer: TOvcfrmTransfer
         ParentFont = False
         ScrollBars = ssBoth
         TabOrder = 0
+        ExplicitTop = -200
+        ExplicitWidth = 0
       end
     end
     object Page2: TOvcTabPage
@@ -236,8 +240,8 @@ object OvcfrmTransfer: TOvcfrmTransfer
       end
       object memoInitialize: TMemo
         Left = 0
-        Top = -200
-        Width = 0
+        Top = 72
+        Width = 516
         Height = 200
         Align = alBottom
         Ctl3D = True
@@ -250,6 +254,8 @@ object OvcfrmTransfer: TOvcfrmTransfer
         ParentFont = False
         ScrollBars = ssBoth
         TabOrder = 0
+        ExplicitTop = -200
+        ExplicitWidth = 0
       end
     end
     object Page3: TOvcTabPage
@@ -268,8 +274,8 @@ object OvcfrmTransfer: TOvcfrmTransfer
       end
       object memoSample: TMemo
         Left = 0
-        Top = -200
-        Width = 0
+        Top = 72
+        Width = 516
         Height = 200
         Align = alBottom
         Ctl3D = True
@@ -282,6 +288,8 @@ object OvcfrmTransfer: TOvcfrmTransfer
         ParentFont = False
         ScrollBars = ssBoth
         TabOrder = 0
+        ExplicitTop = -200
+        ExplicitWidth = 0
       end
     end
   end
@@ -291,7 +299,9 @@ object OvcfrmTransfer: TOvcfrmTransfer
     Width = 329
     Height = 25
     Caption = 'Copy all to clipboard'
+    DoubleBuffered = True
     Enabled = False
+    ParentDoubleBuffered = False
     TabOrder = 1
     OnClick = btnCopyToClipboardClick
   end

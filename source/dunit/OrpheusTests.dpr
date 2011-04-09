@@ -24,7 +24,9 @@ uses
   TestOvcFileViewer in 'TestOvcFileViewer.pas' {OvcFileViewerForm},
   TestOvcPictureField in 'TestOvcPictureField.pas' {TestOvcPictureFieldForm},
   TestOvcDate in 'TestOvcDate.pas',
-  TestOvcTransfer in 'TestOvcTransfer.pas' {TestOvcTransferForm};
+  TestOvcTransfer in 'TestOvcTransfer.pas' {TestOvcTransferForm},
+  TestOvcSpinner in 'TestOvcSpinner.pas' {TestOvcSpinnerForm},
+  TestOvcMisc in 'TestOvcMisc.pas';
 
 {$R *.RES}
 

@@ -2395,7 +2395,7 @@ procedure TOvcCustomCalculator.PressButton(Button : TOvcCalculatorButton);
 
     if (cLastButton = cbPercent) and (Button in [cbAdd, cbSub, cbMul, cbDiv, cbEqual]) then
       cEvaluate(Button)
-    else if ((((cLastButton in [cbEqual, cbMemRecall]) and
+    else if ((((cLastButton in [cbEqual{, cbMemRecall}]) and
                (Button in [cbAdd, cbSub, cbMul, cbDiv])))) and
              cEngine.AddOperand(StrToFloat(FDisplayStr), CalcButtontoOperation[Button]) then begin
       cEvaluate(Button);

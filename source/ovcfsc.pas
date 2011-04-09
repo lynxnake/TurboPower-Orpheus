@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                    OVCFSC.PAS 4.06                    *}
+{*                    OVCFSC.PAS 4.08                    *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -288,16 +288,6 @@ implementation
 
 const
   scDefMinSize = 13;
-
-function GetArrowWidth(Width, Height : Integer) : Integer; register;
-asm
-  cmp  eax, edx
-  jle  @@1
-  mov  eax, edx
-@@1:
-  shr  eax, 1
-  or   eax, 1
-end;
 
 {*** TOvcFlatSpinner ***}
 

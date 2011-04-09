@@ -42,7 +42,7 @@ unit ovctchdr;
 interface
 
 uses
-  Windows, SysUtils, Graphics, Classes, OvcTCmmn, OvcTCell, OvcTCStr;
+  Windows, SysUtils, Graphics, Classes, OvcTCmmn, OvcTCell, OvcTCStr, OvcMisc;
 
 type
   TOvcTCColHead = class(TOvcTCBaseString)

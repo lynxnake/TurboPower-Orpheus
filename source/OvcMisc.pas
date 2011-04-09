@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                   OVCMISC.PAS 4.06                    *}
+{*                   OVCMISC.PAS 4.08                    *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -123,14 +123,15 @@ procedure TransStretchBlt(DstDC: TOvcHdc{HDC}; DstX, DstY, DstW, DstH: Integer;
                            SrcDC: TOvcHdc{HDC}; SrcX, SrcY, SrcW, SrcH: Integer;
                            MaskDC: TOvcHdc{HDC};
                            MaskX, MaskY : Integer);
-function MaxL(A, B : LongInt) : LongInt;
-function MinL(A, B : LongInt) : LongInt;
 function MinI(X, Y : Integer) : Integer;
   {-return the minimum of two integers}
 function MaxI(X, Y : Integer) : Integer;
   {-return the maximum of two integers}
+function MinL(X, Y : LongInt) : LongInt;
+  {-return the minimum of two LongInts}
+function MaxL(X, Y : LongInt) : LongInt;
+  {-return the maximum of two LongInts}
 
-{function GenerateComponentName(PF : TCustomForm; const Root : string) : string;}
 function GenerateComponentName(PF : TWinControl; const Root : string) : string;
   {-return a component name unique for this form}
 function PartialCompare(const S1, S2 : string) : Boolean;
@@ -148,6 +149,9 @@ function HeightOf(const R : TRect) : Integer;
 procedure DebugOutput(const S : string);
   {use OutputDebugString()}
 
+function GetArrowWidth(Width, Height : Integer) : Integer; register;
+  {-Get arrow width for spinner-buttons}
+
 implementation
 
 uses
@@ -163,8 +167,32 @@ begin
   Result := LoadCursor(FindClassHInstance(TOvcCustomControlEx), lpCursorName);
 end;
 
-function CompStruct(const S1, S2; Size : Cardinal) : Integer; register;    // FIXME - check usage - do not use it for comparing records with string
-  {-compare two fixed size structures}
+function CompStruct(const S1, S2; Size : Cardinal) : Integer; register;
+  {-compare two fixed size structures
+
+   -Changes
+    04/2011, AB: Added PUREPASCAL-version }
+{$IFDEF PUREPASCAL}
+var
+  p1, p2: PByte;
+begin
+  result := 0;
+  { Delphi 2006 doesn't accept "(PByte(@S1)+i)^", so we use local variables p1 and p2. }
+  p1 := PByte(@S1);
+  p2 := PByte(@S2);
+  while (Size>0) and (result=0) do begin
+    if p1^ < p2^ then
+      result := -1
+    else if p1^ > p2^ then
+      result := 1
+    else begin
+      Inc(p1);
+      Inc(p2);
+      Dec(Size);
+    end;
+  end;
+end;
+{$ELSE}
 asm
   push    esi
   push    edi
@@ -186,10 +214,11 @@ asm
   mov     eax, -1      {else S1 less, return -1}
 
 @@CSDone:
-
   pop     edi
   pop     esi
 end;
+{$ENDIF}
+
 
 procedure FixRealPrim(P : PChar; DC : Char);
   {-Get a string representing a real ready for Val()}
@@ -410,37 +439,66 @@ begin
   Dec(PAnsiChar(P), Delta);
 end;
 
-function MinI(X, Y : Integer) : Integer;
+
+function MinI(X, Y : Integer) : Integer; register;
+{$IFDEF PUREPASCAL}
+begin
+  if X < Y then result := X else result := Y;
+end;
+{$ELSE}
 asm
   cmp  eax, edx
   jle  @@Exit
   mov  eax, edx
 @@Exit:
 end;
+{$ENDIF}
 
-function MaxI(X, Y : Integer) : Integer;
+
+function MaxI(X, Y : Integer) : Integer; register;
+{$IFDEF PUREPASCAL}
+begin
+  if X > Y then result := X else result := Y;
+end;
+{$ELSE}
 asm
   cmp  eax, edx
   jge  @@Exit
   mov  eax, edx
 @@Exit:
 end;
+{$ENDIF}
 
-function MaxL(A, B : LongInt) : LongInt;
-begin
-  if (A < B) then
-    Result := B
-  else
-    Result := A;
-end;
 
-function MinL(A, B : LongInt) : LongInt;
+function MinL(X, Y : LongInt) : LongInt; register;
+{$IFDEF PUREPASCAL}
 begin
-  if (A < B) then
-    Result := A
-  else
-    Result := B;
+  if X < Y then result := X else result := Y;
 end;
+{$ELSE}
+asm
+  cmp  eax, edx
+  jle  @@Exit
+  mov  eax, edx
+@@Exit:
+end;
+{$ENDIF}
+
+
+function MaxL(X, Y : LongInt) : LongInt; register;
+{$IFDEF PUREPASCAL}
+begin
+  if X > Y then result := X else result := Y;
+end;
+{$ELSE}
+asm
+  cmp  eax, edx
+  jge  @@Exit
+  mov  eax, edx
+@@Exit:
+end;
+{$ENDIF}
+
 
 function TrimLeft(const S : string) : string;
 var
@@ -718,7 +776,6 @@ begin
   Result := (ThisYear div 100) * 100;
 end;
 
-{function GenerateComponentName(PF : TCustomForm; const Root : string) : string;}
 function GenerateComponentName(PF : TWinControl; const Root : string) : string;
 var
   I : Integer;
@@ -737,7 +794,7 @@ function PartialCompare(const S1, S2 : string) : Boolean;
 var
   L : Integer;
 begin
-  {and empty string matches nothing}
+  {an empty string matches nothing}
   Result := False;
   L := MinI(Length(S1), Length(S2));
   if L > 0 then
@@ -1064,5 +1121,31 @@ begin
   OutputDebugString(PChar(S));
   OutputDebugString(#13#10);
 end;
+
+
+function GetArrowWidth(Width, Height : Integer) : Integer; register;
+  {-Get arrow width for spinner-buttons
+
+   -Changes:
+    04/2011, AB: Moved this function from ovcfsc/ovcsc to ovcmisc to eliminate redundant
+                 code and to make it accessible for unit-testing.
+                 Added PUREPASCAL-version. }
+{$IFDEF PUREPASCAL}
+begin
+  {The arrow-width should be 1/2 of the minimum of the given 'Width' and
+   'Height'; to get a symmetric arrow, the result has to be odd. }
+  if Width<Height then result := Width else result := Height;
+  result := (result div 2) or 1;
+end;
+{$ELSE}
+asm
+  cmp  eax, edx
+  jle  @@1
+  mov  eax, edx
+@@1:
+  shr  eax, 1
+  or   eax, 1
+end;
+{$ENDIF}
 
 end.

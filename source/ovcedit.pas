@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                   OVCEDIT.PAS 4.06                    *}
+{*                   OVCEDIT.PAS 4.08                    *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -2993,11 +2993,17 @@ begin
 end;
 
 procedure TOvcCustomEditor.edRefreshLines(Start, Stop : LongInt);
+  {-invalidate the region that includes lines from 'Stop' to 'Stop'
+
+   -Changes
+    04/2011, AB: Code changed so that only the region containing the given lines is
+                 updated. The entire ClientRect was updated before, forcing the editor to
+                 repaint the entire text for every single character that was being typed.
+                 n.b. the main part of the necessary code was already present (but commented
+                 out with no futher hint)... }
 var
-  {CR     : TRect;}
-  {R1, R2 : LongInt;}
-  Last   : LongInt;
-  T      : LongInt;
+  CR : TRect;
+  T  : LongInt;
 begin
   if edRedrawPending then
     Exit;
@@ -3008,22 +3014,16 @@ begin
     Stop := Start;
     Start := T;
   end;
-  Last := edTopLine + Pred(edRows);
-  if (Start > Last) or (Stop < edTopLine) then
+  if (Start > edTopLine + edRows -1) or (Stop < edTopLine) then
     Exit;
 
-  {R1 := Start-edTopLine;}
-  {if R1 < 0 then
-    R1 := 0;}
-  {R2 := Stop-edTopLine;}
-  {if R2 > Pred(edRows) then
-    R2 := Pred(edRows);}
-  {CR := ClientRect;}
-  {CR.Top := R1 * edGetRowHt;}
-  {if R2 <> Pred(edRows) then
-    CR.Bottom := Succ(R2) * edGetRowHt;}
-  Invalidate;
+  CR := ClientRect;
+  CR.Top := MaxL(0, Start-edTopLine) * edGetRowHt;
+  if Stop-edTopLine < edRows-1 then
+    CR.Bottom := (Stop-edTopLine+1) * edGetRowHt;
+  InvalidateRect(self.Handle, @CR, False);
 end;
+
 
 function TOvcCustomEditor.edReplaceSelection(P : PChar) : Word;
 var
@@ -4676,48 +4676,36 @@ begin
   DoOnShowStatus(Msg.Line, Msg.Column);
 end;
 
+
 procedure TOvcCustomEditor.Paint;
 var
   Clip        : TRect;
-  I           : Integer;
   FR, CR      : TRect;
-  TC, BC      : TColor;
-  HTC, HBC    : TColor;
-  SA          : PChar;         {actual string, w/o tab expansion}
-  SALen       : Word;          {length of SA}
-  ST          : PChar;         {string with tab expansion}
   NoHighlight : Boolean;
   FirstRow    : Integer;
   LastRow     : Integer;
   FarRt       : Integer;
   HBLine      : LongInt;
   HELine      : LongInt;
-  HBCol       : Integer;
-  HECol       : Integer;
   effHBCol    : Integer;
   effHECol    : Integer;
-  RowStartPix : Integer;
-  OldColor    : TColor;
-  OldWidth    : Integer;
-  OldStyle    : TPenStyle;
   lpDxVal     : Integer;
   lpDx        : array of Integer;
 
   procedure NormalColors;
   begin
-    Canvas.Font.Color := TC;
-    Canvas.Brush.Color := BC;
+    if not Enabled then
+      Canvas.Font.Color := clGrayText
+    else
+      Canvas.Font.Color := FixedFont.Color;
+    Canvas.Brush.Color := Color;
   end;
-
 
   procedure HighlightColors;
   begin
-    HTC := Graphics.ColorToRGB(FHighlightColors.TextColor);
-    HBC := Graphics.ColorToRGB(FHighlightColors.BackColor);
-    Canvas.Font.Color := HTC;
-    Canvas.Brush.Color := HBC;
+    Canvas.Font.Color := Graphics.ColorToRGB(FHighlightColors.TextColor);
+    Canvas.Brush.Color := Graphics.ColorToRGB(FHighlightColors.BackColor);
   end;
-
 
   procedure DrawBookMark(N : LongInt; Row : Integer); near;
   var
@@ -4780,7 +4768,6 @@ var
       FR.Bottom := CR.Bottom;
   end;
 
-
   procedure DrawAt(S : PChar; Len, Row : Integer);
   {-Changes:
     03/2011, AB: fixed issue 947482: When FMargins.Left.Enabled=True, the selected
@@ -4811,7 +4798,6 @@ var
     end;
   end;
 
-
   procedure DrawComplexRow(S : PChar; Len, Row : Integer; N : LongInt);
     {-draw a row that has highlighting}
   var
@@ -4835,7 +4821,7 @@ var
       else if (N = HBLine) then begin
         {is this the only highlighted line?}
         if (N = HELine) then begin
-          Len1 := edParas.EffCol(SA, SALen, HBCol)-Col1;
+          Len1 := effHBCol-Col1;
           if Len1 < 0 then
             Len1 := 0
           { 4.08: fixed: If ScrollPastEnd is true, Len1 might be larger than Len.
@@ -4844,14 +4830,14 @@ var
                   displayed. }
           else if Len1>Len then
             Len1 := Len;
-          Len2 := edParas.EffCol(SA, SALen, HECol)-(Col1+Len1);
+          Len2 := effHECol-(Col1+Len1);
           if Len1+Len2 > Len then
             Len2 := Len-Len1;
           Len3 := Len-(Len1+Len2);
           if Len3 > Len then
             Len3 := Len;
         end else begin
-          Len1 := edParas.EffCol(SA, SALen, HBCol)-Col1;
+          Len1 := effHBCol-Col1;
           { 4.08 Fix for edRectSelect: same problem as above; only relevant if
                  edRectSelect is True }
           if Len1 < 0 then Len1 := 0 else if Len1 > Len then Len1 := Len;
@@ -4859,11 +4845,11 @@ var
           Len3 := Len-(Len1+Len2);
         end
       {it's the last line--is highlighted portion visible?}
-      end else if (Col1 > edParas.EffCol(SA, SALen, HECol)) then
+      end else if Col1 > effHECol then
         {no--display unhighlighted}
         Len1 := Len
       else begin
-        Len2 := edParas.EffCol(SA, SALen, HECol)-Col1;
+        Len2 := effHECol-Col1;
         if Len2 > Len then
           Len2 := Len;
         Len3 := Len-Len2;
@@ -4914,11 +4900,6 @@ var
     end;
   end;
 
-  function max(k,l:Integer): Integer;
-  begin
-    if k>l then result := k else result := l;
-  end;
-
   procedure DrawRow(N : LongInt; Row : Integer);
     {-draw line N on the specified Row of the window}
   var
@@ -4932,29 +4913,25 @@ var
       Exit;
     {get the string}
     if (N > edParas.LineCount) or (N < 0) then begin
-      SA := '';
+      S := '';
       if Assigned(FOnDrawLine) then
       begin
         {set bounding rectangle}
         SetRowRect(Row);
-        if not DoOnDrawLine(Canvas, FR, SA, 0, N, edHDelta, edCols,
+        if not DoOnDrawLine(Canvas, FR, S, 0, N, edHDelta, edCols,
           HBLine, effHBCol, HELine, effHECol)
         then
-          DrawAt(SA, 0, Row);
+          DrawAt(S, 0, Row);
       end else
-        DrawAt(SA, 0, Row)
+        DrawAt(S, 0, Row)
     end else begin
-      T := nil;
       AllocSize := 0;
       edParas.NthLine(N, S, Len);
-      SA := S;
-      ST := S;
-      SALen := Len;
       { 4.08 }
-      effHEmax := max(effHECol,effHBCol);
+      effHEmax := MaxI(effHECol,effHBCol);
       if (Len > 0) and edHaveTabs(S, Len) then begin
         J := edEffectiveLen(S, Len, edParas.TabSize);
-        AllocSize := max(effHEmax,J)+1;
+        AllocSize := MaxI(effHEmax,J)+1;
         GetMem(T, AllocSize * SizeOf(Char));
         C := S[Len];
         S[Len] := #0;
@@ -4963,7 +4940,6 @@ var
         T[AllocSize-1] := #0;
         S[Len] := C;
         S := T;
-        ST := T;
         Len := AllocSize-1;
       { 4.08 to display "nice" rectangular blocks of text if edRectSelect
              is True, we need to "enlarge" lines that are too short. }
@@ -4974,14 +4950,12 @@ var
         for I := Len to effHEmax-2 do T[I] := ' ';
         T[effHEmax-1] := #0;
         S := T;
-        ST := T;
         Len := effHEmax-1;
-      end;
+      end else
+        T := S;
 
       if edHDelta >= Len then begin
         S := '';
-        SA := S;
-        ST := S;
         Len := 0;
       end else begin
         S := @S[edHDelta];
@@ -4991,7 +4965,7 @@ var
       end;
 
       { 4.08: Some characters in S might not be printable or will not have the
-              proper width; Depending on the Windows version, ExtTextout handles these
+              proper width; depending on the Windows version, ExtTextout handles these
               characters differently - which might cause trouble. For example
               S = 'X'#152'X'  -> XP: 'X X'  Vista: 'XX'
               S = 'x'#152'a'  -> XP: 'x a'  Vista: 'xã'
@@ -5006,7 +4980,7 @@ var
       if Assigned(FOnDrawLine) then begin
         {set bounding rectangle}
         SetRowRect(Row);
-        if not DoOnDrawLine(Canvas, FR, ST, StrLen(ST), N, edHDelta,
+        if not DoOnDrawLine(Canvas, FR, T, StrLen(T), N, edHDelta,
                edCols, HBLine, effHBCol, HELine, effHECol) then
         begin
           if (Len = 0) then
@@ -5020,9 +4994,10 @@ var
         else
           DrawComplexRow(S, Len, Row, N);
       end;
-      if (T <> nil) and (AllocSize > 0) then
+      if AllocSize > 0 then
         FreeMem(T, AllocSize * SizeOf(Char));
     end;
+
     {reset FR}
     FR.Left := CR.Left + GetLeftMargin;
     FR.Right := FarRt;
@@ -5036,7 +5011,6 @@ var
       Canvas.Pen.Color := OldColor;
     end;
   end;
-
 
   procedure DrawEdges;
   var
@@ -5055,6 +5029,13 @@ var
   end;
 
 
+var
+  I, RowStartPix : Integer;
+  SA             : PChar;
+  SALen          : Word;
+  OldColor       : TColor;
+  OldWidth       : Integer;
+  OldStyle       : TPenStyle;
 begin
   {set canvas defaults}
   Canvas.Font := FixedFont.Font;
@@ -5072,55 +5053,37 @@ begin
     Canvas.FillRect(Rect(Cr.Left, Cr.Top + EdRows * EdGetRowHt,
       Cr.Right, Cr.Bottom));
 
-  {get colors}
-  if not Enabled then
-    TC := clGrayText
-  else
-    TC := FixedFont.Color;
-  BC := Color;
-  HTC := Graphics.ColorToRGB(FHighlightColors.TextColor);
-  HBC := Graphics.ColorToRGB(FHighlightColors.BackColor);
-
   {figure out which rows to update}
   {get the cliping region}
   GetClipBox(Canvas.Handle, Clip);
   FirstRow := (Clip.Top div edGetRowHt) + 1;
-
   LastRow :=  (Clip.Bottom + Pred(edGetRowHt)) div edGetRowHt;
-
-  if LastRow = edRows then begin
+  if LastRow = edRows then
     LastRow := edRows + 1;
-  end;
+
+  if copy((self.Parent as tform).Caption,1,1)='+' then
+    (self.Parent as tform).Caption := format('- von %d bis %d',[firstrow,lastrow])
+  else
+    (self.Parent as tform).Caption := format('+ von %d bis %d',[firstrow,lastrow]);
 
   {do we need to highlight text?}
-  NoHighlight := (not Enabled) or (not edHaveHighlight);
+  NoHighlight := (not Enabled) or
+                 (not edHaveHighlight) or
+                 (FHideSelection and (GetFocus <> Handle));
 
-  {if we don't have the focus and we should hide the selection}
-  {then we can repaint without highlighing text}
-  if not NoHighlight then
-    if FHideSelection and not (GetFocus = Handle) then
-      NoHighlight := True;
-
+  {get the area that has to be highlighted}
   if NoHighlight then begin
     HBLine := 0;
-    HBCol := 0;
     HELine := 0;
-    HECol := 0;
-
-    {effective columns for owner-draw line}
     effHBCol := 0;
     effHECol := 0;
   end else begin
     HBLine := edHltBgnL.Line;
-    HBCol := edHltBgnL.Col;
     HELine := edHltEndL.Line;
-    HECol := edHltEndL.Col;
-
-    {effective columns for owner-draw line}
     edParas.NthLine(HBLine, SA, SALen);
-    effHBCol := edParas.EffCol(SA, SALen, HBCol);
+    effHBCol := edParas.EffCol(SA, SALen, edHltBgnL.Col);
     edParas.NthLine(HELine, SA, SALen);
-    effHECol := edParas.EffCol(SA, SALen, HECol);
+    effHECol := edParas.EffCol(SA, SALen, edHltEndL.Col);
   end;
 
   {draw edges of window}
@@ -5191,13 +5154,9 @@ begin
       Canvas.Pen.Color := OldColor;
     end;
 
-  {do we need to fill in the partial line at the bottom of the window?}
-{  if LastRow > edRows then
-    DrawAt('', 0, LastRow);}
-
   { 4.08 }
-  if edRectSelect and not NoHighlight and (edRectSelectDiff<>HBCol-HECol) then begin
-    edRectSelectDiff := HBCol-HECol;
+  if edRectSelect and not NoHighlight and (edRectSelectDiff<>effHBCol-effHECol) then begin
+    edRectSelectDiff := effHBCol-effHECol;
     if (FirstRow>HBLine-edTopLine+1) and (FirstRow>1) then
       edRefreshLines(HBLine, FirstRow+edTopLine-2)
     else if (LastRow<HELine-edTopLine+1) and (LastRow<EdRows) then

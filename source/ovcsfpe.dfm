@@ -6,11 +6,13 @@ object OvcfrmSimpleMask: TOvcfrmSimpleMask
   Caption = 'Simple Mask'
   ClientHeight = 166
   ClientWidth = 323
+  Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'Default'
   Font.Style = []
+  OldCreateOrder = True
   ShowHint = True
   OnCreate = FormCreate
   PixelsPerInch = 96
@@ -29,9 +31,11 @@ object OvcfrmSimpleMask: TOvcfrmSimpleMask
     Height = 25
     Caption = 'OK'
     Default = True
+    DoubleBuffered = True
     ModalResult = 1
-    TabOrder = 1
     NumGlyphs = 2
+    ParentDoubleBuffered = False
+    TabOrder = 1
   end
   object btnCancel: TBitBtn
     Left = 242
@@ -40,9 +44,11 @@ object OvcfrmSimpleMask: TOvcfrmSimpleMask
     Height = 25
     Cancel = True
     Caption = 'Cancel'
+    DoubleBuffered = True
     ModalResult = 2
-    TabOrder = 2
     NumGlyphs = 2
+    ParentDoubleBuffered = False
+    TabOrder = 2
   end
   object cbxMaskCharacter: TComboBox
     Left = 9
@@ -55,7 +61,6 @@ object OvcfrmSimpleMask: TOvcfrmSimpleMask
     Font.Name = 'Courier New'
     Font.Pitch = fpFixed
     Font.Style = []
-    ItemHeight = 15
     MaxLength = 1
     ParentFont = False
     TabOrder = 0

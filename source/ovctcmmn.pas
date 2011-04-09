@@ -43,7 +43,7 @@ interface
 
 uses
   Windows, SysUtils, Messages, Graphics, Forms, StdCtrls, Classes, Controls,
-  OvcBase, OvcData, OvcExcpt;
+  OvcBase, OvcData, OvcExcpt, OvcMisc;
 
 {---Enumeration types}
 type
@@ -415,14 +415,6 @@ type {internal use only}
     Ay : array [0..127] of TOvcTblDisplayItem; {127 is arbitrary}
   end;
 
-{--Utility routines}
-function MinI(X, Y : Integer) : Integer;
-  {Return the minimum of two integers}
-function MaxI(X, Y : Integer) : Integer;
-  {Return the maximum of two integers}
-function MaxL(A, B : longint) : longint;
-function MinL(A, B : longint) : longint;
-
 function MakeRowStyle(AHeight : Integer; AHidden : boolean) : TRowStyle;
   {-Make a row style variable from a height and hidden flag.}
 
@@ -437,23 +429,6 @@ procedure AssignDisplayArray(var A : POvcTblDisplayArray; Num : word);
 implementation
 
 {===Standard routines================================================}
-function MinI(X, Y : Integer) : Integer;
-  {Return the minimum of two integers}
-asm
-  cmp  eax, edx
-  jle  @@Exit
-  mov  eax, edx
-@@Exit:
-end;
-{--------}
-function MaxI(X, Y : Integer) : Integer;
-  {Return the maximum of two integers}
-asm
-  cmp  eax, edx
-  jge  @@Exit
-  mov  eax, edx
-@@Exit:
-end;
 {--------}
 procedure TableError(const Msg : string);
   begin
@@ -463,16 +438,6 @@ procedure TableError(const Msg : string);
 procedure TableErrorRes(StringCode : word);
   begin
     raise EOrpheusTable.Create(GetOrphStr(StringCode));
-  end;
-{--------}
-function MaxL(A, B : longint) : longint;
-  begin
-    if (A < B) then Result := B else Result := A;
-  end;
-{--------}
-function MinL(A, B : longint) : longint;
-  begin
-    if (A < B) then Result := A else Result := B;
   end;
 {--------}
 procedure AssignDisplayArray(var A : POvcTblDisplayArray; Num : word);

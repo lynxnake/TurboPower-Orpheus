@@ -87,7 +87,7 @@ unit ovctsell;
 interface
 
 uses
-  Windows, SysUtils, OvcTCmmn;
+  Windows, SysUtils, OvcTCmmn, OvcMisc;
 
 type
   TOvcSelRowRange = packed record            {a row range}

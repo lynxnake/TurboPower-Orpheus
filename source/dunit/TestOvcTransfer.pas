@@ -1,4 +1,4 @@
-unit TestOvcTransfer;
+﻿unit TestOvcTransfer;
 
 interface
 
@@ -6,7 +6,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, DateUtils,
   TestFramework, ovcbase, ovcrlbl, ovcnf, ovcpb, ovcpf, ovcef, ovcsf, StdCtrls,
-  OvcDate, ovcxfer;
+  OvcDate, ovcxfer, ovcedit, ovceditu;
 
 
 type
@@ -22,14 +22,16 @@ type
     OvcSimpleField2Value    : LongInt;
     OvcSimpleField3Value    : Double;
     OvcSimpleField4Value    : Boolean;
+    OvcSimpleField5Value    : Char;
     OvcPictureField1Value   : string;
     OvcPictureField2Value   : TStDate;
-//    OvcPictureField3Value   : TDateTime;
+    OvcPictureField3Value   : TDateTime;
     OvcPictureField4Value   : LongInt;
     OvcNumericField1Value   : LongInt;
     OvcNumericField2Value   : Extended;
     OvcNumericField3Value   : ShortInt;
     OvcRotatedLabel1Text    : string;
+    OvcEditor1Text          : string;
   end;
 
   TTestOvcTransferFormTransferRec2 = packed record
@@ -41,14 +43,16 @@ type
     OvcSimpleField2Value    : LongInt;
     OvcSimpleField3Value    : Double;
     OvcSimpleField4Value    : Boolean;
+    OvcSimpleField5Value    : Char;
     OvcPictureField1Value   : array[0..25] of Char;
     OvcPictureField2Value   : TStDate;
-    //    OvcPictureField3Value   : TDateTime;
+    OvcPictureField3Value   : TDateTime;
     OvcPictureField4Value   : LongInt;
     OvcNumericField1Value   : LongInt;
     OvcNumericField2Value   : Extended;
     OvcNumericField3Value   : ShortInt;
     OvcRotatedLabel1Text    : array[0..255] of Char;
+    OvcEditor1Text          : array[0..255] of Char;
   end;
 
   TTestOvcTransferFormTransferRec3 = packed record
@@ -60,14 +64,16 @@ type
     OvcSimpleField2Value    : LongInt;
     OvcSimpleField3Value    : Double;
     OvcSimpleField4Value    : Boolean;
+    OvcSimpleField5Value    : Char;
     OvcPictureField1Value   : string[25];
     OvcPictureField2Value   : TStDate;
-//    OvcPictureField3Value   : TDateTime;
+    OvcPictureField3Value   : TDateTime;
     OvcPictureField4Value   : LongInt;
     OvcNumericField1Value   : LongInt;
     OvcNumericField2Value   : Extended;
     OvcNumericField3Value   : ShortInt;
     OvcRotatedLabel1Text    : ShortString;
+    OvcEditor1Text          : ShortString;
   end;
 
   TTestOvcTransferForm = class(TForm)
@@ -90,6 +96,8 @@ type
     OvcNumericField3: TOvcNumericField;
     OvcRotatedLabel1: TOvcRotatedLabel;
     OvcTransfer1: TOvcTransfer;
+    OvcSimpleField5: TOvcSimpleField;
+    OvcEditor1: TOvcEditor;
   private
     procedure InitRec1(var Data : TTestOvcTransferFormTransferRec1);
     procedure InitRec2(var Data : TTestOvcTransferFormTransferRec2);
@@ -135,14 +143,16 @@ begin
     OvcSimpleField2Value    := 0;
     OvcSimpleField3Value    := 0;
     OvcSimpleField4Value    := False;
+    OvcSimpleField5Value    := 'X';
     OvcPictureField1Value   := '';
     OvcPictureField2Value   := OvcDate.BadDate;
-//    OvcPictureField3Value   := 0;
+    OvcPictureField3Value   := 0;
     OvcPictureField4Value   := 0;
     OvcNumericField1Value   := 0;
     OvcNumericField2Value   := 0;
     OvcNumericField3Value   := 0;
     OvcRotatedLabel1Text    := '';
+    OvcEditor1Text          := '';
   end; {with}
 end;
 
@@ -158,14 +168,16 @@ begin
     OvcSimpleField2Value    := 0;
     OvcSimpleField3Value    := 0;
     OvcSimpleField4Value    := False;
+    OvcSimpleField5Value    := 'Y';
     OvcPictureField1Value   := '';
     OvcPictureField2Value   := OvcDate.BadDate;
-//    OvcPictureField3Value   := 0;
+    OvcPictureField3Value   := 0;
     OvcPictureField4Value   := 0;
     OvcNumericField1Value   := 0;
     OvcNumericField2Value   := 0;
     OvcNumericField3Value   := 0;
     OvcRotatedLabel1Text    := '';
+    OvcEditor1Text          := '';
   end; {with}
 end;
 
@@ -181,14 +193,16 @@ begin
     OvcSimpleField2Value    := 0;
     OvcSimpleField3Value    := 0;
     OvcSimpleField4Value    := False;
+    OvcSimpleField5Value    := 'Z';
     OvcPictureField1Value   := '';
     OvcPictureField2Value   := OvcDate.BadDate;
-//    OvcPictureField3Value   := 0;
+    OvcPictureField3Value   := 0;
     OvcPictureField4Value   := 0;
     OvcNumericField1Value   := 0;
     OvcNumericField2Value   := 0;
     OvcNumericField3Value   := 0;
     OvcRotatedLabel1Text    := '';
+    OvcEditor1Text          := '';
   end; {with}
 end;
 
@@ -227,14 +241,21 @@ begin
     OvcSimpleField2Value    := 42;
     OvcSimpleField3Value    := 42;
     OvcSimpleField4Value    := False;
+    OvcSimpleField5Value    := {$IFDEF UNICODE}'Ѻ'{$ELSE}'X'{$ENDIF};
     OvcPictureField1Value   := 'OvcPictureField1Value';
     OvcPictureField2Value   := OvcDate.DMYtoStDate(27,03,2011,0);
-//    OvcPictureField3Value   := EncodeDateTime(2011, 3, 27, 22, 27, 01, 0);
+    OvcPictureField3Value   := EncodeDateTime(2011, 3, 27, 22, 27, 01, 0);
     OvcPictureField4Value   := 42;
     OvcNumericField1Value   := 43;
     OvcNumericField2Value   := 44;
     OvcNumericField3Value   := 45;
     OvcRotatedLabel1Text    := 'OvcRotatedLabel1Text';
+    OvcEditor1Text          := {$IFDEF UNICODE}
+                               'Съешь ещё этих мягких'#13#10'французских булок, да выпей чаю';
+                               {$ELSE}
+                               'The quick brown fox'#13#10'jumps over the lazy dog.';
+                               {$ENDIF}
+
   end;
 
   OrTransfer1 := TOvcTransfer.Create(nil);
@@ -249,14 +270,16 @@ begin
                                 FForm.OvcSimpleField2,
                                 FForm.OvcSimpleField3,
                                 FForm.OvcSimpleField4,
+                                FForm.OvcSimpleField5,
                                 FForm.OvcPictureField1,
                                 FForm.OvcPictureField2,
-//                                FForm.OvcPictureField3,
+                                FForm.OvcPictureField3,
                                 FForm.OvcPictureField4,
                                 FForm.OvcNumericField1,
                                 FForm.OvcNumericField2,
                                 FForm.OvcNumericField3,
-                                FForm.OvcRotatedLabel1], TR);
+                                FForm.OvcRotatedLabel1,
+                                FForm.OvcEditor1], TR);
 
     CheckEquals(TR.Edit1Text,                FForm.Edit1.Text,                  'Test failed for Edit1');
     CheckEquals(TR.Label1Text,               FForm.Label1.Caption,              'Test failed for Label1');
@@ -270,14 +293,16 @@ begin
     CheckEquals(TR.OvcSimpleField2Value,     FForm.OvcSimpleField2.AsInteger,   'Test failed for OvcSimpleField2');
     CheckEquals(TR.OvcSimpleField3Value,     FForm.OvcSimpleField3.AsFloat,     'Test failed for OvcSimpleField3');
     CheckEquals(TR.OvcSimpleField4Value,     FForm.OvcSimpleField4.AsBoolean,   'Test failed for OvcSimpleField4');
+    CheckEquals(TR.OvcSimpleField5Value,     FForm.OvcSimpleField5.AsString,    'Test failed for OvcSimpleField5');
     CheckEquals(TR.OvcPictureField1Value,    FForm.OvcPictureField1.AsString,   'Test failed for OvcPictureField1');
     CheckEquals(TR.OvcPictureField2Value,    FForm.OvcPictureField2.AsOvcDate,  'Test failed for OvcPictureField2');
-//    CheckEquals(TR.OvcPictureField3Value,    FForm.OvcPictureField3.AsDateTime, 'Test failed for OvcPictureField3');
+    CheckEquals(TR.OvcPictureField3Value,    FForm.OvcPictureField3.AsDateTime, 'Test failed for OvcPictureField3');
     CheckEquals(TR.OvcPictureField4Value,    FForm.OvcPictureField4.AsInteger,  'Test failed for OvcPictureField4');
     CheckEquals(TR.OvcNumericField1Value,    FForm.OvcNumericField1.AsInteger,  'Test failed for OvcNumericField1');
     CheckEquals(TR.OvcNumericField2Value,    FForm.OvcNumericField2.AsExtended, 'Test failed for OvcNumericField2');
     CheckEquals(TR.OvcNumericField3Value,    FForm.OvcNumericField3.AsInteger,  'Test failed for OvcNumericField3');
     CheckEquals(TR.OvcRotatedLabel1Text,     FForm.OvcRotatedLabel1.Caption,    'Test failed for OvcRotatedLabel1');
+    CheckEquals(TR.OvcEditor1Text,           FForm.OvcEditor1.Text,             'Test failed for OvcEditor1');
   finally
     OrTransfer1.Free;
   end;
@@ -302,14 +327,16 @@ begin
     OvcSimpleField2.AsInteger   := 12345;
     OvcSimpleField3.AsFloat     := 43.5;
     OvcSimpleField4.AsBoolean   := True;
+    OvcSimpleField5.AsString    := {$IFDEF UNICODE}'Ѻ'{$ELSE}'X'{$ENDIF};
     OvcPictureField1.AsString   := 'OvcPictureField1.AsString';
     OvcPictureField2.AsOvcDate  := OvcDate.DMYtoStDate(14, 4, 1968, 0);
-//    OvcPictureField3.AsDateTime := EncodeDateTime(2011, 3, 27, 22, 27, 01, 0);
+    OvcPictureField3.AsDateTime := EncodeDateTime(2011, 3, 27, 22, 27, 01, 0);
     OvcPictureField4.AsInteger  := 5432;
     OvcNumericField1.AsInteger  := 1000;
     OvcNumericField2.AsExtended := 31.25;
     OvcNumericField3.AsInteger  := -7;
     OvcRotatedLabel1.Caption    := 'OvcRotatedLabel1';
+    OvcEditor1.Text             := 'Arepo sator'#13#10'tenet'#13#10'rotas opera';
   end;
 
   FForm.InitRec1(TR);
@@ -325,14 +352,16 @@ begin
                                   FForm.OvcSimpleField2,
                                   FForm.OvcSimpleField3,
                                   FForm.OvcSimpleField4,
+                                  FForm.OvcSimpleField5,
                                   FForm.OvcPictureField1,
                                   FForm.OvcPictureField2,
-//                                  FForm.OvcPictureField3,
+                                  FForm.OvcPictureField3,
                                   FForm.OvcPictureField4,
                                   FForm.OvcNumericField1,
                                   FForm.OvcNumericField2,
                                   FForm.OvcNumericField3,
-                                  FForm.OvcRotatedLabel1], TR);
+                                  FForm.OvcRotatedLabel1,
+                                  FForm.OvcEditor1], TR);
 
     CheckEquals(FForm.Edit1.Text,           TR.Edit1Text,                'Test failed for Edit1');
     CheckEquals(FForm.Label1.Caption,       TR.Label1Text,               'Test failed for Label1');
@@ -346,14 +375,16 @@ begin
     CheckEquals(FForm.OvcSimpleField2.AsInteger,   TR.OvcSimpleField2Value,  'Test failed for OvcSimpleField2');
     CheckEquals(FForm.OvcSimpleField3.AsFloat,     TR.OvcSimpleField3Value,  'Test failed for OvcSimpleField3');
     CheckEquals(FForm.OvcSimpleField4.AsBoolean,   TR.OvcSimpleField4Value,  'Test failed for OvcSimpleField4');
+    CheckEquals(FForm.OvcSimpleField5.AsString,    TR.OvcSimpleField5Value,  'Test failed for OvcSimpleField5');
     CheckEquals(FForm.OvcPictureField1.AsString,   TR.OvcPictureField1Value, 'Test failed for OvcPictureField1');
     CheckEquals(FForm.OvcPictureField2.AsOvcDate,  TR.OvcPictureField2Value, 'Test failed for OvcPictureField2');
-//    CheckEquals(FForm.OvcPictureField3.AsDateTime, TR.OvcPictureField3Value, 'Test failed for OvcPictureField3');
+    CheckEquals(FForm.OvcPictureField3.AsDateTime, TR.OvcPictureField3Value, 'Test failed for OvcPictureField3');
     CheckEquals(FForm.OvcPictureField4.AsInteger,  TR.OvcPictureField4Value, 'Test failed for OvcPictureField4');
     CheckEquals(FForm.OvcNumericField1.AsInteger,  TR.OvcNumericField1Value, 'Test failed for OvcNumericField1');
     CheckEquals(FForm.OvcNumericField2.AsExtended, TR.OvcNumericField2Value, 'Test failed for OvcNumericField2');
     CheckEquals(FForm.OvcNumericField3.AsInteger,  TR.OvcNumericField3Value, 'Test failed for OvcNumericField3');
     CheckEquals(FForm.OvcRotatedLabel1.Caption,    TR.OvcRotatedLabel1Text,  'Test failed for OvcRotatedLabel1');
+    CheckEquals(FForm.OvcEditor1.Text,             TR.OvcEditor1Text,        'Test failed for OvcEditor1');
   finally
     OrTransfer1.Free;
   end;
@@ -375,14 +406,16 @@ begin
     OvcSimpleField2Value    := 42;
     OvcSimpleField3Value    := 42;
     OvcSimpleField4Value    := False;
+    OvcSimpleField5Value    := {$IFDEF UNICODE}'Ѻ'{$ELSE}'X'{$ENDIF};
     OvcPictureField1Value   := 'OvcPictureField1Value';
     OvcPictureField2Value   := OvcDate.DMYtoStDate(27,03,2011,0);
-//    OvcPictureField3Value   := EncodeDateTime(2011, 3, 27, 22, 27, 01, 0);
+    OvcPictureField3Value   := EncodeDateTime(2011, 3, 27, 22, 27, 01, 0);
     OvcPictureField4Value   := 42;
     OvcNumericField1Value   := 43;
     OvcNumericField2Value   := 44;
     OvcNumericField3Value   := 45;
     OvcRotatedLabel1Text    := 'OvcRotatedLabel1Text';
+    OvcEditor1Text          := 'The quick brown fox'#13#10'jumps over the lazy dog.';
   end;
 
   OrTransfer1 := TOvcTransfer.Create(nil);
@@ -395,14 +428,16 @@ begin
                                 FForm.OvcSimpleField2,
                                 FForm.OvcSimpleField3,
                                 FForm.OvcSimpleField4,
+                                FForm.OvcSimpleField5,
                                 FForm.OvcPictureField1,
                                 FForm.OvcPictureField2,
-//                                FForm.OvcPictureField3,
+                                FForm.OvcPictureField3,
                                 FForm.OvcPictureField4,
                                 FForm.OvcNumericField1,
                                 FForm.OvcNumericField2,
                                 FForm.OvcNumericField3,
-                                FForm.OvcRotatedLabel1], TR);
+                                FForm.OvcRotatedLabel1,
+                                FForm.OvcEditor1], TR);
 
     CheckEquals(TR.Edit1Text,                FForm.Edit1.Text,                  'Test failed for Edit1');
     CheckEquals(TR.Label1Text,               FForm.Label1.Caption,              'Test failed for Label1');
@@ -412,14 +447,16 @@ begin
     CheckEquals(TR.OvcSimpleField2Value,     FForm.OvcSimpleField2.AsInteger,   'Test failed for OvcSimpleField2');
     CheckEquals(TR.OvcSimpleField3Value,     FForm.OvcSimpleField3.AsFloat,     'Test failed for OvcSimpleField3');
     CheckEquals(TR.OvcSimpleField4Value,     FForm.OvcSimpleField4.AsBoolean,   'Test failed for OvcSimpleField4');
+    CheckEquals(TR.OvcSimpleField5Value,     FForm.OvcSimpleField5.AsString,    'Test failed for OvcSimpleField5');
     CheckEquals(TR.OvcPictureField1Value,    FForm.OvcPictureField1.AsString,   'Test failed for OvcPictureField1');
     CheckEquals(TR.OvcPictureField2Value,    FForm.OvcPictureField2.AsOvcDate,  'Test failed for OvcPictureField2');
-//    CheckEquals(TR.OvcPictureField3Value,    FForm.OvcPictureField3.AsDateTime, 'Test failed for OvcPictureField3');
+    CheckEquals(TR.OvcPictureField3Value,    FForm.OvcPictureField3.AsDateTime, 'Test failed for OvcPictureField3');
     CheckEquals(TR.OvcPictureField4Value,    FForm.OvcPictureField4.AsInteger,  'Test failed for OvcPictureField4');
     CheckEquals(TR.OvcNumericField1Value,    FForm.OvcNumericField1.AsInteger,  'Test failed for OvcNumericField1');
     CheckEquals(TR.OvcNumericField2Value,    FForm.OvcNumericField2.AsExtended, 'Test failed for OvcNumericField2');
     CheckEquals(TR.OvcNumericField3Value,    FForm.OvcNumericField3.AsInteger,  'Test failed for OvcNumericField3');
     CheckEquals(TR.OvcRotatedLabel1Text,     FForm.OvcRotatedLabel1.Caption,    'Test failed for OvcRotatedLabel1');
+    CheckEquals(TR.OvcEditor1Text,           FForm.OvcEditor1.Text,             'Test failed for OvcEditor1');
   finally
     OrTransfer1.Free;
   end;
@@ -444,14 +481,16 @@ begin
     OvcSimpleField2.AsInteger   := 12345;
     OvcSimpleField3.AsFloat     := 43.5;
     OvcSimpleField4.AsBoolean   := True;
+    OvcSimpleField5.AsString    := {$IFDEF UNICODE}'Ѻ'{$ELSE}'X'{$ENDIF};
     OvcPictureField1.AsString   := 'OvcPictureField1.AsString';
     OvcPictureField2.AsOvcDate  := OvcDate.DMYtoStDate(14, 4, 1968, 0);
-//    OvcPictureField3.AsDateTime := EncodeDateTime(2011, 3, 27, 22, 27, 01, 0);
+    OvcPictureField3.AsDateTime := EncodeDateTime(2011, 3, 27, 22, 27, 01, 0);
     OvcPictureField4.AsInteger  := 5432;
     OvcNumericField1.AsInteger  := 1000;
     OvcNumericField2.AsExtended := 31.25;
     OvcNumericField3.AsInteger  := -7;
     OvcRotatedLabel1.Caption    := 'OvcRotatedLabel1';
+    OvcEditor1.Text             := 'Arepo sator'#13#10'tenet'#13#10'rotas opera';
   end;
 
   FForm.InitRec2(TR);
@@ -465,14 +504,16 @@ begin
                                   FForm.OvcSimpleField2,
                                   FForm.OvcSimpleField3,
                                   FForm.OvcSimpleField4,
+                                  FForm.OvcSimpleField5,
                                   FForm.OvcPictureField1,
                                   FForm.OvcPictureField2,
-//                                  FForm.OvcPictureField3,
+                                  FForm.OvcPictureField3,
                                   FForm.OvcPictureField4,
                                   FForm.OvcNumericField1,
                                   FForm.OvcNumericField2,
                                   FForm.OvcNumericField3,
-                                  FForm.OvcRotatedLabel1], TR);
+                                  FForm.OvcRotatedLabel1,
+                                  FForm.OvcEditor1], TR);
 
     CheckEquals(FForm.Edit1.Text,           TR.Edit1Text,                'Test failed for Edit1');
     CheckEquals(FForm.Label1.Caption,       TR.Label1Text,               'Test failed for Label1');
@@ -482,14 +523,16 @@ begin
     CheckEquals(FForm.OvcSimpleField2.AsInteger,   TR.OvcSimpleField2Value,  'Test failed for OvcSimpleField2');
     CheckEquals(FForm.OvcSimpleField3.AsFloat,     TR.OvcSimpleField3Value,  'Test failed for OvcSimpleField3');
     CheckEquals(FForm.OvcSimpleField4.AsBoolean,   TR.OvcSimpleField4Value,  'Test failed for OvcSimpleField4');
+    CheckEquals(FForm.OvcSimpleField5.AsString,    TR.OvcSimpleField5Value,  'Test failed for OvcSimpleField5');
     CheckEquals(FForm.OvcPictureField1.AsString,   TR.OvcPictureField1Value, 'Test failed for OvcPictureField1');
     CheckEquals(FForm.OvcPictureField2.AsOvcDate,  TR.OvcPictureField2Value, 'Test failed for OvcPictureField2');
-//    CheckEquals(FForm.OvcPictureField3.AsDateTime, TR.OvcPictureField3Value, 'Test failed for OvcPictureField3');
+    CheckEquals(FForm.OvcPictureField3.AsDateTime, TR.OvcPictureField3Value, 'Test failed for OvcPictureField3');
     CheckEquals(FForm.OvcPictureField4.AsInteger,  TR.OvcPictureField4Value, 'Test failed for OvcPictureField4');
     CheckEquals(FForm.OvcNumericField1.AsInteger,  TR.OvcNumericField1Value, 'Test failed for OvcNumericField1');
     CheckEquals(FForm.OvcNumericField2.AsExtended, TR.OvcNumericField2Value, 'Test failed for OvcNumericField2');
     CheckEquals(FForm.OvcNumericField3.AsInteger,  TR.OvcNumericField3Value, 'Test failed for OvcNumericField3');
     CheckEquals(FForm.OvcRotatedLabel1.Caption,    TR.OvcRotatedLabel1Text,  'Test failed for OvcRotatedLabel1');
+    CheckEquals(FForm.OvcEditor1.Text,             TR.OvcEditor1Text,        'Test failed for OvcEditor1');
   finally
     OrTransfer1.Free;
   end;
@@ -511,14 +554,16 @@ begin
     OvcSimpleField2Value    := 42;
     OvcSimpleField3Value    := 42;
     OvcSimpleField4Value    := False;
+    OvcSimpleField5Value    := {$IFDEF UNICODE}'Ѻ'{$ELSE}'X'{$ENDIF};
     OvcPictureField1Value   := 'OvcPictureField1Value';
     OvcPictureField2Value   := OvcDate.DMYtoStDate(27,03,2011,0);
-//    OvcPictureField3Value   := EncodeDateTime(2011, 3, 27, 22, 27, 01, 0);
+    OvcPictureField3Value   := EncodeDateTime(2011, 3, 27, 22, 27, 01, 0);
     OvcPictureField4Value   := 42;
     OvcNumericField1Value   := 43;
     OvcNumericField2Value   := 44;
     OvcNumericField3Value   := 45;
     OvcRotatedLabel1Text    := 'OvcRotatedLabel1Text';
+    OvcEditor1Text          := 'The quick brown fox'#13#10'jumps over the lazy dog.';
   end;
 
   OrTransfer1 := TOvcTransfer.Create(nil);
@@ -531,14 +576,16 @@ begin
                                 FForm.OvcSimpleField2,
                                 FForm.OvcSimpleField3,
                                 FForm.OvcSimpleField4,
+                                FForm.OvcSimpleField5,
                                 FForm.OvcPictureField1,
                                 FForm.OvcPictureField2,
-//                                FForm.OvcPictureField3,
+                                FForm.OvcPictureField3,
                                 FForm.OvcPictureField4,
                                 FForm.OvcNumericField1,
                                 FForm.OvcNumericField2,
                                 FForm.OvcNumericField3,
-                                FForm.OvcRotatedLabel1], TR);
+                                FForm.OvcRotatedLabel1,
+                                FForm.OvcEditor1], TR);
 
     CheckEquals(string(TR.Edit1Text),            FForm.Edit1.Text,                  'Test failed for Edit1');
     CheckEquals(string(TR.Label1Text),           FForm.Label1.Caption,              'Test failed for Label1');
@@ -548,14 +595,16 @@ begin
     CheckEquals(TR.OvcSimpleField2Value,         FForm.OvcSimpleField2.AsInteger,   'Test failed for OvcSimpleField2');
     CheckEquals(TR.OvcSimpleField3Value,         FForm.OvcSimpleField3.AsFloat,     'Test failed for OvcSimpleField3');
     CheckEquals(TR.OvcSimpleField4Value,         FForm.OvcSimpleField4.AsBoolean,   'Test failed for OvcSimpleField4');
+    CheckEquals(TR.OvcSimpleField5Value,         FForm.OvcSimpleField5.AsString,    'Test failed for OvcSimpleField5');
     CheckEquals(string(TR.OvcPictureField1Value),FForm.OvcPictureField1.AsString,   'Test failed for OvcPictureField1');
     CheckEquals(TR.OvcPictureField2Value,        FForm.OvcPictureField2.AsOvcDate,  'Test failed for OvcPictureField2');
-//    CheckEquals(TR.OvcPictureField3Value,        FForm.OvcPictureField3.AsDateTime, 'Test failed for OvcPictureField3');
+    CheckEquals(TR.OvcPictureField3Value,        FForm.OvcPictureField3.AsDateTime, 'Test failed for OvcPictureField3');
     CheckEquals(TR.OvcPictureField4Value,        FForm.OvcPictureField4.AsInteger,  'Test failed for OvcPictureField4');
     CheckEquals(TR.OvcNumericField1Value,        FForm.OvcNumericField1.AsInteger,  'Test failed for OvcNumericField1');
     CheckEquals(TR.OvcNumericField2Value,        FForm.OvcNumericField2.AsExtended, 'Test failed for OvcNumericField2');
     CheckEquals(TR.OvcNumericField3Value,        FForm.OvcNumericField3.AsInteger,  'Test failed for OvcNumericField3');
     CheckEquals(string(TR.OvcRotatedLabel1Text), FForm.OvcRotatedLabel1.Caption,    'Test failed for OvcRotatedLabel1');
+    CheckEquals(string(TR.OvcEditor1Text),       FForm.OvcEditor1.Text,             'Test failed for OvcEditor1');
   finally
     OrTransfer1.Free;
   end;
@@ -580,14 +629,16 @@ begin
     OvcSimpleField2.AsInteger   := 12345;
     OvcSimpleField3.AsFloat     := 43.5;
     OvcSimpleField4.AsBoolean   := True;
+    OvcSimpleField5.AsString    := {$IFDEF UNICODE}'Ѻ'{$ELSE}'X'{$ENDIF};
     OvcPictureField1.AsString   := 'OvcPictureField1.AsString';
     OvcPictureField2.AsOvcDate  := OvcDate.DMYtoStDate(14, 4, 1968, 0);
-//    OvcPictureField3.AsDateTime := EncodeDateTime(2011, 3, 27, 22, 27, 01, 0);
+    OvcPictureField3.AsDateTime := EncodeDateTime(2011, 3, 27, 22, 27, 01, 0);
     OvcPictureField4.AsInteger  := 5432;
     OvcNumericField1.AsInteger  := 1000;
     OvcNumericField2.AsExtended := 31.25;
     OvcNumericField3.AsInteger  := -7;
     OvcRotatedLabel1.Caption    := 'OvcRotatedLabel1';
+    OvcEditor1.Text             := 'Arepo sator'#13#10'tenet'#13#10'rotas opera';
   end;
 
   FForm.InitRec3(TR);
@@ -601,14 +652,16 @@ begin
                                   FForm.OvcSimpleField2,
                                   FForm.OvcSimpleField3,
                                   FForm.OvcSimpleField4,
+                                  FForm.OvcSimpleField5,
                                   FForm.OvcPictureField1,
                                   FForm.OvcPictureField2,
-//                                  FForm.OvcPictureField3,
+                                  FForm.OvcPictureField3,
                                   FForm.OvcPictureField4,
                                   FForm.OvcNumericField1,
                                   FForm.OvcNumericField2,
                                   FForm.OvcNumericField3,
-                                  FForm.OvcRotatedLabel1], TR);
+                                  FForm.OvcRotatedLabel1,
+                                  FForm.OvcEditor1], TR);
 
     CheckEquals(FForm.Edit1.Text,           string(TR.Edit1Text),        'Test failed for Edit1');
     CheckEquals(FForm.Label1.Caption,       string(TR.Label1Text),       'Test failed for Label1');
@@ -618,14 +671,16 @@ begin
     CheckEquals(FForm.OvcSimpleField2.AsInteger,   TR.OvcSimpleField2Value,          'Test failed for OvcSimpleField2');
     CheckEquals(FForm.OvcSimpleField3.AsFloat,     TR.OvcSimpleField3Value,          'Test failed for OvcSimpleField3');
     CheckEquals(FForm.OvcSimpleField4.AsBoolean,   TR.OvcSimpleField4Value,          'Test failed for OvcSimpleField4');
+    CheckEquals(FForm.OvcSimpleField5.AsString,    TR.OvcSimpleField5Value,          'Test failed for OvcSimpleField5');
     CheckEquals(FForm.OvcPictureField1.AsString,   string(TR.OvcPictureField1Value), 'Test failed for OvcPictureField1');
     CheckEquals(FForm.OvcPictureField2.AsOvcDate,  TR.OvcPictureField2Value,         'Test failed for OvcPictureField2');
-//    CheckEquals(FForm.OvcPictureField3.AsDateTime, TR.OvcPictureField3Value, 'Test failed for OvcPictureField3');
+    CheckEquals(FForm.OvcPictureField3.AsDateTime, TR.OvcPictureField3Value, 'Test failed for OvcPictureField3');
     CheckEquals(FForm.OvcPictureField4.AsInteger,  TR.OvcPictureField4Value,         'Test failed for OvcPictureField4');
     CheckEquals(FForm.OvcNumericField1.AsInteger,  TR.OvcNumericField1Value,         'Test failed for OvcNumericField1');
     CheckEquals(FForm.OvcNumericField2.AsExtended, TR.OvcNumericField2Value,         'Test failed for OvcNumericField2');
     CheckEquals(FForm.OvcNumericField3.AsInteger,  TR.OvcNumericField3Value,         'Test failed for OvcNumericField3');
     CheckEquals(FForm.OvcRotatedLabel1.Caption,    string(TR.OvcRotatedLabel1Text),  'Test failed for OvcRotatedLabel1');
+    CheckEquals(FForm.OvcEditor1.Text,             string(TR.OvcEditor1Text),        'Test failed for OvcEditor1');
   finally
     OrTransfer1.Free;
   end;

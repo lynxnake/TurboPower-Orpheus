@@ -320,7 +320,7 @@ begin
                 S := '';
             end;
           end;
-          fsubChar     : S := 'AnsiChar;';
+          fsubChar     : S := 'Char;';
           fsubBoolean  : S := 'Boolean;';
           fsubYesNo    : S := 'Boolean;';
           fsubLongInt  : S := 'LongInt;';

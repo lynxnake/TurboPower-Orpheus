@@ -916,42 +916,6 @@ end;
 {$ENDIF}
 
 
-function MinI(X, Y : integer) : integer;
-  {Return the minimum of two integers}
-begin
-  if (X < Y) then
-    Result := X
-  else
-    Result := Y;
-end;
-
-function MaxI(X, Y : integer) : integer;
-  {Return the maximum of two integers}
-begin
-  if (X > Y) then
-    Result := X
-  else
-    Result := Y;
-end;
-
-function MinL(X, Y : LongInt) : LongInt;
-  {Return the minimum of two long integers}
-begin
-  if (X < Y) then
-    Result := X
-  else
-    Result := Y;
-end;
-
-function MaxL(X, Y : LongInt) : LongInt;
-  {Return the maximum of two long integers}
-begin
-  if (X > Y) then
-    Result := X
-  else
-    Result := Y;
-end;
-
 function PosEqual(const P1, P2 : TOvcTextPos) : Boolean;
   {-Return True if two text positions are the same}
 begin

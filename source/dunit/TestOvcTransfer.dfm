@@ -22,7 +22,7 @@ object TestOvcTransferForm: TTestOvcTransferForm
   end
   object OvcRotatedLabel1: TOvcRotatedLabel
     Left = 464
-    Top = 148
+    Top = 110
     Width = 130
     Height = 83
     Alignment = taCenter
@@ -168,7 +168,7 @@ object TestOvcTransferForm: TTestOvcTransferForm
   end
   object OvcPictureField1: TOvcPictureField
     Left = 288
-    Top = 138
+    Top = 178
     Width = 130
     Height = 21
     Cursor = crIBeam
@@ -190,7 +190,7 @@ object TestOvcTransferForm: TTestOvcTransferForm
   end
   object OvcPictureField2: TOvcPictureField
     Left = 288
-    Top = 165
+    Top = 205
     Width = 130
     Height = 21
     Cursor = crIBeam
@@ -215,7 +215,7 @@ object TestOvcTransferForm: TTestOvcTransferForm
   end
   object OvcPictureField3: TOvcPictureField
     Left = 288
-    Top = 192
+    Top = 232
     Width = 130
     Height = 21
     Cursor = crIBeam
@@ -231,16 +231,16 @@ object TestOvcTransferForm: TTestOvcTransferForm
     EFColors.Highlight.TextColor = clHighlightText
     Epoch = 0
     InitDateTime = False
-    MaxLength = 16
+    MaxLength = 19
     Options = [efoCaretToEnd]
-    PictureMask = 'dd/mm/yyyy hh:mm'
+    PictureMask = 'dd/mm/yyyy hh:mm:ss'
     TabOrder = 11
-    RangeHigh = {25600D00000000000000}
-    RangeLow = {00000000000000000000}
+    RangeHigh = {73B2DBB9838916F2FE43}
+    RangeLow = {73B2DBB9838916F2FEC3}
   end
   object OvcPictureField4: TOvcPictureField
     Left = 288
-    Top = 219
+    Top = 259
     Width = 130
     Height = 21
     Cursor = crIBeam
@@ -323,8 +323,49 @@ object TestOvcTransferForm: TTestOvcTransferForm
     RangeHigh = {7F000000000000000000}
     RangeLow = {80FFFFFF000000000000}
   end
-  object OvcTransfer1: TOvcTransfer
+  object OvcSimpleField5: TOvcSimpleField
     Left = 288
-    Top = 262
+    Top = 124
+    Width = 130
+    Height = 21
+    Cursor = crIBeam
+    DataType = sftChar
+    CaretOvr.Shape = csBlock
+    ControlCharColor = clRed
+    DecimalPlaces = 0
+    EFColors.Disabled.BackColor = clWindow
+    EFColors.Disabled.TextColor = clGrayText
+    EFColors.Error.BackColor = clRed
+    EFColors.Error.TextColor = clBlack
+    EFColors.Highlight.BackColor = clHighlight
+    EFColors.Highlight.TextColor = clHighlightText
+    MaxLength = 1
+    Options = []
+    PictureMask = 'X'
+    TabOrder = 16
+    RangeHigh = {20000000000000000000}
+    RangeLow = {20000000000000000000}
+  end
+  object OvcEditor1: TOvcEditor
+    Left = 464
+    Top = 210
+    Width = 130
+    Height = 96
+    CaretOvr.Shape = csBlock
+    FixedFont.Color = clWindowText
+    FixedFont.Name = 'Terminal'
+    FixedFont.Size = 8
+    FixedFont.Style = []
+    HighlightColors.BackColor = clHighlight
+    HighlightColors.TextColor = clHighlightText
+    LeftMargin = 15
+    MarginOptions.Right.LinePosition = 5
+    MarginOptions.Left.LinePosition = 15
+    RightMargin = 5
+    TabOrder = 17
+  end
+  object OvcTransfer1: TOvcTransfer
+    Left = 226
+    Top = 258
   end
 end

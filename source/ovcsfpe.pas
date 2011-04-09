@@ -96,14 +96,6 @@ var
   I : Integer;
   S : string;
 
-  function MinI(X, Y : Integer) : Integer;
-  begin
-    if X < Y then
-      Result := X
-    else
-      Result := Y;
-  end;
-
 begin
   {return the mask character}
   with cbxMaskCharacter do begin
