@@ -1,3 +1,4 @@
+{$I OVC.INC}
 
 unit ExRvDir0;
 
@@ -8,7 +9,7 @@ uses
   Dialogs, StdCtrls, ExtCtrls, OvcBase, OvcRVIdx, OvcRptVw, Buttons,
   OvcMisc, OvcLkOut, OvcCmbx, OvcRvCbx, OvcDlg, OvcRvPDg, OvcViewEd,
   OvcFiler, OvcStore, OvcBtnHd, ImgList, FileCtrl, Menus, OvcState,
-  {$IFDEF VER140} Variants, {$ENDIF}                                  {!!.02}
+  {$IFDEF VERSION7} Variants, {$ENDIF}
   OvcHsCbx, ComCtrls;
 
 type

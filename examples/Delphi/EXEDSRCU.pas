@@ -34,7 +34,7 @@ implementation
 
 procedure TfrmSearch.FormCreate(Sender: TObject);
 begin
-  Ed1.Filename := 'C:\AUTOEXEC.BAT';
+  Ed1.Filename := extractfilepath(application.exename)+'EXEDSRCU.pas';
   ED1.IsOpen := True;
 end;
 

@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                  OVCSTORE.PAS 4.06                    *}
+{*                  OVCSTORE.PAS 4.08                    *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -42,6 +42,9 @@ interface
 
 uses
   Windows, Registry, Classes, Controls, Forms, SysUtils, IniFiles, OvcFiler,
+{$IFDEF UNICODE}
+  OvcStr, StrUtils,
+{$ENDIF}
   OvcData, OvcConst;
 
 type
@@ -318,16 +321,66 @@ begin
   FStore := TIniFile.Create(S);
 end;
 
+const
+  UTF7_prefix = 'UTF7-coded:';
+
 function TOvcIniFileStore.ReadString(const Section, Item,
                                      DefaultValue : string) : string;
+  {-read string from ini-File
+
+   -Changes
+     04/2011, AB: Added unicode version}
+
+{$IFDEF UNICODE}
+var
+  Bytes : TBytes;
+  i, L: Integer;
+begin
+  Result := FStore.ReadString(Section, Item, DefaultValue);
+  if (Result<>DefaultValue) and AnsiStartsStr(UTF7_prefix,Result) then begin
+    L := Length(UTF7_prefix);
+    SetLength(Bytes, Length(result)-L);
+    for i := 0 to High(bytes) do
+      Bytes[i] := Ord(result[i+L+1]);
+    Result := SysUtils.TEncoding.UTF7.GetString(Bytes);
+  end;
+end;
+{$ELSE}
 begin
   Result := FStore.ReadString(Section, Item, DefaultValue);
 end;
+{$ENDIF}
 
 procedure TOvcIniFileStore.WriteString(const Section, Item, Value : string);
+  {-write string to ini-File
+
+   -Changes
+     04/2011, AB: Added unicode version}
+
+{$IFDEF UNICODE}
+var
+  Bytes : TBytes;
+  s : string;
+  i, L: Integer;
+begin
+  if ovc32StringIsCurrentCodePage(Value) then
+    FStore.WriteString(Section, Item, Value)
+  else begin
+    Bytes := SysUtils.TEncoding.UTF7.GetBytes(Value);
+    L := Length(UTF7_prefix);
+    s := UTF7_prefix;
+    SetLength(s, High(Bytes)+1+L);
+    for i := 0 to High(bytes) do
+      s[i+L+1] := Chr(Bytes[i]);
+    FStore.WriteString(Section, Item, s);
+  end;
+end;
+{$ELSE}
 begin
   FStore.WriteString(Section, Item, Value);
 end;
+{$ENDIF}
+
 
 {===== TO32XMLFileStore ==============================================}
 

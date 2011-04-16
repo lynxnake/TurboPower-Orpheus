@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                    OVCBTNHD.PAS 4.06                  *}
+{*                    OVCBTNHD.PAS 4.08                  *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -42,6 +42,7 @@ interface
 
 uses
   Windows, Classes, Controls, ExtCtrls, Forms, Graphics,
+  {$IFDEF VERSION7}Types,{$ENDIF}
   Messages, SysUtils, OvcBase, OvcConst, OvcData, OvcMisc, OvcDrag;
 
 type
