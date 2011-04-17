@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                  OVCTCEDT.PAS 4.06                    *}
+{*                  OVCTCEDT.PAS 4.08                    *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -83,8 +83,6 @@ type
          read FMaxLength write FMaxLength;
 
     public
-      constructor Create(AOwner: TComponent); override;
-
       function CreateEditControl(AOwner : TComponent) : TOvcTCStringEdit; virtual;
 
       function  EditHandle : THandle; override;
@@ -123,7 +121,7 @@ type
       property TextHiColor default clBtnHighlight;
       property TextStyle default tsFlat;
       property UseWordWrap default False;
-      property UseASCIIZStrings default True;
+      property DataStringType;
 
       {events inherited from custom ancestor}
       property OnChange;
@@ -207,6 +205,7 @@ type
       property Access default otxDefault;
       property Adjust default otaDefault;
       property Color;
+      property DataStringType;
       property Font;
       property Hint;
       property Margin default 4;
@@ -241,11 +240,6 @@ type
 implementation
 
 {===TOvcTCCustomString===============================================}
-constructor TOvcTCCustomString.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-  UsePString := True;
-end;
 
 function TOvcTCCustomString.CreateEditControl(AOwner : TComponent) : TOvcTCStringEdit;
   begin
@@ -299,48 +293,38 @@ function TOvcTCCustomString.GetModified : boolean;
     else Result := false;
   end ;
 {--------}
-procedure TOvcTCCustomString.SaveEditedData(Data : pointer);     //SZ: TEST
+
+procedure TOvcTCCustomString.SaveEditedData(Data : pointer);
+  {-Changes:
+    04/2011, AB: UseASCIIZStrings/UsePString replaced by DataStringType }
   begin
     if Assigned(Data) then
-      if UseASCIIZStrings then
-      begin
-          if FUsePString then
-            PString(Data)^ := FEdit.Text
-          else
-            FEdit.GetTextBuf(PChar(Data), MaxLength);
-      end
-      else
-        POvcShortString(Data)^ := ShortString(Copy(FEdit.Text, 1, MaxLength));
+      case FDataStringType of
+        tstShortString: POvcShortString(Data)^ := ShortString(Copy(FEdit.Text, 1, MaxLength));
+        tstPChar:       FEdit.GetTextBuf(PChar(Data), MaxLength);
+        tstString:      PString(Data)^ := FEdit.Text;
+      end;
   end;
+
 {--------}
 procedure TOvcTCCustomString.StartEditing(RowNum : TRowNum; ColNum : TColNum;
                                           CellRect : TRect;
                                     const CellAttr : TOvcCellAttributes;
                                           CellStyle: TOvcTblEditorStyle;
                                           Data : pointer);
+  {-Changes:
+    04/2011, AB: UseASCIIZStrings/UsePString replaced by DataStringType }
   begin
     FEdit := CreateEditControl(FTable);
     with FEdit do
       begin
-        if UseASCIIZStrings then
-          begin
-            if (Data = nil) then
-              SetTextBuf('')
-            else
-              begin
-                if FUsePString then
-                  SetTextBuf(PChar(PString(Data)^))
-                else
-                  SetTextBuf(PChar(Data));
-              end;
-          end
-        else
-          begin
-            if (Data = nil) then
-              Text := ''
-            else
-              Text := string(POvcShortString(Data)^);
-          end;
+        if Data=nil then
+          Text := ''
+        else case FDataStringType of
+          tstShortString: Text := string(POvcShortString(Data)^);
+          tstPChar:       SetTextBuf(PChar(Data));
+          tstString:      SetTextBuf(PChar(PString(Data)^))
+        end;
         Color := CellAttr.caColor;
         Font := CellAttr.caFont;
         Font.Color := CellAttr.caFontColor;
@@ -378,20 +362,17 @@ procedure TOvcTCCustomString.StartEditing(RowNum : TRowNum; ColNum : TColNum;
       end;
   end;
 {--------}
-procedure TOvcTCCustomString.StopEditing(SaveValue : boolean;
-                                         Data : pointer);
+procedure TOvcTCCustomString.StopEditing(SaveValue : boolean; Data : pointer);
+  {-Changes:
+    04/2011, AB: UseASCIIZStrings/UsePString replaced by DataStringType }
   begin
     try
       if SaveValue and Assigned(Data) then
-        if UseASCIIZStrings then
-        begin
-          if FUsePString then
-            PString(Data)^ := FEdit.Text
-          else
-            FEdit.GetTextBuf(PChar(Data), MaxLength+1)
-        end
-        else
-          POvcShortString(Data)^ := ShortString(Copy(FEdit.Text, 1, MaxLength));
+        case FDataStringType of
+          tstShortString: POvcShortString(Data)^ := ShortString(Copy(FEdit.Text, 1, MaxLength));
+          tstPChar:       FEdit.GetTextBuf(PChar(Data), MaxLength+1);
+          tstString:      PString(Data)^ := FEdit.Text;
+        end;
     finally
       FEdit.Free;
       FEdit := nil;
@@ -514,9 +495,7 @@ procedure TOvcTCStringEdit.WMSetFocus(var Msg : TWMSetFocus);
 constructor TOvcTCCustomMemo.Create(AOwner : TComponent);
   begin
     inherited Create(AOwner);
-    UseASCIIZStrings := true;
     UseWordWrap := true;
-    UsePString := True;
   end;
 {--------}
 function TOvcTCCustomMemo.CreateEditControl(AOwner : TComponent) : TOvcTCMemoEdit;
@@ -577,14 +556,12 @@ procedure TOvcTCCustomMemo.StartEditing(RowNum : TRowNum; ColNum : TColNum;
     FEdit := CreateEditControl(FTable);
     with FEdit do
       begin
-        if (Data = nil) then
-          SetTextBuf('')
-        else
-        begin
-          if FUsePString then
-            SetTextBuf(PChar(PString(Data)^))
-          else
-            SetTextBuf(PChar(Data));
+        if Data=nil then
+          Text := ''
+        else case FDataStringType of
+          tstShortString: Text := string(POvcShortString(Data)^);
+          tstPChar:       SetTextBuf(PChar(Data));
+          tstString:      SetTextBuf(PChar(PString(Data)^))
         end;
         Color := CellAttr.caColor;
         Font := CellAttr.caFont;
@@ -626,17 +603,18 @@ procedure TOvcTCCustomMemo.StartEditing(RowNum : TRowNum; ColNum : TColNum;
       end;
   end;
 {--------}
-procedure TOvcTCCustomMemo.StopEditing(SaveValue : boolean;
-                                       Data : pointer);
+
+procedure TOvcTCCustomMemo.StopEditing(SaveValue : boolean; Data : pointer);
+  {-Changes:
+    04/2011, AB: UseASCIIZStrings/UsePString replaced by DataStringType }
   begin
     try
       if SaveValue and Assigned(Data) then
-      begin
-        if FUsePString then
-          PString(Data)^ := FEdit.Text
-        else
-          FEdit.GetTextBuf(PChar(Data), MaxLength+1)
-      end;
+        case FDataStringType of
+          tstShortString: POvcShortString(Data)^ := ShortString(Copy(FEdit.Text, 1, MaxLength));
+          tstPChar:       FEdit.GetTextBuf(PChar(Data), MaxLength+1);
+          tstString:      PString(Data)^ := FEdit.Text;
+        end;
     finally
       FEdit.Free;
       FEdit := nil;

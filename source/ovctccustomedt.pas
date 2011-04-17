@@ -63,7 +63,7 @@ type
     property Adjust;
     property Color;
     property Font;
-    property UseASCIIZStrings;
+    property DataStringType;
   end;
 
   TOvcTCCustomStr = class(TOvcTCCustomControl)
@@ -258,7 +258,6 @@ begin
   FTimer.Enabled := false;
   FTimer.Interval := 100;
   FTimer.OnTimer := OnTimer;
-  UseASCIIZStrings := True;
   FCharCase := ecNormal;
 end;
 
@@ -325,6 +324,7 @@ end;
 
 procedure TOvcTCCustomControl.SaveEditedData(Data: Pointer);
 begin
+  { 04/2011 AB: Why is FEdit.Text not being saved in Data? }
   if FEdit <> nil then
     FString := FEdit.Text
   else

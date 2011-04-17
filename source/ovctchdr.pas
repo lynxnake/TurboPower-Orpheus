@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                  OVCTCHDR.PAS 4.06                    *}
+{*                  OVCTCHDR.PAS 4.08                    *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -99,7 +99,11 @@ type
       property TableFont default True;
       property TextHiColor default clBtnHighlight;
       property TextStyle default tsFlat;
-      property UseASCIIZStrings default True;
+
+      { Don't publish DataStringType unless 'tcPaint' is changed: It provides a PString
+        to the inherited method (indepented of 'DataStringType') which the inherited method
+        will only be able to handle if DataStringType=tstString. }
+      //      property DataStringType;
       property UseWordWrap default False;
       property ShowEllipsis default True;
 
@@ -157,7 +161,10 @@ type
       property TableFont default True;
       property TextHiColor default clBtnHighlight;
       property TextStyle default tsFlat;
-      property UseASCIIZStrings default True;
+      { Don't publish DataStringType unless 'tcPaint' is changed: It provides a PString
+        to the inherited method (indepented of 'DataStringType') which the inherited method
+        will only be able to handle if DataStringType=tstString. }
+      //      property DataStringType;
 
       {events inherited from custom ancestor}
       property OnClick;
@@ -182,7 +189,6 @@ constructor TOvcTCColHead.Create(AOwner : TComponent);
     inherited Create(AOwner);
     FHeadings := TStringList.Create;
     Access := otxReadOnly;
-    UseASCIIZStrings := True; //SZ false;
     {UseWordWrap := false;}
     ShowLetters := true;
   end;
@@ -273,14 +279,15 @@ procedure TOvcTCColHead.tcPaint(TableCanvas : TCanvas;
         end;
     end;
   {------}
+  {-Changes
+    04/2011 AB: Bugfix: As the inherited method expects a pointer to a string,
+                PChar(HeadSt) had to be changed to @Head when calling 'inherited tcPaint' }
   var
-//    DataSt    : POvcShortString absolute Data; //R.K.
     LockedCols: TColNum;
     ActiveCol : TColNum;
     WorkCol   : TColNum;
     C         : char;
     HeadSt    : string;
-//    HeadSt    : ShortString; //R.K.
     CA        : TOvcCellAttributes;
   begin
     CA := CellAttr;
@@ -306,9 +313,7 @@ procedure TOvcTCColHead.tcPaint(TableCanvas : TCanvas;
     if ShowActiveCol and (ColNum = ActiveCol) then
       begin
         {this call to inherited tcPaint blanks out the cell}
-        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CA, PChar(HeadSt));
-//        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CA,
-//          @HeadSt); //R.K.
+        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CA, @HeadSt);
         PaintAnArrow;
       end
     else if ShowLetters then
@@ -323,21 +328,17 @@ procedure TOvcTCColHead.tcPaint(TableCanvas : TCanvas;
             WorkCol := pred(WorkCol) div 26;
           end;
         Delete(HeadSt, length(HeadSt), 1);
-        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CA, PChar(HeadSt));
-//        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CA,
-//          @HeadSt); //R.K.
+        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CA, @HeadSt);
       end
     else {Data points to a column heading}
       begin
         if Assigned(Data) then
-          HeadSt := PString(Data)^ //SZ PString(Data)^ was fine, but had to be changed in TOvcCustomDbTable.Paint as well
-//          HeadSt := DataSt^ //R.K.
+          HeadSt := PString(Data)^
         else if (0 <= ColNum) and (ColNum < Headings.Count) then
           HeadSt := Headings[ColNum]
         else
           HeadSt := '';
-        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CA, PChar(HeadSt));
-//        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CA, @HeadSt); //R.K.
+        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CA, @HeadSt);
       end;
   end;
 {--------}
@@ -371,7 +372,6 @@ constructor TOvcTCRowHead.Create(AOwner : TComponent);
   begin
     inherited Create(AOwner);
     Access := otxReadOnly;
-    UseASCIIZStrings := True; //SZ: false
     UseWordWrap := false;
     ShowNumbers := true;
   end;
@@ -419,8 +419,11 @@ procedure TOvcTCRowHead.tcPaint(TableCanvas : TCanvas;
         end;
     end;
   {------}
+  {-Changes
+    04/2011 AB: Bugfix: As the inherited method expects a pointer to a string,
+                PChar(HeadSt) had to be changed to @Head when calling 'inherited tcPaint' }
   var
-    HeadSt : String;
+    HeadSt     : string;
     ActiveRow  : TRowNum;
     LockedRows : TRowNum;
     WorkRow    : TRowNum;
@@ -439,7 +442,7 @@ procedure TOvcTCRowHead.tcPaint(TableCanvas : TCanvas;
     HeadSt := '';
     if (ShowActiveRow and (RowNum = ActiveRow)) then
       begin
-        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, PChar(HeadSt));
+        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @HeadSt);
         PaintAnArrow;
       end
     else
@@ -449,7 +452,7 @@ procedure TOvcTCRowHead.tcPaint(TableCanvas : TCanvas;
             WorkRow := (RowNum + 1) - LockedRows;
             HeadSt := Format('%d', [WorkRow]);
           end;
-        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, PChar(HeadSt));
+        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @HeadSt);
       end;
   end;
 {--------}

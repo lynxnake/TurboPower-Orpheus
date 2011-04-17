@@ -5,7 +5,8 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, OvcData,
   Dialogs, ovctcbef, ovctcpic, ovctcmmn, ovctcell, ovctcstr, ovctcedt, ovcbase, ovcef,
-  ovcsf, ovctable, TestFramework, ovctcnum, ovctcsim;
+  StdCtrls,
+  ovcsf, ovctable, TestFramework, ovctcnum, ovctcsim, ovctccustomedt, o32tcflx;
 
 type
   TfrmTestOvcPictureField = class(TForm)
@@ -15,11 +16,17 @@ type
     OvcTCPictureField2: TOvcTCPictureField;
     OvcTCNumericField1: TOvcTCNumericField;
     OvcTCSimpleField1: TOvcTCSimpleField;
+    OvcTable2: TOvcTable;
+    OvcTCString1_SS: TOvcTCString;
+    OvcTCMemo1: TOvcTCMemo;
+    OvcTCMemo1_SS: TOvcTCMemo;
+    O32TCFlexEdit1: TO32TCFlexEdit;
+    O32TCFlexEdit1_SS: TO32TCFlexEdit;
     procedure FormCreate(Sender: TObject);
     procedure OvcTable1GetCellData(Sender: TObject; RowNum, ColNum: Integer; var Data: Pointer;
       Purpose: TOvcCellDataPurpose);
   private
-    { Fields for storing the data being displayed in the table. To detect a possible
+    { Fields for storing the data being displayed in OvcTable1. To detect a possible
       "buffer-overflow" (that might occur when data is written back from the table)
       "Overflow"-fields are used. }
     Data_OvcTCString1: string;
@@ -32,6 +39,17 @@ type
     Data_Overflow_OvcTCNumericField1: Integer;
     Data_OvcTCSimpleField1: string;
     Data_Overflow_OvcTCSimpleField1: Integer;
+    Data_OvcTCMemo1: string;
+    Data_Overflow_OvcTCMemo1: Integer;
+    Data_O32TCFlexEdit1: string;
+    Data_Overflow_O32TCFlexEdit1: Integer;
+    { Fields for storing the data being displayed in OvcTable2. }
+    Data_OvcTCString1_SS: string[10];
+    Data_Overflow_OvcTCString1_SS: Integer;
+    Data_OvcTCMemo1_SS: ShortString;
+    Data_Overflow_OvcTCMemo1_SS: Integer;
+    Data_O32TCFlexEdit1_SS: ShortString;
+    Data_Overflow_O32TCFlexEdit1_SS: Integer;
   end;
 
   TTestOvcTCPictureField = class(TTestCase)
@@ -41,12 +59,18 @@ type
     procedure SetUp; override;
     procedure TearDown; override;
   published
+    procedure TestOvcTCString;
     procedure TestOvcTCPictureField_pftString;
     procedure TestOvcTCPictureField_pftLongInt;
     procedure TestOvcTCNumericField_nftDouble;
     procedure TestOvcTCSimpleField_sftString;
     procedure TestOvcTCSimpleField_sftString_DataNIL;
     procedure TestOvcTCSimpleField_Passwordmode;
+    procedure TestOvcTCMemo;
+    procedure TestO32TCFlexEdit;
+    procedure TestOvcTCString_SS;
+    procedure TestOvcTCMemo_SS;
+    procedure TestO32TCFlexEdit_SS;
   end;
 
 implementation
@@ -61,6 +85,8 @@ type
   TPOvcTCSimpleField  = class(TOvcTCSimpleField);
   TPOvcBaseEntryField = class(TOvcBaseEntryField);
   TPOvcCustomSimpleField = class(TOvcCustomSimpleField);
+  TPOvcTCMemo = class(TOvcTCMemo);
+  TPO32TCFlexEdit = class(TO32TCFlexEdit);
 
 procedure TfrmTestOvcPictureField.FormCreate(Sender: TObject);
 begin
@@ -70,24 +96,47 @@ begin
   Data_Overflow_OvcTCPictureField1 := -1;
   Data_OvcTCPictureField2          :=  0;
   Data_Overflow_OvcTCPictureField2 := -1;
-  Data_OvcTCNumericField1          := 0;
+  Data_OvcTCNumericField1          :=  0;
   Data_Overflow_OvcTCNumericField1 := -1;
   Data_OvcTCSimpleField1           := '';
   Data_Overflow_OvcTCSimpleField1  := -1;
+  Data_OvcTCMemo1                  := '';
+  Data_Overflow_OvcTCMemo1         := -1;
+  Data_O32TCFlexEdit1              := '';
+  Data_Overflow_O32TCFlexEdit1     := -1;
+
+  Data_OvcTCString1_SS             := '';
+  Data_Overflow_OvcTCString1_SS    := -1;
+  Data_OvcTCMemo1_SS               := '';
+  Data_Overflow_OvcTCMemo1_SS      := -1;
+  Data_O32TCFlexEdit1_SS           := '';
+  Data_Overflow_O32TCFlexEdit1_SS  := -1;
 end;
 
 procedure TfrmTestOvcPictureField.OvcTable1GetCellData(Sender: TObject; RowNum, ColNum: Integer;
   var Data: Pointer; Purpose: TOvcCellDataPurpose);
 begin
   if RowNum=0 then begin
-    case ColNum of
-      0: data := @Data_OvcTCString1;
-      1: data := @Data_OvcTCPictureField1;
-      2: data := @Data_OvcTCPictureField2;
-      3: data := @Data_OvcTCNumericField1;
-      4: data := @Data_OvcTCSimpleField1;
-      else
-        data := nil;
+    if Sender = OvcTable1 then begin
+      case ColNum of
+        0: data := @Data_OvcTCString1;
+        1: data := @Data_OvcTCPictureField1;
+        2: data := @Data_OvcTCPictureField2;
+        3: data := @Data_OvcTCNumericField1;
+        4: data := @Data_OvcTCSimpleField1;
+        5: data := @Data_OvcTCMemo1;
+        6: data := @Data_O32TCFlexEdit1;
+        else
+          data := nil;
+      end;
+    end else begin
+      case ColNum of
+        0: data := @Data_OvcTCString1_SS;
+        1: data := @Data_OvcTCMemo1_SS;
+        2: data := @Data_O32TCFlexEdit1_SS;
+        else
+          data := nil;
+      end;
     end;
   end else
     { special case for 'TestOvcTCSimpleField_sftString_DataNIL' }
@@ -96,7 +145,7 @@ end;
 
 { TTestOvcPictureField }
 
-procedure TypeText(F:TPOvcBaseEntryField; const s:string);
+procedure TypeText(F:TPOvcBaseEntryField; const s:string); overload;
 var
   i: Integer;
 begin
@@ -105,6 +154,29 @@ begin
     Include(F.sefOptions, sefCharOK);
     F.Perform(WM_CHAR, Ord(s[i]), 0);
   end;
+end;
+
+procedure TypeText(E:TCustomEdit; const s:string); overload;
+var
+  i: Integer;
+begin
+  for i := 1 to Length(s) do begin
+    E.Perform(WM_CHAR, Ord(s[i]), 0);
+  end;
+end;
+
+
+procedure TTestOvcTCPictureField.TestOvcTCString;
+  {- test OvcTCString }
+begin
+  { Test typing data }
+  FForm.OvcTable1.SetFocus;
+  FForm.OvcTable1.SetActiveCell(0,0);
+  FForm.OvcTable1.StartEditingState;
+  TypeText(TPOvcBaseEntryField(TPOvcTCString(FForm.OvcTCString1).FEdit), 'another test');
+  FForm.OvcTable1.StopEditingState(True);
+  CheckEquals('another test', Trim(FForm.Data_OvcTCString1));
+  CheckEquals(-1, FForm.Data_Overflow_OvcTCString1, 'Data overflow for OvcTCString1');
 end;
 
 
@@ -165,7 +237,6 @@ begin
 end;
 
 
-
 procedure TTestOvcTCPictureField.TestOvcTCSimpleField_sftString;
   {- test OvcTCSimpleField with datatype 'sftString' }
 begin
@@ -222,6 +293,90 @@ begin
   finally
     FForm.OvcTCSimpleField1.Options := FForm.OvcTCSimpleField1.Options - [efoPasswordmode];
   end;
+end;
+
+
+procedure TTestOvcTCPictureField.TestOvcTCMemo;
+  {- test OvcTCMemo }
+begin
+  { Test typing data }
+  FForm.OvcTable1.SetFocus;
+  FForm.OvcTable1.SetActiveCell(0,5);
+  FForm.OvcTable1.StartEditingState;
+  TypeText(TOvcTCMemoEdit(TPOvcTCMemo(FForm.OvcTCMemo1).FEdit), 'sft field test');
+  FForm.OvcTable1.StopEditingState(True);
+  CheckEquals('sft field test', Trim(FForm.Data_OvcTCMemo1));
+  CheckEquals(-1, FForm.Data_Overflow_OvcTCMemo1, 'Data overflow for OvcTCMemo1');
+end;
+
+
+procedure TTestOvcTCPictureField.TestO32TCFlexEdit;
+  {- test O32TCFlexEdit }
+begin
+  { Test typing data }
+  FForm.OvcTable1.SetFocus;
+  FForm.OvcTable1.SetActiveCell(0,6);
+  FForm.OvcTable1.StartEditingState;
+  TypeText(TCustomEdit(TPO32TCFlexEdit(FForm.O32TCFlexEdit1).FEdit), 'FlexTest');
+  FForm.OvcTable1.StopEditingState(True);
+  CheckEquals('FlexTest', Trim(FForm.Data_O32TCFlexEdit1));
+  CheckEquals(-1, FForm.Data_Overflow_O32TCFlexEdit1, 'Data overflow for O32TCFlexEdit1');
+end;
+
+
+procedure TTestOvcTCPictureField.TestOvcTCString_SS;
+  {- test OvcTCString with ShortString for storing the data }
+begin
+  { Test typing data }
+  FForm.OvcTable2.SetFocus;
+  FForm.OvcTable2.SetActiveCell(0,0);
+  FForm.OvcTable2.StartEditingState;
+  TypeText(TPOvcBaseEntryField(TPOvcTCString(FForm.OvcTCString1_SS).FEdit), 'TEST1');
+  FForm.OvcTable2.StopEditingState(True);
+  CheckEquals('TEST1', Trim(string(FForm.Data_OvcTCString1_SS)));
+  CheckEquals(-1, FForm.Data_Overflow_OvcTCString1_SS, 'Data overflow for OvcTCString1_SS');
+  { Test typing maximum number of characters }
+  FForm.Data_OvcTCString1_SS := '';
+  FForm.OvcTable2.StartEditingState;
+  TypeText(TPOvcBaseEntryField(TPOvcTCString(FForm.OvcTCString1_SS).FEdit), '1234567890');
+  FForm.OvcTable2.StopEditingState(True);
+  CheckEquals('1234567890', Trim(string(FForm.Data_OvcTCString1_SS)));
+  CheckEquals(-1, FForm.Data_Overflow_OvcTCString1_SS, 'Data overflow for OvcTCString1_SS');
+  { Test typing more than the maximum number of characters }
+  FForm.Data_OvcTCString1_SS := '';
+  FForm.OvcTable2.StartEditingState;
+  TypeText(TPOvcBaseEntryField(TPOvcTCString(FForm.OvcTCString1_SS).FEdit), '1234567890X');
+  FForm.OvcTable2.StopEditingState(True);
+  CheckEquals('1234567890', Trim(string(FForm.Data_OvcTCString1_SS)));
+  CheckEquals(-1, FForm.Data_Overflow_OvcTCString1_SS, 'Data overflow for OvcTCString1_SS');
+end;
+
+
+procedure TTestOvcTCPictureField.TestOvcTCMemo_SS;
+  {- test OvcTCMemo with ShortString for storing the data }
+begin
+  { Test typing data }
+  FForm.OvcTable2.SetFocus;
+  FForm.OvcTable2.SetActiveCell(0,1);
+  FForm.OvcTable2.StartEditingState;
+  TypeText(TOvcTCMemoEdit(TPOvcTCMemo(FForm.OvcTCMemo1_SS).FEdit), 'sft field test'#13'line 2');
+  FForm.OvcTable2.StopEditingState(True);
+  CheckEquals('sft field test'#13#10'line 2', Trim(string(FForm.Data_OvcTCMemo1_SS)));
+  CheckEquals(-1, FForm.Data_Overflow_OvcTCMemo1_SS, 'Data overflow for OvcTCMemo1_SS');
+end;
+
+
+procedure TTestOvcTCPictureField.TestO32TCFlexEdit_SS;
+  {- test O32TCFlexEdit with ShortString for storing the data }
+begin
+  { Test typing data }
+  FForm.OvcTable2.SetFocus;
+  FForm.OvcTable2.SetActiveCell(0,2);
+  FForm.OvcTable2.StartEditingState;
+  TypeText(TCustomEdit(TPO32TCFlexEdit(FForm.O32TCFlexEdit1_SS).FEdit), 'FlexTest');
+  FForm.OvcTable2.StopEditingState(True);
+  CheckEquals('FlexTest', Trim(string(FForm.Data_O32TCFlexEdit1_SS)));
+  CheckEquals(-1, FForm.Data_Overflow_O32TCFlexEdit1_SS, 'Data overflow for O32TCFlexEdit1_SS');
 end;
 
 

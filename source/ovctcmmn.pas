@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                  OVCTCMMN.PAS 4.06                    *}
+{*                  OVCTCMMN.PAS 4.08                    *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -143,6 +143,11 @@ type
               tesNormal,           {..normal (ie nothing special)}
               tesBorder,           {..with border}
               tes3D);              {..3D look}
+
+  TOvcTblStringtype = (
+              tstShortString,
+              tstPChar,
+              tstString);
 
 {---Row/Column number (index) types}
 type

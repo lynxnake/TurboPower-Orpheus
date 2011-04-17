@@ -283,7 +283,7 @@ procedure TOvcTCBaseEntryField.tcPaint(TableCanvas : TCanvas;
                      SWP_HIDEWINDOW or SWP_NOREDRAW or SWP_NOZORDER);
         FEditDisplay.SetValue(Data^);
         S := Trim(FEditDisplay.DisplayString);
-        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, PChar(S));
+        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @S);
       end;
   end;
 

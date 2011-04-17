@@ -47,17 +47,15 @@ type
   TOvcTCBaseString = class(TOvcBaseTableCell)
     protected {private}
       {.Z+}
-      FUseASCIIZStrings : boolean;
-      FUseWordWrap      : boolean;
-      FShowEllipsis     : Boolean;
-      FUsePString       : Boolean;
-
-      FOnChange    : TNotifyEvent;
+      FDataStringType : TOvcTblStringtype;
+      FUseWordWrap    : boolean;
+      FShowEllipsis   : Boolean;
+      FOnChange       : TNotifyEvent;
       {.Z-}
 
     protected
       {.Z+}
-      procedure SetUseASCIIZStrings(AZS : boolean);
+      procedure SetDataStringType(ADST : TOvcTblStringtype);
       procedure SetUseWordWrap(WW : boolean);
 
       procedure tcPaint(TableCanvas : TCanvas;
@@ -73,15 +71,13 @@ type
       {.Z-}
 
       {properties}
-      property UseASCIIZStrings : boolean
-         read FUseASCIIZStrings write SetUseASCIIZStrings default True;
+      property DataStringType : TOvcTblStringtype
+         read FDataStringType write SetDataStringType default tstString;
 
       property UseWordWrap : boolean
          read FUseWordWrap write SetUseWordWrap;
 
       property ShowEllipsis: Boolean read FShowEllipsis write FShowEllipsis;
-
-      property UsePString: Boolean read FUsePString write FUsePString;
 
       {events}
       property OnChange : TNotifyEvent
@@ -99,7 +95,7 @@ constructor TOvcTCBaseString.Create(AOwner : TComponent);
 begin
   inherited Create(AOwner);
   FShowEllipsis := True;
-  FUseASCIIZStrings := True;
+  FDataStringType := tstString;
 end;
 
 procedure TOvcTCBaseString.tcPaint(TableCanvas : TCanvas;
@@ -108,15 +104,10 @@ procedure TOvcTCBaseString.tcPaint(TableCanvas : TCanvas;
                                    ColNum      : TColNum;
                              const CellAttr    : TOvcCellAttributes;
                                    Data        : pointer);
+  {-Changes
+    04/2011 AB: replaced UsePString by FDataStringType }
   var
     sBuffer: string;
-//    T: string;
-//    S : POvcShortString absolute Data;
-//    SZ: PChar absolute Data;
-//    IsEmptyString : boolean;
-//    StZ           : PChar;
-//    SAsPChar      : array [0..255] of Char;
-//    StZAllocated  : boolean;
   begin
     {blank out the cell}
     inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, Data);
@@ -129,41 +120,15 @@ procedure TOvcTCBaseString.tcPaint(TableCanvas : TCanvas;
     if Data = nil then
       sBuffer := Format('%d:%d', [RowNum, ColNum])
     else
-    begin
-      if FUsePString then
-        sBuffer := PString(Data)^
-      else
-        sBuffer := string(PChar(Data));
-    end;
+      case FDataStringType of
+        tstShortString: sBuffer := string(POvcShortString(Data)^);
+        tstPChar:       sBuffer := string(PChar(Data));
+        tstString:      sBuffer := PString(Data)^;
+      end;
 
     tcPaintStrZ(TableCanvas, cellRect, CellAttr, sBuffer);
-
-//R.K.
-//    {prepare to paint the string}
-//    StZAllocated := false;
-//    {for a null string, output the row:column in that format}
-//    if (Data = nil) then
-//      begin
-//        StZ := StrAlloc(32); {should be ample}
-//        StZAllocated := true;
-//        StrFmt(StZ, '%d:%d', [RowNum, ColNum]);
-//      end
-//    {for an ASCIIZ string, just go paint it}
-//    else if UseASCIIZStrings then
-//      StZ := SZ
-//    {for a Pascal shortstring, convert to an ASCIIZ version}
-//    else
-//      StZ := StrPCopy(SAsPChar, S^);
-//    IsEmptyString := (StZ[0] = #0);
-//    {now paint the ASCIIZ string}
-//    try
-//      if not IsEmptyString then
-//        tcPaintStrZ(TableCanvas, CellRect, CellAttr, StZ);
-//    finally
-//      if StZAllocated then
-//        StrDispose(StZ);
-//    end;
   end;
+
 {--------}
 procedure TOvcTCBaseString.tcPaintStrZ(TblCanvas : TCanvas;
                                const CellRect  : TRect;
@@ -263,14 +228,14 @@ procedure TOvcTCBaseString.tcPaintStrZ(TblCanvas : TCanvas;
       end;
   end;
 {--------}
-procedure TOvcTCBaseString.SetUseASCIIZStrings(AZS : boolean);
+procedure TOvcTCBaseString.SetDataStringType(ADST : TOvcTblStringtype);
   begin
-    if (AZS <> FUseASCIIZStrings) then
-      begin
-        FUseASCIIZStrings := AZS;
-        tcDoCfgChanged;
-      end;
+    if ADST <> FDataStringType then begin
+      FDataStringType := ADST;
+      tcDoCfgChanged;
+    end;
   end;
+
 {--------}
 procedure TOvcTCBaseString.SetUseWordWrap(WW : boolean);
   begin

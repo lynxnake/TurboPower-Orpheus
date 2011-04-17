@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                    OVCTCFLX.PAS 4.06                  *}
+{*                    OVCTCFLX.PAS 4.08                  *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -218,6 +218,7 @@ type
     {properties inherited from custom ancestor}
     property Access default otxDefault;
     property Adjust default otaDefault;
+    property DataStringType;
     property EditorBorders;
     property Color;
     property EditorOptions;
@@ -443,7 +444,6 @@ end;
 constructor TO32TCCustomFlexEdit.Create(AOwner : TComponent);
 begin
   inherited Create(AOwner);
-  UseASCIIZStrings := true;
   UseWordWrap := true;
   FEditorOptions := TO32TCEditorProperties.Create;
   FBorderProps := TO32TCBorderProperties.Create;
@@ -560,8 +560,8 @@ procedure TO32TCCustomFlexEdit.StartEditing(RowNum : TRowNum; ColNum : TColNum;
                                       const CellAttr : TOvcCellAttributes;
                                             CellStyle: TOvcTblEditorStyle;
                                             Data : pointer);
-{var
-  Str: String;}
+  {-Changes:
+    04/2011, AB: Use DataStringType to determine what kind of pointer is provided }
 begin
   FEdit := TO32TCFlexEditEditor.Create(FTable);
 
@@ -626,13 +626,13 @@ begin
     Hint := Self.Hint;
     ShowHint := Self.ShowHint;
 
-    {Str := PAnsiChar(Data);} {!!!}
-    if (Data = nil) then
-      SetTextBuf('')
-    else begin
-      SetTextBuf(PChar(Data));
+    if Data=nil then
+      Text := ''
+    else case FDataStringType of
+      tstShortString: Text := string(POvcShortString(Data)^);
+      tstPChar:       SetTextBuf(PChar(Data));
+      tstString:      SetTextBuf(PChar(PString(Data)^))
     end;
-
     OnChange := Self.OnChange;
     OnClick := Self.OnClick;
     OnDblClick := Self.OnDblClick;
@@ -651,21 +651,23 @@ begin
 end;
 {=====}
 
-procedure TO32TCCustomFlexEdit.StopEditing(SaveValue : boolean;
-                                           Data : pointer);
-{var
-  Str: String;}
+procedure TO32TCCustomFlexEdit.StopEditing(SaveValue : boolean; Data : pointer);
+  {-Changes:
+    04/2011, AB: Use DataStringType to determine what kind of pointer is provided }
 begin
   try
-    if SaveValue and Assigned(Data) then begin
-      FEdit.GetTextBuf(PChar(Data), MaxLength);
-      {Str := PAnsiChar(Data);} {!!!}
-    end;
+    if SaveValue and Assigned(Data) then
+      case FDataStringType of
+        tstShortString: POvcShortString(Data)^ := ShortString(Copy(FEdit.Text, 1, MaxLength));
+        tstPChar:       FEdit.GetTextBuf(PChar(Data), MaxLength);
+        tstString:      PString(Data)^ := FEdit.Text;
+      end;
   finally
     FEdit.Free;
     FEdit := nil;
   end;
 end;
+
 {=====}
 
 
