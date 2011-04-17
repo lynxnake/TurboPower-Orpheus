@@ -543,17 +543,17 @@ function DrawLookoutTab(Canvas: TCanvas;
                         IsFocused,
                         IsMouseOver: Boolean): TRect;
 var
-  NewStyle: Boolean;
+//  NewStyle: Boolean;
   R: TRect;
-  DC: THandle;
-  Height, Width: Integer;
+//  DC: THandle;
+//  Height, Width: Integer;
   {$IFNDEF VERSION4}
     Points: array[1..5] of TPoint;
   {$ENDIF}
 begin
   R := Client;
-  Height := R.Bottom;
-  Width := R.Right;
+//  Height := R.Bottom;
+//  Width := R.Right;
 
   with Canvas do begin
     Brush.Color := clBtnFace;

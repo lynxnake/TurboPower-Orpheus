@@ -107,16 +107,11 @@ begin
   {second page (index 1) contains the calendar}
   NB1.PageIndex := 1;
   {change the calendar date}
-  OvcCalendar1.CalendarDate := OvcPictureField1.AsOvcDate;
+  OvcCalendar1.CalendarDate := OvcPictureField1.AsDateTime;
 end;
 
 procedure TForm1.OvcCalendar1Change(Sender: TObject; Date: TDateTime);
-var
-  S : string[25];
-  Y : Word;
 begin
-  Y := OvcCalendar1.Year;
-  S := Format('%d', [Y]);
   Panel1.Caption := OvcCalendar1.DateString('www, dd nnn yyyy');
 end;
 

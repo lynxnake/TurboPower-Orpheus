@@ -556,7 +556,11 @@ end;
 
 procedure TIGridForm.TreeView1KeyPress(Sender: TObject; var Key: Char);
 begin
+{$IFDEF UNICODE}
+  if CharInSet(Key, ['A'..'Z', 'a'..'z', '0'..'1']) then begin
+{$ELSE}
   if Key in ['A'..'Z', 'a'..'z', '0'..'1'] then begin
+{$ENDIF}
     CaptionEdit.SetFocus;
     CaptionEdit.Text := Key;
     Key := #0;

@@ -13,6 +13,7 @@ type
     OvcController1: TOvcController;
     OvcTextFileEditor1: TOvcTextFileEditor;
     BitBtn1: TBitBtn;
+    Memo1: TMemo;
     procedure OvcTextFileEditor1DrawLine(Sender: TObject;
       EditorCanvas: TCanvas; Rect: TRect; S: PChar; Len, Line, Pos, Count,
       HBLine, HBCol, HELine, HECol: Integer; var WasDrawn: Boolean);
