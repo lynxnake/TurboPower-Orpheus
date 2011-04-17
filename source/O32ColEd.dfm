@@ -1,8 +1,8 @@
 object O32frmCollEditor: TO32frmCollEditor
   Left = 293
   Top = 221
-  Width = 238
-  Height = 161
+  ClientHeight = 135
+  ClientWidth = 222
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clBlack
@@ -19,23 +19,25 @@ object O32frmCollEditor: TO32frmCollEditor
   object ListBox1: TListBox
     Left = 0
     Top = 0
-    Width = 194
-    Height = 127
+    Width = 186
+    Height = 135
     Align = alClient
     ItemHeight = 13
     MultiSelect = True
     TabOrder = 0
     OnClick = ListBox1Click
     OnKeyDown = ListBox1KeyDown
+    ExplicitHeight = 123
   end
   object Panel1: TPanel
-    Left = 194
+    Left = 186
     Top = 0
     Width = 36
-    Height = 127
+    Height = 135
     Align = alRight
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitHeight = 123
     object btnAdd: TOvcSpeedButton
       Left = 7
       Top = 6

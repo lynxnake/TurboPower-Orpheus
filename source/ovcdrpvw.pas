@@ -1,5 +1,5 @@
-{*********************************************************}     // TIBURON TODO
-{*                  OVCDRPVW.PAS 4.00                    *}
+{*********************************************************}
+{*                  OVCDRPVW.PAS 4.08                    *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -41,7 +41,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Graphics, OvcConst, OvcExcpt,
-  OvcBase, OvcRvIdx, OvcRptVw;
+  OvcMisc, OvcBase, OvcRvIdx, OvcRptVw;
 
 type
   TOvcDataReportView = class;
@@ -793,8 +793,11 @@ begin
 end;
 
 procedure TOvcDataRvItem.SetFieldSize(Index, NewSize : Integer);
+  {-Changes:
+    04/2011, AB: Modification to preserve the content of the field given by 'Index';
+                 this has been done to simplify string-transformation in 'ReadFromStream' }
 var
-  i, fc, Offset, NewDataBufferSize : Integer;
+  i, fc, Offset, NewDataBufferSize, OldSize : Integer;
   NewDataBuffer : PByteArray;
   NewFieldIndexTable : PIntArray;
 begin
@@ -806,6 +809,7 @@ begin
       if i <> Index then
         inc(NewDataBufferSize, FieldSize[i]);
     inc(NewDataBufferSize,NewSize);
+    OldSize := FieldSizeTable^[Index];
     FieldSizeTable^[Index] := NewSize;
     GetMem(NewDataBuffer, NewDataBufferSize);
     GetMem(NewFieldIndexTable, FieldIndexSize);
@@ -815,11 +819,17 @@ begin
       inc(Offset, FieldSizeTable^[i]);
     end;
     for i := 0 to pred(fc) do
-      if (i <> Index) and (FieldSizeTable^[i] <> 0) then
-        move(
-          DataBuffer^[FieldIndexTable^[i]],
-          NewDataBuffer^[NewFieldIndexTable^[i]],
-          FieldSizeTable^[i]);
+      if FieldSizeTable^[i] > 0 then begin
+        if i <> Index then
+          move(DataBuffer^[FieldIndexTable^[i]],
+               NewDataBuffer^[NewFieldIndexTable^[i]],
+               FieldSizeTable^[i])
+        else if OldSize>0 then
+          move(DataBuffer^[FieldIndexTable^[i]],
+               NewDataBuffer^[NewFieldIndexTable^[i]],
+               MinI(OldSize,FieldSizeTable^[i]));
+      end;
+
     FreeMem(DataBuffer, DataBufferSize);
     DataBuffer := NewDataBuffer;
     DataBufferSize := NewDataBufferSize;
@@ -1195,12 +1205,41 @@ procedure TOvcDataRvItem.ReadFromStream(Stream: TStream);
 var
   FS : LongInt;
   i : Integer;
+{$IFDEF UNICODE}
+  j, k1, k2 : Integer;
+{$ENDIF}
 begin
   for i := 0 to pred(FOwner.Fields.Count) do begin
     Stream.Read(FS, sizeof(FS));
     if FS <> 0 then begin
       FieldSize[i] := FS;
       Stream.Read(DataBuffer^[FieldIndexTable^[i]], FS);
+{$IFDEF UNICODE}
+      if FOwner.Field[i].DataType = dtString then begin
+        { Beware: We might have just read an old fashioned Ansi-String from the
+          stream (e.g data from an older *.dfm file). We have to detect this and
+          transform the data if necessary. }
+        j := FieldIndexTable^[i];
+        if ((FS mod 2) <> 0) or (DataBuffer^[j+FS-2]<>0) then begin
+          { We have an Ansi-String in DataBuffer: Double the field-size and transform it
+            as follows:
+                               j   j+1  j+2  j+3  j+4  j+5  j+6  j+7
+            DataBuffer (old)  65   66   67    0
+            DataBuffer (new)  65    0   66    0   67   0     0    0 }
+          k1 := j+FS-1;
+          FS := 2*FS;
+          k2 := j+FS-1;
+          FieldSize[i] := FS;
+          while k1>=j do begin
+            DataBuffer^[k2] := 0;
+            Dec(k2);
+            DataBuffer^[k2] := DataBuffer^[k1];
+            Dec(k2);
+            Dec(k1);
+          end;
+        end;
+      end;
+{$ENDIF}
     end;
   end;
 end;

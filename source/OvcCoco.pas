@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                   OVCCOCO.PAS 4.06                    *}
+{*                   OVCCOCO.PAS 4.08                    *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{*   Armin Biernaczyk                                                         *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -342,13 +343,12 @@ function TCocoRScanner.CharAt(pos : longint) : char;
 var
   ch : char;
 begin
-  if pos >= SourceLen then
-  begin
+  if pos >= SourceLen then begin
     Result := _EF;
     exit;
   end;
   SrcStream.Seek(pos, soFromBeginning);
-  SrcStream.ReadBuffer(Ch, 1 * SizeOf(Char));
+  SrcStream.ReadBuffer(Ch, SizeOf(Char));
   if ch <> _EOF then
     Result := ch
   else
@@ -365,33 +365,37 @@ begin
   SetLength(Result, Symbol.Len);
   p := Symbol.Pos;
   i := 1;
-  while i <= Symbol.Len do
-  begin
+  while i <= Symbol.Len do begin
     Result[i] := ChProc(p);
     inc(i);
-    inc(p)
+    inc(p, SizeOf(Char))
   end;
 end; {GetNStr}
+
 
 function TCocoRScanner.GetName(Symbol : TSymbolPosition) : string;
 begin
   Result := GetNStr(Symbol, CurrentCh);
 end; {GetName}
 
+
 function TCocoRScanner.GetStartState : PStartTable;
 begin
   Result := @fStartState;
 end; {GetStartState}
+
 
 procedure TCocoRScanner.SetStartState(aStartTable : PStartTable);
 begin
   fStartState := aStartTable^;
 end; {SetStartState}
 
+
 function TCocoRScanner.GetString(Symbol : TSymbolPosition) : string;
 begin
   Result := GetNStr(Symbol, CharAt);
 end; {GetString}
+
 
 procedure TCocoRScanner._Reset;
 var
@@ -400,7 +404,7 @@ begin
   { Make sure that the stream has the _EF character at the end. }
   CurrInputCh := _EF;
   SrcStream.Seek(0, soFromEnd);
-  SrcStream.WriteBuffer(CurrInputCh, 1);
+  SrcStream.WriteBuffer(CurrInputCh, SizeOf(Char));
   SrcStream.Seek(0, soFromBeginning);
 
   LastInputCh := _EF;
@@ -408,7 +412,7 @@ begin
   SourceLen := len;
   CurrLine := 1;
   StartOfLine := -2;
-  BufferPosition := -1;
+  BufferPosition := -SizeOf(Char);
   CurrentSymbol.Clear;
   NextSymbol.Clear;
   NumEOLInComment := 0;
@@ -508,9 +512,7 @@ begin
   end;
 end; {GenerateListing}
 
-procedure TCocoRGrammar.GetLine(var pos : longint;
-  var line : string;
-  var eof : boolean);
+procedure TCocoRGrammar.GetLine(var pos: longint; var line: string; var eof: boolean);
   { Read a source line. Return empty line if eof }
 var
   ch : char;
@@ -519,14 +521,14 @@ begin
   i := 1;
   eof := false;
   ch := Scanner.CharAt(pos);
-  inc(pos);
+  inc(pos, SizeOf(Char));
   while not ovcCharInSet(ch, LineEnds) do
   begin
     SetLength(line, length(Line) + 1);
     line[i] := ch;
     inc(i);
     ch := Scanner.CharAt(pos);
-    inc(pos);
+    inc(pos, SizeOf(Char));
   end;
   SetLength(line, i - 1);
   eof := (i = 1) and (ch = _EF);

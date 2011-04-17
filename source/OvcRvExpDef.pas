@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                OvcRvExpDef.PAS 4.00                   *}
+{*                OvcRvExpDef.PAS 4.08                   *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -2730,22 +2730,18 @@ begin
   if RelOp = roNone then
     if BetweenClause <> nil then
       Result := BetweenClause.AsBoolean(Data, SimpleExp1.GetValue(Data))
-    else
-    if LikeClause <> nil then
+    else if LikeClause <> nil then
       Result := LikeClause.AsBoolean(Data, SimpleExp1.GetValue(Data))
-    else
-    if InClause <> nil then
+    else if InClause <> nil then
       Result := InClause.AsBoolean(Data, SimpleExp1.GetValue(Data))
-    else
-    if IsTest <> nil then
+    else if IsTest <> nil then
       Result := IsTest.AsBoolean(SimpleExp1.GetValue(Data))
     else
       Result := SimpleExp1.GetValue(Data)
+  else if SimpleExp2 <> nil then
+    Result := SimpleCompare(RelOp, SimpleExp1.GetValue(Data), SimpleExp2.GetValue(Data))
   else
-    if SimpleExp2 <> nil then
-      Result := SimpleCompare(RelOp, SimpleExp1.GetValue(Data), SimpleExp2.GetValue(Data))
-    else
-      SQLError('Simple expression or ANY/ALL clause expected');
+    SQLError('Simple expression or ANY/ALL clause expected');
 end;
 
 procedure TOvcRvExpCondPrimary.Assign(const Source: TOvcRvExpNode);
@@ -2831,23 +2827,19 @@ begin
     T1 := SimpleExp1.GetType
   else
     T1 := dtCustom; {anything that doesn't match a valid SQL type}
-  case RelOp of
-  roNone :
+
+  if RelOp = roNone then begin
     if BetweenClause <> nil then
       BetweenClause.MatchType(T1)
-    else
-    if LikeClause <> nil then
+    else if LikeClause <> nil then
       LikeClause.MatchType(T1)
-    else
-    if InClause <> nil then
+    else if InClause <> nil then
       InClause.MatchType(T1)
-    else
-    if IsTest <> nil then
+    else if IsTest <> nil then
       IsTest.MatchType(T1);
-  else begin
-      Assert(SimpleExp2 <> nil);
-      SimpleExp2.MatchType(T1);
-    end;
+  end else begin
+    Assert(SimpleExp2 <> nil);
+    SimpleExp2.MatchType(T1);
   end;
 end;
 
@@ -3538,17 +3530,13 @@ procedure TOvcRvExpFactor.CheckType;
 begin
   if CondExp <> nil then
     FType:= CondExp.GetType
-  else
-  if FieldRef <> nil then
+  else if FieldRef <> nil then
     FType := FieldRef.GetType
-  else
-  if Literal <> nil then
+  else if Literal <> nil then
     FType := Literal.GetType
-  else
-  if Aggregate <> nil then
+  else if Aggregate <> nil then
     FType := Aggregate.GetType
-  else
-  if ScalarFunc <> nil then
+  else if ScalarFunc <> nil then
     FType := ScalarFunc.GetType
   else
     Assert(False);
