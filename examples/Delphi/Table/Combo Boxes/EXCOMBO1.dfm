@@ -1,15 +1,15 @@
 object Form1: TForm1
-  Left = 236
-  Top = 115
+  Left = 0
+  Top = 0
   BorderStyle = bsDialog
   Caption = 'Table ComboBox Cell Example'
   ClientHeight = 248
-  ClientWidth = 290
+  ClientWidth = 278
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -13
-  Font.Name = 'Default'
+  Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = True
   Position = poScreenCenter
@@ -17,10 +17,16 @@ object Form1: TForm1
   TextHeight = 16
   object OvcTable1: TOvcTable
     Left = 8
-    Top = 8
-    Width = 273
+    Top = 9
+    Width = 261
     Height = 201
+    ColorUnused = clBtnFace
     Controller = OvcController1
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
     GridPenSet.NormalGrid.NormalColor = clBtnShadow
     GridPenSet.NormalGrid.Style = psSolid
     GridPenSet.NormalGrid.Effect = geBoth
@@ -34,14 +40,16 @@ object Form1: TForm1
     GridPenSet.CellWhenUnfocused.Style = psSolid
     GridPenSet.CellWhenUnfocused.Effect = geBoth
     LockedRowsCell = OvcTCColHead1
+    Options = [otoNoRowResizing, otoNoColResizing, otoNoSelection]
+    ParentFont = False
     TabOrder = 0
     OnDoneEdit = OvcTable1DoneEdit
     OnGetCellData = OvcTable1GetCellData
     CellData = (
       'Form1.OvcTCColHead1'
-      'Form1.OvcTCRowHead1'
+      'Form1.OvcTCComboBox2'
       'Form1.OvcTCComboBox1'
-      'Form1.OvcTCComboBox2')
+      'Form1.OvcTCRowHead1')
     RowData = (
       25)
     ColData = (
@@ -59,8 +67,8 @@ object Form1: TForm1
       'Form1.OvcTCComboBox2')
   end
   object Button1: TButton
-    Left = 200
-    Top = 216
+    Left = 188
+    Top = 215
     Width = 81
     Height = 25
     Caption = '&Close'

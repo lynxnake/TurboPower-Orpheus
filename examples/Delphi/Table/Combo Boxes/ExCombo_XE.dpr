@@ -22,13 +22,11 @@
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
-program Excombo;
+program ExCombo_XE;
 
 uses
   Forms,
   Excombo1 in 'EXCOMBO1.PAS' {Form1};
-
-          
 
 begin
   Application.CreateForm(TForm1, Form1);

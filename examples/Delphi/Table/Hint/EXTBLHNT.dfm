@@ -2,13 +2,13 @@ object Form1: TForm1
   Left = 200
   Top = 99
   Caption = 'ExTblHints'
-  ClientHeight = 253
-  ClientWidth = 321
+  ClientHeight = 263
+  ClientWidth = 334
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clNavy
   Font.Height = -13
-  Font.Name = 'Default'
+  Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = True
   ShowHint = True
