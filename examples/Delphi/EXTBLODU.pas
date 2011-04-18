@@ -55,7 +55,6 @@ var
   F   : Boolean;
   R   : TRect;
   C   : TCanvas;
-//  S   : string;
   Buf : array[0..255] of Char;
 begin
   DoneIt := True;

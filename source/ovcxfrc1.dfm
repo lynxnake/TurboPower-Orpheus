@@ -24,11 +24,9 @@ object OvcfrmTransfer: TOvcfrmTransfer
     Height = 25
     Cancel = True
     Caption = '&Close'
-    DoubleBuffered = True
     ModalResult = 2
-    ParentDoubleBuffered = False
-    Spacing = -1
     TabOrder = 2
+    Spacing = -1
     IsControl = True
   end
   object NB: TOvcNotebook
@@ -199,7 +197,7 @@ object OvcfrmTransfer: TOvcfrmTransfer
       object memoTransfer: TMemo
         Left = 0
         Top = 72
-        Width = 516
+        Width = 517
         Height = 200
         Align = alBottom
         Ctl3D = True
@@ -241,7 +239,7 @@ object OvcfrmTransfer: TOvcfrmTransfer
       object memoInitialize: TMemo
         Left = 0
         Top = 72
-        Width = 516
+        Width = 517
         Height = 200
         Align = alBottom
         Ctl3D = True
@@ -275,7 +273,7 @@ object OvcfrmTransfer: TOvcfrmTransfer
       object memoSample: TMemo
         Left = 0
         Top = 72
-        Width = 516
+        Width = 517
         Height = 200
         Align = alBottom
         Ctl3D = True
@@ -299,9 +297,7 @@ object OvcfrmTransfer: TOvcfrmTransfer
     Width = 329
     Height = 25
     Caption = 'Copy all to clipboard'
-    DoubleBuffered = True
     Enabled = False
-    ParentDoubleBuffered = False
     TabOrder = 1
     OnClick = btnCopyToClipboardClick
   end

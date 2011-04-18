@@ -83,16 +83,16 @@ type
     SpeedButton9: TSpeedButton;
     LastButton: TSpeedButton;
     OvcTable1: TOvcTable;
-    OvcTCString1: TOvcTCString;
     OvcTCNumericField1: TOvcTCNumericField;
     OvcTCSimpleField1: TOvcTCSimpleField;
     OvcTCRowHead1: TOvcTCRowHead;
-    OvcTCSimpleField2: TOvcTCSimpleField;
     N3: TMenuItem;
     Calendar1: TMenuItem;
     InsertHotkey1: TMenuItem;                                 {!!.01}
     DeleteHotkey1: TMenuItem;
-    StatusBar1: TStatusBar;                                 {!!.01}
+    StatusBar1: TStatusBar;
+    OvcTCString1: TOvcTCString;
+    OvcTCColHead1: TOvcTCColHead;                                 {!!.01}
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure OvcNotebook1PageChange(Sender: TObject; Index: Integer;
@@ -143,7 +143,6 @@ type
     RecState : TRecState;
     DataList : TStringList;
     BH, BW: Word;
-    CellData : string[255];
     CalcValue : Double;
     procedure AddRecord;
     procedure OrdException(Sender: TObject; E: Exception);
@@ -202,7 +201,7 @@ var
   I : Integer;
 begin
   for I := 1 to MaxStates do
-    if AnsiCompareStr(P, StateAbbrevs[I]) = 0 then begin
+    if AnsiCompareStr(P, string(StateAbbrevs[I])) = 0 then begin
       Result := I;
       Exit;
     end;
@@ -409,7 +408,7 @@ end;
 procedure TOrdEntryForm.OvcSpinner1Click(Sender: TObject; State: TOvcSpinState;
   Delta: Double; Wrap: Boolean);
 var
-  CurState : string[2];
+  CurState : string;
   I : Integer;
 begin
   { Get the current value of the field }
@@ -432,7 +431,7 @@ begin
         I := 1
       else
         Inc(I);
-    TOvcSimpleField(OvcSpinner1.FocusedControl).AsString := StateAbbrevs[I];
+    TOvcSimpleField(OvcSpinner1.FocusedControl).AsString := string(StateAbbrevs[I]);
   end;
 end;
 
@@ -531,7 +530,7 @@ end;
 
 procedure TOrdEntryForm.StateFieldUserCommand(Sender: TObject; Command: Word);
 var
-  CurState : string[2];
+  CurState : string;
   I : Integer;
 begin
   { Get the current value of the field }
@@ -554,20 +553,19 @@ begin
         I := 1
       else
         Inc(I);
-    TOvcSimpleField(OvcSpinner1.FocusedControl).AsString := StateAbbrevs[I];
+    TOvcSimpleField(OvcSpinner1.FocusedControl).AsString := string(StateAbbrevs[I]);
   end;
 end;
 
 procedure TOrdEntryForm.StateFieldUserValidation(Sender: TObject;
   var ErrorCode: Word);
 var
-  CurState : string[2];
+  CurState : string;
 begin
   if ErrorCode <> 0 then Exit;
   CurState := StateField.AsString;
-  if CurState[0] <> '' then
-    if FindState(CurState) = -1 then
-      ErrorCode := StateError;
+  if (CurState <> '') and (FindState(CurState) = -1) then
+    ErrorCode := StateError;
 end;
 
 procedure TOrdEntryForm.StatusHint(Sender: TObject);
@@ -646,7 +644,7 @@ end;
 
 procedure TOrdEntryForm.TransferFromForm;
 begin
-  OvcTransfer1.TransferFromForm([LastNameField,
+  OvcTransfer1.TransferFromFormS([LastNameField,
                                  FirstNameField,
                                  CompanyField,
                                  StreetField,
@@ -657,7 +655,7 @@ end;
 
 procedure TOrdEntryForm.TransferToForm;
 begin
-  OvcTransfer1.TransferToForm([LastNameField,
+  OvcTransfer1.TransferToFormS([LastNameField,
                                FirstNameField,
                                CompanyField,
                                StreetField,
@@ -771,17 +769,10 @@ end;
 procedure TOrdEntryForm.OvcTable1GetCellData(Sender: TObject; RowNum: Longint;
   ColNum: Integer; var Data: Pointer; Purpose : TOvcCellDataPurpose);
 begin
-  CellData := '';
-  Data := @CellData;
-  if (RowNum = 0) then begin
-    CellData := '';
-    case ColNum of
-      1 : CellData := 'Qty';
-      2 : CellData := 'Description';
-      3 : CellData := 'Price';
-      4 : CellData := 'Total';
-    end;
-  end else begin
+  Data := nil;
+  { As a TOvcTCColHead-component is used for the headings, there is no need to provide
+    any data for RowNum=0. }
+  if (RowNum > 0) and (RowNum<=NumOrders) then begin
     case ColNum of
       1 : Data := @TR.Orders[RowNum].Qty;
       2 : Data := @TR.Orders[RowNum].Desc;

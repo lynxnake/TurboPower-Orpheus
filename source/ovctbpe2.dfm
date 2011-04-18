@@ -264,6 +264,7 @@ object OvcfrmColEditor: TOvcfrmColEditor
       Height = 21
       Style = csDropDownList
       DropDownCount = 16
+      ItemHeight = 13
       TabOrder = 0
     end
     object ctlHidden: TCheckBox
@@ -320,12 +321,10 @@ object OvcfrmColEditor: TOvcfrmColEditor
     Width = 75
     Height = 25
     Caption = '&Done'
-    DoubleBuffered = True
     ModalResult = 1
-    NumGlyphs = 2
-    ParentDoubleBuffered = False
     TabOrder = 3
     OnClick = DoneButtonClick
+    NumGlyphs = 2
   end
   object ApplyButton: TBitBtn
     Left = 304
@@ -334,11 +333,9 @@ object OvcfrmColEditor: TOvcfrmColEditor
     Height = 25
     Caption = '&Apply'
     Default = True
-    DoubleBuffered = True
-    NumGlyphs = 2
-    ParentDoubleBuffered = False
     TabOrder = 2
     OnClick = ApplyButtonClick
+    NumGlyphs = 2
   end
   object DefaultController: TOvcController
     EntryCommands.TableList = (

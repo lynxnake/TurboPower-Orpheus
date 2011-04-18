@@ -111,7 +111,7 @@ begin
   {transfer data to the form}
   {the below component order must match the transfer record}
   {definition!}
-  OvcTransfer1.TransferToForm(
+  OvcTransfer1.TransferToFormS(
     [Label1, Edit1, CheckBox1, RadioButton1, OvcPictureField1,
      Listbox1, ComboBox1, Panel1, OvcSimpleField1,
      OvcPictureField2, OvcNumericField1], Rec);
@@ -126,10 +126,12 @@ var
 begin
   {create transfer objects and init transfer record}
   InitForm1Transfer(Rec);
-  {transfer data from the form}
-  {normally, you would not wish to retrieve the contents}
-  {of static components (Label, Panel, ...) }
-  OvcTransfer1.TransferFromForm(
+  {transfer data from the form
+   Normally, you would not wish to retrieve the contents of static
+   components (Label, Panel, ...)
+   As "old fashioned" ShortStrings are used in the transfer record, we
+   have to use 'TransferFromFormS': }
+  OvcTransfer1.TransferFromFormS(
     [Label1, Edit1, CheckBox1, RadioButton1, OvcPictureField1,
      Listbox1, ComboBox1, Panel1, OvcSimpleField1,
      OvcPictureField2, OvcNumericField1], Rec);
