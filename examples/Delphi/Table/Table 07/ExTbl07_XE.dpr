@@ -15,23 +15,20 @@
 {*                                                                            *}
 {* The Initial Developer of the Original Code is TurboPower Software          *}
 {*                                                                            *}
-{* Portions created by TurboPower Software Inc. are Copyright (C)1995-2002      *}
+{* Portions created by TurboPower Software Inc. are Copyright (C)1995-2002    *}
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
-program ExTbl01;
+
+program ExTbl07;
 
 uses
   Forms,
-  ExTbl01U in 'ExTbl01U.pas' {Form1};
+  ExTbl07U in 'ExTbl07U.pas' {Form1};
 
-{$IFDEF WIN32}
-  {$R *.R32}
-{$ELSE}
-  {$R *.R16}
-{$ENDIF}
+{$R *.RES}
 
 begin
   Application.CreateForm(TForm1, Form1);

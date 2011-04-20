@@ -160,7 +160,7 @@ var
 
 begin
   P := 0;
-  IniF := TIniFile.Create('c:\extbl12.ini');
+  IniF := TIniFile.Create(ChangeFileExt(Application.ExeName, '.ini'));
   try
     for I := 1 to 3 do begin
       case ColToFieldMap[I] of

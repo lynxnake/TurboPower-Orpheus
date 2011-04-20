@@ -2,13 +2,13 @@ object Form1: TForm1
   Left = 358
   Top = 206
   Caption = 'Form1'
-  ClientHeight = 280
-  ClientWidth = 363
+  ClientHeight = 294
+  ClientWidth = 372
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -13
-  Font.Name = 'Default'
+  Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = True
   Position = poScreenCenter
@@ -20,6 +20,7 @@ object Form1: TForm1
     Top = 10
     Width = 333
     Height = 231
+    ColorUnused = clBtnFace
     Controller = OvcController1
     GridPenSet.NormalGrid.NormalColor = clBtnShadow
     GridPenSet.NormalGrid.Style = psDot
@@ -37,8 +38,8 @@ object Form1: TForm1
     OnDoneEdit = OvcTable1DoneEdit
     OnGetCellData = OvcTable1GetCellData
     CellData = (
-      'Form1.OvcTCMemo1'
-      'Form1.OvcTCPictureField1')
+      'Form1.OvcTCPictureField1'
+      'Form1.OvcTCMemo1')
     RowData = (
       30)
     ColData = (
@@ -57,15 +58,9 @@ object Form1: TForm1
   object Button1: TButton
     Left = 145
     Top = 254
-    Width = 75
+    Width = 84
     Height = 25
     Caption = 'Show Memo'
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Default'
-    Font.Style = []
-    ParentFont = False
     TabOrder = 1
     OnClick = Button1Click
   end

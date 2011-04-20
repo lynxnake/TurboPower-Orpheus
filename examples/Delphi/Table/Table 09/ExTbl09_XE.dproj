@@ -1,14 +1,14 @@
 ﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
-			<ProjectGuid>{459A19CE-5A97-4276-8E80-1B23858458E0}</ProjectGuid>
-			<ProjectVersion>12.3</ProjectVersion>
-			<Config Condition="'$(Config)'==''">Purepascal</Config>
-			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
-			<MainSource>OrpheusTests.dpr</MainSource>
+			<ProjectGuid>{16AE90BD-0CFF-459E-BB63-B9F08840FE2B}</ProjectGuid>
+			<MainSource>ExTbl09_XE.dpr</MainSource>
 			<Basis>True</Basis>
+			<Config Condition="'$(Config)'==''">Debug</Config>
 			<Platform>Win32</Platform>
 			<AppType>Application</AppType>
 			<FrameworkType>VCL</FrameworkType>
+			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
+			<ProjectVersion>12.3</ProjectVersion>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Basis' or '$(Base)'!=''">
 			<Base>true</Base>
@@ -23,16 +23,14 @@
 			<CfgParent>Base</CfgParent>
 			<Base>true</Base>
 		</PropertyGroup>
-		<PropertyGroup Condition="'$(Config)'=='Purepascal' or '$(Cfg_3)'!=''">
-			<Cfg_3>true</Cfg_3>
-			<CfgParent>Base</CfgParent>
-			<Base>true</Base>
-		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
-			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
-			<DCC_DependencyCheckOutputName>..\..\..\Compile\OrpheusTests.exe</DCC_DependencyCheckOutputName>
+			<DCC_E>false</DCC_E>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
-			<DCC_Platform>x86</DCC_Platform>
+			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;WinTypes=Windows;WinProcs=Windows;$(DCC_UnitAlias)</DCC_UnitAlias>
+			<DCC_F>false</DCC_F>
+			<DCC_S>false</DCC_S>
+			<DCC_N>false</DCC_N>
+			<DCC_K>false</DCC_K>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
 			<DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
@@ -41,54 +39,19 @@
 			<DCC_DebugInformation>false</DCC_DebugInformation>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
-			<DCC_Optimize>false</DCC_Optimize>
 			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
-		</PropertyGroup>
-		<PropertyGroup Condition="'$(Cfg_3)'!=''">
-			<DCC_Define>DEBUG;PUREPASCAL;$(DCC_Define)</DCC_Define>
+			<DCC_Optimize>false</DCC_Optimize>
+			<DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
 		</PropertyGroup>
 		<ItemGroup>
-			<DelphiCompile Include="OrpheusTests.dpr">
+			<DelphiCompile Include="ExTbl09_XE.dpr">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="TestOVCEditU.pas"/>
-			<DCCReference Include="TestOVCIntl.pas"/>
-			<DCCReference Include="TestOVCPlb.pas"/>
-			<DCCReference Include="TestOvcFormatSettings.pas"/>
-			<DCCReference Include="TestOvcDbPictureField.pas"/>
-			<DCCReference Include="TestOvcDbSimpleField.pas"/>
-			<DCCReference Include="TestOvcTable.pas">
-				<Form>frmTestOvcPictureField</Form>
-			</DCCReference>
-			<DCCReference Include="TestOVCStr.pas"/>
-			<DCCReference Include="TestOVCEdit.pas">
+			<DCCReference Include="ExTbl09U.pas">
 				<Form>Form1</Form>
 			</DCCReference>
-			<DCCReference Include="..\OvcStr.pas"/>
-			<DCCReference Include="TestOvcUtils.pas"/>
-			<DCCReference Include="TestOvcFileViewer.pas">
-				<Form>OvcFileViewerForm</Form>
-			</DCCReference>
-			<DCCReference Include="TestOvcPictureField.pas">
-				<Form>TestOvcPictureFieldForm</Form>
-			</DCCReference>
-			<DCCReference Include="TestOvcDate.pas"/>
-			<DCCReference Include="TestOvcTransfer.pas">
-				<Form>TestOvcTransferForm</Form>
-			</DCCReference>
-			<DCCReference Include="TestOvcSpinner.pas">
-				<Form>TestOvcSpinnerForm</Form>
-			</DCCReference>
-			<DCCReference Include="TestOvcMisc.pas"/>
-			<None Include="TestOvcFileViewer.txt">
-				<ContainerId>WebFile</ContainerId>
-			</None>
 			<BuildConfiguration Include="Debug">
 				<Key>Cfg_2</Key>
-				<CfgParent>Base</CfgParent>
-			</BuildConfiguration>
-			<BuildConfiguration Include="Purepascal">
-				<Key>Cfg_3</Key>
 				<CfgParent>Base</CfgParent>
 			</BuildConfiguration>
 			<BuildConfiguration Include="Basis">
@@ -103,10 +66,12 @@
 		<Import Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')" Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj"/>
 		<ProjectExtensions>
 			<Borland.Personality>Delphi.Personality.12</Borland.Personality>
-			<Borland.ProjectType/>
+			<Borland.ProjectType>VCLApplication</Borland.ProjectType>
 			<BorlandProject>
 				<Delphi.Personality>
-					<Parameters/>
+					<Source>
+						<Source Name="MainSource">ExTbl09_XE.dpr</Source>
+					</Source>
 					<VersionInfo>
 						<VersionInfo Name="IncludeVerInfo">False</VersionInfo>
 						<VersionInfo Name="AutoIncBuild">False</VersionInfo>
@@ -134,20 +99,7 @@
 						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
-					<Excluded_Packages>
-						<Excluded_Packages Name="$(BDSBIN)\dcloffice2k120.bpl">Microsoft Office 2000 Beispiele für gekapselte Komponenten für Automation Server</Excluded_Packages>
-						<Excluded_Packages Name="$(BDSBIN)\dclofficexp120.bpl">Microsoft Office XP Beispiele für gekapselte Komponenten für Automation Server</Excluded_Packages>
-					</Excluded_Packages>
-					<Source>
-						<Source Name="MainSource">OrpheusTests.dpr</Source>
-					</Source>
 				</Delphi.Personality>
-				<UnitTesting>
-					<TestFramework>DUnit / Delphi Win32</TestFramework>
-					<TestRunner>GUI</TestRunner>
-					<TestProjectName/>
-					<SourceProjectName/>
-				</UnitTesting>
 				<Platforms>
 					<Platform value="Win32">True</Platform>
 				</Platforms>

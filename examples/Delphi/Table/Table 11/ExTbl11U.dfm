@@ -3,17 +3,17 @@ object Form1: TForm1
   Top = 108
   Caption = 'Table Example'
   ClientHeight = 232
-  ClientWidth = 381
+  ClientWidth = 386
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Default'
+  Font.Height = -13
+  Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = True
   Position = poScreenCenter
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 16
   object OvcTable1: TOvcTable
     Left = 8
     Top = 16
@@ -40,9 +40,9 @@ object Form1: TForm1
     OnGetCellAttributes = OvcTable1GetCellAttributes
     CellData = (
       'Form1.OvcTCString2'
-      'Form1.OvcTCRowHead1'
+      'Form1.OvcTCPictureField1'
       'Form1.OvcTCString1'
-      'Form1.OvcTCPictureField1')
+      'Form1.OvcTCRowHead1')
     RowData = (
       20)
     ColData = (
@@ -65,11 +65,9 @@ object Form1: TForm1
     Width = 75
     Height = 25
     Caption = '&Close'
-    DoubleBuffered = True
-    NumGlyphs = 2
-    ParentDoubleBuffered = False
     TabOrder = 1
     OnClick = BitBtn1Click
+    NumGlyphs = 2
   end
   object OvcController1: TOvcController
     EntryCommands.TableList = (
@@ -90,8 +88,8 @@ object Form1: TForm1
     Adjust = otaBottomLeft
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBtnText
-    Font.Height = -11
-    Font.Name = 'Default'
+    Font.Height = -13
+    Font.Name = 'Tahoma'
     Font.Style = []
     MaxLength = 49
     Table = OvcTable1
@@ -102,8 +100,8 @@ object Form1: TForm1
   object OvcTCString2: TOvcTCString
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBtnText
-    Font.Height = -11
-    Font.Name = 'Default'
+    Font.Height = -13
+    Font.Name = 'Tahoma'
     Font.Style = []
     Table = OvcTable1
     TableFont = False
@@ -113,8 +111,8 @@ object Form1: TForm1
   object OvcTCRowHead1: TOvcTCRowHead
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBtnText
-    Font.Height = -11
-    Font.Name = 'Default'
+    Font.Height = -13
+    Font.Name = 'Tahoma'
     Font.Style = []
     Table = OvcTable1
     TableFont = False
@@ -135,8 +133,8 @@ object Form1: TForm1
     EFColors.Highlight.TextColor = clHighlightText
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBtnText
-    Font.Height = -11
-    Font.Name = 'Default'
+    Font.Height = -13
+    Font.Name = 'Tahoma'
     Font.Style = []
     Table = OvcTable1
     TableFont = False

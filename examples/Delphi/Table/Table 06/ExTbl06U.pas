@@ -10,8 +10,6 @@ uses
   OvcBase, OvcTable;
 
 type
-  S10 = string;
-
   TForm1 = class(TForm)
     OvcTable1: TOvcTable;
     OvcController1: TOvcController;
@@ -21,13 +19,13 @@ type
     procedure OvcTable1GetCellData(Sender: TObject; RowNum: Longint;
       ColNum: Integer; var Data: Pointer; Purpose: TOvcCellDataPurpose);
     procedure Button1Click(Sender: TObject);
-  private
-    { Private declarations }
   public
     { Public declarations }
     HiIdx :   TRowNum;
-    MyArray : array[1..9] of S10;
-
+    { It is possible to use a ShortString (e.g. string[10]) here; however, it is important
+      to set OvcTCString1.DataStringType and OvcTCString1.MaxLength accordingly in the
+      object-inspector. }
+    MyArray : array[1..9] of string;
 
     procedure DeleteMyArray(Row : TRowNum);
   end;
@@ -56,7 +54,6 @@ begin
     if ColNum = 1 then
       Data := @MyArray[RowNum];
 end;
-
 
 procedure TForm1.DeleteMyArray(Row : TRowNum);
 var

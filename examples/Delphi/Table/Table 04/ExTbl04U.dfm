@@ -37,9 +37,9 @@ object Form1: TForm1
     TabOrder = 0
     OnGetCellData = OvcTable1GetCellData
     CellData = (
-      'Form1.OvcTCComboBox1'
+      'Form1.OvcTCString1'
       'Form1.OvcTCGlyph1'
-      'Form1.OvcTCString1')
+      'Form1.OvcTCComboBox1')
     RowData = (
       25)
     ColData = (

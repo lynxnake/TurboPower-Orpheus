@@ -1,4 +1,4 @@
-unit TestOvcTCPictureField;
+unit TestOvcTable;
 
 interface
 
@@ -6,7 +6,8 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, OvcData,
   Dialogs, ovctcbef, ovctcpic, ovctcmmn, ovctcell, ovctcstr, ovctcedt, ovcbase, ovcef,
   StdCtrls,
-  ovcsf, ovctable, TestFramework, ovctcnum, ovctcsim, ovctccustomedt, o32tcflx;
+  ovcsf, ovctable, TestFramework, ovctcnum, ovctcsim, ovctccustomedt, o32tcflx, ovctcbmp,
+  ovctcgly, ovctcbox;
 
 type
   TfrmTestOvcPictureField = class(TForm)
@@ -22,6 +23,7 @@ type
     OvcTCMemo1_SS: TOvcTCMemo;
     O32TCFlexEdit1: TO32TCFlexEdit;
     O32TCFlexEdit1_SS: TO32TCFlexEdit;
+    OvcTCCheckBox1: TOvcTCCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure OvcTable1GetCellData(Sender: TObject; RowNum, ColNum: Integer; var Data: Pointer;
       Purpose: TOvcCellDataPurpose);
@@ -50,9 +52,11 @@ type
     Data_Overflow_OvcTCMemo1_SS: Integer;
     Data_O32TCFlexEdit1_SS: ShortString;
     Data_Overflow_O32TCFlexEdit1_SS: Integer;
+    Data_OvcTCCheckBox1: StdCtrls.TCheckBoxState;
+    Data_Overflow_OvcTCCheckBox1: Integer;
   end;
 
-  TTestOvcTCPictureField = class(TTestCase)
+  TTestOvcTable = class(TTestCase)
   private
     FForm: TfrmTestOvcPictureField;
   protected
@@ -71,6 +75,7 @@ type
     procedure TestOvcTCString_SS;
     procedure TestOvcTCMemo_SS;
     procedure TestO32TCFlexEdit_SS;
+    procedure TextOvcTCCheckBox_Click;
   end;
 
 implementation
@@ -111,6 +116,8 @@ begin
   Data_Overflow_OvcTCMemo1_SS      := -1;
   Data_O32TCFlexEdit1_SS           := '';
   Data_Overflow_O32TCFlexEdit1_SS  := -1;
+  Data_OvcTCCheckBox1              := cbUnchecked;
+  Data_Overflow_OvcTCCheckBox1     := -1;
 end;
 
 procedure TfrmTestOvcPictureField.OvcTable1GetCellData(Sender: TObject; RowNum, ColNum: Integer;
@@ -134,6 +141,7 @@ begin
         0: data := @Data_OvcTCString1_SS;
         1: data := @Data_OvcTCMemo1_SS;
         2: data := @Data_O32TCFlexEdit1_SS;
+        3: data := @Data_OvcTCCheckBox1;
         else
           data := nil;
       end;
@@ -166,7 +174,7 @@ begin
 end;
 
 
-procedure TTestOvcTCPictureField.TestOvcTCString;
+procedure TTestOvcTable.TestOvcTCString;
   {- test OvcTCString }
 begin
   { Test typing data }
@@ -180,7 +188,7 @@ begin
 end;
 
 
-procedure TTestOvcTCPictureField.TestOvcTCPictureField_pftString;
+procedure TTestOvcTable.TestOvcTCPictureField_pftString;
   {- test OvcTCPictureField with datatype 'pftString' }
 begin
   { Test reading data }
@@ -199,7 +207,7 @@ begin
 end;
 
 
-procedure TTestOvcTCPictureField.TestOvcTCPictureField_pftLongInt;
+procedure TTestOvcTable.TestOvcTCPictureField_pftLongInt;
   {- test OvcTCPictureField with datatype 'pftLongInt' }
 begin
   { Test reading data }
@@ -218,7 +226,7 @@ begin
 end;
 
 
-procedure TTestOvcTCPictureField.TestOvcTCNumericField_nftDouble;
+procedure TTestOvcTable.TestOvcTCNumericField_nftDouble;
   {- test OvcTCNumericField with datatype 'nftDouble' }
 begin
   { Test reading data }
@@ -237,7 +245,7 @@ begin
 end;
 
 
-procedure TTestOvcTCPictureField.TestOvcTCSimpleField_sftString;
+procedure TTestOvcTable.TestOvcTCSimpleField_sftString;
   {- test OvcTCSimpleField with datatype 'sftString' }
 begin
   { Test reading data }
@@ -256,7 +264,7 @@ begin
 end;
 
 
-procedure TTestOvcTCPictureField.TestOvcTCSimpleField_sftString_DataNIL;
+procedure TTestOvcTable.TestOvcTCSimpleField_sftString_DataNIL;
   {- test for a corner case that was handled incorrectly in rev 191}
 var
   s: string;
@@ -276,7 +284,7 @@ begin
 end;
 
 
-procedure TTestOvcTCPictureField.TestOvcTCSimpleField_Passwordmode;
+procedure TTestOvcTable.TestOvcTCSimpleField_Passwordmode;
   {- test for a bug that was fixed in rev 201: TOvcTCSimpleField did not display
      Password-characters properly in unicode. }
 var
@@ -296,7 +304,7 @@ begin
 end;
 
 
-procedure TTestOvcTCPictureField.TestOvcTCMemo;
+procedure TTestOvcTable.TestOvcTCMemo;
   {- test OvcTCMemo }
 begin
   { Test typing data }
@@ -310,7 +318,7 @@ begin
 end;
 
 
-procedure TTestOvcTCPictureField.TestO32TCFlexEdit;
+procedure TTestOvcTable.TestO32TCFlexEdit;
   {- test O32TCFlexEdit }
 begin
   { Test typing data }
@@ -324,7 +332,7 @@ begin
 end;
 
 
-procedure TTestOvcTCPictureField.TestOvcTCString_SS;
+procedure TTestOvcTable.TestOvcTCString_SS;
   {- test OvcTCString with ShortString for storing the data }
 begin
   { Test typing data }
@@ -352,7 +360,7 @@ begin
 end;
 
 
-procedure TTestOvcTCPictureField.TestOvcTCMemo_SS;
+procedure TTestOvcTable.TestOvcTCMemo_SS;
   {- test OvcTCMemo with ShortString for storing the data }
 begin
   { Test typing data }
@@ -366,7 +374,7 @@ begin
 end;
 
 
-procedure TTestOvcTCPictureField.TestO32TCFlexEdit_SS;
+procedure TTestOvcTable.TestO32TCFlexEdit_SS;
   {- test O32TCFlexEdit with ShortString for storing the data }
 begin
   { Test typing data }
@@ -380,7 +388,51 @@ begin
 end;
 
 
-procedure TTestOvcTCPictureField.SetUp;
+procedure TTestOvcTable.TextOvcTCCheckBox_Click;
+  {- test for a Bug fixed in rev 213: In a table with otoNoSelection in Options it took
+     three clicks on a cell containing a checkBox to change the checkbox' state. }
+begin
+  FForm.Data_OvcTCCheckBox1 := cbUnchecked;
+  { test clicking on a checkbox without "otoNoSelection in Options": The first click
+    selects the cell, the second toggles the checkbox. }
+  with FForm.OvcTable2 do begin
+    Options := Options - [otoNoSelection];
+    SetActiveCell(0,0);
+    SetFocus;
+    PostMessage(FForm.ActiveControl.Handle, WM_LBUTTONDOWN, 0, 5*65536+400);
+    Application.ProcessMessages;
+    PostMessage(FForm.ActiveControl.Handle, WM_LBUTTONUP, 0, 5*65536+400);
+    Application.ProcessMessages;
+    PostMessage(FForm.ActiveControl.Handle, WM_LBUTTONDOWN, 0, 5*65536+400);
+    Application.ProcessMessages;
+    PostMessage(FForm.ActiveControl.Handle, WM_LBUTTONUP, 0, 5*65536+400);
+    Application.ProcessMessages;
+    StopEditingState(True);
+  end;
+  CheckTrue(FForm.Data_OvcTCCheckBox1=cbChecked,
+            'Clicking on a OvcTCCheckbox failed when otoNoSelection not in Options');
+  CheckEquals(-1, FForm.Data_Overflow_OvcTCCheckBox1, 'Data overflow for OvcTCCheckBox1');
+
+  FForm.Data_OvcTCCheckBox1 := cbUnchecked;
+  { test clicking on a checkbox with "otoNoSelection in Options": The first click toggles the
+    checkbox. }
+  with FForm.OvcTable2 do begin
+    Options := Options + [otoNoSelection];
+    SetActiveCell(0,0);
+    SetFocus;
+    PostMessage(FForm.ActiveControl.Handle, WM_LBUTTONDOWN, 0, 5*65536+400);
+    Application.ProcessMessages;
+    PostMessage(FForm.ActiveControl.Handle, WM_LBUTTONUP, 0, 5*65536+400);
+    Application.ProcessMessages;
+    StopEditingState(True);
+  end;
+  CheckTrue(FForm.Data_OvcTCCheckBox1=cbChecked,
+            'Clicking on a OvcTCCheckbox failed when otoNoSelection in Options');
+  CheckEquals(-1, FForm.Data_Overflow_OvcTCCheckBox1, 'Data overflow for OvcTCCheckBox1');
+end;
+
+
+procedure TTestOvcTable.SetUp;
 begin
   inherited SetUp;
   FForm := TfrmTestOvcPictureField.Create(nil);
@@ -388,13 +440,13 @@ begin
   Application.ProcessMessages;
 end;
 
-procedure TTestOvcTCPictureField.TearDown;
+procedure TTestOvcTable.TearDown;
 begin
   FForm.Free;
   inherited TearDown;
 end;
 
 initialization
-  RegisterTest(TTestOvcTCPictureField.Suite);
+  RegisterTest(TTestOvcTable.Suite);
 
 end.

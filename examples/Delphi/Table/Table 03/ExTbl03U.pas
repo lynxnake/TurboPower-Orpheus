@@ -19,9 +19,6 @@ uses
   OvcBase, OvcTable, OvcTCEdt, StdCtrls;
 
 type
-  StrBuf = string; //array[0..99] of char;
-  GroupNrString = string;//[7];
-
   TForm1 = class(TForm)
     OvcTable1: TOvcTable;
     OvcController1: TOvcController;
@@ -34,24 +31,22 @@ type
     procedure OvcTable1DoneEdit(Sender: TObject; RowNum: Longint;
       ColNum: Integer);
     procedure Button1Click(Sender: TObject);
-  private
-    { Private declarations }
   public
     { Public declarations }
     function LoStrBuf(var SB : string) : string;
     procedure UpStrBuf(var SB : string; Row : TRowNum);
 
-    function String2GroupNr(S : GroupNrString) : Word;
-    function GroupNr2String(N : Word) : GroupNrString;
+    function String2GroupNr(S : string) : Longword;
+    function GroupNr2String(N : Longword) : string;
   end;
 
 var
   Form1: TForm1;
-  MyMemos : array[1..9] of StrBuf;
+  MyMemos : array[1..9] of string;
   ABuf : string;
 
-  MyWords : array[1..9] of Word;
-  AString : GroupNrString;
+  MyWords : array[1..9] of Longword;
+  AString : string;
 
 implementation
 
@@ -70,25 +65,32 @@ begin
 end;
 
 
-function TForm1.String2GroupNr(S : GroupNrString) : Word;
-var w1, w2 : Word;
+function TForm1.String2GroupNr(S : string) : Longword;
+var
+  w1, w2 : Longword;
+  s1: string;
 begin
-  w1 := 0;
-  w2 := 0;
-  w1 := StrToInt(Copy(S, 1, 2));
-  w2 := StrToInt(Copy(S, 4, 4));
-  Result := (w1 shl 11) + w2;
+  s1 := Trim(Copy(S, 1, 2));
+  if s1='' then
+    w1 := 0
+  else
+    w1 := StrToInt(s1);
+  s1 := Trim(Copy(S, 4, 4));
+  if s1='' then
+    w2 := 0
+  else
+    w2 := StrToInt(s1);
+  Result := (w1 shl 14) + w2;
 end;
 
-function TForm1.GroupNr2String(N : Word) : GroupNrString;
+function TForm1.GroupNr2String(N : Longword) : string;
 var
-  S1,
-  S2  : GroupNRString;
+  S1, S2 : string;
 begin
-  S1 := IntToStr((N and $7800) shr 11);
+  S1 := IntToStr((N and $FFFFc000) shr 14);
   while (Length(S1) < 2) do
     S1 := ' ' + S1;
-  S2 := IntToStr(N and $07FF);
+  S2 := IntToStr(N and $00003FFF);
   while (Length(S2) < 4) do
     S2 := '0' + S2;
   Result := S1 + '/' + S2;

@@ -59,7 +59,7 @@ implementation
 type
   TMyRecord = record
     mrString        : string;
-    mrMemo          : string; //array [0..79] of char;
+    mrMemo          : string;
     mrCheckBox      : TCheckBoxState;
     mrSimple        : string;
     mrPicture       : TOvcDate;

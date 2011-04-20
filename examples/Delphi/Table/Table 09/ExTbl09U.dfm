@@ -2,20 +2,20 @@ object Form1: TForm1
   Left = 305
   Top = 253
   Caption = 'Table Example'
-  ClientHeight = 203
-  ClientWidth = 430
+  ClientHeight = 212
+  ClientWidth = 509
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Default'
+  Font.Height = -13
+  Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = True
   Position = poScreenCenter
   OnClose = FormClose
   OnCreate = FormCreate
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 16
   object OvcTable1: TOvcTable
     Left = 17
     Top = 8
@@ -54,22 +54,20 @@ object Form1: TForm1
   object Memo1: TMemo
     Left = 192
     Top = 8
-    Width = 237
+    Width = 305
     Height = 195
     TabStop = False
     Lines.Strings = (
       'This example shows how to assign UserData to '
       'a table cell. In this case, the input characters '
-      'are '
-      'limited to those in ['#39'A'#39'..'#39'C, '#39'0'#39'..'#39'9'#39'].'
+      'are limited to those in ['#39'A'#39'..'#39'C, '#39'0'#39'..'#39'9'#39'].'
       ''
       'Since there is one and only one input column'
-      'in the table, there no checking in the '
+      'in the table, there is no checking in the '
       'OnMyMessage1 event handler to account for'
       'the possiblity that a different type of field '
-      'might'
-      'be involved, e.g., a TOvcSimpleField. This is'
-      'left to you. ')
+      'might be involved, e.g., a TOvcSimpleField. This'
+      'is left to you. ')
     ReadOnly = True
     TabOrder = 1
   end

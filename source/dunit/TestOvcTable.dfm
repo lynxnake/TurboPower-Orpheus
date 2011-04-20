@@ -41,12 +41,12 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     OnGetCellData = OvcTable1GetCellData
     CellData = (
       'frmTestOvcPictureField.O32TCFlexEdit1'
-      'frmTestOvcPictureField.OvcTCPictureField1'
-      'frmTestOvcPictureField.OvcTCString1'
+      'frmTestOvcPictureField.OvcTCMemo1'
+      'frmTestOvcPictureField.OvcTCSimpleField1'
       'frmTestOvcPictureField.OvcTCNumericField1'
       'frmTestOvcPictureField.OvcTCPictureField2'
-      'frmTestOvcPictureField.OvcTCSimpleField1'
-      'frmTestOvcPictureField.OvcTCMemo1')
+      'frmTestOvcPictureField.OvcTCPictureField1'
+      'frmTestOvcPictureField.OvcTCString1')
     RowData = (
       30)
     ColData = (
@@ -102,17 +102,14 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     GridPenSet.CellWhenUnfocused.NormalColor = clBlack
     GridPenSet.CellWhenUnfocused.Style = psDash
     GridPenSet.CellWhenUnfocused.Effect = geBoth
+    Options = [otoNoSelection]
     TabOrder = 1
     OnGetCellData = OvcTable1GetCellData
     CellData = (
+      'frmTestOvcPictureField.OvcTCCheckBox1'
       'frmTestOvcPictureField.O32TCFlexEdit1_SS'
-      'frmTestOvcPictureField.OvcTCSimpleField1'
-      'frmTestOvcPictureField.OvcTCPictureField2'
-      'frmTestOvcPictureField.OvcTCNumericField1'
-      'frmTestOvcPictureField.OvcTCString1'
-      'frmTestOvcPictureField.OvcTCPictureField1'
-      'frmTestOvcPictureField.OvcTCString1_SS'
-      'frmTestOvcPictureField.OvcTCMemo1_SS')
+      'frmTestOvcPictureField.OvcTCMemo1_SS'
+      'frmTestOvcPictureField.OvcTCString1_SS')
     RowData = (
       30)
     ColData = (
@@ -127,7 +124,11 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
       120
       False
       True
-      'frmTestOvcPictureField.O32TCFlexEdit1_SS')
+      'frmTestOvcPictureField.O32TCFlexEdit1_SS'
+      100
+      False
+      True
+      'frmTestOvcPictureField.OvcTCCheckBox1')
   end
   object OvcTCString1: TOvcTCString
     MaxLength = 50
@@ -258,6 +259,15 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     Validation.ValidatorType = 'None'
     Validation.ValidationType = vtNone
     Left = 310
+    Top = 116
+  end
+  object OvcTCCheckBox1: TOvcTCCheckBox
+    Adjust = otaCenter
+    CellGlyphs.IsDefault = True
+    CellGlyphs.GlyphCount = 3
+    CellGlyphs.ActiveGlyphCount = 2
+    Table = OvcTable2
+    Left = 416
     Top = 116
   end
 end

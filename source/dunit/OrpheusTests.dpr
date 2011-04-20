@@ -16,7 +16,7 @@ uses
   TestOvcFormatSettings in 'TestOvcFormatSettings.pas',
   TestOvcDbPictureField in 'TestOvcDbPictureField.pas',
   TestOvcDbSimpleField in 'TestOvcDbSimpleField.pas',
-  TestOvcTCPictureField in 'TestOvcTCPictureField.pas' {frmTestOvcPictureField},
+  TestOvcTable in 'TestOvcTable.pas' {frmTestOvcPictureField},
   TestOVCStr in 'TestOVCStr.pas',
   TestOVCEdit in 'TestOVCEdit.pas' {Form1},
   OvcStr in '..\OvcStr.pas',

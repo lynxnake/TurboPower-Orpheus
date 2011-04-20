@@ -15,19 +15,20 @@
 {*                                                                            *}
 {* The Initial Developer of the Original Code is TurboPower Software          *}
 {*                                                                            *}
-{* Portions created by TurboPower Software Inc. are Copyright (C)1995-2002      *}
+{* Portions created by TurboPower Software Inc. are Copyright (C)1995-2002    *}
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
-program Extbl13;
+
+program ExTbl12_XE;
 
 uses
   Forms,
-  Extbl13u in 'EXTBL13U.PAS' {Form1};
+  ExTbl12U in 'ExTbl12U.PAS' {Form1};
 
-          
+{$R *.RES}
 
 begin
   Application.CreateForm(TForm1, Form1);
