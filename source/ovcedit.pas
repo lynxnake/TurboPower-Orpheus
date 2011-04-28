@@ -217,8 +217,8 @@ type
     edRectSelect        : Boolean;    { 4.08 True if we are selecting a        }
                                       {      rectangular block of text         }
     edRectSelectDiff    : Integer;
-    edResetingScrollbars: Boolean;    { Flag to prevent infinite recursions
-                                        whilst reseting the scrollbars         }
+    edResettingScrollbars: Boolean;   { Flag to prevent infinite recursions
+                                        whilst resetting the scrollbars         }
     {property methods}
     function GetFirstEditor : TOvcCustomEditor;
     function GetInsCaretType : TOvcCaret;
@@ -1588,7 +1588,7 @@ begin
   { 4.08 }
   edRectSelect := False;
   edRectSelectDiff := 0;
-  edResetingScrollbars := False;
+  edResettingScrollbars := False;
 
   {initialize the paragraph list}
   edParas := TOvcParaList.Init(Self, DefUndoBufferSize, False);
@@ -5400,10 +5400,10 @@ procedure TOvcCustomEditor.ResetScrollBars(UpdateScreen : Boolean);
     03/2011, AB: fixed issue 755214: In some cases (attaching an editor to another with both
                  WordWrap and WrapToWindow set to true) ResetScrollBars is called
                  inside edAdjustWrapColumn causig an infinite recursion.
-                 This is now prevented by using 'edResetingScrollbars'. }
+                 This is now prevented by using 'edResettingScrollbars'. }
 begin
-  if HandleAllocated and not edResetingScrollbars then begin
-    edResetingScrollbars := True;
+  if HandleAllocated and not edResettingScrollbars then begin
+    edResettingScrollbars := True;
     edSetVScrollRange;
     edSetVScrollPos;
     edSetHScrollRange;
@@ -5417,7 +5417,7 @@ begin
 
     {update}
     edRedraw(UpdateScreen);
-    edResetingScrollbars := False;
+    edResettingScrollbars := False;
   end;
 end;
 
