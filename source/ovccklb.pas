@@ -156,6 +156,7 @@ type
       read GetStates write SetStates;
 
   published
+    property AutoComplete;
     property BoxClickOnly : Boolean
       read FBoxClickOnly write FBoxClickOnly
       default True;
@@ -610,10 +611,14 @@ var
   I: Integer;
   State : TCheckBoxState;
   Tmp : TNotifyEvent;
+  Toggle: Boolean;
 begin
+  //SZ: toggle should happen only when pressing space; old behaviour was on every key, but it toggled the previous item not the one that gets focused
+  Toggle := (Key = ' '); //  Key is set to #0 in inherited KeyPress
+
   inherited KeyPress(Key);
 
-  if (not ReadOnly)
+  if Toggle and (not ReadOnly)
   and (ItemIndex >= 0)
   and (ItemIndex < Items.Count) then
   begin
