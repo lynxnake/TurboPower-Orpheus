@@ -1047,20 +1047,20 @@ begin
   if (ActiveRow = RowNum) and (ActiveCol = ColNum) then begin
     if FHideButton then begin
       {let ancestor paint the text}
-      inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, PChar(S));
+      inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @S);
     end else begin
       {Paint the string in the restricted rectangle}
-      inherited tcPaint(TableCanvas, R, RowNum, ColNum, CellAttr, PChar(S));
+      inherited tcPaint(TableCanvas, R, RowNum, ColNum, CellAttr, @S);
       {Paint the button on the right side}
       DrawButton(TableCanvas, CellRect);
     end;
   end else if FShowArrow then begin
     {paint the string in the restricted rectangle}
-    inherited tcPaint(TableCanvas, R, RowNum, ColNum, CellAttr, PChar(S));
+    inherited tcPaint(TableCanvas, R, RowNum, ColNum, CellAttr, @S);
     {Paint the arrow on the right side}
     DrawArrow(TableCanvas, CellRect, CellAttr);
   end else
-    inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, PChar(S));
+    inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @S);
 end;
 
 { TOvcPopupWindow }
