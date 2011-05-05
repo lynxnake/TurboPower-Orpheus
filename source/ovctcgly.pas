@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                  OVCTCGLY.PAS 4.06                    *}
+{*                  OVCTCGLY.PAS 4.08                    *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -333,9 +333,9 @@ procedure TOvcTCCustomGlyph.StopEditing(SaveValue : boolean;
 var
   pEdit: TOvcTCGlyphEdit;
   begin
-    if SaveValue and Assigned(Data) and (FEdit <> nil) then
-      Integer(Data^) := FEdit.Value;
-    begin
+    if FEdit <> nil then begin
+      if SaveValue and Assigned(Data) then
+        Integer(Data^) := FEdit.Value;
       pEdit := FEdit;
       FEdit := nil;
       pEdit.Free;

@@ -43,7 +43,7 @@ interface
 
 uses
   Windows, SysUtils, Messages, Classes, Controls, Forms, StdCtrls,
-  OvcTCmmn, OvcTCell, OvcTCStr,
+  OvcBase, OvcTCmmn, OvcTCell, OvcTCStr,
   Graphics; { - for default color definition}
 
 type
@@ -139,8 +139,6 @@ type
       property OnMouseMove;
       property OnMouseUp;
       property OnOwnerDraw;
-    public
-      constructor Create(AOwner : TComponent); override;
   end;
 
 type
@@ -313,7 +311,8 @@ procedure TOvcTCCustomString.StartEditing(RowNum : TRowNum; ColNum : TColNum;
                                           CellStyle: TOvcTblEditorStyle;
                                           Data : pointer);
   {-Changes:
-    04/2011, AB: UseASCIIZStrings/UsePString replaced by DataStringType }
+    04/2011, AB: UseASCIIZStrings/UsePString replaced by DataStringType
+    05/2011, AB: respect efoAutoSelect in Self.Table.Controller.EntryOptions }
   begin
     FEdit := CreateEditControl(FTable);
     with FEdit do
@@ -344,6 +343,10 @@ procedure TOvcTCCustomString.StartEditing(RowNum : TRowNum; ColNum : TColNum;
           tesBorder : BorderStyle := bsSingle;
           tes3D     : Ctl3D := true;
         end;{case}
+        if Assigned(self.Table) and Assigned(self.Table.Controller) then
+          AutoSelect := efoAutoSelect in Self.Table.Controller.EntryOptions;
+        if not AutoSelect then
+          SelStart := Length(Text);
 
         OnChange := Self.OnChange;
         OnClick := Self.OnClick;
@@ -714,13 +717,5 @@ procedure TOvcTCMemoEdit.WMSetFocus(var Msg : TWMSetFocus);
     inherited;
     CellOwner.PostMessageToTable(ctim_SetFocus, Msg.FocusedWnd, 0);
   end;
-{====================================================================}
-
-{===TOvcTCString===============================================}
-constructor TOvcTCString.Create(AOwner : TComponent);
-  begin
-    inherited Create(AOwner);
-  end;
-
 
 end.

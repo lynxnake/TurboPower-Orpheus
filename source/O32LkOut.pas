@@ -2606,6 +2606,11 @@ begin
                   try
                     BM.Width := FImages.Width;
                     BM.Height := FImages.Height;
+                    { 04.05.2011: Change suggested by Nathan Sutcliffe
+                      fixes the problem that images with transparent color were not
+                      painted properly when "small icons" are used (issue 1307362). }
+                    BM.Canvas.Brush.Color := FBackgroundColor;
+                    BM.Canvas.FillRect( Rect( 0, 0, BM.Width, BM.Height ) );
                     FImages.Draw(BM.Canvas, 0, 0, Item.IconIndex);
                     {DrawBmp.}Canvas.BrushCopy(Item.FIconRect, BM,
                       Rect(0, 0, BM.Width, BM.Height), BM.Canvas.Pixels[0,
