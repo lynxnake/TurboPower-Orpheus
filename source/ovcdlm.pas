@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                   OVCDLM.PAS 4.06                    *}
+{*                   OVCDLM.PAS 4.08                    *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -320,10 +320,12 @@ begin
     Dispose(P);
 end;
 
+{
 function DComp(D1, D2: DWord): Integer; register;
 asm
   sub eax, edx
 end;
+}
 
 {===== TOvcList ======================================================}
 
@@ -449,7 +451,8 @@ end;
 function TOvcList.Compare(Sender: TOvcPageTree; UserData, Key1,
   Key2: Pointer): Integer;
 begin
-  Result := DComp(DWord(POvcListNode(Key1).Item), DWord(POvcListNode(Key2).Item));
+//  Result := DComp(DWord(POvcListNode(Key1).Item), DWord(POvcListNode(Key2).Item));
+  Result := DWord(POvcListNode(Key1).Item) - DWord(POvcListNode(Key2).Item);
 end;
 
 function TOvcList.First(var Node: PovcListNode): Boolean;
@@ -592,7 +595,8 @@ begin
       if Key1 = Key2 then
         raise Exception.Create('Internal error')
       else
-        Result := DComp(DWord(Key1), DWord(Key2));
+        Result := DWord(Key1) - DWord(Key2);
+//        Result := DComp(DWord(Key1), DWord(Key2));
   end;
 end;
 
