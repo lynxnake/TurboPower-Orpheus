@@ -2570,7 +2570,7 @@ begin
 
   if (ACell is TOvcTCString) then begin
     TOvcTCString(ACell).MaxLength := AField.DisplayWidth;
-    TOvcTCString(ACell).UseASCIIZStrings := False;
+    TOvcTCString(ACell).DataStringType := tstString;
   end else if (ACell is TOvcTCComboBox) then begin
     TOvcTCComboBox(ACell).UseRunTimeItems := False;
 
