@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                  OVCTCBEF.PAS 4.06                    *}
+{*                  OVCTCBEF.PAS 4.08                    *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -43,7 +43,7 @@ interface
 
 uses
   Windows, SysUtils, Classes, Graphics, Controls, Forms,
-  OvcBase, OvcCmd, OvcEF, OvcCaret, OvcTCmmn, OvcTCell, OvcTable, OvcTCStr;
+  OvcBase, OvcCmd, OvcData, OvcConst, OvcEF, OvcCaret, OvcTCmmn, OvcTCell, OvcTable, OvcTCStr;
 
 type
   TOvcTCBaseEntryField = class(TOvcTCBaseString)
@@ -268,8 +268,12 @@ procedure TOvcTCBaseEntryField.tcPaint(TableCanvas : TCanvas;
                                        ColNum      : TColNum;
                                  const CellAttr    : TOvcCellAttributes;
                                        Data        : pointer);
+{  -Changes
+    05/2011, AB: Use 'FDataStringType' to determine what kind of string 'Data' points
+                 to (in case the data-type is string). }
   var
-    S : string;
+    S  : string;
+    sS : ShortString;
   begin
     if (Data = nil) then
       inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, Data)
@@ -281,9 +285,32 @@ procedure TOvcTCBaseEntryField.tcPaint(TableCanvas : TCanvas;
         FEditDisplay.Parent := FTable;
         SetWindowPos(FEditDisplay.Handle, HWND_TOP, 0, 0, 0, 0,
                      SWP_HIDEWINDOW or SWP_NOREDRAW or SWP_NOZORDER);
-        FEditDisplay.SetValue(Data^);
+        { In most cases, 'Data' can simply passed on to 'FEditDisplay'. However, in case
+          of strings, some extra care is needed:
+          The kind of string 'Data' points to differs and is determined by 'DataStringType' -
+          FEditDisplay needs a pointer to a string; so a conversion might be necessary }
+        if (TOvcBEF(FEditDisplay).efDataType mod fcpDivisor = fsubString) and
+           (FDataStringType <> tstString) then begin
+          if FDataStringType = tstShortString then
+            S := string(POvcShortString(Data)^)
+          else {FDataStringType = tstPChar}
+            S := string(PChar(Data));
+          FEditDisplay.SetValue(S);
+        end else
+          FEditDisplay.SetValue(Data^);
         S := Trim(FEditDisplay.DisplayString);
-        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @S);
+        { Usually, 'S' can be passed on to the inherited method. However, if FDataStringType
+          <> tstString then a different kind of string-type is expected by the
+          inherited method. }
+        case FDataStringType of
+          tstShortString: begin
+                            sS := ShortString(S);
+                            Data := @sS;
+                          end;
+          tstPChar:       Data := @S[1];
+          tstString:      Data := @S;
+        end;
+        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, Data);
       end;
   end;
 
@@ -300,6 +327,11 @@ procedure TOvcTCBaseEntryField.StartEditing(RowNum : TRowNum; ColNum : TColNum;
                                      const CellAttr : TOvcCellAttributes;
                                            CellStyle: TOvcTblEditorStyle;
                                            Data : pointer);
+{  -Changes
+    05/2011, AB: Use 'FDataStringType' to determine what kind of string 'Data' points
+                 to (in case the data-type is string). }
+  var
+    S: string;
   begin
     with TOvcBEF(FEdit) do
       begin
@@ -323,9 +355,21 @@ procedure TOvcTCBaseEntryField.StartEditing(RowNum : TRowNum; ColNum : TColNum;
         Controller := TOvcTable(FTable).Controller;
         if (Controller = nil) then
           ShowMessage('NIL in StartEditing');
-        if Assigned(Data) then
-          SetValue(Data^)
-        else
+        if Assigned(Data) then begin
+          { In most cases, 'Data' can simply passed on to 'FEdit'. However, in case
+            of strings, some extra care is needed:
+            The kind of string 'Data' points to differs and is determined by 'DataStringType' -
+            FEdit needs a pointer to a string; so a conversion might be necessary. }
+          if (efDataType mod fcpDivisor = fsubString) and
+             (FDataStringType <> tstString) then begin
+            if FDataStringType = tstShortString then
+              S := string(POvcShortString(Data)^)
+            else {FDataStringType = tstPChar}
+              S := string(PChar(Data));
+            SetValue(S);
+          end else
+            SetValue(Data^);
+        end else
           ClearContents;
         Visible := true;
 
@@ -352,9 +396,25 @@ procedure TOvcTCBaseEntryField.StartEditing(RowNum : TRowNum; ColNum : TColNum;
 {--------}
 procedure TOvcTCBaseEntryField.StopEditing(SaveValue : boolean;
                                            Data : pointer);
+{  -Changes
+    05/2011, AB: Use 'FDataStringType' to determine what kind of string 'Data' points
+                 to (in case the data-type is string). }
+  var
+    S: string;
   begin
-    if SaveValue and Assigned(Data) then
-      FEdit.GetValue(Data^);
+    if SaveValue and Assigned(Data) then begin
+      if (TOvcBEF(FEdit).efDataType mod fcpDivisor = fsubString) and
+         (FDataStringType <> tstString) then begin
+        { The data-type is string, but 'Data' doesn't point to a string (but ShortString
+          or array of char). FEdit.GetValue(Data^) cannot be used directly in this case. }
+        FEdit.GetValue(S);
+        if FDataStringType = tstShortString then
+          POvcShortString(Data)^ := ShortString(Copy(S, 1, MaxLength))
+        else {FDataStringType = tstPChar}
+          StrPLCopy(Data, S, MaxLength);
+      end else
+        FEdit.GetValue(Data^);
+    end;
     EditHide;
   end;
 
@@ -440,7 +500,7 @@ function TOvcTCBaseEntryField.GetMaxLength : word;
   begin
     if Assigned(FEdit) then
         Result := TOvcBEF(FEdit).MaxLength
-   else Result := 0;
+    else Result := 0;
   end;
 {--------}
 function TOvcTCBaseEntryField.GetPadChar : Char;

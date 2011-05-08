@@ -28,13 +28,8 @@ uses
   Forms,
   ExLkOutU in 'ExLkOutU.pas' {Form1};
 
-{$IFDEF WIN32}
-  {$R *.R32}
-  {$R ExLkOutG.r32}
-{$ELSE}
-  {$R *.R16}
-  {$R ExLkOutG.r16}
-{$ENDIF}
+{$R *.RES}
+{$R ExLkOutG.res}
 
 begin
   Application.CreateForm(TForm1, Form1);

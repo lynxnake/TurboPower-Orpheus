@@ -24,6 +24,8 @@ type
     O32TCFlexEdit1: TO32TCFlexEdit;
     O32TCFlexEdit1_SS: TO32TCFlexEdit;
     OvcTCCheckBox1: TOvcTCCheckBox;
+    OvcTCPictureField1_SS: TOvcTCPictureField;
+    OvcTCSimpleField1_SS: TOvcTCSimpleField;
     procedure FormCreate(Sender: TObject);
     procedure OvcTable1GetCellData(Sender: TObject; RowNum, ColNum: Integer; var Data: Pointer;
       Purpose: TOvcCellDataPurpose);
@@ -48,6 +50,10 @@ type
     { Fields for storing the data being displayed in OvcTable2. }
     Data_OvcTCString1_SS: string[10];
     Data_Overflow_OvcTCString1_SS: Integer;
+    Data_OvcTCPictureField1_SS: string[10];
+    Data_Overflow_OvcTCPictureField1_SS: Integer;
+    Data_OvcTCSimpleField1_SS: string[10];
+    Data_Overflow_OvcTCSimpleField1_SS: Integer;
     Data_OvcTCMemo1_SS: ShortString;
     Data_Overflow_OvcTCMemo1_SS: Integer;
     Data_O32TCFlexEdit1_SS: ShortString;
@@ -73,6 +79,8 @@ type
     procedure TestOvcTCMemo;
     procedure TestO32TCFlexEdit;
     procedure TestOvcTCString_SS;
+    procedure TestOvcTCPictureField_SS;
+    procedure TestOvcTCSimpleField_SS;
     procedure TestOvcTCMemo_SS;
     procedure TestO32TCFlexEdit_SS;
     procedure TextOvcTCCheckBox_Click;
@@ -95,29 +103,33 @@ type
 
 procedure TfrmTestOvcPictureField.FormCreate(Sender: TObject);
 begin
-  Data_OvcTCString1                := '';
-  Data_Overflow_OvcTCString1       := -1;
-  Data_OvcTCPictureField1          := '';
-  Data_Overflow_OvcTCPictureField1 := -1;
-  Data_OvcTCPictureField2          :=  0;
-  Data_Overflow_OvcTCPictureField2 := -1;
-  Data_OvcTCNumericField1          :=  0;
-  Data_Overflow_OvcTCNumericField1 := -1;
-  Data_OvcTCSimpleField1           := '';
-  Data_Overflow_OvcTCSimpleField1  := -1;
-  Data_OvcTCMemo1                  := '';
-  Data_Overflow_OvcTCMemo1         := -1;
-  Data_O32TCFlexEdit1              := '';
-  Data_Overflow_O32TCFlexEdit1     := -1;
+  Data_OvcTCString1                   := '';
+  Data_Overflow_OvcTCString1          := -1;
+  Data_OvcTCPictureField1             := '';
+  Data_Overflow_OvcTCPictureField1    := -1;
+  Data_OvcTCPictureField2             :=  0;
+  Data_Overflow_OvcTCPictureField2    := -1;
+  Data_OvcTCNumericField1             :=  0;
+  Data_Overflow_OvcTCNumericField1    := -1;
+  Data_OvcTCSimpleField1              := '';
+  Data_Overflow_OvcTCSimpleField1     := -1;
+  Data_OvcTCMemo1                     := '';
+  Data_Overflow_OvcTCMemo1            := -1;
+  Data_O32TCFlexEdit1                 := '';
+  Data_Overflow_O32TCFlexEdit1        := -1;
 
-  Data_OvcTCString1_SS             := '';
-  Data_Overflow_OvcTCString1_SS    := -1;
-  Data_OvcTCMemo1_SS               := '';
-  Data_Overflow_OvcTCMemo1_SS      := -1;
-  Data_O32TCFlexEdit1_SS           := '';
-  Data_Overflow_O32TCFlexEdit1_SS  := -1;
-  Data_OvcTCCheckBox1              := cbUnchecked;
-  Data_Overflow_OvcTCCheckBox1     := -1;
+  Data_OvcTCString1_SS                := '';
+  Data_Overflow_OvcTCString1_SS       := -1;
+  Data_OvcTCPictureField1_SS          := '';
+  Data_Overflow_OvcTCPictureField1_SS := -1;
+  Data_OvcTCSimpleField1_SS           := '';
+  Data_Overflow_OvcTCSimpleField1_SS  := -1;
+  Data_OvcTCMemo1_SS                  := '';
+  Data_Overflow_OvcTCMemo1_SS         := -1;
+  Data_O32TCFlexEdit1_SS              := '';
+  Data_Overflow_O32TCFlexEdit1_SS     := -1;
+  Data_OvcTCCheckBox1                 := cbUnchecked;
+  Data_Overflow_OvcTCCheckBox1        := -1;
 end;
 
 procedure TfrmTestOvcPictureField.OvcTable1GetCellData(Sender: TObject; RowNum, ColNum: Integer;
@@ -126,29 +138,31 @@ begin
   if RowNum=0 then begin
     if Sender = OvcTable1 then begin
       case ColNum of
-        0: data := @Data_OvcTCString1;
-        1: data := @Data_OvcTCPictureField1;
-        2: data := @Data_OvcTCPictureField2;
-        3: data := @Data_OvcTCNumericField1;
-        4: data := @Data_OvcTCSimpleField1;
-        5: data := @Data_OvcTCMemo1;
-        6: data := @Data_O32TCFlexEdit1;
+        0: Data := @Data_OvcTCString1;
+        1: Data := @Data_OvcTCPictureField1;
+        2: Data := @Data_OvcTCPictureField2;
+        3: Data := @Data_OvcTCNumericField1;
+        4: Data := @Data_OvcTCSimpleField1;
+        5: Data := @Data_OvcTCMemo1;
+        6: Data := @Data_O32TCFlexEdit1;
         else
-          data := nil;
+          Data := nil;
       end;
     end else begin
       case ColNum of
-        0: data := @Data_OvcTCString1_SS;
-        1: data := @Data_OvcTCMemo1_SS;
-        2: data := @Data_O32TCFlexEdit1_SS;
-        3: data := @Data_OvcTCCheckBox1;
+        0: Data := @Data_OvcTCString1_SS;
+        1: Data := @Data_OvcTCPictureField1_SS;
+        2: Data := @Data_OvcTCsimpleField1_SS;
+        3: Data := @Data_OvcTCMemo1_SS;
+        4: Data := @Data_O32TCFlexEdit1_SS;
+        5: Data := @Data_OvcTCCheckBox1;
         else
-          data := nil;
+          Data := nil;
       end;
     end;
   end else
     { special case for 'TestOvcTCSimpleField_sftString_DataNIL' }
-    data := nil;
+    Data := nil;
 end;
 
 { TTestOvcPictureField }
@@ -360,12 +374,72 @@ begin
 end;
 
 
+procedure TTestOvcTable.TestOvcTCPictureField_SS;
+  {- test OvcTCPictureField with ShortString for storing the data }
+begin
+  { Test typing data }
+  FForm.OvcTable2.SetFocus;
+  FForm.OvcTable2.SetActiveCell(0,1);
+  FForm.OvcTable2.StartEditingState;
+  TypeText(TPOvcBaseEntryField(TPOvcTCPictureField(FForm.OvcTCPictureField1_SS).FEdit), 'TEST1');
+  FForm.OvcTable2.StopEditingState(True);
+  CheckEquals('TEST1', Trim(string(FForm.Data_OvcTCPictureField1_SS)));
+  CheckEquals(-1, FForm.Data_Overflow_OvcTCPictureField1_SS, 'Data overflow for OvcTCPictureField1_SS');
+  { Test typing maximum number of characters
+    Warning: Setting 'OvcTCPictureField1_SS.MaxLength' to 10 is not enough; the PictureMask
+    has to be set to 'XXXXXXXXXX': Internally, MaxLength is set to Length(PictureMask), so
+    the value set in the object-inspector is overridden. This looks more like a bug than a
+    feature ;-) }
+  FForm.Data_OvcTCPictureField1_SS := '';
+  FForm.OvcTable2.StartEditingState;
+  TypeText(TPOvcBaseEntryField(TPOvcTCPictureField(FForm.OvcTCPictureField1_SS).FEdit), '1234567890');
+  FForm.OvcTable2.StopEditingState(True);
+  CheckEquals('1234567890', Trim(string(FForm.Data_OvcTCPictureField1_SS)));
+  CheckEquals(-1, FForm.Data_Overflow_OvcTCPictureField1_SS, 'Data overflow for OvcTCPictureField1_SS');
+  { Test typing more than the maximum number of characters }
+  FForm.Data_OvcTCPictureField1_SS := '';
+  FForm.OvcTable2.StartEditingState;
+  TypeText(TPOvcBaseEntryField(TPOvcTCPictureField(FForm.OvcTCPictureField1_SS).FEdit), '1234567890X');
+  FForm.OvcTable2.StopEditingState(True);
+  CheckEquals('1234567890', Trim(string(FForm.Data_OvcTCPictureField1_SS)));
+  CheckEquals(-1, FForm.Data_Overflow_OvcTCPictureField1_SS, 'Data overflow for OvcTCPictureField1_SS');
+end;
+
+
+procedure TTestOvcTable.TestOvcTCSimpleField_SS;
+  {- test OvcTCSimpleField with ShortString for storing the data }
+begin
+  { Test typing data }
+  FForm.OvcTable2.SetFocus;
+  FForm.OvcTable2.SetActiveCell(0,2);
+  FForm.OvcTable2.StartEditingState;
+  TypeText(TPOvcBaseEntryField(TPOvcTCSimpleField(FForm.OvcTCSimpleField1_SS).FEdit), 'TEST1');
+  FForm.OvcTable2.StopEditingState(True);
+  CheckEquals('TEST1', Trim(string(FForm.Data_OvcTCSimpleField1_SS)));
+  CheckEquals(-1, FForm.Data_Overflow_OvcTCSimpleField1_SS, 'Data overflow for OvcTCSimpleField1_SS');
+  { Test typing maximum number of characters }
+  FForm.Data_OvcTCSimpleField1_SS := '';
+  FForm.OvcTable2.StartEditingState;
+  TypeText(TPOvcBaseEntryField(TPOvcTCSimpleField(FForm.OvcTCSimpleField1_SS).FEdit), '1234567890');
+  FForm.OvcTable2.StopEditingState(True);
+  CheckEquals('1234567890', Trim(string(FForm.Data_OvcTCSimpleField1_SS)));
+  CheckEquals(-1, FForm.Data_Overflow_OvcTCSimpleField1_SS, 'Data overflow for OvcTCSimpleField1_SS');
+  { Test typing more than the maximum number of characters }
+  FForm.Data_OvcTCSimpleField1_SS := '';
+  FForm.OvcTable2.StartEditingState;
+  TypeText(TPOvcBaseEntryField(TPOvcTCSimpleField(FForm.OvcTCSimpleField1_SS).FEdit), '1234567890X');
+  FForm.OvcTable2.StopEditingState(True);
+  CheckEquals('1234567890', Trim(string(FForm.Data_OvcTCSimpleField1_SS)));
+  CheckEquals(-1, FForm.Data_Overflow_OvcTCSimpleField1_SS, 'Data overflow for OvcTCSimpleField1_SS');
+end;
+
+
 procedure TTestOvcTable.TestOvcTCMemo_SS;
   {- test OvcTCMemo with ShortString for storing the data }
 begin
   { Test typing data }
   FForm.OvcTable2.SetFocus;
-  FForm.OvcTable2.SetActiveCell(0,1);
+  FForm.OvcTable2.SetActiveCell(0,3);
   FForm.OvcTable2.StartEditingState;
   TypeText(TOvcTCMemoEdit(TPOvcTCMemo(FForm.OvcTCMemo1_SS).FEdit), 'sft field test'#13'line 2');
   FForm.OvcTable2.StopEditingState(True);
@@ -379,7 +453,7 @@ procedure TTestOvcTable.TestO32TCFlexEdit_SS;
 begin
   { Test typing data }
   FForm.OvcTable2.SetFocus;
-  FForm.OvcTable2.SetActiveCell(0,2);
+  FForm.OvcTable2.SetActiveCell(0,4);
   FForm.OvcTable2.StartEditingState;
   TypeText(TCustomEdit(TPO32TCFlexEdit(FForm.O32TCFlexEdit1_SS).FEdit), 'FlexTest');
   FForm.OvcTable2.StopEditingState(True);
@@ -399,13 +473,13 @@ begin
     Options := Options - [otoNoSelection];
     SetActiveCell(0,0);
     SetFocus;
-    PostMessage(FForm.ActiveControl.Handle, WM_LBUTTONDOWN, 0, 5*65536+400);
+    PostMessage(FForm.ActiveControl.Handle, WM_LBUTTONDOWN, 0, 5*65536+640);
     Application.ProcessMessages;
-    PostMessage(FForm.ActiveControl.Handle, WM_LBUTTONUP, 0, 5*65536+400);
+    PostMessage(FForm.ActiveControl.Handle, WM_LBUTTONUP, 0, 5*65536+640);
     Application.ProcessMessages;
-    PostMessage(FForm.ActiveControl.Handle, WM_LBUTTONDOWN, 0, 5*65536+400);
+    PostMessage(FForm.ActiveControl.Handle, WM_LBUTTONDOWN, 0, 5*65536+640);
     Application.ProcessMessages;
-    PostMessage(FForm.ActiveControl.Handle, WM_LBUTTONUP, 0, 5*65536+400);
+    PostMessage(FForm.ActiveControl.Handle, WM_LBUTTONUP, 0, 5*65536+640);
     Application.ProcessMessages;
     StopEditingState(True);
   end;
@@ -420,9 +494,9 @@ begin
     Options := Options + [otoNoSelection];
     SetActiveCell(0,0);
     SetFocus;
-    PostMessage(FForm.ActiveControl.Handle, WM_LBUTTONDOWN, 0, 5*65536+400);
+    PostMessage(FForm.ActiveControl.Handle, WM_LBUTTONDOWN, 0, 5*65536+640);
     Application.ProcessMessages;
-    PostMessage(FForm.ActiveControl.Handle, WM_LBUTTONUP, 0, 5*65536+400);
+    PostMessage(FForm.ActiveControl.Handle, WM_LBUTTONUP, 0, 5*65536+640);
     Application.ProcessMessages;
     StopEditingState(True);
   end;

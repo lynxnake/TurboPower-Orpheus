@@ -8,7 +8,7 @@ uses
   SysUtils, WinTypes, WinProcs, Messages, Classes, Graphics, Controls,
   Forms, DBTables, DB, OvcBase, OvcTCmmn, OvcTable, OvcTCStr, OvcTCEdt,
 
-  OvcCache, {This is a bonus class contained in the Orpheus\bonus 
+  OvcCache, {This is a bonus class contained in the Orpheus\bonus
   directory, it should be manually added to the project}
 
   OvcData, OvcEF, OvcSF, OvcTCSim, OvcTCBEF,
@@ -94,7 +94,7 @@ type
     procedure btnAboutClick(Sender: TObject);
 
   private
-    CellData      : string[255];
+    CellData      : string;
     CustomerCache : TOvcCache;
 
   public
@@ -138,17 +138,17 @@ begin
   {read the db record}
   with PCustomerData(P)^ do begin
     CustNo      := dbCustomerCustNo.AsFloat;
-    Company     := dbCustomerCompany.AsString;
-    Addr1       := dbCustomerAddr1.AsString;
-    Addr2       := dbCustomerAddr2.AsString;
-    City        := dbCustomerCity.AsString;
-    State       := dbCustomerState.AsString;
-    Zip         := dbCustomerZip.AsString;
-    Country     := dbCustomerCountry.AsString;
-    Phone       := dbCustomerPhone.AsString;
-    FAX         := dbCustomerFAX.AsString;
+    Company     := ShortString(dbCustomerCompany.AsString);
+    Addr1       := ShortString(dbCustomerAddr1.AsString);
+    Addr2       := ShortString(dbCustomerAddr2.AsString);
+    City        := ShortString(dbCustomerCity.AsString);
+    State       := ShortString(dbCustomerState.AsString);
+    Zip         := ShortString(dbCustomerZip.AsString);
+    Country     := ShortString(dbCustomerCountry.AsString);
+    Phone       := ShortString(dbCustomerPhone.AsString);
+    FAX         := ShortString(dbCustomerFAX.AsString);
     TaxRate     := dbCustomerTaxRate.AsFloat;
-    Contact     := dbCustomerContact.AsString;
+    Contact     := ShortString(dbCustomerContact.AsString);
     InvoiceDate := DateTimeToStDate(dbCustomerLastInvoiceDate.AsDateTime);
   end;
 end;
@@ -288,17 +288,17 @@ begin
       case ColNum of
         0 : {row label column};
         1 : {no editing of customer number allowed};
-        2 : dbCustomerCompany.AsString := P^.Company;
-        3 : dbCustomerAddr1.AsString := P^.Addr1;
-        4 : dbCustomerAddr2.AsString := P^.Addr2;
-        5 : dbCustomerCity.AsString := P^.City;
-        6 : dbCustomerState.AsString := P^.State;
-        7 : dbCustomerZip.AsString := P^.Zip;
-        8 : dbCustomerCountry.AsString := P^.Country;
-        9 : dbCustomerPhone.AsString := P^.Phone;
-       10 : dbCustomerFAX.AsString := P^.FAX;
-       11 : dbCustomerTaxRate.AsFloat := P^.TaxRate;
-       12 : dbCustomerContact.AsString := P^.Contact;
+        2 : dbCustomerCompany.AsString := string(P^.Company);
+        3 : dbCustomerAddr1.AsString   := string(P^.Addr1);
+        4 : dbCustomerAddr2.AsString   := string(P^.Addr2);
+        5 : dbCustomerCity.AsString    := string(P^.City);
+        6 : dbCustomerState.AsString   := string(P^.State);
+        7 : dbCustomerZip.AsString     := string(P^.Zip);
+        8 : dbCustomerCountry.AsString := string(P^.Country);
+        9 : dbCustomerPhone.AsString   := string(P^.Phone);
+       10 : dbCustomerFAX.AsString     := string(P^.FAX);
+       11 : dbCustomerTaxRate.AsFloat  := P^.TaxRate;
+       12 : dbCustomerContact.AsString := string(P^.Contact);
        13 : dbCustomerLastInvoiceDate.AsDateTime :=
               StDateToDateTime(P^.InvoiceDate);
       end;

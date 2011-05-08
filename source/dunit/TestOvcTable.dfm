@@ -82,7 +82,7 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
   object OvcTable2: TOvcTable
     Left = 18
     Top = 112
-    Width = 701
+    Width = 871
     Height = 79
     LockedRows = 0
     TopRow = 0
@@ -106,6 +106,8 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     TabOrder = 1
     OnGetCellData = OvcTable1GetCellData
     CellData = (
+      'frmTestOvcPictureField.OvcTCSimpleField1_SS'
+      'frmTestOvcPictureField.OvcTCPictureField1_SS'
       'frmTestOvcPictureField.OvcTCCheckBox1'
       'frmTestOvcPictureField.O32TCFlexEdit1_SS'
       'frmTestOvcPictureField.OvcTCMemo1_SS'
@@ -117,6 +119,14 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
       False
       True
       'frmTestOvcPictureField.OvcTCString1_SS'
+      120
+      False
+      True
+      'frmTestOvcPictureField.OvcTCPictureField1_SS'
+      120
+      False
+      True
+      'frmTestOvcPictureField.OvcTCSimpleField1_SS'
       120
       False
       True
@@ -218,7 +228,7 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     MaxLength = 255
     Table = OvcTable2
     WantReturns = True
-    Left = 186
+    Left = 428
     Top = 116
   end
   object O32TCFlexEdit1: TO32TCFlexEdit
@@ -258,7 +268,7 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     Validation.InputRequired = False
     Validation.ValidatorType = 'None'
     Validation.ValidationType = vtNone
-    Left = 310
+    Left = 550
     Top = 116
   end
   object OvcTCCheckBox1: TOvcTCCheckBox
@@ -267,7 +277,40 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     CellGlyphs.GlyphCount = 3
     CellGlyphs.ActiveGlyphCount = 2
     Table = OvcTable2
-    Left = 416
+    Left = 658
     Top = 116
+  end
+  object OvcTCPictureField1_SS: TOvcTCPictureField
+    PictureMask = 'XXXXXXXXXX'
+    MaxLength = 10
+    CaretOvr.Shape = csBlock
+    DataStringType = tstShortString
+    EFColors.Disabled.BackColor = clWindow
+    EFColors.Disabled.TextColor = clGrayText
+    EFColors.Error.BackColor = clRed
+    EFColors.Error.TextColor = clBlack
+    EFColors.Highlight.BackColor = clHighlight
+    EFColors.Highlight.TextColor = clHighlightText
+    Table = OvcTable2
+    Left = 184
+    Top = 116
+    RangeHigh = {00000000000000000000}
+    RangeLow = {00000000000000000000}
+  end
+  object OvcTCSimpleField1_SS: TOvcTCSimpleField
+    CaretOvr.Shape = csBlock
+    DataStringType = tstShortString
+    EFColors.Disabled.BackColor = clWindow
+    EFColors.Disabled.TextColor = clGrayText
+    EFColors.Error.BackColor = clRed
+    EFColors.Error.TextColor = clBlack
+    EFColors.Highlight.BackColor = clHighlight
+    EFColors.Highlight.TextColor = clHighlightText
+    MaxLength = 10
+    Table = OvcTable2
+    Left = 306
+    Top = 116
+    RangeHigh = {00000000000000000000}
+    RangeLow = {00000000000000000000}
   end
 end

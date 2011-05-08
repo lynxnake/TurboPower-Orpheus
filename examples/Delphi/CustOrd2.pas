@@ -104,8 +104,8 @@ type
     procedure BitBtn1Click(Sender: TObject);
 
   private
-    CellData      : string[255];
-    OrderCache    : TOvcCache;
+    CellData   : string;
+    OrderCache : TOvcCache;
 
   public
     procedure GetOrderRecord(RowNum : LongInt; var P : Pointer; var Size : Word);
@@ -152,18 +152,18 @@ begin
     SaleDate      := DateTimeToStDate(dbOrderQuerySaleDate.AsDateTime);
     ShipDate      := DateTimeToStDate(dbOrderQueryShipDate.AsDateTime);
     EmpNo         := dbOrderQueryEmpNo.AsInteger;
-    ShipToContact := dbOrderQueryShipToContact.AsString;
-    ShipToAddr1   := dbOrderQueryShipToAddr1.AsString;
-    ShipToAddr2   := dbOrderQueryShipToAddr2.AsString;
-    ShipToCity    := dbOrderQueryShipToCity.AsString;
-    ShipToState   := dbOrderQueryShipToState.AsString;
-    ShipToZip     := dbOrderQueryShipToZip.AsString;
-    ShipToCountry := dbOrderQueryShipToCountry.AsString;
-    ShipToPhone   := dbOrderQueryShipToPhone.AsString;
-    ShipVIA       := dbOrderQueryShipVIA.AsString;
-    PO            := dbOrderQueryPO.AsString;
-    Terms         := dbOrderQueryTerms.AsString;
-    PaymentMethod := dbOrderQueryPaymentMethod.AsString;
+    ShipToContact := ShortString(dbOrderQueryShipToContact.AsString);
+    ShipToAddr1   := ShortString(dbOrderQueryShipToAddr1.AsString);
+    ShipToAddr2   := ShortString(dbOrderQueryShipToAddr2.AsString);
+    ShipToCity    := ShortString(dbOrderQueryShipToCity.AsString);
+    ShipToState   := ShortString(dbOrderQueryShipToState.AsString);
+    ShipToZip     := ShortString(dbOrderQueryShipToZip.AsString);
+    ShipToCountry := ShortString(dbOrderQueryShipToCountry.AsString);
+    ShipToPhone   := ShortString(dbOrderQueryShipToPhone.AsString);
+    ShipVIA       := ShortString(dbOrderQueryShipVIA.AsString);
+    PO            := ShortString(dbOrderQueryPO.AsString);
+    Terms         := ShortString(dbOrderQueryTerms.AsString);
+    PaymentMethod := ShortString(dbOrderQueryPaymentMethod.AsString);
     ItemsTotal    := dbOrderQueryItemsTotal.AsFloat;
     TaxRate       := dbOrderQueryTaxRate.AsFloat;
     Freight       := dbOrderQueryFreight.AsFloat;

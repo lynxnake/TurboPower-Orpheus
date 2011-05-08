@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                  OVCTCSIM.PAS 4.06                    *}
+{*                  OVCTCSIM.PAS 4.08                    *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -101,6 +101,7 @@ type
       property CaretOvr;
       property Color;
       property ControlCharColor default clRed;
+      property DataStringType;
       property DataType default sftString;
       property DecimalPlaces default 0;
       property EFColors;
