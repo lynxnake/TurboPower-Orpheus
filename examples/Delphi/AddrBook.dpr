@@ -30,11 +30,7 @@ uses
   Adrbook2 in 'AdrBook2.pas' {AdrAbout},
   CalUnit in 'CalUnit.pas' {CalForm};
 
-{$IFDEF WIN32}
-  {$R *.R32}
-{$ELSE}
-  {$R *.R16}
-{$ENDIF}
+{$R *.RES}
 
 begin
   Application.Title := 'Address Book';

@@ -15,12 +15,13 @@
 {*                                                                            *}
 {* The Initial Developer of the Original Code is TurboPower Software          *}
 {*                                                                            *}
-{* Portions created by TurboPower Software Inc. are Copyright (C)1995-2002      *}
+{* Portions created by TurboPower Software Inc. are Copyright (C)1995-2002    *}
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
+
 program excbglyf;
 
 uses
@@ -28,13 +29,7 @@ uses
   excbglyu in 'excbglyu.pas' {Form1};
 
 
-{$IFDEF Win32}
-  {$R *.R32}
-  {$R ExCbGlyG.r32}
-{$ELSE}
-  {$R *.R16}
-  {$R ExCbGlyG.r16}
-{$ENDIF}
+{$R *.RES}
 
 begin
   Application.CreateForm(TForm1, Form1);

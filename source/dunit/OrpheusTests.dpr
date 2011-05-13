@@ -26,7 +26,8 @@ uses
   TestOvcDate in 'TestOvcDate.pas',
   TestOvcTransfer in 'TestOvcTransfer.pas' {TestOvcTransferForm},
   TestOvcSpinner in 'TestOvcSpinner.pas' {TestOvcSpinnerForm},
-  TestOvcMisc in 'TestOvcMisc.pas';
+  TestOvcMisc in 'TestOvcMisc.pas',
+  TestOvcComboBox in 'TestOvcComboBox.pas' {TfrmTestOvcComboBox};
 
 {$R *.RES}
 

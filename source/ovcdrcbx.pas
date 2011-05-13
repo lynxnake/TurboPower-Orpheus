@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                   OVCDRCBX.PAS 4.06                  *}
+{*                   OVCDRCBX.PAS 4.08                   *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -225,7 +225,15 @@ var
 begin
   inherited Create(AOwner);
 
-  FItemHeight := 16;
+  { FItemHeight is set at the end of the inherited method (via 'RecalcHeight')
+    - and the height of the ComboBox is set accordingly. FItemHeight may be different
+    from 16: Setting it to 16 now is likely to lead to a height of the Combobox that does
+    not match FItemHeight (as the height ist not recalculated).
+    In 'TOvcBaseComboBox.Loaded' the method 'RecalcHeight' is called again; as the font
+    might be different, this might lead to setting ItemHeight to a different value: if
+    this value happens to be 16, the height of the ComboBox will not be modified.
+    The solution is not to set FItemHeight here. }
+//  FItemHeight := 16;
   FDirectory := '.';
   FMask := '*.*';
 
@@ -305,7 +313,7 @@ begin
     BkColor := FMRUListColor;
   end else begin
     TxtRect.Left := TxtRect.Left + ItemHeight + LocalOffset;
-    StrPCopy(TxtItem, DirectoryParse(Items[Index], LocalLevel + 1));
+    StrPLCopy(TxtItem, DirectoryParse(Items[Index], LocalLevel + 1), High(TxtItem));
     BkColor := Color;
   end;
 

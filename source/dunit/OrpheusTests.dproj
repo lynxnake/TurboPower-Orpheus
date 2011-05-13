@@ -80,6 +80,9 @@
 				<Form>TestOvcSpinnerForm</Form>
 			</DCCReference>
 			<DCCReference Include="TestOvcMisc.pas"/>
+			<DCCReference Include="TestOvcComboBox.pas">
+				<Form>TfrmTestOvcComboBox</Form>
+			</DCCReference>
 			<None Include="TestOvcFileViewer.txt">
 				<ContainerId>WebFile</ContainerId>
 			</None>

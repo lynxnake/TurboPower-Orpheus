@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                   OVCFMCBX.PAS 4.06                   *}
+{*                   OVCFMCBX.PAS 4.08                   *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -47,12 +47,12 @@ uses
 type
   TOvcAssociationComboBox = class(TOvcBaseComboBox)
   protected {private}
+(*
     FSavedItemList : TStringList;
-    procedure vSaveObjects;
     procedure vFreeObjects;
-
     procedure CreateWnd; override;
     procedure DestroyWnd; override;
+*)
     procedure DrawItem(Index : Integer; ItemRect : TRect;
       State : TOwnerDrawState); override;
     procedure Loaded; override;
@@ -61,8 +61,10 @@ type
     function GetIcon : HIcon;
 
   public
+(*
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
+*)
     procedure Populate;
 
     property Description : string read GetDescription;
@@ -150,14 +152,16 @@ begin
   Result := ExtractAssociatedIcon(MainInstance, FileName, IconNum);
 end;
 
-procedure TOvcAssociationComboBox.vSaveObjects;
-begin
-  if (FSavedItemList <> nil) then begin
-    vFreeObjects;
-    FSavedItemList.Clear;
-    FSavedItemList.Assign(FMRUList.Items);
-  end;
-end;
+(*
+  Changes, AB 05/2001:
+    The code for 'DestroyWnd' / 'CreateWnd' lead to crashes:
+    In 'DestroyWnd' all the objects stored in 'Items' were destroyed (for no obvious
+    reason); as DestroyWnd + CreateWnd is called after 'Populate', all then objects
+    get lost.
+    Moreover, the use of 'FSavedItemList' is unclear, as the items stored here are
+    never used...
+
+    Removing all this code makes the component work... }
 
 procedure TOvcAssociationComboBox.vFreeObjects;
 var
@@ -168,12 +172,17 @@ begin
       TOvcAssociationItem(FSavedItemList.Objects[I]).Free;
 end;
 
+
 procedure TOvcAssociationComboBox.DestroyWnd;
 var
   I: integer;
 begin
   if not (csDesigning in ComponentState) then begin
-    vSaveObjects;
+    if (FSavedItemList <> nil) then begin
+      vFreeObjects;
+      FSavedItemList.Clear;
+      FSavedItemList.Assign(FMRUList.Items);
+    end;
     {free association objects}
     for I := 0 to pred(Items.Count) do
       TOvcAssociationItem(Items.Objects[I]).Free;
@@ -203,6 +212,8 @@ begin
 
   inherited Destroy;
 end;
+*)
+
 
 procedure TOvcAssociationComboBox.DrawItem(Index : Integer; ItemRect: TRect;
             State : TOwnerDrawState);
@@ -228,7 +239,7 @@ begin
     FillRect(ItemRect);
     TxtRect := ItemRect;
     Obj := TOvcAssociationItem(Items.Objects[Index]);
-    StrPCopy(TxtItem, Obj.Extension + ' (' + Obj.Description + ')');
+    StrPLCopy(TxtItem, Obj.Extension + ' (' + Obj.Description + ')', High(TxtItem));
 
     Icon := vLoadIcon(Obj.FileName);
     if (Icon <> 0) then begin

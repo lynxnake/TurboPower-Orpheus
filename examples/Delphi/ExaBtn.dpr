@@ -15,12 +15,13 @@
 {*                                                                            *}
 {* The Initial Developer of the Original Code is TurboPower Software          *}
 {*                                                                            *}
-{* Portions created by TurboPower Software Inc. are Copyright (C)1995-2002      *}
+{* Portions created by TurboPower Software Inc. are Copyright (C)1995-2002    *}
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
+
 program Exabtn;
 
 uses
@@ -28,7 +29,7 @@ uses
   Exabtn1 in 'EXABTN1.PAS' {Form1},
   Exabtn2 in 'EXABTN2.PAS' {frmCal};
 
-          
+{$R *.RES}
 
 begin
   Application.CreateForm(TForm1, Form1);

@@ -628,14 +628,28 @@ begin
 end;
 
 procedure TOvcBaseComboBox.AddItemToMRUList(Index: Integer);
+{ Changes:
+     05/2011, AB: Bugfix: After selecting an Item from the dropdown-list, the
+     ComboxBox does not react to moving down the list using the mousewheel.
+     Going up works - and as soon as you went up at least once, you can move
+     downwards, too.
+     The source of the problem is inserting an item at the beginning of the list
+     'Items' - although it is not clear (to me) how this causes the strange
+     effect.
+     The following code - setting ItemIndex temporarily to 0 - is just a
+     workaround... }
 var
   I : Integer;
 begin
   I := FMRUList.Items.Count;
   if (I > -1) and (Index > -1) then begin
     FMRUList.NewItem(Items[Index], Items.Objects[Index]);
-    if FMRUList.Items.Count > I then
+    if FMRUList.Items.Count > I then begin
+      I := ItemIndex;
       Items.InsertObject(0, Items[Index], Items.Objects[Index]);
+      ItemIndex := 0;
+      ItemIndex := I+1;
+    end;
   end;
 end;
 

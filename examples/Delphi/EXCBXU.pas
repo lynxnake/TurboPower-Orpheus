@@ -37,22 +37,12 @@ type
   TForm1 = class(TForm)
     OvcComboBox: TOvcComboBox;
     OrController1: TOvcController;
-    OvcComboBox1Label1: TOvcAttachedLabel;
     OvcFontComboBox: TOvcFontComboBox;
-    OvcFontComboBox1Label1: TOvcAttachedLabel;
     OvcDirectoryComboBox: TOvcDirectoryComboBox;
-    OvcDirectoryComboBox1Label1: TOvcAttachedLabel;
     OvcFileComboBox: TOvcFileComboBox;
-    OvcFileComboBox1Label1: TOvcAttachedLabel;
     OvcHistoryComboBox: TOvcHistoryComboBox;
-    OvcHistoryComboBox1Label1: TOvcAttachedLabel;
     OvcAssociationComboBox: TOvcAssociationComboBox;
     OvcPrinterComboBox: TOvcPrinterComboBox;
-    OvcPrinterComboBox1Label1: TOvcAttachedLabel;
-    OvcDbFieldComboBox1Label1: TOvcAttachedLabel;
-    OvcDbAliasComboBox1Label1: TOvcAttachedLabel;
-    OvcDbTableNameComboBox1Label1: TOvcAttachedLabel;
-    OvcAssociationComboBoxLabel1: TOvcAttachedLabel;
     Properties: TGroupBox;
     Label5: TLabel;
     Label6: TLabel;
@@ -90,7 +80,6 @@ type
     ItemIndex1: TEdit;
     HotTrack1: TCheckBox;
     OvcDriveComboBox: TOvcDriveComboBox;
-    OvcDriveComboBox1Label1: TOvcAttachedLabel;
     Label13: TLabel;
     Volume1: TEdit;
     AllFontBtn: TSpeedButton;
@@ -99,6 +88,17 @@ type
     OvcDbTableNameComboBox: TOvcDbTableNameComboBox;
     OvcDbFieldComboBox: TOvcDbFieldComboBox;
     OvcDbBDEHelper1: TOvcDbBDEHelper;
+    OvcComboBoxLabel1: TOvcAttachedLabel;
+    OvcFontComboBoxLabel1: TOvcAttachedLabel;
+    OvcDriveComboBoxLabel1: TOvcAttachedLabel;
+    OvcDirectoryComboBoxLabel1: TOvcAttachedLabel;
+    OvcFileComboBoxLabel1: TOvcAttachedLabel;
+    OvcPrinterComboBoxLabel1: TOvcAttachedLabel;
+    OvcAssociationComboBoxLabel1: TOvcAttachedLabel;
+    OvcHistoryComboBoxLabel1: TOvcAttachedLabel;
+    OvcDbAliasComboBoxLabel1: TOvcAttachedLabel;
+    OvcDbTableNameComboBoxLabel1: TOvcAttachedLabel;
+    OvcDbFieldComboBoxLabel1: TOvcAttachedLabel;
     procedure ComboBoxSelectionChange(Sender: TObject);
     procedure DropCountBtnClick(Sender: TObject);
     procedure MRUCountBtnClick(Sender: TObject);

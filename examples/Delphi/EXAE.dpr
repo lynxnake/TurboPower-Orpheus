@@ -15,12 +15,13 @@
 {*                                                                            *}
 {* The Initial Developer of the Original Code is TurboPower Software          *}
 {*                                                                            *}
-{* Portions created by TurboPower Software Inc. are Copyright (C)1995-2002      *}
+{* Portions created by TurboPower Software Inc. are Copyright (C)1995-2002    *}
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
+
 program Exae;
 
 uses
@@ -28,11 +29,7 @@ uses
   Exaeu in 'EXAEU.PAS' {AEForm},
   CalUnit in 'CALUNIT.PAS' {CalForm};
 
-{$IFDEF WIN32}
-  {$R *.R32}
-{$ELSE}
-  {$R *.R16}
-{$ENDIF}
+{$R *.RES}
 
 begin
   Application.CreateForm(TAEForm, AEForm);
