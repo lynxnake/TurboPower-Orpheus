@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                   OVCCMBX.PAS 4.06                    *}
+{*                   OVCCMBX.PAS 4.08                    *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -751,6 +751,9 @@ begin
 end;
 
 procedure TOvcBaseComboBox.CNCommand(var Message: TWmCommand);
+{ Changes:
+  05/2011, AB: Bugfix for issue 668019 (OnClick was fired twice when an item
+           from the drop-down list is selected). }
 begin
   if Message.NotifyCode = CBN_DROPDOWN then begin
     FCurItemIndex := ItemIndex;
@@ -758,7 +761,7 @@ begin
     if ItemIndex > -1 then begin
       AddItemToMRUList(ItemIndex);
       Text := Items[ItemIndex];
-      Click;
+//      Click;
       SelectionChanged;
     end;
   end;

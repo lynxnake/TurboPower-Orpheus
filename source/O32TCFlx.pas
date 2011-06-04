@@ -147,7 +147,7 @@ type
     property Color: TColor Read FColor write FColor;
     property Cursor: TCursor read FCursor write FCursor;
     property MaxLines: Integer read FMaxLines write FMaxLines;
-    property PasswordChar: Char read FPasswordChar write FPasswordChar;
+    property PasswordChar: Char read FPasswordChar write FPasswordChar default #0;
     property ReadOnly: Boolean Read FReadOnly write FReadOnly;
     property ShowButton: Boolean read FShowButton write FShowButton;
   end;
@@ -414,7 +414,9 @@ begin
   FCursor := crDefault;
   FMaxLines := 3;
   FShowButton := false;
-  FPasswordChar := '*';
+  { 06/2011; AB: Changed default-value for 'PasswordChar' to #0, so that
+                 TO32TCFlexEdit does not work in password-mode by default }
+  FPasswordChar := #0; //'*';
   FReadOnly := false;
 end;
 {=====}
@@ -462,6 +464,8 @@ end;
 {=====}
 
 function TO32TCCustomFlexEdit.GetCellEditor : TControl;
+  {-Changes
+    06/2011 AB: Bugfix: FEditorOptions must not be freed here }
 begin
   Result := FEdit;
   FEditorOptions.Free;

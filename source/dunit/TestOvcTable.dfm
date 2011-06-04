@@ -239,7 +239,6 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     EditorOptions.Color = clWindow
     EditorOptions.Cursor = crDefault
     EditorOptions.MaxLines = 3
-    EditorOptions.PasswordChar = '*'
     EditorOptions.ReadOnly = False
     EditorOptions.ShowButton = False
     Table = OvcTable1
@@ -259,7 +258,6 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     EditorOptions.Color = clWindow
     EditorOptions.Cursor = crDefault
     EditorOptions.MaxLines = 3
-    EditorOptions.PasswordChar = '*'
     EditorOptions.ReadOnly = False
     EditorOptions.ShowButton = False
     MaxLength = 10
@@ -291,6 +289,7 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     EFColors.Error.TextColor = clBlack
     EFColors.Highlight.BackColor = clHighlight
     EFColors.Highlight.TextColor = clHighlightText
+    Options = [efoCaretToEnd, efoTrimBlanks]
     Table = OvcTable2
     Left = 184
     Top = 116

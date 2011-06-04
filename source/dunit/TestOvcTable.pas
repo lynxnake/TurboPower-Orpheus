@@ -83,7 +83,8 @@ type
     procedure TestOvcTCSimpleField_SS;
     procedure TestOvcTCMemo_SS;
     procedure TestO32TCFlexEdit_SS;
-    procedure TextOvcTCCheckBox_Click;
+    procedure TestOvcTCCheckBox_Click;
+    procedure TestOvcTCFlexEditCellEditorBug;
   end;
 
 implementation
@@ -462,8 +463,8 @@ begin
 end;
 
 
-procedure TTestOvcTable.TextOvcTCCheckBox_Click;
-  {- test for a Bug fixed in rev 213: In a table with otoNoSelection in Options it took
+procedure TTestOvcTable.TestOvcTCCheckBox_Click;
+  {- test for a bug fixed in rev 213: In a table with otoNoSelection in Options it took
      three clicks on a cell containing a checkBox to change the checkbox' state. }
 begin
   FForm.Data_OvcTCCheckBox1 := cbUnchecked;
@@ -503,6 +504,23 @@ begin
   CheckTrue(FForm.Data_OvcTCCheckBox1=cbChecked,
             'Clicking on a OvcTCCheckbox failed when otoNoSelection in Options');
   CheckEquals(-1, FForm.Data_Overflow_OvcTCCheckBox1, 'Data overflow for OvcTCCheckBox1');
+end;
+
+
+procedure TTestOvcTable.TestOvcTCFlexEditCellEditorBug;
+  {- test for a bug fixed in rev 233: Accessing a TO32TCFledEdit's CellEditor in any way
+     will cause an access-violation later on. }
+var
+  Exception_occured: Boolean;
+begin
+  Exception_occured := False;
+  try
+    if Assigned(FForm.O32TCFlexEdit1.CellEditor) then ;
+    FreeAndNil(FForm);
+  except
+    Exception_occured := True;
+  end;
+  CheckFalse(Exception_occured, 'Exception when freeing Form');
 end;
 
 

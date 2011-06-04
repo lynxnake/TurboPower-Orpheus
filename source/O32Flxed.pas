@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                   O32FLXED.PAS 4.06                   *}
+{*                   O32FLXED.PAS 4.08                   *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -1013,6 +1013,8 @@ end;
 {=====}
 
 procedure TO32CustomFlexEdit.SetText(const Value: String);
+  {-Changes
+    06/2011 AB: Bugfix: the for-loop accessed buffer[0] and buffer[-1] }
 var
   buffer: String;
   i  : Integer;
@@ -1022,11 +1024,11 @@ begin
   if buffer <> '' then begin
     if not MultiLineEnabled then
     {strip out cr and lf's}
-      for i := Length(buffer) downto 0 do
+      for i := Length(buffer) downto 1 do
         if (buffer[i] = #13) or (buffer[i] = #10) then begin
           Delete(buffer, i, 1);
-          if ((buffer[i - 1] <> ' ') and (buffer[i - 1] <> #10)
-          and (buffer[i - 1] <> #13))and (buffer[i] <> ' ') then
+          if (i>1) and (buffer[i]<>' ') and
+             (buffer[i - 1] <> ' ') and (buffer[i - 1] <> #10) and (buffer[i - 1] <> #13) then
             Insert(' ', buffer, i);
         end;
   end;

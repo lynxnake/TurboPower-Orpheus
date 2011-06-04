@@ -536,8 +536,7 @@ var
   W : Word absolute S;
   B : Boolean absolute S;
   E : Extended absolute S;
-  T: string;
-  pBuffer: PString;
+  sValue: string;
 
   function FieldIsZero : Boolean;
   begin
@@ -564,10 +563,9 @@ begin
     {get the entry field value}
     case FFieldType of
       ftString{$IFDEF VERSION5}, ftWideString{$ENDIF}:
-        begin
-          pBuffer := @T;
-          FLastError := Self.GetValue(pBuffer);
-        end;
+{ 06/2011, AB fix for a bug discovered by Yeimi Osorio (in TOvcDBPictureField, issue 3305212)
+           GetValue expects a string here }
+        FLastError := Self.GetValue(sValue);
       else FLastError := Self.GetValue(S);
     end;
 
@@ -584,7 +582,7 @@ begin
         {$IFDEF VERSION5}
         , ftWideString
         {$ENDIF}
-                     : Field.AsString  := T;
+                     : Field.AsString  := sValue;
         ftSmallInt   : Field.AsInteger := I;
         ftInteger    : Field.AsInteger := L;
         ftWord       : Field.AsInteger := W;

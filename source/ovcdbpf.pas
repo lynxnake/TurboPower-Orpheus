@@ -496,7 +496,6 @@ var
   DT : TDateTime absolute S;
   H  : TDateTime;
   sValue: string;
-  pBuffer: PString;
 
   function FieldIsZero : Boolean;
   begin
@@ -525,10 +524,9 @@ begin
       ftTime,
       ftDateTime : DT := Self.AsDateTime;
       ftString{$IFDEF VERSION5}, ftWideString{$ENDIF}:
-        begin
-          pBuffer := @sValue;
-          FLastError := Self.GetValue(pBuffer);
-        end;
+{ 06/2011, AB fix for a bug discovered by Yeimi Osorio (issue 3305212)
+           GetValue expects a string here }
+        FLastError := Self.GetValue(sValue);
     else
       FLastError := Self.GetValue(S);
     end;

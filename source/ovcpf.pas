@@ -63,6 +63,7 @@ type
     FInitDateTime     : Boolean;
     FPictureDataType  : TPictureDataType;
     FPictureMask      : string;
+    FFloatScale       : SmallInt;
 
     {property methods}
     procedure SetInitDateTime(Value : Boolean);
@@ -126,6 +127,10 @@ type
     property PictureMask : string
       read FPictureMask
       write pfSetPictureMask;
+
+    property FloatScale : SmallInt
+      read FFloatScale
+      write FFloatScale;
   end;
 
   TOvcPictureField = class(TOvcCustomPictureField)
@@ -153,6 +158,7 @@ type
     property Enabled;
     property Epoch;
     property Font;
+    property FloatScale default 0;
     property InitDateTime;
     property LabelInfo;
     property MaxLength;
@@ -208,6 +214,11 @@ implementation
 uses
   OvcFormatSettings;
 
+const
+  Pot10: array[-9..9] of Double =
+    (1e-9,1e-8,1e-7,1e-6,1e-5,1e-4,1e-3,1e-2,1e-1,
+     1,1e1,1e2,1e3,1e4,1e5,1e6,1e7,1e8,1e9);
+
 {*** TOvcCustomPictureField ***}
 
 procedure TOvcCustomPictureField.Assign(Source : TPersistent);
@@ -247,6 +258,7 @@ begin
   FInitDateTime    := False;
   FPictureDataType := pftString;
   FPictureMask     := 'XXXXXXXXXXXXXXX';
+  FFloatScale      := 0;
 
   efFieldClass     := fcPicture;
   efDataType       := pfGetDataType(FPictureDataType);
@@ -992,10 +1004,14 @@ procedure TOvcCustomPictureField.efEdit(var Msg : TMessage; Cmd : Word);
           SyncCaret(-1);
         end;
       ccLeft :
+        { 05/2011, AB: Fix for issue 668056 as suggested by David Marcus }
         if efHPos > StBgn then
           CaretLeft
-        else
+        else begin
+          if efHPos < StBgn then
+            efHPos := StBgn;
           CheckAutoAdvance(-1);
+        end;
       ccRight :
         if efHPos <= StEnd then
           CaretRight
@@ -1908,8 +1924,8 @@ var
     {-transfer data to/from string type entry fields
 
      Changes:
-       03/2011, AB: Bugfix: When transfering data to the PicturField with Length=MaxLength,
-                    the picuturemask was not merged with the data. }
+       03/2011, AB: Bugfix: When transfering data to the PictureField with Length=MaxLength,
+                    the PictureMask was not merged with the data. }
   var
     A : TEditString;
   begin
@@ -2104,10 +2120,17 @@ var
       Val(S, R, Code);
       if Code <> 0 then
         R := 0;
-      Real(DataPtr^) := R;
+      if (FloatScale<>0) and (FloatScale>=Low(Pot10)) and (FloatScale<=High(Pot10)) then
+        Real(DataPtr^) := R*Pot10[FloatScale]
+      else
+        Real(DataPtr^) := R;
     end else begin
       pbCalcWidthAndPlaces(Width, Places);
-      Str(Real(DataPtr^):Width:Places, sAnsi);
+      if (FloatScale<>0) and (FloatScale>=Low(Pot10)) and (FloatScale<=High(Pot10)) then
+        R := Real(DataPtr^)/Pot10[FloatScale]
+      else
+        R := Real(DataPtr^);
+      Str(R:Width:Places, sAnsi);
       Tmp := string(sAnsi);
       StrLCopy(S, PChar(Tmp), Length(Tmp));
       if DecimalPlaces <> 0 then
@@ -2135,10 +2158,17 @@ var
       Val(S, E, Code);
       if Code <> 0 then
         E := 0;
-      Extended(DataPtr^) := E;
+      if (FloatScale<>0) and (FloatScale>=Low(Pot10)) and (FloatScale<=High(Pot10)) then
+        Extended(DataPtr^) := E*Pot10[FloatScale]
+      else
+        Extended(DataPtr^) := E;
     end else begin
       pbCalcWidthAndPlaces(Width, Places);
-      Str(Extended(DataPtr^):Width:Places, sAnsi);
+      if (FloatScale<>0) and (FloatScale>=Low(Pot10)) and (FloatScale<=High(Pot10)) then
+        E := Extended(DataPtr^)/Pot10[FloatScale]
+      else
+        E := Extended(DataPtr^);
+      Str(E:Width:Places, sAnsi);
       Tmp := string(sAnsi);
       StrLCopy(S, PChar(Tmp), Length(Tmp));
       if DecimalPlaces <> 0 then
@@ -2166,10 +2196,17 @@ var
       Val(S, D, Code);
       if Code <> 0 then
         D := 0;
-      Double(DataPtr^) := D;
+      if (FloatScale<>0) and (FloatScale>=Low(Pot10)) and (FloatScale<=High(Pot10)) then
+        Double(DataPtr^) := D*Pot10[FloatScale]
+      else
+        Double(DataPtr^) := D;
     end else begin
       pbCalcWidthAndPlaces(Width, Places);
-      Str(Double(DataPtr^):Width:Places, sAnsi);
+      if (FloatScale<>0) and (FloatScale>=Low(Pot10)) and (FloatScale<=High(Pot10)) then
+        D := Double(DataPtr^)/Pot10[FloatScale]
+      else
+        D := Double(DataPtr^);
+      Str(D:Width:Places, sAnsi);
       Tmp := string(sAnsi);
       StrLCopy(S, PChar(Tmp), Length(Tmp));
       if DecimalPlaces <> 0 then
@@ -2197,10 +2234,17 @@ var
       Val(S, Si, Code);
       if Code <> 0 then
         Si := 0;
-      Single(DataPtr^) := Si;
+      if (FloatScale<>0) and (FloatScale>=Low(Pot10)) and (FloatScale<=High(Pot10)) then
+        Single(DataPtr^) := Si*Pot10[FloatScale]
+      else
+        Single(DataPtr^) := Si;
     end else begin
       pbCalcWidthAndPlaces(Width, Places);
-      Str(Single(DataPtr^):Width:Places, sAnsi);
+      if (FloatScale<>0) and (FloatScale>=Low(Pot10)) and (FloatScale<=High(Pot10)) then
+        Si := Single(DataPtr^)/Pot10[FloatScale]
+      else
+        Si := Single(DataPtr^);
+      Str(Si:Width:Places, sAnsi);
       Tmp := string(sAnsi);
       StrLCopy(S, PChar(Tmp), Length(Tmp));
       if DecimalPlaces <> 0 then
@@ -2491,6 +2535,8 @@ var
 
     FixRealPrim(S, IntlSupport.DecimalChar);
     Val(S, R, Code);
+    if (FloatScale<>0) and (FloatScale>=Low(Pot10)) and (FloatScale<=High(Pot10)) then
+      R := R * Pot10[FloatScale];
     if Code <> 0 then
       Result := oeInvalidNumber
     else if (R < efRangeLo.rtReal) or (R > efRangeHi.rtReal) then
@@ -2514,6 +2560,8 @@ var
 
     FixRealPrim(S, IntlSupport.DecimalChar);
     Val(S, E, Code);
+    if (FloatScale<>0) and (FloatScale>=Low(Pot10)) and (FloatScale<=High(Pot10)) then
+      E := E * Pot10[FloatScale];
     if Code <> 0 then
       Result := oeInvalidNumber
     else if (E < efRangeLo.rtExt) or (E > efRangeHi.rtExt) then
@@ -2538,6 +2586,8 @@ var
 
     FixRealPrim(S, IntlSupport.DecimalChar);
     Val(S, E, Code);
+    if (FloatScale<>0) and (FloatScale>=Low(Pot10)) and (FloatScale<=High(Pot10)) then
+      E := E * Pot10[FloatScale];
     if Code <> 0 then
       Result := oeInvalidNumber
     else if (E < efRangeLo.rtExt) or (E > efRangeHi.rtExt) then
@@ -2563,6 +2613,8 @@ var
 
     FixRealPrim(S, IntlSupport.DecimalChar);
     Val(S, E, Code);
+    if (FloatScale<>0) and (FloatScale>=Low(Pot10)) and (FloatScale<=High(Pot10)) then
+      E := E * Pot10[FloatScale];
     if Code <> 0 then
       Result := oeInvalidNumber
     else if (E < efRangeLo.rtExt) or (E > efRangeHi.rtExt) then

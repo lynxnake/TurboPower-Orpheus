@@ -1602,7 +1602,7 @@ var
   W          : Integer;
   H          : Integer;
   CurPos     : Integer;
-  Offset     : Integer;
+  yOffset    : Integer;
   BkMode     : Integer;
   LabelWidth : Integer;
   Flags      : Integer;
@@ -1733,14 +1733,14 @@ begin
                     LineTo(0, TR.Bottom - 1);
                     Pen.Color := clBtnShadow;
                     if I = ActiveFolder then
-                      Offset := 1
+                      yOffset := 1
                     else
-                      Offset := 2;
+                      yOffset := 2;
                     MoveTo(TR.Right - 3, TR.Top - 2);
-                    LineTo(TR.Right - 3, TR.Bottom - Offset);
-                    LineTo(1, TR.Bottom - Offset);
+                    LineTo(TR.Right - 3, TR.Bottom - yOffset);
+                    LineTo(1, TR.Bottom - yOffset);
                     if I = ActiveFolder then
-                      Pixels[1, TR.Bottom - Offset] := clBtnHighlight;
+                      Pixels[1, TR.Bottom - yOffset] := clBtnHighlight;
                   end;
               end;
             end;
@@ -1895,9 +1895,9 @@ begin
             {glyph is at the left}
             with Item.FIconRect do begin
               Top := CurPos;
-              Offset := (Abs(DrawBmp.Canvas.Font.Height)) div 2;
-              if Offset > 8 then
-                Top := Top + Offset - 8;
+              yOffset := (Abs(DrawBmp.Canvas.Font.Height)) div 2;
+              if yOffset > 8 then
+                Top := Top + yOffset - 8;
               Bottom := Top + 16;
               Left := 8;
               Right := Left + 16;

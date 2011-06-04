@@ -44,7 +44,7 @@ interface
 
 uses
   Windows, SysUtils, Messages, Classes, Controls,
-  OvcEF, OvcPF, OvcTCmmn, OvcTCell, OvcTCBEF,
+  OvcEF, OvcPF, OvcTCmmn, OvcTCell, OvcTCBEF, OvcUser,
   Graphics; { - for default color definitions}
 
 type
@@ -75,10 +75,14 @@ type
       function GetDataType : TPictureDataType;
       function GetEpoch : integer;
       function GetPictureMask : string;
+      function GetFloatScale : SmallInt;
+      function GetUserData: TOvcUserData;
 
       procedure SetDataType(DT : TPictureDataType);
       procedure SetEpoch(E : integer);
       procedure SetPictureMask(const PM : string);
+      procedure SetFloatScale(FS : SmallInt);
+      procedure SetUserData(UD : TOvcUserData);
 
       property DataType : TPictureDataType
          read GetDataType write SetDataType;
@@ -88,9 +92,17 @@ type
 
       property PictureMask : string
          read GetPictureMask write SetPictureMask;
+      { 06/2011 AB: New property 'FloatScale' }
+      property FloatScale : SmallInt
+        read GetFloatScale write SetFloatScale;
 
     public
       function CreateEntryField(AOwner : TComponent) : TOvcBaseEntryField; override;
+
+      { 06/2011 AB: New property 'UserData' to gain access to FEdit's/FDisplayEdit's
+                Userdata-property}
+      property UserData :  TOvcUserData
+        read GetUserData write SetUserData;
   end;
 
   TOvcTCPictureField = class(TOvcTCCustomPictureField)
@@ -110,6 +122,7 @@ type
       property DecimalPlaces default 0;
       property EFColors;
       property Epoch default 0;
+      property FloatScale default 0;
       property Font;
       property Hint;
       property Margin default 4;
@@ -192,6 +205,22 @@ function TOvcTCCustomPictureField.GetPictureMask : string;
       Result := 'XXXXXXXXXXXXXXX';
   end;
 {--------}
+function TOvcTCCustomPictureField.GetFloatScale : SmallInt;
+  begin
+    if Assigned(FEdit) then
+      Result := TOvcTCPictureFieldEdit(FEdit).FloatScale
+    else
+      Result := 0;
+  end;
+{--------}
+function TOvcTCCustomPictureField.GetUserData : TOvcUserData;
+  begin
+    if Assigned(FEdit) then
+      Result := TOvcTCPictureFieldEdit(FEdit).UserData
+    else
+      Result := nil;
+  end;
+{--------}
 procedure TOvcTCCustomPictureField.SetDataType(DT : TPictureDataType);
   begin
     if Assigned(FEdit) then
@@ -219,6 +248,24 @@ procedure TOvcTCCustomPictureField.SetPictureMask(const PM : string);
         {force re-initialization of internal flags}
         TOvcTCPictureFieldEdit(FEdit).RecreateWnd;
         TOvcTCPictureFieldEdit(FEditDisplay).RecreateWnd;
+      end;
+  end;
+{--------}
+procedure TOvcTCCustomPictureField.SetFloatScale(FS : SmallInt);
+  begin
+    if Assigned(FEdit) then
+      begin
+        TOvcTCPictureFieldEdit(FEdit).FloatScale := FS;
+        TOvcTCPictureFieldEdit(FEditDisplay).FloatScale := FS;
+      end;
+  end;
+{--------}
+procedure TOvcTCCustomPictureField.SetUserData(UD : TOvcUserData);
+  begin
+    if Assigned(FEdit) then
+      begin
+        TOvcTCPictureFieldEdit(FEdit).UserData := UD;
+        TOvcTCPictureFieldEdit(FEditDisplay).UserData := UD;
       end;
   end;
 {====================================================================}
