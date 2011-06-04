@@ -468,7 +468,7 @@ function TO32TCCustomFlexEdit.GetCellEditor : TControl;
     06/2011 AB: Bugfix: FEditorOptions must not be freed here }
 begin
   Result := FEdit;
-  FEditorOptions.Free;
+//  FEditorOptions.Free;
 end;
 {=====}
 
