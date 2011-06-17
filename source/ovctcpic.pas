@@ -121,6 +121,7 @@ type
       property DataStringType;
       property DecimalPlaces default 0;
       property EFColors;
+      property EllipsisMode;
       property Epoch default 0;
       property FloatScale default 0;
       property Font;

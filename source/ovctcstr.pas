@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                  OVCTCSTR.PAS 4.06                    *}
+{*                  OVCTCSTR.PAS 4.08                    *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -44,17 +44,23 @@ uses
   Windows, SysUtils, Messages, Graphics, Classes, OvcTCmmn, OvcTCell;
 
 type
+  TEllipsisMode = (em_dont_show, em_show, em_show_readonly);
+
   TOvcTCBaseString = class(TOvcBaseTableCell)
     protected {private}
       {.Z+}
-      FDataStringType : TOvcTblStringtype;
-      FUseWordWrap    : boolean;
-      FShowEllipsis   : Boolean;
-      FOnChange       : TNotifyEvent;
+      FDataStringType   : TOvcTblStringtype;
+      FUseWordWrap      : boolean;
+      FShowEllipsis     : Boolean;
+      FEllipsisReadonly : Boolean;
+      FIgnoreCR         : Boolean;
+      FOnChange         : TNotifyEvent;
       {.Z-}
 
     protected
       {.Z+}
+      function GetEllipsisMode: TEllipsisMode;
+      procedure SetEllipsisMode(EM:TEllipsisMode);
       procedure SetDataStringType(ADST : TOvcTblStringtype);
       procedure SetUseWordWrap(WW : boolean);
 
@@ -77,7 +83,14 @@ type
       property UseWordWrap : boolean
          read FUseWordWrap write SetUseWordWrap;
 
+      { New property to access the new Field 'FEllipsisReadonly' together with FShowEllipsis
+        without changing 'ShowEllipsis' }
+      property EllipsisMode: TEllipsisMode
+         read GetEllipsisMode write SetEllipsisMode default em_show_readonly;
+
       property ShowEllipsis: Boolean read FShowEllipsis write FShowEllipsis;
+
+      property IgnoreCR: Boolean read FIgnoreCR write FIgnoreCR default True;
 
       {events}
       property OnChange : TNotifyEvent
@@ -95,7 +108,9 @@ constructor TOvcTCBaseString.Create(AOwner : TComponent);
 begin
   inherited Create(AOwner);
   FShowEllipsis := True;
+  FEllipsisReadonly := True;
   FDataStringType := tstString;
+  FIgnoreCR := True;
 end;
 
 procedure TOvcTCBaseString.tcPaint(TableCanvas : TCanvas;
@@ -134,9 +149,15 @@ procedure TOvcTCBaseString.tcPaintStrZ(TblCanvas : TCanvas;
                                const CellRect  : TRect;
                                const CellAttr  : TOvcCellAttributes;
                                      StZ       : string);
+  {-Changes
+    06/2011 AB: Added FEllipsisReadonly and FIgnoreCR:
+                FIgnoreCR only has an effect when FUseWordWrap is false; in this case:
+                True ->  The text is displayed in a single line i.e. any #13-characters in
+                         StZ are ignore (this is the old behavior)
+                False -> If there are #13-characters in StZ, the text is displayed in multiple
+                         lines. }
   var
     Size   : TSize;
-  var
     Wd     : integer;
     LenStZ : integer;
     DTOpts : Cardinal;
@@ -165,7 +186,11 @@ procedure TOvcTCBaseString.tcPaintStrZ(TblCanvas : TCanvas;
       end
     else
       begin
-        DTOpts:= DT_NOPREFIX or DT_SINGLELINE;
+        DTOpts := DT_NOPREFIX;
+        { remark: if the new option FIgnoreCR=False is used, DT_BOTTOM and DT_VCENTER will
+                  have no effect; if there should be any need for these options some code
+                  needs to be added to align the text manually (e.g using DT_CALCRECT) }
+        if FIgnoreCR then DTOpts := DTOpts or DT_SINGLELINE;
 
         {make sure that if the string doesn't fit, we at least see
          the first few characters}
@@ -197,8 +222,24 @@ procedure TOvcTCBaseString.tcPaintStrZ(TblCanvas : TCanvas;
         end;{case}
       end;
 
-  if FShowEllipsis and (CellAttr.caAccess = otxReadOnly) then
-    DTOpts := DTOpts or DT_END_ELLIPSIS;
+  { 06/2011 AB: The "old" behavior (4.06) should not be changed - but new options to display
+                "..." at the end of the text if it doesn't fit should be offered. This is why
+                'FEllipsisReadonly' has been introduced:
+                True -> old behavior: FShowEllipsis is only used if CellAttr.caAccess =
+                        otxReadOnly (although I can't see the point of this restriction).
+                False -> FShowEllipsis is always used.
+
+                To display "..." at the end of every line that does not fit (if the new
+                option FIgnoreCR=False is used) DT_WORD_ELLIPSIS ist used; in any other
+                case we still use DT_END_ELLIPSIS in order to preserve the old behavior. }
+
+  if FShowEllipsis and ((CellAttr.caAccess = otxReadOnly) or not FEllipsisReadonly) then
+    begin
+      if FUseWordWrap or FIgnoreCR then
+        DTOpts := DTOpts or DT_END_ELLIPSIS
+      else
+        DTOpts := DTOpts or DT_WORD_ELLIPSIS;
+    end;
 
     case CellAttr.caTextStyle of
       tsFlat :
@@ -227,6 +268,28 @@ procedure TOvcTCBaseString.tcPaintStrZ(TblCanvas : TCanvas;
         end;
       end;
   end;
+
+{--------}
+function TOvcTCBaseString.GetEllipsisMode: TEllipsisMode;
+begin
+  if not FShowEllipsis then
+    result := em_dont_show
+  else if FEllipsisReadonly then
+    result := em_show_readonly
+  else
+    result := em_show;
+end;
+{--------}
+procedure TOvcTCBaseString.SetEllipsisMode(EM:TEllipsisMode);
+begin
+  if EM=em_dont_show then
+    FShowEllipsis := False
+  else begin
+    FShowEllipsis := True;
+    FEllipsisReadonly := EM=em_show_readonly;
+  end;
+end;
+
 {--------}
 procedure TOvcTCBaseString.SetDataStringType(ADST : TOvcTblStringtype);
   begin

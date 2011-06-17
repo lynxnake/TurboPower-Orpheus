@@ -222,8 +222,10 @@ type
     property EditorBorders;
     property Color;
     property EditorOptions;
+    property EllipsisMode;
     property Font;
     property Hint;
+    property IgnoreCR;
     property Margin default 4;
     property MaxLength default 255;
     property ShowHint default False;

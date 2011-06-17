@@ -731,7 +731,7 @@ end;
 procedure TO32CustomFlexEdit.WMPaint(var Message: TWMPaint);
 begin
   {Fix for problems 672090 and 894632
-    Tell others we are in the paint mathod
+    Tell others we are in the paint method
   }
   inc(FPainting); {!!}
 
@@ -1033,8 +1033,13 @@ begin
         end;
   end;
 
+  { 06/2011 AB: Bugfix, if we have a string 'Value' containing #13-linebreaks, these
+                will be adjusted (to #13#10) in 'TFlexEditStrings.SetTextStr' (FStrings.Text :=
+                buffer) using 'AdjustLineBreaks'. However, the following line (SetTextBuf(...))
+                will undo this adjustment - leading to the text being displayed in a single
+                line. So we need to adjust the buffer here, too: }
+  buffer := AdjustLineBreaks(buffer);
   FStrings.Text := buffer;
-
   SetTextBuf(PChar(buffer));
 
   if Borders.Active then Borders.RedrawControl;
@@ -1107,7 +1112,7 @@ begin
 {
   Fix for problem 1093230
   Add Params. before caption on SendMessage.
-  In Delphi 2005 the load order has been chagned, which caused the text in the
+  In Delphi 2005 the load order has been changed, which caused the text in the
   control to be lost if the .text was assigned before FormShow. This change
   cures this and does not seem to affect the operation in D6 or D7.
   TNX to John Cooper - neutronwrangler - for providing the fix.
@@ -1122,7 +1127,7 @@ procedure TO32CustomFlexEdit.AdjustHeight;
 var
   DC: HDC;
   SaveFont: HFont;
-  I: Integer;
+  newHeight, I: Integer;
   SysMetrics, Metrics: TTextMetric;
   Str: String;
 begin
@@ -1146,11 +1151,19 @@ begin
     if I > Metrics.tmHeight then I := Metrics.tmHeight;
     I := I div 4 + GetSystemMetrics(SM_CYBORDER) * 4;
   end;
-  Height := (Metrics.tmHeight * FDisplayedLines) + I;
-  if Borders.Active and not FCreating then begin
-    Str := Text;
-    Borders.RedrawControl;
-    Text := Str;
+
+  { 06/2011, AB: Bugfix: when the mouse left the control and we had Borders.Active=True,
+                 Borders.RedrawControl forced the cursor to go to the first character (loosing
+                 the current selection). To fix this, we only do the redrawing if we have a
+                 different height. }
+  newHeight := (Metrics.tmHeight * FDisplayedLines) + I;
+  if newHeight<>Height then begin
+    Height := newHeight;
+    if Borders.Active and not FCreating then begin
+      Str := Text;
+      Borders.RedrawControl;
+      Text := Str;
+    end;
   end;
 end;
 {=====}

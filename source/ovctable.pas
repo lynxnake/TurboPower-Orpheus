@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                  OVCTABLE.PAS 4.06                    *}
+{*                  OVCTABLE.PAS 4.08                    *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -1956,8 +1956,13 @@ function TOvcCustomTable.StartEditingState : boolean;
               DoEnteringRow(ActiveRow);
               DoGetCellData(ActiveRow, ActiveCol, Data, cdpForEdit);
               tbState := tbState - [otsNormal] + [otsHiddenEdit];
-              CellAttr.caColor := Colors.Editing;
-              CellAttr.caFontColor := Colors.EditingText;
+              { 06/2011, AB: To allow the user to use the "normal" colors (as set in the
+                             OnGetCellAttributes-event) we only set the colors if text and
+                             background colors are different. }
+              if Colors.Editing<>Colors.EditingText then begin
+                CellAttr.caColor := Colors.Editing;
+                CellAttr.caFontColor := Colors.EditingText;
+              end;
               tbActCell.StartEditing(ActiveRow, ActiveCol, CellRect, CellAttr, CellStyle, Data);
               Result := (tbActCell.EditHandle <> 0);
               if not Result then
@@ -2010,7 +2015,12 @@ as suggested by him.
         MustFocus := Focused;
       DoEnteringColumn(ActiveCol);
       DoEnteringRow(ActiveRow);
-      DoGetCellData(ActiveRow, ActiveCol, Data, cdpForSave);
+      { To give the user the possibility to find out whether a value has been saved when
+        leaving a cell or not, 'DoGetCellData' is only called when neccessary }
+      if SaveValue then
+        DoGetCellData(ActiveRow, ActiveCol, Data, cdpForSave)
+      else
+        Data := nil;
 
       R.TopLeft := ScreenToClient(R.TopLeft);
       R.BottomRight := ScreenToClient(R.BottomRight);

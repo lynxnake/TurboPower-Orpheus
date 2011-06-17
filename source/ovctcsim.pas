@@ -105,6 +105,7 @@ type
       property DataType default sftString;
       property DecimalPlaces default 0;
       property EFColors;
+      property EllipsisMode;
       property Font;
       property Hint;
       property Margin default 4;

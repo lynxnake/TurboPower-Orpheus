@@ -110,8 +110,10 @@ type
       property AutoAdvanceChar default False;
       property AutoAdvanceLeftRight default False;
       property Color;
+      property EllipsisMode;
       property Font;
       property Hint;
+      property IgnoreCR;
       property Margin default 4;
       property MaxLength default 0;
       property ShowHint default False;
@@ -204,8 +206,10 @@ type
       property Adjust default otaDefault;
       property Color;
       property DataStringType;
+      property EllipsisMode;
       property Font;
       property Hint;
+      property IgnoreCR;
       property Margin default 4;
       property MaxLength default 0;
       property ShowHint default False;
@@ -214,6 +218,7 @@ type
       property TableFont default True;
       property TextHiColor default clBtnHighlight;
       property TextStyle default tsFlat;
+      property UseWordWrap default True;
       property WantReturns default False;
       property WantTabs default False;
 
