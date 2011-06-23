@@ -281,8 +281,18 @@ function EnsureChunk(var A : PChunkArray; CI : word;
 {--------}
 function ChunkIsBlank(A : PChunkArray; ArrayInx : word) : boolean;
   {-Return true if the chunk has no items (all pointers are nil).}
+{$IFDEF PUREPASCAL}
+  var
+    Chunk: PChunk;
+    i: Integer;
+  begin
+    Chunk := A^[ArrayInx].Chunk;
+    i := pred(ChunkElements);
+    while (i>=0) and (Chunk^[i]=nil) do Dec(i);
+    result := i<0;
+  end;
+{$ELSE}
   const
-    ChunkSizeInWords = sizeof(TChunk) div 2;
     ChunkSizeInDWords = sizeof(TChunk) div 4;
   var
     Chunk : PChunk;
@@ -309,6 +319,7 @@ function ChunkIsBlank(A : PChunkArray; ArrayInx : word) : boolean;
       pop edi
     end;
   end;
+{$ENDIF}
 {--------}
 procedure DeleteChunk(A : PChunkArray; ArrayInx : word; var NumChunks : word);
   {-Delete a chunk, moving chunks below up one.}

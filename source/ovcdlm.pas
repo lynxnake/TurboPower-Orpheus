@@ -83,7 +83,7 @@ type
   end;
 
 const
-  EntriesPerPage = (4092 - 5 * sizeof(DWord)) div sizeof(Pointer);
+  EntriesPerPage = (4092 - 2*sizeof(Integer) - 3*SizeOf(Pointer)) div sizeof(Pointer);
     {5 = UseCount, PageType, Owner, LowKey, HighKey}
   DATAPAGE = 0;
   INDEXPAGE = 1;
@@ -320,13 +320,6 @@ begin
     Dispose(P);
 end;
 
-{
-function DComp(D1, D2: DWord): Integer; register;
-asm
-  sub eax, edx
-end;
-}
-
 {===== TOvcList ======================================================}
 
 function TOvcList.Add(Item : Pointer) : POvcListNode;
@@ -451,8 +444,7 @@ end;
 function TOvcList.Compare(Sender: TOvcPageTree; UserData, Key1,
   Key2: Pointer): Integer;
 begin
-//  Result := DComp(DWord(POvcListNode(Key1).Item), DWord(POvcListNode(Key2).Item));
-  Result := DWord(POvcListNode(Key1).Item) - DWord(POvcListNode(Key2).Item);
+  Result := NativeUInt(POvcListNode(Key1)^.Item) - NativeUInt(POvcListNode(Key2)^.Item);
 end;
 
 function TOvcList.First(var Node: PovcListNode): Boolean;
@@ -595,8 +587,7 @@ begin
       if Key1 = Key2 then
         raise Exception.Create('Internal error')
       else
-        Result := DWord(Key1) - DWord(Key2);
-//        Result := DComp(DWord(Key1), DWord(Key2));
+        Result := NativeUInt(Key1) - NativeUInt(Key2);
   end;
 end;
 
@@ -981,7 +972,7 @@ begin
     LastPage^.NextPage := NPage;
   LastPage := NPage;
   LastPageTop := @NPage^.Data;
-  LastPageEnd := Pointer(DWord(LastPageTop) + DWord(ItemsPerPage) * DWord(InternalSize));
+  LastPageEnd := Pointer(NativeUInt(LastPageTop) + DWord(ItemsPerPage)*DWord(InternalSize));
 end;
 
 function TOvcPoolManager.NewItem : Pointer;
@@ -1008,7 +999,7 @@ begin
     if IsBadWritePtr(Result,InternalSize) then
       raise Exception.Create('Internal pool error');
 {$ENDIF}
-    inc(DWord(LastPageTop),InternalSize);
+    LastPageTop := PAnsiChar(LastPageTop) + InternalSize;
   end;
 end;
 

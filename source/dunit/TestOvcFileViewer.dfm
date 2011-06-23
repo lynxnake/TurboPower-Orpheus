@@ -11,7 +11,6 @@ object OvcFileViewerForm: TOvcFileViewerForm
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
-  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object OvcFileViewer: TOvcFileViewer
@@ -20,14 +19,12 @@ object OvcFileViewerForm: TOvcFileViewerForm
     Width = 243
     Height = 169
     Caret.CaretHeight = 12
-    FileName = 'C:\USERS\ARMIN\DELPHI\VB32\DCU\ALM_PASSIV.INI'
     FixedFont.Color = clWindowText
     FixedFont.Name = 'Terminal'
     FixedFont.Size = 8
     FixedFont.Style = []
     HighlightColors.BackColor = clHighlight
     HighlightColors.TextColor = clHighlightText
-    IsOpen = True
     TabOrder = 0
   end
 end

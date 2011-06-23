@@ -3,17 +3,22 @@ unit TestOvcFileViewer;
 interface
 
 uses
-  TestFramework, ClipBrd,
+  TestFramework, ClipBrd, StrUtils,
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ovcbase, ovcviewr;
 
 type
   TOvcFileViewerForm = class(TForm)
     OvcFileViewer: TOvcFileViewer;
-    procedure FormCreate(Sender: TObject);
+    procedure open(const FN:string);
   end;
 
   TTestOvcFileViewer = class(TTestCase)
+  private
+    FForm: TOvcFileViewerForm;
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
   published
     procedure TestActualColumn;
     procedure TestCopyToClipboard;
@@ -21,15 +26,16 @@ type
     procedure TestGetLine;
     procedure TestGetLineHex;
     procedure TestSearch;
+    procedure TestGetLinePtr;
   end;
 
 implementation
 
 {$R *.dfm}
 
-procedure TOvcFileViewerForm.FormCreate(Sender: TObject);
+procedure TOvcFileViewerForm.open(const FN:string);
 begin
-  OvcFileViewer.FileName := ExtractFilePath(Application.ExeName) + 'TestOvcFileViewer.txt';
+  OvcFileViewer.FileName := ExtractFilePath(Application.ExeName) + FN;
   OvcFileViewer.IsOpen := True;
 end;
 
@@ -61,17 +67,11 @@ const
      (Line: 5; EffCol: 25; res: 12));
 var
   i, res: integer;
-  OvcFileViewerForm: TOvcFileViewerForm;
 begin
-  OvcFileViewerForm := TOvcFileViewerForm.Create(nil);
-  try
-    for i := 0 to High(cSomeData) do begin
-      res := OvcFileViewerForm.OvcFileViewer.ActualColumn
-               (cSomeData[i].Line, cSomeData[i].EffCol);
-      CheckTrue(res=cSomeData[i].res, Format('ActualColumn failed for test #%d',[i]));
-    end;
-  finally
-    OvcFileViewerForm.Free;
+  FForm.open('TestOvcFileViewer.txt');
+  for i := 0 to High(cSomeData) do begin
+    res := FForm.OvcFileViewer.ActualColumn(cSomeData[i].Line, cSomeData[i].EffCol);
+    CheckTrue(res=cSomeData[i].res, Format('ActualColumn failed for test #%d',[i]));
   end;
 end;
 
@@ -101,20 +101,15 @@ const
 var
   i: integer;
   s: string;
-  OvcFileViewerForm: TOvcFileViewerForm;
 begin
-  OvcFileViewerForm := TOvcFileViewerForm.Create(nil);
-  try
-    for i := 0 to High(cSomeData) do begin
-      OvcFileViewerForm.OvcFileViewer.InHexMode := cSomeData[i].HexMode;
-      OvcFileViewerForm.OvcFileViewer.SetSelection
-        (cSomeData[i].Line1, cSomeData[i].Col1, cSomeData[i].Line2, cSomeData[i].Col2, True);
-      OvcFileViewerForm.OvcFileViewer.CopyToClipboard;
-      s := Clipboard.AsText;
-      CheckTrue(s=cSomeData[i].res, Format('CopyToClipboard failed for test #%d',[i]));
-    end;
-  finally
-    OvcFileViewerForm.Free;
+  FForm.open('TestOvcFileViewer.txt');
+  for i := 0 to High(cSomeData) do begin
+    FForm.OvcFileViewer.InHexMode := cSomeData[i].HexMode;
+    FForm.OvcFileViewer.SetSelection
+      (cSomeData[i].Line1, cSomeData[i].Col1, cSomeData[i].Line2, cSomeData[i].Col2, True);
+    FForm.OvcFileViewer.CopyToClipboard;
+    s := Clipboard.AsText;
+    CheckTrue(s=cSomeData[i].res, Format('CopyToClipboard failed for test #%d',[i]));
   end;
 end;
 
@@ -145,17 +140,11 @@ const
      (Line: 5; ActCol: 25; res: 41));
 var
   i, res: integer;
-  OvcFileViewerForm: TOvcFileViewerForm;
 begin
-  OvcFileViewerForm := TOvcFileViewerForm.Create(nil);
-  try
-    for i := 0 to High(cSomeData) do begin
-      res := OvcFileViewerForm.OvcFileViewer.EffectiveColumn
-               (cSomeData[i].Line, cSomeData[i].ActCol);
-      CheckTrue(res=cSomeData[i].res, Format('EffectiveColumn failed for test #%d',[i]));
-    end;
-  finally
-    OvcFileViewerForm.Free;
+  FForm.open('TestOvcFileViewer.txt');
+  for i := 0 to High(cSomeData) do begin
+    res := FForm.OvcFileViewer.EffectiveColumn(cSomeData[i].Line, cSomeData[i].ActCol);
+    CheckTrue(res=cSomeData[i].res, Format('EffectiveColumn failed for test #%d',[i]));
   end;
 end;
 
@@ -173,21 +162,16 @@ var
   i, j: integer;
   Dest: array[0..255] of Char;
   res: PChar;
-  OvcFileViewerForm: TOvcFileViewerForm;
 begin
-  OvcFileViewerForm := TOvcFileViewerForm.Create(nil);
-  try
-    for i := 0 to High(cResults) do begin
-      for j := 0 to High(Dest) do
-        Dest[j] := 'z';
-      res := OvcFileViewerForm.OvcFileViewer.GetLine(i, @Dest[0], High(Dest)+1);
-      Checktrue((res=@Dest[0]) and (Dest[Length(cResults[i])+1]='z'),
-                Format('GetLine failed for test #%d',[i]));
-      CheckEqualsString(cResults[i], res,
-                Format('GetLine failed for test #%d',[i]));
-    end;
-  finally
-    OvcFileViewerForm.Free;
+  FForm.open('TestOvcFileViewer.txt');
+  for i := 0 to High(cResults) do begin
+    for j := 0 to High(Dest) do
+      Dest[j] := 'z';
+    res := FForm.OvcFileViewer.GetLine(i, @Dest[0], High(Dest)+1);
+    Checktrue((res=@Dest[0]) and (Dest[Length(cResults[i])+1]='z'),
+              Format('GetLine failed for test #%d',[i]));
+    CheckEqualsString(cResults[i], res,
+              Format('GetLine failed for test #%d',[i]));
   end;
 end;
 
@@ -205,22 +189,17 @@ var
   i, j: integer;
   Dest: array[0..255] of Char;
   res: PChar;
-  OvcFileViewerForm: TOvcFileViewerForm;
 begin
-  OvcFileViewerForm := TOvcFileViewerForm.Create(nil);
-  OvcFileViewerForm.OvcFileViewer.InHexMode := True;
-  try
-    for i := 0 to High(cResults) do begin
-      for j := 0 to High(Dest) do
-        Dest[j] := 'z';
-      res := OvcFileViewerForm.OvcFileViewer.GetLine(i, @Dest[0], High(Dest)+1);
-      Checktrue((res=@Dest[0]) and (Dest[Length(cResults[i])+1]='z'),
-                Format('GetLineHex failed for test #%d',[i]));
-      CheckEqualsString(cResults[i], res,
-                Format('GetLineHex failed for test #%d',[i]));
-    end;
-  finally
-    OvcFileViewerForm.Free;
+  FForm.open('TestOvcFileViewer.txt');
+  FForm.OvcFileViewer.InHexMode := True;
+  for i := 0 to High(cResults) do begin
+    for j := 0 to High(Dest) do
+      Dest[j] := 'z';
+    res := FForm.OvcFileViewer.GetLine(i, @Dest[0], High(Dest)+1);
+    Checktrue((res=@Dest[0]) and (Dest[Length(cResults[i])+1]='z'),
+              Format('GetLineHex failed for test #%d',[i]));
+    CheckEqualsString(cResults[i], res,
+              Format('GetLineHex failed for test #%d',[i]));
   end;
 end;
 
@@ -241,25 +220,77 @@ var
   i: integer;
   res: Boolean;
   s: string;
-  OvcFileViewerForm: TOvcFileViewerForm;
 begin
-  OvcFileViewerForm := TOvcFileViewerForm.Create(nil);
-  try
-    for i := 0 to High(cSomeData) do begin
-      OvcFileViewerForm.OvcFileViewer.SetCaretPosition(0, 0);
-      res := OvcFileViewerForm.OvcFileViewer.Search(cSomeData[i].s, []);
-      Checktrue(res=cSomeData[i].res, Format('Search failed for test #%d',[i]));
-      if res then begin
-        OvcFileViewerForm.OvcFileViewer.CopyToClipboard;
-        s := Clipboard.AsText;
-        CheckEqualsString(cSomeData[i].s, s, Format('Search failed for test #%d',[i]));
-      end;
+  FForm.open('TestOvcFileViewer.txt');
+  for i := 0 to High(cSomeData) do begin
+    FForm.OvcFileViewer.SetCaretPosition(0, 0);
+    res := FForm.OvcFileViewer.Search(cSomeData[i].s, []);
+    Checktrue(res=cSomeData[i].res, Format('Search failed for test #%d',[i]));
+    if res then begin
+      FForm.OvcFileViewer.CopyToClipboard;
+      s := Clipboard.AsText;
+      CheckEqualsString(cSomeData[i].s, s, Format('Search failed for test #%d',[i]));
     end;
-  finally
-    OvcFileViewerForm.Free;
   end;
 end;
 
+
+type
+  TPOvcTextFileViewer = class(TOvcTextFileViewer);
+
+procedure TTestOvcFileViewer.TestGetLinePtr;
+type
+  TData = record
+    nr: Integer;
+    s1, s2: string;
+    len: Integer;
+  end;
+const
+  cSomeData : array[0..6] of TData =
+    ((nr:  0; s1: '01 ';  s2: ' x'; len: 254),
+     (nr:  1; s1: '02 ';  s2: ' x'; len: 254),
+     (nr: 10; s1: '11 ';  s2: ' x'; len: 254),
+     (nr: 15; s1: '16 ';  s2: ' x'; len: 255),
+     (nr: 16; s1: '17 ';  s2: ' x'; len: 254),
+     (nr: 31; s1: '32 ';  s2: '90'; len: 270),
+     (nr: 32; s1: '33 ';  s2: '10'; len: 42));
+var
+  i, len: integer;
+  res: PChar;
+begin
+  FForm.open('TestOvcFileViewer2.txt');
+  for i := 0 to High(cSomeData) do begin
+    res := TPOvcTextFileViewer(FForm.OvcFileViewer).GetLinePtr(cSomeData[i].nr, len);
+    CheckEquals(cSomeData[i].len, len, Format('GetLinePtr failed for line %d',[cSomeData[i].nr]));
+    CheckTrue(AnsiStartsStr(cSomeData[i].s1,res),
+              Format('GetLinePtr failed for line %d',[cSomeData[i].nr]));
+    CheckTrue(AnsiEndsStr(cSomeData[i].s2,res),
+              Format('GetLinePtr failed for line %d',[cSomeData[i].nr]));
+  end;
+  for i := High(cSomeData) downto 0 do begin
+    res := TPOvcTextFileViewer(FForm.OvcFileViewer).GetLinePtr(cSomeData[i].nr, len);
+    CheckEquals(cSomeData[i].len, len, Format('GetLinePtr failed for line %d',[cSomeData[i].nr]));
+    CheckTrue(AnsiStartsStr(cSomeData[i].s1,res),
+              Format('GetLinePtr failed for line %d',[cSomeData[i].nr]));
+    CheckTrue(AnsiEndsStr(cSomeData[i].s2,res),
+              Format('GetLinePtr failed for line %d',[cSomeData[i].nr]));
+  end;
+end;
+
+
+procedure TTestOvcFileViewer.SetUp;
+begin
+  inherited SetUp;
+  FForm := TOvcFileViewerForm.Create(nil);
+  Application.ProcessMessages;
+end;
+
+
+procedure TTestOvcFileViewer.TearDown;
+begin
+  FForm.Free;
+  inherited TearDown;
+end;
 
 initialization
   RegisterTest(TTestOvcFileViewer.Suite);

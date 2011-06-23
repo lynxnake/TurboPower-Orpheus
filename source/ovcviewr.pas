@@ -536,7 +536,7 @@ type
   TBlockNum  = longint;        {Block number type}
 
   PfvBufferArray = ^TfvBufferArray;
-  TfvBufferArray = array [0..pred(PageBufSize)] of Char;
+  TfvBufferArray = array [0..pred(PageBufSize)] of AnsiChar;
 
   TfvPageRec = packed record
     BlockNum : TBlockNum;      {BlockNum * PageBufSize = file pos of block start}
@@ -570,7 +570,7 @@ type
     fvLastLine       : LongInt;     {Final line number in file}
     fvLastLine2      : LongInt;     {Final line number in 'other' mode (text/hex)}
     fvLastLineOffset : LongInt;     {Offset of start of fvLastLine  (not used in hex mode)}
-    fvLnBuf          : PChar;   {Line buffer}
+    fvLnBuf          : PChar;       {Line buffer}
     fvLineInBuf      : LongInt;     {Line currently in fvLnBuf}
     fvLnBufLen       : integer;     {Length of line currently in fvLnBuf}
     fvMaxPage        : LongInt;     {Max page number in fvPages}
@@ -579,9 +579,10 @@ type
     fvPageArraySize  : integer;     {Size of the page array}
     fvPages          : PfvPageArray;{Array of page buffers, 0..fvMaxPage}
     fvTicks          : TQuasiTime;  {Quasi-time, for page buffer replacement}
-    fvWorkBeg        : Integer;     {First valid offset of fvWorkPtr}   {actual ptr in 32-bit}
+    fvWorkBeg        : PAnsiChar;   {Pointer to first character of the working page}
     fvWorkBlk        : TBlockNum;   {Working block number}
-    fvWorkEnd        : integer;     {Next invalid offset of fvWorkPtr}  {actual ptr in 32-bit}
+    fvWorkEnd        : PAnsiChar;   {Pointer to first character "after" the last valid
+                                     character of the working page}
     fvWorkOffset     : LongInt;     {Working file position}
     fvWorkPtr        : PAnsiChar;   {Pointer to working character}
 
@@ -3520,7 +3521,7 @@ begin
     fvPages := nil;
   end;
   if Assigned(fvLnBuf) then begin
-    FreeMem(fvLnBuf, LineBufSize);
+    FreeMem(fvLnBuf, LineBufSize*SizeOf(Char));
     fvLnBuf := nil;
   end;
 end;
@@ -3553,25 +3554,26 @@ begin
      If > MaxInt, force it to MaxInt; we're not particularly
      worried about the exact value if so, just so long as it's
      greater than LineBufSize}
+    { Warning: 'CharsLeft' is the number of characters left MINUS 1 }
     CharsLeft := MinL((FileSize - fvWorkOffset - 1), High(integer));
 
     {$IFDEF PUREPASCAL}
     repeat
-      if integer(fvWorkPtr)=fvWorkEnd then begin
+      if fvWorkPtr=fvWorkEnd then begin
         fvWorkOffset := fvWorkOffset + Len;
         if not fvGetWorkingChar then Break;
       end;
       ch := fvWorkPtr^;
       Inc(fvWorkPtr);
       if ch=#13 then
-        fvLnBuf[Len] := #0
+        Break
       else begin
         if ch=#0 then ch := ' ';
         fvLnBuf[Len] := Char(ch);
       end;
       Dec(CharsLeft);
       Inc(Len);
-    until (CharsLeft<=0) and (Len<LineBufSize-1);
+    until (CharsLeft<0) or (Len>=LineBufSize);
     fvLnBuf[Len] := #0;
     Dec(Len);
 
@@ -3718,7 +3720,7 @@ begin
   Result := True;
 
   {check whether the work pointer is still pointing into the work buffer}
-  if (integer(fvWorkPtr) >= fvWorkEnd) or (integer(fvWorkPtr) < fvWorkBeg) then begin
+  if (fvWorkPtr >= fvWorkEnd) or (fvWorkPtr < fvWorkBeg) then begin
     {have we hit EOF?}
     if (fvWorkOffset >= FileSize) then begin
       Result := False;
@@ -3787,7 +3789,7 @@ begin
     BlockNum := fvWorkBlk;
     LastUsed := fvTicks;
     fvWorkPtr := pointer(Buffer);
-    fvWorkBeg := Integer(fvWorkPtr);
+    fvWorkBeg := fvWorkPtr;
     fvWorkEnd := fvWorkBeg + ByteCount;
     inc(fvWorkPtr, fvWorkOffset - (LongInt(fvWorkBlk) shl LogBufSize));
   end;
@@ -3802,12 +3804,12 @@ begin
   {check whether we are still on the same page as before}
   if (NewOfs shr LogBufSize) = fvWorkBlk then begin
     fvWorkOffset := NewOfs;
-    fvWorkPtr := Pointer(fvWorkBeg + (fvWorkOffset - (LongInt(fvWorkBlk) shl LogBufSize)));
+    fvWorkPtr    := fvWorkBeg + (fvWorkOffset - (LongInt(fvWorkBlk) shl LogBufSize));
   end else begin {we've moved pages}
     fvWorkOffset := NewOfs;
     fvWorkPtr := nil;
-    fvWorkBeg := MaxInt;
-    fvWorkEnd := 0;
+    fvWorkBeg := Pointer(-1);
+    fvWorkEnd := nil;
   end;
 end;
 
@@ -3819,6 +3821,10 @@ var
   LocalNL       : LongInt;
   LastLineLen   : integer;
   Delta1, Delta2, Delta3, Delta4, Delta5 : LongInt;
+{$IFDEF PUREPASCAL}
+  ptr: PAnsiChar;
+  bof, eof, cont: Boolean;
+{$ENDIF}
 begin
   {is this line beyond the end?}
   if (fvLastLine >= 0) and (Line > fvLastLine) then
@@ -3879,6 +3885,46 @@ begin
 
     {do we need to search forwards for the line?}
     if (LineDelta > 0) then begin
+{$IFDEF PUREPASCAL}
+      { repeat moving 'fvWorkPtr' to the first character of the next line until we reach
+        the given line ('line') }
+      repeat
+        LastLineLen := 0;
+        cont := True;
+        repeat
+          ptr := fvWorkPtr;
+          { increment ptr until we leave the page or until we have reached a CR }
+          while (ptr<fvWorkEnd) and cont do begin
+            cont := ptr^<>#13;
+            Inc(ptr);
+          end;
+          { move 'fvWorkPtr' and adjust 'LastLineLen' and 'fvWorkOffset' }
+          Inc(LastLineLen, ptr-fvWorkPtr-1);
+          if cont then Inc(LastLineLen);
+          Inc(fvWorkOffset, ptr-fvWorkPtr);
+          fvWorkPtr := ptr;
+          { if we have left the current page we have to go the the next one by calling
+            'fvGetWorkingChar'; this method will return 'False' if we have reached
+            the end of the file. }
+          if ptr=fvWorkEnd then
+            eof := not fvGetWorkingChar
+          else begin
+            eof := False;
+            LastLineLen := 0;
+          end;
+        until not cont or eof;
+        { there might be a LF following the CR; we have to inc fvWorkPtr in this
+          case - at least we can be sure not to leave the current page here. }
+        if not eof then begin
+          if fvWorkPtr^=#10 then begin
+            Inc(fvWorkPtr);
+            Inc(fvWorkOffset);
+          end;
+          Inc(LocalNL);
+        end;
+      until (LocalNL=Line) or EoF;
+
+{$ELSE}
       asm
         {Note: the following is slightly complicated by the need
                to calculate the length of the last line scanned
@@ -3966,6 +4012,7 @@ begin
         pop   esi
         pop   edi
       end;
+{$ENDIF}
 
       {did we hit the end of the file?}
       if (fvWorkOffset >= FileSize) then begin
@@ -3999,6 +4046,35 @@ begin
         fvGetWorkingChar;
       end;
 
+{$IFDEF PUREPASCAL}
+      repeat
+        repeat
+          ptr := fvWorkPtr;
+          cont := True;
+          { decrement ptr until we leave the page or until we have passed a CR }
+          while (ptr>=fvWorkBeg) and cont do begin
+            cont := ptr^<>#13;
+            Dec(ptr);
+          end;
+          { move 'fvWorkPtr' and adjust 'fvWorkOffset' }
+          Dec(fvWorkOffset, fvWorkPtr-ptr);
+          fvWorkPtr := ptr;
+          { if we have left the current page we have to go the the next one by calling
+            'fvGetWorkingChar'; this method will return 'False' if we have reached
+            the beginning of the file. }
+          if ptr<fvWorkBeg then
+            bof := not fvGetWorkingChar
+          else
+            bof := False;
+        until bof or not cont;
+        Dec(LocalNL);
+      until (LocalNL=Line) or BoF;
+      { The following code expects fvWorkPtr to point to the CR; right now, it
+        points to the preceeding char. }
+      Inc(fvWorkPtr);
+      Inc(fvWorkOffset);
+      fvGetWorkingChar;
+{$ELSE}
       asm
         push edi
         push esi
@@ -4048,6 +4124,7 @@ begin
         pop  esi
         pop  edi
       end;
+{$ENDIF}
 
       {Point to next character after end of previous line}
       Inc(fvWorkOffset);
@@ -4096,7 +4173,7 @@ begin
 
   try {except}
     {allocate the line buffer}
-    GetMem(fvLnBuf, LineBufSize);
+    GetMem(fvLnBuf, LineBufSize*SizeOf(Char));
 
     {allocate page buffers}
     fvMaxPage := Pred(FBufferPageCount);
@@ -4147,8 +4224,8 @@ begin
 
   fvWorkOffset := 0;
   fvWorkBlk := 0;
-  fvWorkBeg := MaxInt;
-  fvWorkEnd := 0;
+  fvWorkBeg := Pointer(-1);
+  fvWorkEnd := nil;
   fvWorkPtr := nil;
 end;
 
@@ -4156,8 +4233,8 @@ procedure TOvcCustomFileViewer.fvNewWorkingSet;
 begin
   fvWorkOffset := fvNewOffset;
   fvWorkPtr := nil;
-  fvWorkBeg := MaxInt;
-  fvWorkEnd := 0;
+  fvWorkBeg := Pointer(-1);
+  fvWorkEnd := nil;
 end;
 
 function TOvcCustomFileViewer.GetFileName : string;
@@ -4267,8 +4344,8 @@ begin
 
   fvWorkOffset := SearchOffset;
   fvWorkPtr := nil;
-  fvWorkBeg := MaxInt;
-  fvWorkEnd := 0;
+  fvWorkBeg := Pointer(-1);
+  fvWorkEnd := nil;
 
   if soBackward in Options then begin
     {get the last offset we need to check}
@@ -4281,7 +4358,7 @@ begin
     {continue searching until found or we hit the last offset}
     while (not Found) and (fvWorkOffset >= LastOffset) do begin
       {get the previous character}
-      if (Integer(fvWorkPtr) < fvWorkBeg) or (Cardinal(fvWorkPtr) >= Cardinal(fvWorkEnd)) then
+      if (fvWorkPtr < fvWorkBeg) or (fvWorkPtr >= fvWorkEnd) then
         fvGetWorkingChar;
       C := Map[fvWorkPtr^];
 
@@ -4293,7 +4370,7 @@ begin
             dec(PatternPos);
             dec(fvWorkOffset);
             dec(fvWorkPtr);
-            if (Integer(fvWorkPtr) < fvWorkBeg) or (Cardinal(fvWorkPtr) >= Cardinal(fvWorkEnd)) then
+            if (fvWorkPtr < fvWorkBeg) or (fvWorkPtr >= fvWorkEnd) then
               fvGetWorkingChar;
             C := Map[fvWorkPtr^];
           until (PatternPos = 0) or (C <> MatchString[PatternPos]);
@@ -4352,7 +4429,7 @@ begin
             for PatternPos := PatternPos downto 2 do begin
               dec(fvWorkOffset);
               dec(fvWorkPtr);
-              if (Integer(fvWorkPtr) < fvWorkBeg) then
+              if fvWorkPtr < fvWorkBeg then
                 fvGetWorkingChar;
             end;
           PatternPos := 0;

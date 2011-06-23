@@ -566,7 +566,7 @@ begin
   NewText := AdjustLineBreaks(Value);
   if (Length(NewText) <> FlexEdit.GetTextLen) or (NewText <> FlexEdit.Text) then
   begin
-    if SendMessage(FlexEdit.Handle, WM_SETTEXT, 0, Longint(NewText)) = 0 then
+    if SendMessage(FlexEdit.Handle, WM_SETTEXT, 0, {$IFDEF WIN64}NativeInt{$ELSE}LongInt{$ENDIF}(NewText)) = 0 then
       raise EInvalidOperation.Create(RSTooManyBytes);
     FlexEdit.Perform(CM_TEXTCHANGED, 0, 0);
   end;

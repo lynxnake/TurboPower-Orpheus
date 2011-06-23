@@ -93,7 +93,9 @@ begin
   CheckEquals(0, CompStruct(e1, e2, SizeOf(e1)), 'CompStruct failed for e1=e2=Sqrt(2)');
   e1 := 0.70001;
   e2 := 0.70000;
-  CheckEquals(1, CompStruct(e1, e2, SizeOf(e1)), 'CompStruct failed for e1=0.70001, e2=0.7');
+  { In Win64 we have Extended=Double so the expected result is different from Win32 }
+  CheckEquals({$IFDEF WIN64}-1{$ELSE}1{$ENDIF},
+              CompStruct(e1, e2, SizeOf(e1)), 'CompStruct failed for e1=0.70001, e2=0.7');
 end;
 
 
