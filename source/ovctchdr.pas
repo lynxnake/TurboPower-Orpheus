@@ -104,6 +104,9 @@ type
         to the inherited method (indepented of 'DataStringType') which the inherited method
         will only be able to handle if DataStringType=tstString. }
       //      property DataStringType;
+
+      { 07/2011 AUCOS-HKK: Reimplemented 'ASCIIZStrings' for backward compatibility }
+      property UseASCIIZStrings;
       property UseWordWrap default False;
       property ShowEllipsis default True;
 
@@ -165,6 +168,8 @@ type
         to the inherited method (indepented of 'DataStringType') which the inherited method
         will only be able to handle if DataStringType=tstString. }
       //      property DataStringType;
+      { 07/2011 AUCOS-HKK: Reimplemented 'ASCIIZStrings' for backward compatibility }
+      property UseASCIIZStrings;
 
       {events inherited from custom ancestor}
       property OnClick;

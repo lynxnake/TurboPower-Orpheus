@@ -124,6 +124,8 @@ type
       property TextStyle default tsFlat;
       property UseWordWrap default False;
       property DataStringType;
+      { 07/2011 AUCOS-HKK: Reimplemented 'ASCIIZStrings' for backward compatibility }
+      property UseASCIIZStrings;
 
       {events inherited from custom ancestor}
       property OnChange;
@@ -218,6 +220,8 @@ type
       property TableFont default True;
       property TextHiColor default clBtnHighlight;
       property TextStyle default tsFlat;
+      { 07/2011 AUCOS-HKK: Reimplemented 'ASCIIZStrings' for backward compatibility }
+      property UseASCIIZStrings;
       property UseWordWrap default True;
       property WantReturns default False;
       property WantTabs default False;
@@ -375,7 +379,7 @@ procedure TOvcTCCustomString.StopEditing(SaveValue : boolean; Data : pointer);
     04/2011, AB: UseASCIIZStrings/UsePString replaced by DataStringType }
   begin
     try
-      if SaveValue and Assigned(Data) then
+      if SaveValue and Assigned(FEdit) and Assigned(Data) then
         case FDataStringType of
           tstShortString: POvcShortString(Data)^ := ShortString(Copy(FEdit.Text, 1, MaxLength));
           tstPChar:       FEdit.GetTextBuf(PChar(Data), MaxLength+1);
@@ -617,7 +621,7 @@ procedure TOvcTCCustomMemo.StopEditing(SaveValue : boolean; Data : pointer);
     04/2011, AB: UseASCIIZStrings/UsePString replaced by DataStringType }
   begin
     try
-      if SaveValue and Assigned(Data) then
+      if SaveValue and Assigned(FEdit) and Assigned(Data) then
         case FDataStringType of
           tstShortString: POvcShortString(Data)^ := ShortString(Copy(FEdit.Text, 1, MaxLength));
           tstPChar:       FEdit.GetTextBuf(PChar(Data), MaxLength+1);

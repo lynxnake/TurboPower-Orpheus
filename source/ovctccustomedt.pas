@@ -64,6 +64,8 @@ type
     property Color;
     property Font;
     property DataStringType;
+    { 07/2011 AUCOS-HKK: Reimplemented 'ASCIIZStrings' for backward compatibility }
+    property UseASCIIZStrings;
   end;
 
   TOvcTCCustomStr = class(TOvcTCCustomControl)

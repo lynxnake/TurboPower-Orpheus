@@ -55,6 +55,12 @@ type
       FEllipsisReadonly : Boolean;
       FIgnoreCR         : Boolean;
       FOnChange         : TNotifyEvent;
+  private
+    { 07/2011, AUCOS-HKK: reimplemented property 'ASCIIZStrings' for backward-
+        compatibility; better use 'DataStringType' to determine the kind of string the
+        component uses. }
+    function ReadASCIIZStrings: boolean;
+    procedure SetUseASCIIZStrings(const Value: boolean);
       {.Z-}
 
     protected
@@ -79,11 +85,14 @@ type
       {properties}
       property DataStringType : TOvcTblStringtype
          read FDataStringType write SetDataStringType default tstString;
+      { 07/2011, AUCOS-HKK: reimplemented property 'ASCIIZStrings' for backward compatibility }
+      property UseASCIIZStrings : boolean
+         read ReadASCIIZStrings write SetUseASCIIZStrings default True;
 
       property UseWordWrap : boolean
          read FUseWordWrap write SetUseWordWrap;
 
-      { New property to access the new Field 'FEllipsisReadonly' together with FShowEllipsis
+      { New property to access the new Field 'FEllipsisReadonly' together with 'FShowEllipsis'
         without changing 'ShowEllipsis' }
       property EllipsisMode: TEllipsisMode
          read GetEllipsisMode write SetEllipsisMode default em_show_readonly;
@@ -309,6 +318,17 @@ procedure TOvcTCBaseString.SetUseWordWrap(WW : boolean);
       end;
   end;
 {====================================================================}
+
+{ 07/2011 AUCOS-HKK: Reimplemented 'ASCIIZStrings' for backward compatibility }
+function TOvcTCBaseString.ReadASCIIZStrings: boolean;
+begin
+  result := DataStringType = tstString;
+end;
+
+procedure TOvcTCBaseString.SetUseASCIIZStrings(const Value: boolean);
+begin
+  DataStringType := tstString;
+end;
 
 
 end.
