@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                    OVCLB.PAS 4.06                     *}
+{*                    OVCLB.PAS 4.08                     *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -564,26 +564,30 @@ begin
 end;
 
 procedure TOvcCustomListBox.tlSetTabStops;
+  {Changes:
+     07/2011, AB: Bugfix: tlTabsDU was not set properly - resulting in a misalingment of
+       the columns; the reason was that 'GetDialogBaseUnits' does not respect the ListBox'
+       Font.
+       Remark: For a precise alignment of the columns (when using a fixed font) 'Columns'
+       must be set to 1. }
 var
-  DBU  : Integer;
   ACW  : Integer;
-  I    : Integer;
+  T, I : Integer;
   S    : string;
 begin
   if not HandleAllocated then
     Exit;
 
-  {get dialog base units}
-  DBU := LOWORD(GetDialogBaseUnits);
-
   {get average character width}
   S := GetOrphStr(SCAlphaString);
-  ACW := Canvas.TextWidth(S) div Length(S);
+  ACW := (Canvas.TextWidth(S) + Length(S) div 2) div Length(S);
 
   {fill tab array}
   for I := 0 to FTabStops.Count-1 do begin
-    tlTabs[I] := StrToInt(FTabStops[I]) * ACW; {pixel width}
-    tlTabsDU[I] := 4*tlTabs[I] div DBU;        {width in dialog units}
+    T := StrToInt(FTabStops[I]);
+    tlTabs[I]   := ACW * T; {pixel width}
+//  old:   tlTabsDU[I] := 4*tlTabs[I] div LOWORD(GetDialogBaseUnits);
+    tlTabsDU[I] := 4 * T;   {width in dialog units}
   end;
 
   {set tab stop positions}
