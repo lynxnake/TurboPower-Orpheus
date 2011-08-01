@@ -69,9 +69,6 @@
 			<DCCReference Include="TestOvcFileViewer.pas">
 				<Form>OvcFileViewerForm</Form>
 			</DCCReference>
-			<DCCReference Include="TestOvcPictureField.pas">
-				<Form>TestOvcPictureFieldForm</Form>
-			</DCCReference>
 			<DCCReference Include="TestOvcDate.pas"/>
 			<DCCReference Include="TestOvcTransfer.pas">
 				<Form>TestOvcTransferForm</Form>

@@ -22,7 +22,6 @@ uses
   OvcStr in '..\OvcStr.pas',
   TestOvcUtils in 'TestOvcUtils.pas',
   TestOvcFileViewer in 'TestOvcFileViewer.pas' {OvcFileViewerForm},
-  TestOvcPictureField in 'TestOvcPictureField.pas' {TestOvcPictureFieldForm},
   TestOvcDate in 'TestOvcDate.pas',
   TestOvcTransfer in 'TestOvcTransfer.pas' {TestOvcTransferForm},
   TestOvcSpinner in 'TestOvcSpinner.pas' {TestOvcSpinnerForm},
