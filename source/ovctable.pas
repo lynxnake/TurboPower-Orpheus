@@ -5927,14 +5927,15 @@ procedure TOvcCustomTable.WMLButtonDown(var Msg : TWMMouse);
                     When otoNoSelection in Options an you click on a cell that has already
                     been active, the ctim_StartEditMouse messages was posted twice - resulting
                     in no change of the checkbox' state. }
+                  if (not (otoAlwaysEditing in Options)) and (ActiveRow = Row) and (ActiveCol = Col) and (not WasUnfocused) then
+                  begin
+                    PostMessage(Handle, ctim_StartEdit, 0, 0);
+                    PostMessage(Handle, ctim_StartEditMouse, Msg.Keys, longint(Msg.Pos));
+                  end;
+
                   tbSetActiveCellPrim(Row, Col);
                 finally
                   AllowRedraw := true;
-                end;
-                if not (otoAlwaysEditing in Options) then begin
-                  PostMessage(Handle, ctim_StartEdit, 0, 0);
-                  PostMessage(Handle, ctim_StartEditMouse,
-                              Msg.Keys, longint(Msg.Pos));
                 end;
               end;
             otrInLocked :
