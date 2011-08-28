@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                  O32INTDEQ.PAS 4.06                   *}
+{*                  O32INTDEQ.PAS 4.08                   *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -23,6 +23,9 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{*   Armin Biernaczyk:                                                        *}
+{*     07/2011: Changed 'FList.List^[M]' to 'FList.List[M]' in several        *}
+{*              places (for compatibility with Delphi Pulsar)                 *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -88,7 +91,7 @@ end;
 {--------}
 procedure TO32IntDeque.Enqueue(aValue : integer);
 begin
-  FList.List^[FTail] := pointer(aValue);
+  FList.List[FTail] := pointer(aValue);
   inc(FTail);
   if (FTail = FList.Count) then
     FTail := 0;
@@ -111,7 +114,7 @@ begin
     j := FList.Count;
     for i := pred(OldCount) downto FHead do begin
       dec(j);
-      FList.List^[j] := FList.List^[i]
+      FList.List[j] := FList.List[i]
     end;
     FHead := j;
   end;
@@ -127,7 +130,7 @@ begin
   if (FHead = 0) then
     FHead := FList.Count;
   dec(FHead);
-  FList.List^[FHead] := pointer(aValue);
+  FList.List[FHead] := pointer(aValue);
   if (FTail = FHead) then
     idGrow;
 end;
@@ -136,7 +139,7 @@ function TO32IntDeque.Pop : integer;
 begin
   if FHead = FTail then
     raise Exception.Create('Integer deque is empty: cannot pop');
-  Result := integer(FList.List^[FHead]);
+  Result := integer(FList.List[FHead]);
   inc(FHead);
   if (FHead = FList.Count) then
     FHead := 0;

@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                    OVCEF.PAS 4.06                     *}
+{*                    OVCEF.PAS 4.08                     *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -4804,6 +4804,14 @@ begin
       Highlight := (not Ignore);
       FixHOfs := True;
       efResetCaret;
+      { 07/2011 AB: When selecting a new cell, the caret is set to the start/end of
+          the field by 'efResetCaret'; to avoid strange effects when selecting text
+          (using <shift>-<crsr left> or <shift>-<crsr right>) we have to reset the
+          selection, too. }
+      if (efoCaretToEnd in FOptions) then
+        SetSelection(MaxEditLen, MaxEditLen)
+      else
+        SetSelection(0, 0);
     end;
   end;
 

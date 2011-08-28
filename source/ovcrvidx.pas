@@ -23,6 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{*   Armin Biernaczyk                                                         *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -2994,6 +2995,8 @@ begin
 end;
 
 procedure TOvcRvIndexSuperGroup.BuildNewGroupIndex(Adds : TOvcList; Level : Integer);
+  {Changes:
+     07/2011, AB: Changed 'SubList.List[..]' to 'SubList.List^[..]'  }
 type
   TCompareFields = function (Data1, Data2: Pointer; FieldIndex: Integer) : Integer of object;
 var
@@ -3052,7 +3055,7 @@ begin
     j := 0;
     repeat
       if (Groups[j] = nil)
-      or (CompareFunc(SubList.List[i], Groups[j].Data, GroupFields[j]) <> 0) then
+      or (CompareFunc(SubList.List^[i], Groups[j].Data, GroupFields[j]) <> 0) then
         break;
       inc(j);
     until j >= Depth;
@@ -3067,8 +3070,8 @@ begin
       until j >= Depth;
     end;
     ItemGroup := Groups[Depth-1];
-    ItemGroup.FElements.Add(SubList.List[i]);
-    FOwner.Contents.AddObject(SubList.List[i], ItemGroup);
+    ItemGroup.FElements.Add(SubList.List^[i]);
+    FOwner.Contents.AddObject(SubList.List^[i], ItemGroup);
   end;
 
   SubList.Free;

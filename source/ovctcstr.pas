@@ -319,7 +319,10 @@ procedure TOvcTCBaseString.SetUseWordWrap(WW : boolean);
   end;
 {====================================================================}
 
-{ 07/2011 AUCOS-HKK: Reimplemented 'ASCIIZStrings' for backward compatibility }
+{ 07/2011 AUCOS-HKK: Reimplemented 'ASCIIZStrings' for backward compatibility
+          Do not use this property in new projects - use 'DataStringType'
+          instead. }
+
 function TOvcTCBaseString.ReadASCIIZStrings: boolean;
 begin
   result := DataStringType = tstString;
@@ -327,7 +330,10 @@ end;
 
 procedure TOvcTCBaseString.SetUseASCIIZStrings(const Value: boolean);
 begin
-  DataStringType := tstString;
+  if Value then
+    DataStringType := tstString
+  else if FDataStringType=tstString then
+    DataStringType := tstShortString;
 end;
 
 

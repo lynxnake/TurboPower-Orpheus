@@ -5923,8 +5923,8 @@ procedure TOvcCustomTable.WMLButtonDown(var Msg : TWMMouse);
                 AllowRedraw := false;
                 try
                   DoActiveCellMoving(ccMouse, Row, Col);
-                  { 19.04.2011 AB: The tables behavior regarding Checkboxes was unsatisfactory:
-                    When otoNoSelection in Options an you click on a cell that has already
+                  { 19.04.2011 AB: The tables behavior regarding checkboxes was unsatisfactory:
+                    When otoNoSelection in Options and you click on a cell that has already
                     been active, the ctim_StartEditMouse messages was posted twice - resulting
                     in no change of the checkbox' state. }
                   if (not (otoAlwaysEditing in Options)) and (ActiveRow = Row) and (ActiveCol = Col) and (not WasUnfocused) then

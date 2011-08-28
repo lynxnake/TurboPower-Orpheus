@@ -369,7 +369,7 @@ var
 begin
   {free all items in the state transition table}
   for i := 0 to pred(FTable.Count) do begin
-    StateData := PO32NFAState(FTable.List^[i]);
+    StateData := PO32NFAState(FTable.List[i]);
     if (StateData <> nil) then begin
       with StateData^ do begin
         if (sdMatchType = mtClass) or
@@ -446,23 +446,23 @@ begin
   {cycle through all the state records, except for the last one}
   for i := 0 to (FTable.Count - 2) do begin
     {get this state}
-    with PO32NFAState(FTable.List^[i])^ do begin
+    with PO32NFAState(FTable.List[i])^ do begin
       {walk the chain pointed to by the first next state, unlinking
        the states that are simple single no-cost moves}
-      Walker := PO32NFAState(FTable.List^[sdNextState1]);
+      Walker := PO32NFAState(FTable.List[sdNextState1]);
       while (Walker^.sdMatchType = mtNone) and
             (Walker^.sdNextState2 = UnusedState) do begin
         sdNextState1 := Walker^.sdNextState1;
-        Walker := PO32NFAState(FTable.List^[sdNextState1]);
+        Walker := PO32NFAState(FTable.List[sdNextState1]);
       end;
       {walk the chain pointed to by the first next state, unlinking
        the states that are simple single no-cost moves}
       if (sdNextState2 <> UnusedState) then begin
-        Walker := PO32NFAState(FTable.List^[sdNextState2]);
+        Walker := PO32NFAState(FTable.List[sdNextState2]);
         while (Walker^.sdMatchType = mtNone) and
               (Walker^.sdNextState2 = UnusedState) do begin
           sdNextState2 := Walker^.sdNextState1;
-          Walker := PO32NFAState(FTable.List^[sdNextState2]);
+          Walker := PO32NFAState(FTable.List[sdNextState2]);
         end;
       end;
     end;
@@ -479,7 +479,7 @@ begin
   {cycle through all the state records, except for the last one}
   for i := 0 to (FTable.Count - 2) do begin
     {get this state}
-    with PO32NFAState(FTable.List^[i])^ do begin
+    with PO32NFAState(FTable.List[i])^ do begin
       {if it's not a no-cost move state or it's the start state...}
       if (sdMatchType <> mtNone) or (i = FStartState) then begin
         {create the state list}
@@ -500,7 +500,7 @@ begin
    marking unused ones--not strictly necessary but good for debugging}
   for i := 0 to (FTable.Count - 2) do begin
     if (i <> FStartState) then
-      with PO32NFAState(FTable.List^[i])^ do begin
+      with PO32NFAState(FTable.List[i])^ do begin
         if (sdMatchType = mtNone) then
           sdMatchType := mtUnused;
       end;
@@ -551,7 +551,7 @@ begin
         end;
       end
       {otherwise, process the state}
-      else with PO32NFAState(FTable.List^[State])^ do begin
+      else with PO32NFAState(FTable.List[State])^ do begin
         case sdMatchType of
           mtNone :
             begin
@@ -613,7 +613,7 @@ begin
      the transition table}
     while not Deque.IsEmpty do begin
       State := Deque.Pop;
-      with PO32NFAState(FTable.List^[State])^ do begin
+      with PO32NFAState(FTable.List[State])^ do begin
         case sdMatchType of
           mtTerminal :
             begin
@@ -1036,7 +1036,7 @@ begin
          'trying to change an invalid state');
 
   {get the state record and change the transition information}
-  StateData := PO32NFAState(FTable.List^[aState]);
+  StateData := PO32NFAState(FTable.List[aState]);
   StateData^.sdNextState1 := aNextState1;
   StateData^.sdNextState2 := aNextState2;
   Result := aState;
@@ -1054,7 +1054,7 @@ procedure TO32RegexEngine.rcWalkNoCostTree(aList  : TO32IntList;
                                              aState : integer);
 begin
   {look at this state's record...}
-  with PO32NFAState(FTable.List^[aState])^ do begin
+  with PO32NFAState(FTable.List[aState])^ do begin
     {if it's a no-cost state, recursively walk the
      first, then the second chain}
     if (sdMatchType = mtNone) then begin

@@ -38,7 +38,7 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     GridPenSet.CellWhenUnfocused.Style = psDash
     GridPenSet.CellWhenUnfocused.Effect = geBoth
     TabOrder = 0
-    OnGetCellData = OvcTable1GetCellData
+    OnGetCellData = OvcTableGetCellData
     CellData = (
       'frmTestOvcPictureField.O32TCFlexEdit1'
       'frmTestOvcPictureField.OvcTCMemo1'
@@ -104,7 +104,7 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     GridPenSet.CellWhenUnfocused.Effect = geBoth
     Options = [otoNoSelection]
     TabOrder = 1
-    OnGetCellData = OvcTable1GetCellData
+    OnGetCellData = OvcTableGetCellData
     CellData = (
       'frmTestOvcPictureField.OvcTCSimpleField1_SS'
       'frmTestOvcPictureField.OvcTCPictureField1_SS'
@@ -139,6 +139,61 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
       False
       True
       'frmTestOvcPictureField.OvcTCCheckBox1')
+  end
+  object OvcTable3: TOvcTable
+    Left = 18
+    Top = 210
+    Width = 871
+    Height = 77
+    LockedRows = 0
+    TopRow = 0
+    RowLimit = 2
+    LockedCols = 0
+    LeftCol = 0
+    GridPenSet.NormalGrid.NormalColor = clBtnShadow
+    GridPenSet.NormalGrid.Style = psDot
+    GridPenSet.NormalGrid.Effect = geBoth
+    GridPenSet.LockedGrid.NormalColor = clBtnShadow
+    GridPenSet.LockedGrid.Style = psSolid
+    GridPenSet.LockedGrid.Effect = ge3D
+    GridPenSet.CellWhenFocused.NormalColor = clBlack
+    GridPenSet.CellWhenFocused.Style = psSolid
+    GridPenSet.CellWhenFocused.Effect = geBoth
+    GridPenSet.CellWhenUnfocused.NormalColor = clBlack
+    GridPenSet.CellWhenUnfocused.Style = psDash
+    GridPenSet.CellWhenUnfocused.Effect = geBoth
+    ScrollBars = ssNone
+    TabOrder = 2
+    OnGetCellData = OvcTableGetCellData
+    CellData = (
+      'frmTestOvcPictureField.OvcTCString1_PChar'
+      'frmTestOvcPictureField.OvcTCPictureField1_PChar'
+      'frmTestOvcPictureField.OvcTCSimpleField1_PChar'
+      'frmTestOvcPictureField.OvcTCMemo1_PChar'
+      'frmTestOvcPictureField.O32TCFlexEdit1_PChar')
+    RowData = (
+      30)
+    ColData = (
+      120
+      False
+      True
+      'frmTestOvcPictureField.OvcTCString1_PChar'
+      120
+      False
+      True
+      'frmTestOvcPictureField.OvcTCPictureField1_PChar'
+      120
+      False
+      True
+      'frmTestOvcPictureField.OvcTCSimpleField1_PChar'
+      120
+      False
+      True
+      'frmTestOvcPictureField.OvcTCMemo1_PChar'
+      120
+      False
+      True
+      'frmTestOvcPictureField.O32TCFlexEdit1_PChar')
   end
   object OvcTCString1: TOvcTCString
     MaxLength = 50
@@ -214,6 +269,7 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     MaxLength = 10
     Table = OvcTable2
     DataStringType = tstShortString
+    UseASCIIZStrings = False
     Left = 64
     Top = 116
   end
@@ -227,6 +283,7 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     DataStringType = tstShortString
     MaxLength = 255
     Table = OvcTable2
+    UseASCIIZStrings = False
     WantReturns = True
     Left = 428
     Top = 116
@@ -311,5 +368,76 @@ object frmTestOvcPictureField: TfrmTestOvcPictureField
     Top = 116
     RangeHigh = {00000000000000000000}
     RangeLow = {00000000000000000000}
+  end
+  object OvcTCString1_PChar: TOvcTCString
+    MaxLength = 10
+    Table = OvcTable3
+    DataStringType = tstPChar
+    UseASCIIZStrings = False
+    Left = 64
+    Top = 216
+  end
+  object OvcTCPictureField1_PChar: TOvcTCPictureField
+    PictureMask = 'XXXXXXXXXX'
+    MaxLength = 10
+    CaretOvr.Shape = csBlock
+    DataStringType = tstPChar
+    EFColors.Disabled.BackColor = clWindow
+    EFColors.Disabled.TextColor = clGrayText
+    EFColors.Error.BackColor = clRed
+    EFColors.Error.TextColor = clBlack
+    EFColors.Highlight.BackColor = clHighlight
+    EFColors.Highlight.TextColor = clHighlightText
+    Options = [efoCaretToEnd, efoTrimBlanks]
+    Table = OvcTable3
+    Left = 186
+    Top = 216
+    RangeHigh = {00000000000000000000}
+    RangeLow = {00000000000000000000}
+  end
+  object OvcTCSimpleField1_PChar: TOvcTCSimpleField
+    CaretOvr.Shape = csBlock
+    DataStringType = tstPChar
+    EFColors.Disabled.BackColor = clWindow
+    EFColors.Disabled.TextColor = clGrayText
+    EFColors.Error.BackColor = clRed
+    EFColors.Error.TextColor = clBlack
+    EFColors.Highlight.BackColor = clHighlight
+    EFColors.Highlight.TextColor = clHighlightText
+    MaxLength = 10
+    Table = OvcTable3
+    Left = 304
+    Top = 216
+    RangeHigh = {00000000000000000000}
+    RangeLow = {00000000000000000000}
+  end
+  object OvcTCMemo1_PChar: TOvcTCMemo
+    DataStringType = tstPChar
+    MaxLength = 255
+    Table = OvcTable3
+    UseASCIIZStrings = False
+    WantReturns = True
+    Left = 428
+    Top = 214
+  end
+  object O32TCFlexEdit1_PChar: TO32TCFlexEdit
+    DataStringType = tstPChar
+    EditorBorders.Active = False
+    EditorBorders.FlatColor = clBlack
+    EditorBorders.BorderStyle = bstyRaised
+    EditorOptions.Alignment = taLeftJustify
+    EditorOptions.Color = clWindow
+    EditorOptions.Cursor = crDefault
+    EditorOptions.MaxLines = 3
+    EditorOptions.ReadOnly = False
+    EditorOptions.ShowButton = False
+    MaxLength = 10
+    Table = OvcTable3
+    Validation.BeepOnError = True
+    Validation.InputRequired = False
+    Validation.ValidatorType = 'None'
+    Validation.ValidationType = vtNone
+    Left = 546
+    Top = 214
   end
 end

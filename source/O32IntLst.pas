@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                  O32INTLST.PAS 4.06                   *}
+{*                  O32INTLST.PAS 4.08                   *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -23,7 +23,9 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
-{*                                                                            *}
+{*   Armin Biernaczyk:                                                        *}
+{*     07/2011: Changed 'FList.List^[M]' to 'FList.List[M]' in several        *}
+{*              places (for compatibility with Delphi Pulsar)                 *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
 {$APPTYPE GUI}
@@ -117,14 +119,14 @@ begin
     R := pred(Count);
     while (L <= R) do begin
       M := (L + R) div 2;
-      if (integer(FList.List^[M]) = aItem) then begin
+      if (integer(FList.List[M]) = aItem) then begin
         if AllowDups then begin
           FList.Insert(M, pointer(aItem));
           Result := M;
         end;
         Exit;
       end;
-      if (integer(FList.List^[M]) < aItem) then
+      if (integer(FList.List[M]) < aItem) then
         L := M + 1
       else
         R := M - 1;
@@ -150,7 +152,7 @@ end;
 function TO32IntList.ilGetItem(aInx : integer) : integer;
 begin
   Assert((0 <= aInx) and (aInx < Count), 'Index out of bounds');
-  Result := integer(FList.List^[aInx]);
+  Result := integer(FList.List[aInx]);
 end;
 {--------}
 procedure TO32IntList.ilSetCapacity(aValue : integer);
@@ -176,7 +178,7 @@ end;
 procedure TO32IntList.ilSetItem(aInx : integer; aValue : integer);
 begin
   Assert((0 <= aInx) and (aInx < Count), 'Index out of bounds');
-  FList.List^[aInx] := pointer(aValue);
+  FList.List[aInx] := pointer(aValue);
 end;
 {--------}
 procedure TO32IntList.ilSort;

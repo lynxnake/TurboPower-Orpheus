@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                   O32IGRID.PAS 4.06                   *}
+{*                   O32IGRID.PAS 4.08                   *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -23,6 +23,9 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
+{*   Armin Biernaczyk:                                                        *}
+{*     07/2011: Changed 'xxx.List^[I]' to 'xxx.List[M]' in several places     *}
+{*              (for compatibility with Delphi Pulsar)                        *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -2500,8 +2503,8 @@ begin
   SortedList := TList.Create;
   {Load list of mainlevel items}
   for I := 0 to FVisibleItems.Count - 1 do begin
-    if TO32InspectorItem(FVisibleItems.List^[I]).Level = 0 then
-      SortedList.Add(FVisibleItems.List^[I]);
+    if TO32InspectorItem(FVisibleItems.List[I]).Level = 0 then
+      SortedList.Add(FVisibleItems.List[I]);
   end;
 
   SortList(SortedList);
@@ -2533,8 +2536,8 @@ begin
       { Spin through all of the visible items looking for any children at this }
       { level }
       for I := 0 to FVisibleItems.Count - 1 do begin
-        if TO32InspectorItem(FVisibleItems.List^[I]).Level = Level then
-          ChildList.Add(FVisibleItems.List^[I]);
+        if TO32InspectorItem(FVisibleItems.List[I]).Level = Level then
+          ChildList.Add(FVisibleItems.List[I]);
       end;
 
       { If we found any children then sort them, insert them into the sorted }
@@ -2548,9 +2551,9 @@ begin
         { are inserted at the top of their list, directly under their parent. }
         for J := ChildList.Count - 1 downto 0 do begin
           for K := 0 to TargetList.Count - 1 do
-            if TargetList.List^[K] = TO32InspectorItem(ChildList.List^[J]).Parent
+            if TargetList.List[K] = TO32InspectorItem(ChildList.List[J]).Parent
             then begin
-              TargetList.Insert(K + 1, ChildList.List^[J]);
+              TargetList.Insert(K + 1, ChildList.List[J]);
               break;
             end;
         end;
@@ -2578,11 +2581,11 @@ begin
   for i := 0 to AList.Count - 1 do begin
     IndexOfMin := i;
     for j := i to AList.Count - 1 do
-      if (Compare(AList.List^[j], AList.List^[IndexOfMin]) < 0)
+      if (Compare(AList.List[j], AList.List[IndexOfMin]) < 0)
       then IndexOfMin := j;
-    Temp := AList.List^[i];
-    AList.List^[i] := AList.List^[IndexOfMin];
-    AList.List^[IndexOfMin] := Temp;
+    Temp := AList.List[i];
+    AList.List[i] := AList.List[IndexOfMin];
+    AList.List[IndexOfMin] := Temp;
   end;
 end;
 {=====}
