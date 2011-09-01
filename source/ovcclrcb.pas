@@ -144,6 +144,17 @@ implementation
 uses
   SysUtils;
 
+{$IFDEF VERSION2010}
+function ThemesEnabled: Boolean; inline;
+begin
+{$IFDEF VERSIONXE2}
+  Result := StyleServices.Enabled;
+{$ELSE}
+  Result := ThemeServices.ThemesEnabled;
+{$ENDIF}
+end;
+{$ENDIF}
+
 procedure TOvcCustomColorComboBox.CalculateBoxWidth;
 var
   I : Integer;
@@ -240,7 +251,7 @@ var
 begin
   // Done in DrawItem Themed if visual styles are enabled (otherwise flashing white rectangle when switching focus to another control)
 {$IFDEF VERSION2010}
-  if ThemeServices.ThemesEnabled and CheckWin32Version(6, 0) and (odComboBoxEdit in State) then
+  if ThemesEnabled and CheckWin32Version(6, 0) and (odComboBoxEdit in State) then
   begin
     Canvas.Pen.Color := clBlack;
     Canvas.Brush.Color := clWhite;

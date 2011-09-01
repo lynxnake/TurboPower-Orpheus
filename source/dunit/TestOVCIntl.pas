@@ -1,5 +1,5 @@
 {******************************************************************************}
-{*                   TestOovcIintl.pas 4.07                                   *}
+{*                   TestOvcIntl.pas 4.08                                     *}
 {******************************************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -19,11 +19,12 @@
 {*                                                                            *}
 {* The Initial Developer of the Original Code is Roman Kassebaum              *}
 {*                                                                            *}
-{*                                                                            *}
 {* Contributor(s):                                                            *}
 {*    Roman Kassebaum                                                         *}
+{*    Armin Biernaczyk                                                        *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
+
 unit TestOVCIntl;
 
 interface

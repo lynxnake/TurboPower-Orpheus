@@ -94,6 +94,7 @@ contains
   O32LobEd in '..\..\source\O32LobEd.pas' {O32frmLkOutEd},
   o32coled in '..\..\source\o32coled.pas' {O32frmCollEditor},
   O32IGridEditor1 in '..\..\source\O32IGridEditor1.pas',
-  O32IGridItemEd in '..\..\source\O32IGridItemEd.pas' {FormIGridItemEditor};
+  O32IGridItemEd in '..\..\source\O32IGridItemEd.pas' {FormIGridItemEditor},
+  ovctccheckcbx in '..\..\source\ovctccheckcbx.pas';
 
 end.

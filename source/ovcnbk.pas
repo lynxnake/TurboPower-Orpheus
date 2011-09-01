@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                    OVCNBK.PAS 4.06                    *}
+{*                    OVCNBK.PAS 4.08                    *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -500,6 +500,23 @@ const
   tabMinTabWidth = 20;
   tabMargin      = 2;
 
+{$IFDEF VERSION7}
+function ThemesEnabled: Boolean; inline;
+begin
+{$IFDEF VERSIONXE2}
+  Result := StyleServices.Enabled;
+{$ELSE}
+  Result := ThemeServices.ThemesEnabled;
+{$ENDIF}
+end;
+
+{$IFDEF VERSIONXE2}
+function ThemeServices: TCustomStyleServices; inline;
+begin
+  Result := StyleServices;
+end;
+{$ENDIF}
+{$ENDIF}
 
 {*** TOvcTabPage ***}
 
@@ -537,7 +554,7 @@ begin
   if NoteBook.FHotTab <> -1 then
   begin
     {$IFDEF VERSION7}
-      if ThemeServices.ThemesEnabled then
+      if ThemesEnabled then
         NoteBook.InvalidateTab(NoteBook.FHotTab);
     {$ENDIF}
     NoteBook.FHotTab := -1;
@@ -614,7 +631,7 @@ var
 {$ENDIF}
 begin
   {$IFDEF VERSION7}
-  if ThemeServices.ThemesEnabled then
+  if ThemesEnabled and ((not Assigned(Notebook)) or (Notebook.Color=clBtnface)) then
   begin
     Details := ThemeServices.GetElementDetails(ttBody);
     ThemeServices.DrawElement(Canvas.Handle, Details, ClientRect);
@@ -1269,7 +1286,7 @@ begin
     begin
       FoundTab := True;
       {$IFDEF VERSION7}
-      if ThemeServices.ThemesEnabled then
+      if ThemesEnabled then
         if FHotTab <> I then
         begin
           if FHotTab <> -1 then
@@ -1289,7 +1306,7 @@ begin
   begin
     if FHotTab <> -1 then
     begin
-      if ThemeServices.ThemesEnabled then
+      if ThemesEnabled then
         InvalidateTab(FHotTab);
       FHotTab := -1;
     end;
@@ -1779,7 +1796,7 @@ begin
           H := Self.Height-T-2;
           W := Self.Width-3;
           {$IFDEF VERSION7}
-          if ThemeServices.ThemesEnabled then
+          if ThemesEnabled then
             Dec(W);
           {$ENDIF}
         end;
@@ -1790,7 +1807,7 @@ begin
           H := Self.Height-FTabHeight*tabTotalRows-5;
           W := Self.Width-3;
           {$IFDEF VERSION7}
-          if ThemeServices.ThemesEnabled then
+          if ThemesEnabled then
             Dec(W);
           {$ENDIF}
         end;
@@ -2180,7 +2197,7 @@ var
     {$ENDIF}
   begin
     {$IFDEF VERSION7}
-    if ThemeServices.ThemesEnabled then
+    if ThemesEnabled and (TP.TabColor=clBtnFace) then
     begin
       Details := ThemeServices.GetElementDetails(ttPane);
       RBody := Rect(0, 0, Width, Height-tabTotalRows*FTabHeight-1);
@@ -2355,7 +2372,7 @@ var
         if FShadowedText then begin
           Canvas.Font.Color := FTextShadowColor;
           {$IFDEF VERSION7}
-          if ThemeServices.ThemesEnabled then
+          if ThemesEnabled then
             SetBkMode(Canvas.Handle, TRANSPARENT)
           else
           {$ENDIF}
@@ -2368,7 +2385,7 @@ var
         end else begin
           {draw the text}
           {$IFDEF VERSION7}
-          if ThemeServices.ThemesEnabled then
+          if ThemesEnabled then
             SetBkMode(Canvas.Handle, TRANSPARENT)
           else
           {$ENDIF}
@@ -2392,7 +2409,7 @@ var
   procedure DrawTriangle(X, Y : Integer; Left : Boolean);
   begin
     {$IFDEF VERSION7}
-    if ThemeServices.ThemesEnabled then
+    if ThemesEnabled then
       Exit;
     {$ENDIF}
     if Row <> StartRow then begin
@@ -2408,7 +2425,7 @@ var
 
 begin
   {$IFDEF VERSION2010}
-  if ThemeServices.ThemesEnabled then
+  if ThemesEnabled then
   begin
     CR := ClientRect;
     Details := ThemeServices.GetElementDetails(tttabDontCare);
@@ -3267,7 +3284,7 @@ var
     {$ENDIF}
   begin
     {$IFDEF VERSION7}
-    if ThemeServices.ThemesEnabled then
+    if ThemesEnabled and (TP.TabColor=clBtnFace) then
     begin
       Details := ThemeServices.GetElementDetails(ttPane);
       RBody := Rect(0, 0 + TR.Bottom, Width, Height);
@@ -3415,7 +3432,7 @@ var
         if FShadowedText then begin
           Canvas.Font.Color := FTextShadowColor;
           {$IFDEF VERSION7}
-          if ThemeServices.ThemesEnabled then
+          if ThemesEnabled then
             SetBkMode(Canvas.Handle, TRANSPARENT)
           else
           {$ENDIF}
@@ -3428,7 +3445,7 @@ var
         end else begin
           {draw the text}
           {$IFDEF VERSION7}
-          if ThemeServices.ThemesEnabled then
+          if ThemesEnabled then
             SetBkMode(Canvas.Handle, TRANSPARENT)
           else
           {$ENDIF}
@@ -3439,7 +3456,7 @@ var
         {use shadow text for inactive tabs}
         Canvas.Font.Color := FHighlightColor;
         {$IFDEF VERSION7}
-        if ThemeServices.ThemesEnabled then
+        if ThemesEnabled then
           SetBkMode(Canvas.Handle, TRANSPARENT)
         else
         {$ENDIF}
@@ -3457,7 +3474,7 @@ var
   procedure DrawTriangle(X, Y : Integer; Left : Boolean);
   begin
     {$IFDEF VERSION7}
-    if ThemeServices.ThemesEnabled then
+    if ThemesEnabled then
       Exit;
     {$ENDIF}
     if Row <> StartRow then begin
@@ -3473,7 +3490,7 @@ var
 
 begin
   {$IFDEF VERSION2010}
-  if ThemeServices.ThemesEnabled then
+  if ThemesEnabled then
   begin
     CR := ClientRect;
     Details := ThemeServices.GetElementDetails(tttabDontCare);

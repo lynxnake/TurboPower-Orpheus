@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                  OVCTHEMES.PAS 4.06                   *}
+{*                  OVCTHEMES.PAS 4.08                   *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -46,6 +46,22 @@ implementation
 {$IFDEF VERSION2010}
 uses
   SysUtils, Themes, UxTheme;
+
+function ThemesEnabled: Boolean; inline;
+begin
+{$IFDEF VERSIONXE2}
+  Result := StyleServices.Enabled;
+{$ELSE}
+  Result := ThemeServices.ThemesEnabled;
+{$ENDIF}
+end;
+
+{$IFDEF VERSIONXE2}
+function ThemeServices: TCustomStyleServices; inline;
+begin
+  Result := StyleServices;
+end;
+{$ENDIF}
 {$ENDIF}
 
 { TovcThemes }
@@ -59,7 +75,7 @@ class procedure TovcThemes.DrawSelection(Canvas: TCanvas; ARect: TRect);
 {$ENDIF VERSION2010}
 begin
   {$IFDEF VERSION2010}
-  if ThemeServices.ThemesEnabled and (Win32MajorVersion >= 6) and (Canvas.Brush.Color = clHighLight) then
+  if ThemesEnabled and (Win32MajorVersion >= 6) and (Canvas.Brush.Color = clHighLight) then
   begin
     BRC := TBrushRecall.Create(Canvas.Brush);
     try

@@ -45,7 +45,12 @@ begin
   FForm.OvcComboBox1.ItemIndex := 4;
   TPOvcComboBox(FForm.OvcComboBox1).AddItemToMRUList(4);
   { Now try to move down the list using the mousewheel }
-  FForm.OvcComboBox1.Perform(WM_MOUSEWHEEL, -2*WHEEL_DELTA*65536, 0);
+  {$IFDEF CONDITIONALEXPRESSIONS}
+     {$IF CompilerVersion >= 23.0}
+       {$DEFINE USEUINT}
+     {$IFEND}
+  {$ENDIF}
+  FForm.OvcComboBox1.Perform(WM_MOUSEWHEEL, {$IFDEF USEUINT}NativeUInt{$ENDIF}(-2*WHEEL_DELTA*65536), 0);
   CheckEquals(6, FForm.OvcComboBox1.ListIndex);
   { Try to move up the list using the mousewheel }
   FForm.OvcComboBox1.Perform(WM_MOUSEWHEEL, 1*WHEEL_DELTA*65536, 0);

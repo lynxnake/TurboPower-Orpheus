@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                  OVCTCBOX.PAS 4.06                    *}
+{*                  OVCTCBOX.PAS 4.08                    *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -42,7 +42,7 @@ interface
 
 uses
   Windows, SysUtils, Graphics, Classes, Controls, StdCtrls,
-  OvcTCmmn, OvcTCell, OvcTGRes, OvcTCGly;
+  OvcTCmmn, OvcTCell, OvcTGRes, OvcTCGly, OvcMisc;
 
 type
   TOvcTCCustomCheckBox = class(TOvcTCCustomGlyph)
@@ -118,6 +118,27 @@ type
 
 implementation
 
+{$IFDEF VERSION2010}
+uses
+  Themes;
+
+function ThemesEnabled: Boolean;// inline;
+begin
+{$IFDEF VERSIONXE2}
+  Result := StyleServices.Enabled;
+{$ELSE}
+  Result := ThemeServices.ThemesEnabled;
+{$ENDIF}
+end;
+
+{$IFDEF VERSIONXE2}
+function ThemeServices: TCustomStyleServices;// inline;
+begin
+  Result := StyleServices;
+end;
+{$ENDIF}
+{$ENDIF}
+
 
 {===TOvcTCCustomCheckBox creation/destruction========================}
 constructor TOvcTCCustomCheckBox.Create(AOwner : TComponent);
@@ -171,13 +192,57 @@ procedure TOvcTCCustomCheckBox.tcPaint(TableCanvas : TCanvas;
   var
     B : ^TCheckBoxState absolute Data;
     Value : integer;
+{$IFDEF VERSION2010}
+    Details: TThemedElementDetails;
+    R: TRect;
+    w, h, dw, dh: Integer;
+{$ENDIF}
   begin
     if (Data = nil) then
       inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, nil)
     else
       begin
         Value := ord(B^);
-        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @Value);
+{$IFDEF VERSION2010}
+        if ThemesEnabled and CellGlyphs.IsDefault then begin
+          inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, nil);
+          w  := GetSystemMetrics(SM_CXMENUCHECK);
+          h  := GetSystemMetrics(SM_CYMENUCHECK);
+          dw := MaxI(0, CellRect.Right - CellRect.Left -  w - 2*Margin);
+          dh := MaxI(0, CellRect.Bottom - CellRect.Top -  h - 2*Margin);
+          R.Left := CellRect.Left + Margin;
+          R.Top  := CellRect.Top + Margin;
+          case Adjust of
+            otaTopCenter:
+              R.Left := R.Left + dw div 2;
+            otaTopRight:
+              R.Left := R.Left + dw;
+            otaCenterLeft, otaDefault:
+              R.Top := R.Top + dh div 2;
+            otaCenter:
+              begin R.Left := R.Left + dw div 2;  R.Top := R.Top + dh div 2; end;
+            otaCenterRight:
+              begin R.Left := R.Left + dw;  R.Top := R.Top + dh div 2; end;
+            otaBottomLeft:
+              R.Top := R.Top + dh;
+            otaBottomCenter:
+              begin R.Left := R.Left + dw div 2;  R.Top := R.Top + dh; end;
+            otaBottomRight:
+              begin R.Left := R.Left + dw;  R.Top := R.Top + dh; end;
+          end;
+          R.Right  := MinI(CellRect.Right, R.Left + w);
+          R.Bottom := MinI(CellRect.Bottom, R.Top + h);
+          with ThemeServices do begin
+            case value of
+              0:   Details := GetElementDetails(tbCheckBoxUncheckedNormal);
+              1:   Details := GetElementDetails(tbCheckBoxCheckedNormal);
+              else Details := GetElementDetails(tbCheckBoxMixedNormal);
+            end;
+            DrawElement(TableCanvas.Handle, Details, R);
+          end;
+        end else
+{$ENDIF}
+          inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @Value);
       end;
   end;
 {====================================================================}

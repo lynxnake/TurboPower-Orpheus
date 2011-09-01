@@ -118,6 +118,9 @@
    {$IF compilerversion >= 22} // Delphi 2011 or higher
      {$DEFINE VERSIONXE}
    {$IFEND}
+   {$IF compilerversion >= 23} // Delphi XE2 (Pulsar) or higher
+     {$DEFINE VERSIONXE2}
+   {$IFEND}
 {$ENDIF}
 
 {$IFDEF VERSION2}
@@ -167,3 +170,9 @@
 {assigning 0 to a date field is treated the same as assigning the    }
 {constant "BadDate" (see manual) using the AsDateTime property.      }
 {Otherwise, 0 is treated as a valid date. (32-bit only)              }
+
+{Orpheus contains some x86-assembler-code which will not work in     }
+{win64. So we will use pure pascal-code in this case.                }
+{$IFDEF WIN64}
+  {$DEFINE PUREPASCAL}
+{$ENDIF}

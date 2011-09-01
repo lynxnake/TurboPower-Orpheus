@@ -256,6 +256,24 @@ uses
   Themes;
 {$ENDIF}
 
+{$IFDEF VERSION7}
+function ThemesEnabled: Boolean; inline;
+begin
+{$IFDEF VERSIONXE2}
+  Result := StyleServices.Enabled;
+{$ELSE}
+  Result := ThemeServices.ThemesEnabled;
+{$ENDIF}
+end;
+
+{$IFDEF VERSIONXE2}
+function ThemeServices: TCustomStyleServices; inline;
+begin
+  Result := StyleServices;
+end;
+{$ENDIF}
+{$ENDIF}
+
 {*** TOvcCheckList ***}
 
 procedure TOvcCheckList.ChangeStateForAll(NewState : TCheckBoxState);
@@ -426,7 +444,7 @@ begin
     Dec(W);
 
   {$IFDEF VERSION7}
-  if ThemeServices.ThemesEnabled then
+  if ThemesEnabled then
   begin
     if odChecked in AState then
     begin
@@ -459,7 +477,7 @@ begin
   X := NR.Left + M;
   Y := NR.Top + M;
   {$IFDEF VERSION7}
-  if not ThemeServices.ThemesEnabled then
+  if not ThemesEnabled then
   {$ENDIF}
   begin
     if odGrayed in AState then
@@ -486,7 +504,7 @@ begin
 
   { Let the owner draw the check mark }
   {$IFDEF VERSION7}
-  if not ThemeServices.ThemesEnabled then
+  if not ThemesEnabled then
   {$ENDIF}
   begin
     if Assigned(FOwnerDrawCheck) then begin

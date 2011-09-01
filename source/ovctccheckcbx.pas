@@ -124,7 +124,7 @@ type
     procedure CheckListStateChange(Sender: TObject; Index: Integer; OldState, NewState: TCheckBoxState);
     procedure CheckedItemsChange(Sender: TObject);
     procedure SetOnStateChange(const Value: TOvcStateChangeEvent);
-    class procedure DrawArrow(Canvas: TCanvas; const CellRect: TRect; const CellAttr: TOvcCellAttributes);
+//    class procedure DrawArrow(Canvas: TCanvas; const CellRect: TRect; const CellAttr: TOvcCellAttributes);
     class procedure DrawButton(Canvas: TCanvas; const CellRect: TRect);
     procedure DrawBackground(Canvas: TCanvas; const CellRect: TRect; CellAttr: TOvcCellAttributes; Focused: Boolean);
     class procedure DrawText(Canvas: TCanvas; const CellRect: TRect; CellAttr: TOvcCellAttributes; Focused: Boolean; Items: TCellCheckComboBoxItems; const CheckedItems: TStrings);
@@ -295,6 +295,24 @@ var
 const
   ComboBoxHeight = 24;
 
+{$IFDEF VERSION2010}
+function ThemesEnabled: Boolean; inline;
+begin
+{$IFDEF VERSIONXE2}
+  Result := StyleServices.Enabled;
+{$ELSE}
+  Result := ThemeServices.ThemesEnabled;
+{$ENDIF}
+end;
+
+{$IFDEF VERSIONXE2}
+function ThemeServices: TCustomStyleServices; inline;
+begin
+  Result := StyleServices;
+end;
+{$ENDIF}
+{$ENDIF}
+
 { TCellCheckComboBoxItem }
 
 procedure TCellCheckComboBoxItem.Assign(Source: TPersistent);
@@ -438,6 +456,7 @@ begin
   Invalidate;
 end;
 
+(*
 class procedure TOvcTCCheckComboBoxEdit.DrawArrow(Canvas: TCanvas;
   const CellRect: TRect; const CellAttr: TOvcCellAttributes);
 var
@@ -467,6 +486,7 @@ begin
       Polygon([LeftPoint, RightPoint, BottomPoint]);
     end;
 end;
+*)
 
 procedure TOvcTCCheckComboBoxEdit.DrawBackground(Canvas: TCanvas;
   const CellRect: TRect; CellAttr: TOvcCellAttributes; Focused: Boolean);
@@ -520,7 +540,7 @@ begin
   BotPixel := CellRect.Bottom - 1;
 
   {$IFDEF VERSION2010}
-  if ThemeServices.ThemesEnabled then
+  if ThemesEnabled then
   begin
     Details := ThemeServices.GetElementDetails(tcDropDownButtonNormal);
     BtnRect := CellRect;

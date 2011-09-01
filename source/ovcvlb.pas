@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                   OVCVLB.PAS 4.06                     *}
+{*                   OVCVLB.PAS 4.08                     *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -1052,13 +1052,13 @@ end;
 procedure TOvcCustomVirtualListBox.LBGetItemRect(var Msg : TMessage);
 begin
   PRect(Msg.LParam)^ :=
-    Rect(0, (Msg.WParam - FTopIndex) * FRowHeight,
-         ClientWidth, (Msg.WParam - FTopIndex) * FRowHeight + FRowHeight);
+    Rect(0, (Integer(Msg.WParam) - FTopIndex) * FRowHeight,
+         ClientWidth, (Integer(Msg.WParam) - FTopIndex) * FRowHeight + FRowHeight);
 end;
 
 procedure TOvcCustomVirtualListBox.LBGetSel(var Msg : TMessage);
 begin
-  if (Msg.wParam >= 0) and (Msg.wParam <= lHighIndex) then
+  if (Integer(Msg.wParam) >= 0) and (Integer(Msg.wParam) <= lHighIndex) then
     Msg.Result := Ord(DoOnIsSelected(Msg.wParam))
   else
     Msg.Result := LB_ERR;
@@ -1086,7 +1086,7 @@ end;
 
 procedure TOvcCustomVirtualListBox.LBSetCurSel(var Msg : TMessage);
 begin
-  if FMultiSelect and (Msg.wParam >= -1) and (Msg.wParam <= lHighIndex) then begin
+  if FMultiSelect and (Integer(Msg.wParam) >= -1) and (Integer(Msg.wParam) <= lHighIndex) then begin
     SetItemIndex(Msg.wParam);
     if Msg.wParam = $FFFF then
       Msg.Result := LB_ERR
@@ -1130,7 +1130,7 @@ end;
 
 procedure TOvcCustomVirtualListBox.LBSetTopIndex(var Msg : TMessage);
 begin
-  if (Msg.wParam >= 0) and (Msg.wParam <= lHighIndex) then begin
+  if (Integer(Msg.wParam) >= 0) and (Integer(Msg.wParam) <= lHighIndex) then begin
     SetTopIndex(Msg.wParam);
     Msg.Result := 0;
   end else

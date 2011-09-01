@@ -38,7 +38,7 @@ object TfrmTestOvcComboBox: TTfrmTestOvcComboBox
     Top = 56
     Width = 145
     Height = 22
-    Directory = '.'
+    Directory = 'C:\Windows\system32'
     Mask = '*.*'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -48,6 +48,6 @@ object TfrmTestOvcComboBox: TTfrmTestOvcComboBox
     ItemHeight = 16
     ParentFont = False
     TabOrder = 1
-    Text = 'OvcDirectoryComboBox1'
+    Text = 'C:\Windows\system32'
   end
 end

@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                   OVCDLM.PAS 4.08                    *}
+{*                   OVCDLM.PAS 4.08                     *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -1020,6 +1020,9 @@ end;
 destructor TOvcFastList.Destroy;
 begin
   Clear;
+{$IFDEF VERSIONXE2}
+  if Assigned(FList) then Dispose(FList);
+{$ENDIF}
 end;
 
 function TOvcFastList.Add(Item: Pointer): Integer;
@@ -1107,17 +1110,25 @@ end;
 
 procedure TOvcFastList.SetCapacity(NewCapacity: Integer);
 begin
-  if (NewCapacity < FCount) or (NewCapacity > MaxListSize) then
+  if (NewCapacity < FCount)
+     {$IFNDEF VERSIONXE2} or (NewCapacity > MaxListSize) {$ENDIF} then
     CapacityError(NewCapacity);
   if NewCapacity <> FCapacity then begin
+    {$IFDEF VERSIONXE2}
+    if not Assigned(FList) then
+      New(FList);
+    SetLength(FList^, NewCapacity);
+    {$ELSE}
     ReallocMem(FList, NewCapacity * SizeOf(Pointer));
+    {$ENDIF}
     FCapacity := NewCapacity;
   end;
 end;
 
 procedure TOvcFastList.SetCount(NewCount: Integer);
 begin
-  if (NewCount < 0) or (NewCount > MaxListSize) then
+  if (NewCount < 0)
+     {$IFNDEF VERSIONXE2} or (NewCount > MaxListSize) {$ENDIF} then
     CountError(NewCount);
   if NewCount > FCapacity then SetCapacity(NewCount);
   if NewCount > FCount then

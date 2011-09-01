@@ -5,7 +5,9 @@ program OrpheusTests;
 {$ENDIF}
 
 uses
+  {$IFNDEF WIN64}
   MidasLib,
+  {$ENDIF}
   Forms,
   TestFramework,
   GUITestRunner,
@@ -19,14 +21,14 @@ uses
   TestOvcTable in 'TestOvcTable.pas' {frmTestOvcPictureField},
   TestOVCStr in 'TestOVCStr.pas',
   TestOVCEdit in 'TestOVCEdit.pas' {Form1},
-  OvcStr in '..\OvcStr.pas',
   TestOvcUtils in 'TestOvcUtils.pas',
   TestOvcFileViewer in 'TestOvcFileViewer.pas' {OvcFileViewerForm},
   TestOvcDate in 'TestOvcDate.pas',
   TestOvcTransfer in 'TestOvcTransfer.pas' {TestOvcTransferForm},
   TestOvcSpinner in 'TestOvcSpinner.pas' {TestOvcSpinnerForm},
   TestOvcMisc in 'TestOvcMisc.pas',
-  TestOvcComboBox in 'TestOvcComboBox.pas' {TfrmTestOvcComboBox};
+  TestOvcComboBox in 'TestOvcComboBox.pas' {TfrmTestOvcComboBox},
+  TestOvcDlm in 'TestOvcDlm.pas';
 
 {$R *.RES}
 

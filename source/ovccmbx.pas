@@ -383,6 +383,25 @@ implementation
 uses
   OvcVer, OvcExcpt {$IFDEF VERSION2010}, UxTheme, Math {$ENDIF};
 
+{$IFDEF VERSION2010}
+function ThemesEnabled: Boolean; inline;
+begin
+{$IFDEF VERSIONXE2}
+  Result := StyleServices.Enabled;
+{$ELSE}
+  Result := ThemeServices.ThemesEnabled;
+{$ENDIF}
+end;
+
+{$IFDEF VERSIONXE2}
+function ThemeServices: TCustomStyleServices; inline;
+begin
+  Result := StyleServices;
+end;
+{$ENDIF}
+{$ENDIF}
+
+
 constructor TOvcHTColors.Create;
 begin
   inherited Create;
@@ -667,10 +686,10 @@ end;
 function TOvcBaseComboBox.UseRuntimeThemes: Boolean;
 begin
 {$IFDEF VERSION2010}
-  Result := ThemeServices.ThemesEnabled and CheckWin32Version(6, 0) {Vista} and (Style = ocsDropDownList);
+  Result := ThemesEnabled and CheckWin32Version(6, 0) {Vista} and (Style = ocsDropDownList);
 {$ELSE}
   Result := False;
-{$ENDIF}    
+{$ENDIF}
 end;
 
 procedure TOvcBaseComboBox.MRUListUpdate(Count : Integer);
@@ -1467,7 +1486,7 @@ begin
   {$IFDEF VERSION2010}
   if not (csDesigning in ComponentState) then
   begin
-    if ThemeServices.ThemesEnabled then
+    if ThemesEnabled then
       Value := False;
   end;
   {$ENDIF}
