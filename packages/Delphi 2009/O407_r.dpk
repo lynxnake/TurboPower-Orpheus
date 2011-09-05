@@ -203,6 +203,8 @@ contains
   O32SBar in '..\..\source\O32SBar.pas',
   o32WideCharSet in '..\..\source\o32WideCharSet.pas',
   ovcThemes in '..\..\source\ovcThemes.pas',
-  ovcBidi in '..\..\source\ovcBidi.pas';
+  ovcBidi in '..\..\source\ovcBidi.pas',
+  ovctccheckcbx in '..\..\source\ovctccheckcbx.pas',
+  ovctccustomedt in '..\..\source\ovctccustomedt.pas';
 
 end.

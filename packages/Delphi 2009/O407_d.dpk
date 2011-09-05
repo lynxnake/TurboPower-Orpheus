@@ -49,7 +49,7 @@ PACKAGE O407_d;
 {$DESCRIPTION 'TurboPower Orpheus 4.07 designtime package - VCL120'}
 {$LIBSUFFIX '120'}
 {$DESIGNONLY}
-{$IMPLICITBUILD ON}
+{$IMPLICITBUILD OFF}
 
 requires
   Vcl,

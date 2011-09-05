@@ -1,6 +1,6 @@
 ﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
-			<ProjectGuid>{97ECEF13-FB31-4F7E-A2FA-21CEE6F4D30F}</ProjectGuid>
+			<ProjectGuid>{1309C9DB-8FBE-4CB4-AC4F-8C1FDDF8F54D}</ProjectGuid>
 			<MainSource>O407_r.dpk</MainSource>
 			<Config Condition="'$(Config)'==''">Debug</Config>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
@@ -20,18 +20,22 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
-			<DllSuffix>120</DllSuffix>
-			<DesignOnlyPackage>false</DesignOnlyPackage>
-			<DCC_DependencyCheckOutputName>C:\Users\Public\Documents\RAD Studio\6.0\Bpl\O407_r120.bpl</DCC_DependencyCheckOutputName>
 			<DCC_WriteableConstants>true</DCC_WriteableConstants>
-			<DCC_Description>TurboPower Orpheus 4.07 runtime package - VCL120</DCC_Description>
-			<RuntimeOnlyPackage>true</RuntimeOnlyPackage>
-			<DCC_OutputNeverBuildDcps>true</DCC_OutputNeverBuildDcps>
-			<GenDll>true</GenDll>
-			<GenPackage>true</GenPackage>
-			<DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
+			<DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
+			<DllSuffix>120</DllSuffix>
+			<DCC_Description>TurboPower Orpheus 4.07 runtime package - VCL120</DCC_Description>
 			<DCC_Platform>x86</DCC_Platform>
+			<DCC_DependencyCheckOutputName>C:\Users\Public\Documents\RAD Studio\6.0\Bpl\O407_r120.bpl</DCC_DependencyCheckOutputName>
+			<RuntimeOnlyPackage>true</RuntimeOnlyPackage>
+			<DCC_S>false</DCC_S>
+			<DCC_N>false</DCC_N>
+			<GenDll>true</GenDll>
+			<DCC_OutputNeverBuildDcps>true</DCC_OutputNeverBuildDcps>
+			<DCC_E>false</DCC_E>
+			<GenPackage>true</GenPackage>
+			<DCC_K>false</DCC_K>
+			<DCC_F>false</DCC_F>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
 			<DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
@@ -48,171 +52,6 @@
 			</DelphiCompile>
 			<DCCReference Include="Vcl.dcp"/>
 			<DCCReference Include="rtl.dcp"/>
-			<DCCReference Include="..\..\source\ovcabtn.pas"/>
-			<DCCReference Include="..\..\source\ovcae.pas"/>
-			<DCCReference Include="..\..\source\OvcBase.pas"/>
-			<DCCReference Include="..\..\source\ovcbtnhd.pas"/>
-			<DCCReference Include="..\..\source\ovccal.pas"/>
-			<DCCReference Include="..\..\source\ovccalc.pas"/>
-			<DCCReference Include="..\..\source\ovccaldg.pas">
-				<Form>ovcfrmCalendarDlg</Form>
-			</DCCReference>
-			<DCCReference Include="..\..\source\ovccaret.pas"/>
-			<DCCReference Include="..\..\source\ovccklb.pas"/>
-			<DCCReference Include="..\..\source\ovcclcdg.pas">
-				<Form>ovcfrmCalculatorDlg</Form>
-			</DCCReference>
-			<DCCReference Include="..\..\source\ovcclkdg.pas">
-				<Form>ovcfrmClockDlg</Form>
-			</DCCReference>
-			<DCCReference Include="..\..\source\ovcclock.pas"/>
-			<DCCReference Include="..\..\source\ovcclrcb.pas"/>
-			<DCCReference Include="..\..\source\ovccmbx.pas"/>
-			<DCCReference Include="..\..\source\ovccmd.pas"/>
-			<DCCReference Include="..\..\source\ovccolor.pas"/>
-			<DCCReference Include="..\..\source\ovcconst.pas"/>
-			<DCCReference Include="..\..\source\ovcdata.pas"/>
-			<DCCReference Include="..\..\source\ovcdate.pas"/>
-			<DCCReference Include="..\..\source\ovcdlg.pas"/>
-			<DCCReference Include="..\..\source\ovcdlm.pas"/>
-			<DCCReference Include="..\..\source\ovcdrag.pas"/>
-			<DCCReference Include="..\..\source\ovcdrcbx.pas"/>
-			<DCCReference Include="..\..\source\ovcdrpvw.pas"/>
-			<DCCReference Include="..\..\source\ovcdvcbx.pas"/>
-			<DCCReference Include="..\..\source\ovcedcal.pas"/>
-			<DCCReference Include="..\..\source\ovcedclc.pas"/>
-			<DCCReference Include="..\..\source\ovcedit.pas"/>
-			<DCCReference Include="..\..\source\o32editf.pas"/>
-			<DCCReference Include="..\..\source\ovceditn.pas"/>
-			<DCCReference Include="..\..\source\ovceditp.pas"/>
-			<DCCReference Include="..\..\source\ovceditu.pas"/>
-			<DCCReference Include="..\..\source\ovcedpop.pas"/>
-			<DCCReference Include="..\..\source\ovcedsld.pas"/>
-			<DCCReference Include="..\..\source\ovcedtim.pas"/>
-			<DCCReference Include="..\..\source\ovcef.pas"/>
-			<DCCReference Include="..\..\source\ovcexcpt.pas"/>
-			<DCCReference Include="..\..\source\ovcfiler.pas"/>
-			<DCCReference Include="..\..\source\ovcflcbx.pas"/>
-			<DCCReference Include="..\..\source\ovcfmcbx.pas"/>
-			<DCCReference Include="..\..\source\ovcftcbx.pas"/>
-			<DCCReference Include="..\..\source\ovcfxfnt.pas"/>
-			<DCCReference Include="..\..\source\ovchscbx.pas"/>
-			<DCCReference Include="..\..\source\ovcintl.pas"/>
-			<DCCReference Include="..\..\source\ovciseb.pas"/>
-			<DCCReference Include="..\..\source\ovcislb.pas"/>
-			<DCCReference Include="..\..\source\ovclabel.pas"/>
-			<DCCReference Include="..\..\source\ovclb.pas"/>
-			<DCCReference Include="..\..\source\ovclkout.pas"/>
-			<DCCReference Include="..\..\source\ovcmeter.pas"/>
-			<DCCReference Include="..\..\source\ovcmisc.pas"/>
-			<DCCReference Include="..\..\source\ovcmodg.pas">
-				<Form>ovcfrmMemoDlg</Form>
-			</DCCReference>
-			<DCCReference Include="..\..\source\ovcmru.pas"/>
-			<DCCReference Include="..\..\source\ovcnbk.pas"/>
-			<DCCReference Include="..\..\source\ovcnf.pas"/>
-			<DCCReference Include="..\..\source\ovcoutln.pas"/>
-			<DCCReference Include="..\..\source\ovcpb.pas"/>
-			<DCCReference Include="..\..\source\ovcpeakm.pas"/>
-			<DCCReference Include="..\..\source\ovcpf.pas"/>
-			<DCCReference Include="..\..\source\ovcplb.pas"/>
-			<DCCReference Include="..\..\source\ovcprcbx.pas"/>
-			<DCCReference Include="..\..\source\ovcrlbl.pas"/>
-			<DCCReference Include="..\..\source\ovcrptvw.pas"/>
-			<DCCReference Include="..\..\source\ovcrvcbx.pas"/>
-			<DCCReference Include="..\..\source\ovcrvidx.pas"/>
-			<DCCReference Include="..\..\source\ovcrvpdg.pas">
-				<Form>ovcfrmRptVwPrintDlg</Form>
-			</DCCReference>
-			<DCCReference Include="..\..\source\ovcsc.pas"/>
-			<DCCReference Include="..\..\source\ovcsf.pas"/>
-			<DCCReference Include="..\..\source\ovcslide.pas"/>
-			<DCCReference Include="..\..\source\ovcspary.pas"/>
-			<DCCReference Include="..\..\source\ovcspeed.pas"/>
-			<DCCReference Include="..\..\source\ovcspldg.pas">
-				<Form>ovcfrmSplashDlg</Form>
-			</DCCReference>
-			<DCCReference Include="..\..\source\ovcsplit.pas"/>
-			<DCCReference Include="..\..\source\ovcstate.pas"/>
-			<DCCReference Include="..\..\source\ovcstore.pas"/>
-			<DCCReference Include="..\..\source\ovctable.pas"/>
-			<DCCReference Include="..\..\source\ovctbclr.pas"/>
-			<DCCReference Include="..\..\source\ovctbcls.pas"/>
-			<DCCReference Include="..\..\source\ovctbrws.pas"/>
-			<DCCReference Include="..\..\source\ovctcary.pas"/>
-			<DCCReference Include="..\..\source\ovctcbef.pas"/>
-			<DCCReference Include="..\..\source\ovctcbmp.pas"/>
-			<DCCReference Include="..\..\source\ovctcbox.pas"/>
-			<DCCReference Include="..\..\source\ovctccbx.pas"/>
-			<DCCReference Include="..\..\source\ovctcedt.pas"/>
-			<DCCReference Include="..\..\source\ovctcell.pas"/>
-			<DCCReference Include="..\..\source\ovctcgly.pas"/>
-			<DCCReference Include="..\..\source\ovctchdr.pas"/>
-			<DCCReference Include="..\..\source\ovctcico.pas"/>
-			<DCCReference Include="..\..\source\ovctcmmn.pas"/>
-			<DCCReference Include="..\..\source\ovctcnum.pas"/>
-			<DCCReference Include="..\..\source\ovctcpic.pas"/>
-			<DCCReference Include="..\..\source\ovctcsim.pas"/>
-			<DCCReference Include="..\..\source\ovctcstr.pas"/>
-			<DCCReference Include="..\..\source\ovctgpns.pas"/>
-			<DCCReference Include="..\..\source\ovctgres.pas"/>
-			<DCCReference Include="..\..\source\ovctimer.pas"/>
-			<DCCReference Include="..\..\source\ovctsell.pas"/>
-			<DCCReference Include="..\..\source\ovcurl.pas"/>
-			<DCCReference Include="..\..\source\ovcuser.pas"/>
-			<DCCReference Include="..\..\source\ovcvalid.pas"/>
-			<DCCReference Include="..\..\source\ovcver.pas"/>
-			<DCCReference Include="..\..\source\ovcviewr.pas"/>
-			<DCCReference Include="..\..\source\ovcvlb.pas"/>
-			<DCCReference Include="..\..\source\ovcxfer.pas"/>
-			<DCCReference Include="..\..\source\ovcbcklb.pas"/>
-			<DCCReference Include="..\..\source\o32bordr.pas"/>
-			<DCCReference Include="..\..\source\ovcbedit.pas"/>
-			<DCCReference Include="..\..\source\ovcbcalc.pas"/>
-			<DCCReference Include="..\..\source\ovcbcldr.pas"/>
-			<DCCReference Include="..\..\source\ovcbtime.pas"/>
-			<DCCReference Include="..\..\source\ovcfsc.pas"/>
-			<DCCReference Include="..\..\source\o32vldtr.pas"/>
-			<DCCReference Include="..\..\source\ovcevents.pas"/>
-			<DCCReference Include="..\..\source\o32rxvld.pas"/>
-			<DCCReference Include="..\..\source\o32intlst.pas"/>
-			<DCCReference Include="..\..\source\o32intdeq.pas"/>
-			<DCCReference Include="..\..\source\o32rxngn.pas"/>
-			<DCCReference Include="..\..\source\o32sr.pas"/>
-			<DCCReference Include="..\..\source\o32vpool.pas"/>
-			<DCCReference Include="..\..\source\o32flxed.pas"/>
-			<DCCReference Include="..\..\source\ovcbordr.pas"/>
-			<DCCReference Include="..\..\source\ovceditf.pas"/>
-			<DCCReference Include="..\..\source\ovcstr.pas"/>
-			<DCCReference Include="..\..\source\o32tcflx.pas"/>
-			<DCCReference Include="..\..\source\o32vlop1.pas"/>
-			<DCCReference Include="..\..\source\o32vlreg.pas"/>
-			<DCCReference Include="..\..\source\ovccoco.pas"/>
-			<DCCReference Include="..\..\source\ovcrvexp.pas"/>
-			<DCCReference Include="..\..\source\ovcviewed.pas"/>
-			<DCCReference Include="..\..\source\ovcflded.pas">
-				<Form>frmovcRvFldEd</Form>
-			</DCCReference>
-			<DCCReference Include="..\..\source\ovcrvexpdef.pas"/>
-			<DCCReference Include="..\..\source\ovcrvpv.pas">
-				<Form>ovcRVPrintPreview</Form>
-			</DCCReference>
-			<DCCReference Include="..\..\source\o32lkout.pas"/>
-			<DCCReference Include="..\..\source\o32flxbn.pas"/>
-			<DCCReference Include="..\..\source\ovcvcped.pas">
-				<Form>frmViewCEd</Form>
-			</DCCReference>
-			<DCCReference Include="..\..\source\o32ledlabel.pas"/>
-			<DCCReference Include="..\..\source\O32ImgFm.pas"/>
-			<DCCReference Include="..\..\source\O32MouseMon.pas"/>
-			<DCCReference Include="..\..\source\o32ovldr.pas"/>
-			<DCCReference Include="..\..\source\o32pvldr.pas"/>
-			<DCCReference Include="..\..\source\OvcUtils.pas"/>
-			<DCCReference Include="..\..\source\O32IGrid.pas"/>
-			<DCCReference Include="..\..\source\O32SBar.pas"/>
-			<DCCReference Include="..\..\source\o32WideCharSet.pas"/>
-			<DCCReference Include="..\..\source\ovcThemes.pas"/>
-			<DCCReference Include="..\..\source\ovcBidi.pas"/>
 			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>
@@ -266,10 +105,6 @@
 						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
-					<Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\dcloffice2k120.bpl">Microsoft Office 2000 Beispiele für gekapselte Komponenten für Automation Server</Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\dclofficexp120.bpl">Microsoft Office XP Beispiele für gekapselte Komponenten für Automation Server</Excluded_Packages>
-					</Excluded_Packages>
 				</Delphi.Personality>
 			</BorlandProject>
 			<ProjectFileVersion>12</ProjectFileVersion>
