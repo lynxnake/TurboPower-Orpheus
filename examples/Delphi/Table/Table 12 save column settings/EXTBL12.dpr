@@ -28,11 +28,7 @@ uses
   Forms,
   ExTbl12U in 'ExTbl12U.PAS' {Form1};
 
-{$IFDEF WIN32}
-  {$R *.R32}
-{$ELSE}
-  {$R *.R16}
-{$ENDIF}
+{$R *.RES}
 
 begin
   Application.CreateForm(TForm1, Form1);
