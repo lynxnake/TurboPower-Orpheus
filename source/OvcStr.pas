@@ -1387,14 +1387,14 @@ function StrChPos(P : PChar; C : Char;
 
    Changes:
      01/2010, SZ: Unicode verified 27.01.2010
-     03/2011, AB: PUREPASCAL-version added (identical to unicode-version) }
+     03/2011, AB: PUREPASCAL-version added (identical to unicode-version)
+     09/2011, AB: Fix for issue 3405788 as suggested by Wolfgang Klein }
 
 {$IFDEF PUREPASCAL}
 var
   Tmp: PChar;
 begin
   Tmp := StrScan(P, C);
-  Pos := 0;
   Result := Tmp <> nil;
   if Result then
     Pos := Tmp - P;
@@ -1406,7 +1406,6 @@ var
   Tmp: PChar;
 begin
   Tmp := StrScan(P, C);
-  Pos := 0;
   Result := Tmp <> nil;
   if Result then
     Pos := Tmp - P;

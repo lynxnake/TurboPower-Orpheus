@@ -542,11 +542,14 @@ var
   res: Boolean;
 begin
   for i := 0 to High(cSomeData) do begin
+    Pos := 42;
     res := StrChPos(@cSomeData[i].S[1], cSomeData[i].c, Pos);
     CheckEquals(cSomeData[i].res>=0, res,
       Format('StrChPos failed for test %d',[i]));
-    if res then CheckEquals(cSomeData[i].res, Pos,
-                  Format('StrChPos failed for test %d',[i]));
+    if res then
+      CheckEquals(cSomeData[i].res, Pos, Format('StrChPos failed for test %d',[i]))
+    else
+      CheckEquals(42, Pos, Format('StrChPos failed for test %d',[i]))
   end;
 end;
 
