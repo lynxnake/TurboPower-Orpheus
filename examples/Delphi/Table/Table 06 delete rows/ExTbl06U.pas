@@ -7,7 +7,7 @@ interface
 uses
   SysUtils, Windows, Messages, Classes, Graphics, Controls,
   Forms, Dialogs, StdCtrls, OvcTCmmn, OvcTCell, OvcTCStr, OvcTCEdt,
-  OvcBase, OvcTable;
+  OvcBase, OvcTable, ovctchdr;
 
 type
   TForm1 = class(TForm)
@@ -15,6 +15,8 @@ type
     OvcController1: TOvcController;
     OvcTCString1: TOvcTCString;
     Button1: TButton;
+    OvcTCRowHead1: TOvcTCRowHead;
+    OvcTCColHead1: TOvcTCColHead;
     procedure FormCreate(Sender: TObject);
     procedure OvcTable1GetCellData(Sender: TObject; RowNum: Longint;
       ColNum: Integer; var Data: Pointer; Purpose: TOvcCellDataPurpose);
@@ -50,9 +52,8 @@ procedure TForm1.OvcTable1GetCellData(Sender: TObject; RowNum: Longint;
   ColNum: Integer; var Data: Pointer; Purpose: TOvcCellDataPurpose);
 begin
   Data := nil;
-  if (RowNum > 0) and (RowNum <= HiIdx) then
-    if ColNum = 1 then
-      Data := @MyArray[RowNum];
+  if (RowNum > 0) and (RowNum <= HiIdx) and (ColNum = 1) then
+    Data := @MyArray[RowNum];
 end;
 
 procedure TForm1.DeleteMyArray(Row : TRowNum);

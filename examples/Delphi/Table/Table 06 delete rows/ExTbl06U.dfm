@@ -48,20 +48,24 @@ object Form1: TForm1
     GridPenSet.CellWhenUnfocused.NormalColor = clBlack
     GridPenSet.CellWhenUnfocused.Style = psDash
     GridPenSet.CellWhenUnfocused.Effect = geBoth
+    LockedRowsCell = OvcTCColHead1
     TabOrder = 1
     OnGetCellData = OvcTable1GetCellData
     CellData = (
-      'Form1.OvcTCString1')
+      'Form1.OvcTCString1'
+      'Form1.OvcTCRowHead1'
+      'Form1.OvcTCColHead1')
     RowData = (
       30
       5
       False
       29)
     ColData = (
-      151
+      37
       False
-      False
-      150
+      True
+      'Form1.OvcTCRowHead1'
+      261
       False
       True
       'Form1.OvcTCString1')
@@ -86,5 +90,20 @@ object Form1: TForm1
     Table = OvcTable1
     Left = 48
     Top = 200
+  end
+  object OvcTCRowHead1: TOvcTCRowHead
+    Adjust = otaCenter
+    Table = OvcTable1
+    Left = 92
+    Top = 200
+  end
+  object OvcTCColHead1: TOvcTCColHead
+    Headings.Strings = (
+      ''
+      'Text')
+    ShowLetters = False
+    Table = OvcTable1
+    Left = 240
+    Top = 206
   end
 end
