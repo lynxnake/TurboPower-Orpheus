@@ -28,7 +28,7 @@ uses
   Forms,
   ExTbl09U in 'ExTbl09U.pas' {Form1};
 
-{$R *.R32}
+{$R *.RES}
 
 begin
   Application.CreateForm(TForm1, Form1);

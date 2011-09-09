@@ -28,7 +28,7 @@ uses
   Forms,
   Extblhnt in 'EXTBLHNT.PAS' {Form1};
 
-          
+{$R *.RES}          
 
 begin
   Application.CreateForm(TForm1, Form1);

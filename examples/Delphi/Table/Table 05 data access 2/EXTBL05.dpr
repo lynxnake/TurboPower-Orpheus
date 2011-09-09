@@ -22,13 +22,13 @@
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
-program Excombo;
+program ExTbl05;
 
 uses
   Forms,
-  Excombo1 in 'EXCOMBO1.PAS' {Form1};
+  ExTbl05U in 'ExTbl05U.pas' {Form1};
 
-          
+{$R *.RES}
 
 begin
   Application.CreateForm(TForm1, Form1);

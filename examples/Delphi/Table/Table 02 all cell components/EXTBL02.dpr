@@ -22,17 +22,13 @@
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
-program ExTbl04;
+program ExTbl02;
 
 uses
   Forms,
-  ExTbl04U in 'ExTbl04U.pas' {Form1};
+  ExTbl02U in 'ExTbl02U.pas' {Form1};
 
-{$IFDEF WIN32}
-  {$R *.R32}
-{$ELSE}
-  {$R *.R16}
-{$ENDIF}
+{$R *.RES}
 
 begin
   Application.CreateForm(TForm1, Form1);

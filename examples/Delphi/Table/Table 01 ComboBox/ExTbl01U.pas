@@ -23,9 +23,7 @@ unit ExTbl01U;
    handle some of these details...
 
    There are a couple of key properties to set in the combo, so be sure to
-   check what I have done carefully.  A biggie that comes to mind is that
-   MaxLength must be properly set.
-}
+   check what I have done carefully. }
 
 interface
 
@@ -42,17 +40,14 @@ type
     OvcTCComboBox1: TOvcTCComboBox;
     OvcTCComboBox2: TOvcTCComboBox;
     OvcTCRowHead1: TOvcTCRowHead;
-    BitBtn1: TBitBtn;
+    Button1: TButton;
     procedure OvcTable1GetCellData(Sender: TObject; RowNum: Longint;
       ColNum: Integer; var Data: Pointer; Purpose : TovcCellDataPurpose);
     procedure OvcTable1DoneEdit(Sender: TObject; RowNum: Longint;
       ColNum: Integer);
-    procedure BitBtn1Click(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
   private
-    CellData : String;
     ComboTemp : TCellComboBoxInfo;
-  public
-    { Public declarations }
   end;
 
 var
@@ -65,7 +60,7 @@ implementation
 type
   TTestRec = packed record
     C1Index  : integer;       { index for combobox1 }
-    C1String : string;//[20];     { string for combobox1 }
+    C1String : string;        { string for combobox1 }
     C2Index  : integer;       { index for combobox2 }
   end;
 
@@ -86,28 +81,40 @@ const
 
 procedure TForm1.OvcTable1GetCellData(Sender: TObject; RowNum: Longint;
   ColNum: Integer; var Data: Pointer; Purpose : TovcCellDataPurpose);
+var
+  i: Integer;
 begin
-  CellData := '';
-  Data := PChar(CellData);
-    if (1 <= RowNum) and (RowNum <= 9) then
-      case ColNum of
-        1 : begin
-              Data := PCellComboBoxInfo(@TestDatabase[RowNum].C1Index);
-              if TestDataBase[RowNum].C1String <> '' then begin
+  Data := nil;
+  if (1 <= RowNum) and (RowNum <= 9) then
+    case ColNum of
+      1 : begin
+            { After editing a cell in column 1, GetCellData is called with Purpose=
+              cdpForSave. As we provide a pointer to TestDatabase[RowNum].C1Index, the
+              table will store the index of the selected item in
+              TestDatabase[RowNum].C1Index (-1 if a new text has been entered)
+              and the string itself in TestDatabase[RowNum].C1String. }
+            Data := PCellComboBoxInfo(@TestDatabase[RowNum].C1Index);
+            { If a new text has been entered, we want to add it to the cell component's
+              list of items. This is done here when GetCellData ist called after editing
+              with Purpose=cdpForPaint. }
+            if TestDataBase[RowNum].C1String <> '' then begin
+              i := OvcTCComboBox1.Items.IndexOf(TestDataBase[RowNum].C1String);
+              if i<0 then begin
                 TestDataBase[RowNum].C1Index :=
-                  OvcTCComboBox1.Items.Add(TestDataBase[RowNum].C1String);
-                TestDataBase[RowNum].C1String := '';
-              end;
+                  OvcTCComboBox1.Items.Add(TestDataBase[RowNum].C1String)
+              end else
+                TestDataBase[RowNum].C1Index := i;
+              TestDataBase[RowNum].C1String := '';
             end;
-        2 : begin
-              ComboTemp.Index := TestDataBase[RowNum].C2Index;
-              ComboTemp.St := '';
-              Data := PCellComboBoxInfo(@ComboTemp);
-            end;
-      end{case}
-    else if (RowNum = 0) then
-      Data := nil;
+          end;
+      2 : begin
+            ComboTemp.Index := TestDataBase[RowNum].C2Index;
+            ComboTemp.St := '';
+            Data := PCellComboBoxInfo(@ComboTemp);
+          end;
+    end;
 end;
+
 
 procedure TForm1.OvcTable1DoneEdit(Sender: TObject; RowNum: Longint;
   ColNum: Integer);
@@ -119,7 +126,8 @@ begin
   end;
 end;
 
-procedure TForm1.BitBtn1Click(Sender: TObject);
+
+procedure TForm1.Button1Click(Sender: TObject);
 begin
   Close;
 end;

@@ -34,7 +34,7 @@ type
   MyRec = record
     GIdx : Integer;
     CIdx : Integer;
-    CStr : string;//[10];
+    CStr : string;
   end;
 
 var
@@ -44,8 +44,6 @@ var
 implementation
 
 {$R *.DFM}
-
-
 
 procedure TForm1.FormCreate(Sender: TObject);
 var
