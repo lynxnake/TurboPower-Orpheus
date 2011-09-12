@@ -51,10 +51,11 @@ object Form1: TForm1
     LockedRowsCell = OvcTCColHead1
     TabOrder = 1
     OnGetCellData = OvcTable1GetCellData
+    OnSizeCellEditor = OvcTable1SizeCellEditor
     CellData = (
-      'Form1.OvcTCString1'
+      'Form1.OvcTCColHead1'
       'Form1.OvcTCRowHead1'
-      'Form1.OvcTCColHead1')
+      'Form1.OvcTCString1')
     RowData = (
       30
       5

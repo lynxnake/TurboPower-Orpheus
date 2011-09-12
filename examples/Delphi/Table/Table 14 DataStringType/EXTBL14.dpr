@@ -28,6 +28,7 @@ uses
   Forms,
   ExTbl14U in 'ExTbl14U.pas' {Form1};
 
+{$R extbl14_BMP.res}
 {$R *.RES}
 
 begin

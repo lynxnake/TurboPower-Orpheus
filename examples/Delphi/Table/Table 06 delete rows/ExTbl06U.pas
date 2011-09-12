@@ -7,7 +7,7 @@ interface
 uses
   SysUtils, Windows, Messages, Classes, Graphics, Controls,
   Forms, Dialogs, StdCtrls, OvcTCmmn, OvcTCell, OvcTCStr, OvcTCEdt,
-  OvcBase, OvcTable, ovctchdr;
+  OvcBase, OvcTable, ovctchdr, OvcMisc;
 
 type
   TForm1 = class(TForm)
@@ -21,6 +21,8 @@ type
     procedure OvcTable1GetCellData(Sender: TObject; RowNum: Longint;
       ColNum: Integer; var Data: Pointer; Purpose: TOvcCellDataPurpose);
     procedure Button1Click(Sender: TObject);
+    procedure OvcTable1SizeCellEditor(Sender: TObject; RowNum, ColNum: Integer;
+      var CellRect: TRect; var CellStyle: TOvcTblEditorStyle);
   public
     { Public declarations }
     HiIdx :   TRowNum;
@@ -54,6 +56,21 @@ begin
   Data := nil;
   if (RowNum > 0) and (RowNum <= HiIdx) and (ColNum = 1) then
     Data := @MyArray[RowNum];
+end;
+
+procedure TForm1.OvcTable1SizeCellEditor(Sender: TObject; RowNum, ColNum: Integer;
+  var CellRect: TRect; var CellStyle: TOvcTblEditorStyle);
+var
+  d: Integer;
+begin
+  { Usually, the text being displayed and the text being edited are not aligned
+    vertically: When you click on a cell to edit the string, the string "jumps"
+    to the top of the cell.
+    This can be changed using the SizeCellEditor-event. }
+  if (RowNum>0) and (ColNum=1) then begin
+    d := MaxI(0, CellRect.Bottom - CellRect.Top - OvcTable1.Canvas.TextHeight('X'));
+    CellRect.Top := CellRect.Top + d div 2;
+  end;
 end;
 
 procedure TForm1.DeleteMyArray(Row : TRowNum);

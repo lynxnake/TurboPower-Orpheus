@@ -87,13 +87,9 @@ begin
   InactiveBMP := TBitmap.Create;
   ActiveBMP := TBitmap.Create;
 
-{$IFDEF WIN32}
+  { These Bitmaps are stored in extbl14_BMP.res }
   InactiveBMP.LoadFromResourceID(HInstance, BITMAP_1);
   ActiveBMP.LoadFromResourceID(HInstance, BITMAP_2);
-{$ELSE}
-  InactiveBMP.Handle := LoadBitmap(HInstance, MAKEINTRESOURCE(BITMAP_1));
-  ActiveBMP.Handle := LoadBitmap(HInstance, MAKEINTRESOURCE(BITMAP_2));
-{$ENDIF}
 end;
 
 
@@ -147,10 +143,10 @@ begin
       SRect := Rect(0,0,16,16);
       { add text and graphics for columns 1..3 }
       if DownColNum=ColNum then begin
-        TableCanvas.TextOut(CellRect.Left+10, CellRect.Top+10, 'Active');
+        TableCanvas.TextOut(CellRect.Left+10, CellRect.Top+4, 'Active');
         TableCanvas.BrushCopy(DRect, ActiveBMP, SRect, clSilver);
       end else begin
-        TableCanvas.TextOut(CellRect.Left+10, CellRect.Top+10, 'Inactive');
+        TableCanvas.TextOut(CellRect.Left+10, CellRect.Top+4, 'Inactive');
         TableCanvas.BrushCopy(DRect, InactiveBMP, SRect, clSilver);
       end;
     end;
@@ -179,7 +175,7 @@ begin
     if C=DownColNum then
       (OvcTable1.Columns[C].DefaultCell as TOvcTCString).Color := clRed
     else
-      (OvcTable1.Columns[C].DefaultCell as TOvcTCString).Color := clSilver;
+      (OvcTable1.Columns[C].DefaultCell as TOvcTCString).Color := clBtnFace;
   end;
 
   { Force repainting the table }

@@ -40,11 +40,11 @@ object Form1: TForm1
     OnGetCellAttributes = OvcTable1GetCellAttributes
     CellData = (
       'Form1.OvcTCString2'
-      'Form1.OvcTCPictureField1'
+      'Form1.OvcTCRowHead1'
       'Form1.OvcTCString1'
-      'Form1.OvcTCRowHead1')
+      'Form1.OvcTCPictureField1')
     RowData = (
-      20)
+      22)
     ColData = (
       40
       False
@@ -65,9 +65,11 @@ object Form1: TForm1
     Width = 75
     Height = 25
     Caption = '&Close'
+    DoubleBuffered = True
+    NumGlyphs = 2
+    ParentDoubleBuffered = False
     TabOrder = 1
     OnClick = BitBtn1Click
-    NumGlyphs = 2
   end
   object OvcController1: TOvcController
     EntryCommands.TableList = (

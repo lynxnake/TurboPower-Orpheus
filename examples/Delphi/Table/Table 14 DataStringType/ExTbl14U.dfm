@@ -46,20 +46,20 @@ object Form1: TForm1
     LockedRowsCell = OvcTCColHead1
     Options = [otoThumbTrack]
     ParentFont = False
-    ScrollBars = ssNone
+    ScrollBars = ssVertical
     TabOrder = 0
     OnGetCellData = OvcTable1GetCellData
     OnLockedCellClick = OvcTable1LockedCellClick
     CellData = (
       'Form1.OvcTCColHead1'
-      'Form1.OvcTCRowHead1'
       'Form1.OvcTCString3'
+      'Form1.OvcTCString2'
       'Form1.OvcTCString1'
-      'Form1.OvcTCString2')
+      'Form1.OvcTCRowHead1')
     RowData = (
       30)
     ColData = (
-      71
+      55
       False
       True
       'Form1.OvcTCRowHead1'
@@ -108,6 +108,7 @@ object Form1: TForm1
   end
   object OvcTCColHead1: TOvcTCColHead
     ShowLetters = False
+    Adjust = otaCenterLeft
     Table = OvcTable1
     OnOwnerDraw = OvcTCColHead1OwnerDraw
     Left = 127
@@ -123,6 +124,7 @@ object Form1: TForm1
     MaxLength = 50
     Table = OvcTable1
     DataStringType = tstPChar
+    UseASCIIZStrings = False
     Left = 226
     Top = 231
   end
@@ -130,6 +132,7 @@ object Form1: TForm1
     MaxLength = 50
     Table = OvcTable1
     DataStringType = tstShortString
+    UseASCIIZStrings = False
     Left = 330
     Top = 231
   end
