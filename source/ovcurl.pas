@@ -149,6 +149,9 @@ type
 
 implementation
 
+uses
+  Types;
+
 const
   BadColor = $02000000;
 

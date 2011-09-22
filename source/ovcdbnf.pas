@@ -239,6 +239,8 @@ type
 
 implementation
 
+uses
+  Types;
 
 const
   {field types supported by the data aware numeric field}

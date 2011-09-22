@@ -3,16 +3,16 @@
 			<ProjectGuid>{C92A393F-BA72-42A0-A7A8-E04F281F6211}</ProjectGuid>
 		</PropertyGroup>
 		<ItemGroup>
-			<Projects Include="O407_r.dproj">
+			<Projects Include="O408_r.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="O407_d.dproj">
+			<Projects Include="O408_d.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="O407br.dproj">
+			<Projects Include="O408br.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="O407bd.dproj">
+			<Projects Include="O408bd.dproj">
 				<Dependencies/>
 			</Projects>
 			<Projects Include="..\..\source\dunit\OrpheusTests.dproj">
@@ -26,41 +26,41 @@
 				<Default.Personality/>
 			</BorlandProject>
 		</ProjectExtensions>
-		<Target Name="O407_r">
-			<MSBuild Projects="O407_r.dproj"/>
+		<Target Name="O408_r">
+			<MSBuild Projects="O408_r.dproj"/>
 		</Target>
-		<Target Name="O407_r:Clean">
-			<MSBuild Projects="O407_r.dproj" Targets="Clean"/>
+		<Target Name="O408_r:Clean">
+			<MSBuild Projects="O408_r.dproj" Targets="Clean"/>
 		</Target>
-		<Target Name="O407_r:Make">
-			<MSBuild Projects="O407_r.dproj" Targets="Make"/>
+		<Target Name="O408_r:Make">
+			<MSBuild Projects="O408_r.dproj" Targets="Make"/>
 		</Target>
-		<Target Name="O407_d">
-			<MSBuild Projects="O407_d.dproj"/>
+		<Target Name="O408_d">
+			<MSBuild Projects="O408_d.dproj"/>
 		</Target>
-		<Target Name="O407_d:Clean">
-			<MSBuild Projects="O407_d.dproj" Targets="Clean"/>
+		<Target Name="O408_d:Clean">
+			<MSBuild Projects="O408_d.dproj" Targets="Clean"/>
 		</Target>
-		<Target Name="O407_d:Make">
-			<MSBuild Projects="O407_d.dproj" Targets="Make"/>
+		<Target Name="O408_d:Make">
+			<MSBuild Projects="O408_d.dproj" Targets="Make"/>
 		</Target>
-		<Target Name="O407br">
-			<MSBuild Projects="O407br.dproj"/>
+		<Target Name="O408br">
+			<MSBuild Projects="O408br.dproj"/>
 		</Target>
-		<Target Name="O407br:Clean">
-			<MSBuild Projects="O407br.dproj" Targets="Clean"/>
+		<Target Name="O408br:Clean">
+			<MSBuild Projects="O408br.dproj" Targets="Clean"/>
 		</Target>
-		<Target Name="O407br:Make">
-			<MSBuild Projects="O407br.dproj" Targets="Make"/>
+		<Target Name="O408br:Make">
+			<MSBuild Projects="O408br.dproj" Targets="Make"/>
 		</Target>
-		<Target Name="O407bd">
-			<MSBuild Projects="O407bd.dproj"/>
+		<Target Name="O408bd">
+			<MSBuild Projects="O408bd.dproj"/>
 		</Target>
-		<Target Name="O407bd:Clean">
-			<MSBuild Projects="O407bd.dproj" Targets="Clean"/>
+		<Target Name="O408bd:Clean">
+			<MSBuild Projects="O408bd.dproj" Targets="Clean"/>
 		</Target>
-		<Target Name="O407bd:Make">
-			<MSBuild Projects="O407bd.dproj" Targets="Make"/>
+		<Target Name="O408bd:Make">
+			<MSBuild Projects="O408bd.dproj" Targets="Make"/>
 		</Target>
 		<Target Name="OrpheusTests">
 			<MSBuild Projects="..\..\source\dunit\OrpheusTests.dproj"/>
@@ -72,13 +72,13 @@
 			<MSBuild Projects="..\..\source\dunit\OrpheusTests.dproj" Targets="Make"/>
 		</Target>
 		<Target Name="Build">
-			<CallTarget Targets="O407_r;O407_d;O407br;O407bd;OrpheusTests"/>
+			<CallTarget Targets="O408_r;O408_d;O408br;O408bd;OrpheusTests"/>
 		</Target>
 		<Target Name="Clean">
-			<CallTarget Targets="O407_r:Clean;O407_d:Clean;O407br:Clean;O407bd:Clean;OrpheusTests:Clean"/>
+			<CallTarget Targets="O408_r:Clean;O408_d:Clean;O408br:Clean;O408bd:Clean;OrpheusTests:Clean"/>
 		</Target>
 		<Target Name="Make">
-			<CallTarget Targets="O407_r:Make;O407_d:Make;O407br:Make;O407bd:Make;OrpheusTests:Make"/>
+			<CallTarget Targets="O408_r:Make;O408_d:Make;O408br:Make;O408bd:Make;OrpheusTests:Make"/>
 		</Target>
 		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
 	</Project>

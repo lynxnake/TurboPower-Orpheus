@@ -108,7 +108,7 @@ type
 implementation
 
 uses
-  OvcVer;
+  OvcVer, Types;
 
 {===== TO32CustomImageForm ===========================================}
 

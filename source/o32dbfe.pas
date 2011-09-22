@@ -43,7 +43,7 @@ interface
 uses
   Windows, Classes, Controls, DB, DbConsts, DbCtrls, Forms, Graphics, dialogs,
   Menus, Messages, SysUtils, OvcBase, OvcColor, OvcConst, OvcData, OvcEF,
-  OvcExcpt, OvcMisc, O32FlxEd;
+  OvcExcpt, OvcMisc, O32FlxEd, Types;
 
 type
   TO32DbFlexEdit = class(TO32CustomFlexEdit)

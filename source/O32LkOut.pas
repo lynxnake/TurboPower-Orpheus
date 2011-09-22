@@ -2162,8 +2162,6 @@ var
   Flags         : Integer;
   MyRect        : TRect;
   TR            : TRect;
-  ContainerRect : TRect;
-  FolderType    : TO32FolderType;
   BkColor       : TColor;
   Folder        : TO32LookOutFolder;
   Item          : TO32LookOutBtnItem;
