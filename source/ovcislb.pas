@@ -234,6 +234,9 @@ type
 
 implementation
 
+uses
+  Types;
+
 {*** TOvcSearchEdit ***}
 
 procedure TOvcSearchEdit.PerformSearch;
