@@ -5258,12 +5258,26 @@ procedure TOvcCustomTable.DoGetCellAttributes(RowNum : TRowNum; ColNum : TColNum
 procedure TOvcCustomTable.DoGetCellData(RowNum  : TRowNum; ColNum : TColNum;
                                     var Data    : pointer;
                                         Purpose : TOvcCellDataPurpose);
+{$IFDEF DEBUG}
+  var
+    DataComp: Integer;
+{$ENDIF}
   begin
     Data := nil;
     if ((ComponentState * [csLoading, csDestroying]) = []) and
        HandleAllocated and
-       Assigned(FGetCellData) then
+       Assigned(FGetCellData) then begin
       FGetCellData(Self, RowNum, ColNum, Data, Purpose);
+{$IFDEF DEBUG}
+      { A common bug is to provide a pointer to a local variable in 'GetCellData'. This
+        will lead to an access-violation. We try to detect this here: If data points
+        to some local data, @DataComp will be a "little" larger than 'Data'. 1024
+        is an arbitrary choice. }
+      if Assigned(Data) and (NativeInt(@DataComp)-NativeInt(Data)>0)
+                        and (NativeInt(@DataComp)-NativeInt(Data)<1024) then
+        raise EOrpheusTable.CreateFmt(GetOrphStr(SCTableInvalidData),[RowNum,ColNum]);
+{$ENDIF}
+    end;
   end;
 {--------}
 procedure TOvcCustomTable.DoLeavingColumn(ColNum : TColNum);

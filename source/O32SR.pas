@@ -232,7 +232,7 @@ resourcestring
 
 const
   {Change this when new strings are added.}
-  SrMaxMessages             = 375;
+  SrMaxMessages             = 376;
 
 type
   SrMsgNumLookupRec = record
@@ -345,6 +345,7 @@ const
      (MessageNum : SCTableHeaderNotAssigned;  MessageStr : RSTableHeaderNotAssigned),
      (MessageNum : SCTableInvalidHeaderCell;  MessageStr : RSTableInvalidHeaderCell),
      (MessageNum : SCGridTableName;           MessageStr : RSGridTableName),
+     (MessageNum : SCTableInvalidData;        MessageStr : RSTableInvalidData),
      (MessageNum : SCNoneStr;                 MessageStr : RSNoneStr),
      (MessageNum : SCccUser;                  MessageStr : RSccUser),
      (MessageNum : SCccUserNum;               MessageStr : RSccUserNum),

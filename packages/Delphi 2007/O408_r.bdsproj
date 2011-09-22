@@ -5,12 +5,12 @@
 			<Option Name="Personality">Delphi.Personality</Option>
 			<Option Name="ProjectType">VCLApplication</Option>
 			<Option Name="Version">1.0</Option>
-			<Option Name="GUID">{8F9F21F1-5C3D-4674-B6B1-7EED99739F90}</Option>
+			<Option Name="GUID">{050CE2BB-1826-4A2F-A53E-C5907506E53C}</Option>
 		</Option>
 	</PersonalityInfo>
 	<Delphi.Personality>
 		<Source>
-			<Source Name="MainSource">O407_d.dpk</Source>
+			<Source Name="MainSource">O408_r.dpk</Source>
 		</Source>
 		<FileVersion>
 			<FileVersion Name="Version">7.0</FileVersion>
@@ -125,7 +125,7 @@
 			<Linker Name="MinStackSize">16384</Linker>
 			<Linker Name="MaxStackSize">1048576</Linker>
 			<Linker Name="ImageBase">4194304</Linker>
-			<Linker Name="ExeDescription">TurboPower Orpheus 4.07 designtime package - VCL110</Linker>
+			<Linker Name="ExeDescription">TurboPower Orpheus 4.08 runtime package - VCL110</Linker>
 		</Linker>
 		<Directories>
 			<Directories Name="OutputDir"></Directories>
@@ -178,11 +178,10 @@
 			<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
 			<VersionInfoKeys Name="Comments"></VersionInfoKeys>
 		</VersionInfoKeys>
-		<buildevents/>
-		<Language>
-			<Language Name="ActiveLang"></Language>
-			<Language Name="ProjectLang">$00000000</Language>
-			<Language Name="RootDir"></Language>
-		</Language>
-	</Delphi.Personality>
+		<buildevents/>  <Language>
+      <Language Name="ActiveLang"></Language>
+      <Language Name="ProjectLang">$00000000</Language>
+      <Language Name="RootDir"></Language>
+    </Language>
+  </Delphi.Personality>
 </BorlandProject>

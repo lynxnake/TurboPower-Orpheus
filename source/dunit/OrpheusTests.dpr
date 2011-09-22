@@ -32,7 +32,9 @@ uses
   O32VlOp1 in '..\O32VlOp1.pas',
   O32VlReg in '..\O32VlReg.pas',
   O32VPool in '..\O32VPool.pas',
+  {$IFDEF UNICODE}
   O32WideCharSet in '..\O32WideCharSet.pas',
+  {$ENDIF}
   ovcabtn in '..\ovcabtn.pas',
   ovcae in '..\ovcae.pas',
   OvcBase in '..\OvcBase.pas',

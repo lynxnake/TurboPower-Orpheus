@@ -141,6 +141,7 @@ const
   SCTableHeaderNotAssigned = 30264;
   SCTableInvalidHeaderCell = 30265;
   SCGridTableName          = 30266;
+  SCTableInvalidData       = 30267;
   {general constants for string table resource entries}
   SCNoneStr                = 30268;
   SCccUser                 = 30269;

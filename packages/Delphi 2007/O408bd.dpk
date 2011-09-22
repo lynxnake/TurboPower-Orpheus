@@ -22,7 +22,7 @@
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
-PACKAGE O407bd;
+PACKAGE O408bd;
 
 {$R *.res}
 {$ALIGN 8}
@@ -46,16 +46,16 @@ PACKAGE O407bd;
 {$WRITEABLECONST ON}
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
-{$DESCRIPTION 'TurboPower Orpheus 4.07 data-aware designtime package - VCL120'}
+{$DESCRIPTION 'TurboPower Orpheus 4.08 data-aware designtime package - VCL120'}
 {$LIBSUFFIX '110'}
 {$DESIGNONLY}
 {$IMPLICITBUILD ON}
 
 requires
   Vcl,
-  O407_d,
-  O407_r,
-  O407br,
+  O408_d,
+  O408_r,
+  O408br,
   designide;
 
 contains

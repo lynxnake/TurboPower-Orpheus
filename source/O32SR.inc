@@ -158,6 +158,7 @@ resourcestring
   RSTableInvalidFieldIndex  = 'Invalid field index';
   RSTableHeaderNotAssigned  = 'Header not assigned';
   RSTableInvalidHeaderCell  = 'Invalid header cell';
+  RSTableInvalidData        = 'Invalid data (pointer to local variable; row:%d, col:%d)';
   RSCalcBack                = 'Back';
   RSCalcMC                  = 'MC';
   RSCalcMR                  = 'MR';
