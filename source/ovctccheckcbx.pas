@@ -37,7 +37,7 @@ interface
 
 uses
   Windows, Messages, Forms, Controls, StdCtrls, Classes, Graphics,
-  ovccklb, ovctcmmn, OvcTCell, OvcTCStr;
+  ovccklb, ovctcmmn, OvcTCell, OvcTCStr{$IFDEF VERSION2010}, Themes{$ENDIF};
 
 type
   TOvcPopupWindow = class(TCustomForm)
@@ -282,11 +282,7 @@ type
 implementation
 
 uses
-  SysUtils,
-  {$IFDEF VERSION2010}
-  Themes,
-  {$ENDIF}
-  ovctccbx, ovcmisc;
+  SysUtils, ovctccbx, ovcmisc;
 
 var
   OvcComboBoxBitmap      : TBitmap;

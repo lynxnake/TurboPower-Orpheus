@@ -44,7 +44,7 @@ interface
 uses
   Windows, Classes, Controls, Forms, Graphics, Menus, Messages, StdCtrls,
   SysUtils, {$IFDEF VERSION4} ImgList, {$ENDIF} OvcBase, OvcData,
-  OvcLB, OvcMisc;
+  OvcLB, OvcMisc{$IFDEF VERSION7}, Themes{$ENDIF};
 
 type
   TOvcCheckStyle = (csCheck, csX);
@@ -250,11 +250,6 @@ type
   end;
 
 implementation
-
-{$IFDEF VERSION7}
-uses
-  Themes;
-{$ENDIF}
 
 {$IFDEF VERSION7}
 function ThemesEnabled: Boolean; inline;

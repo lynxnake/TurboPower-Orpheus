@@ -550,7 +550,7 @@ begin
       State := TOwnerDrawState(LoWord(itemState));
       if (odComboBoxEdit in State) and (odFocused in State) then
       begin
-        Exclude(State, odFocused);
+        //Exclude(State, odFocused); This line causes a hint R.K.
         itemState := itemState and not ODS_FOCUS;
       end;
     end;
@@ -1018,7 +1018,11 @@ begin
   else
     S := '';
 
+{$IFDEF VERSIONXE2}
+  ThemeServices.DrawText(DC, Details, S, Rect, [tfCenter, tfSingleLine], 0);
+{$ELSE}
   ThemeServices.DrawText(DC, Details, S, Rect, DT_VCENTER or DT_SINGLELINE, 0);
+{$ENDIF}
 end; {$ENDIF}
 
 function TOvcBaseComboBox.GetAttachedLabel : TOvcAttachedLabel;

@@ -966,7 +966,7 @@ begin
     LongSize := OldSize + Amount;
     if LongSize < 0 then
       raise EInvalidGridOperation.Create(STooManyDeleted)
-    else if LongSize >= MaxListSize - 1 then
+    else if LongSize >= {$IFDEF VERSIONXE2}MaxInt{$ELSE}MaxListSize{$ENDIF} - 1 then
       raise EInvalidGridOperation.Create(SGridTooLarge);
     NewSize := Cardinal(LongSize);
     if NewSize > 0 then Inc(NewSize);

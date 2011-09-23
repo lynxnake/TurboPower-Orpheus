@@ -51,7 +51,8 @@ interface
 
 uses
   Windows, Buttons, Classes, Controls, Forms, Graphics, Menus, Messages,
-  SysUtils, StdCtrls, OvcBase, OvcCmd, OvcConst, OvcData, OvcExcpt, OvcMisc;
+  SysUtils, StdCtrls, OvcBase, OvcCmd, OvcConst, OvcData, OvcExcpt, OvcMisc
+  {$IFDEF VERSION7}, Themes{$ENDIF};
 
 type
   TDrawTabEvent = procedure(Sender : TObject; Index : Integer;
@@ -486,8 +487,8 @@ type
 implementation
 
 {$IFDEF VERSION7}
-  uses
-  Themes, UxTheme, Math;
+uses
+  UxTheme, Math;
 {$ENDIF}
 
 type

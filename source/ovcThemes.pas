@@ -24,6 +24,8 @@
 {*                                                                            *}
 {* Contributor(s):                                                            *}
 {*                                                                            *}
+{* Roman Kassebaum                                                            *}
+{*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
 unit ovcThemes;
@@ -33,10 +35,11 @@ unit ovcThemes;
 interface
 
 uses
-  Windows, Graphics;
+  Windows, Graphics{$IFDEF VERSION2010}, System.UITypes{$ENDIF}{$IFDEF VERSION2010}, Themes, UxTheme{$ENDIF};
 
 type
   TovcThemes = class(TObject)
+  public
     class procedure DrawSelection(Canvas: TCanvas; ARect: TRect);
   end;
 
@@ -45,7 +48,7 @@ implementation
 
 {$IFDEF VERSION2010}
 uses
-  SysUtils, Themes, UxTheme;
+  SysUtils;
 
 function ThemesEnabled: Boolean; inline;
 begin
