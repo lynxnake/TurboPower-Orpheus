@@ -35,7 +35,7 @@ unit ovcThemes;
 interface
 
 uses
-  Windows, Graphics{$IFDEF VERSION2010}, System.UITypes{$ENDIF}{$IFDEF VERSION2010}, Themes, UxTheme{$ENDIF};
+  Windows, Graphics{$IFDEF VERSIONXE2}, System.UITypes{$ENDIF}{$IFDEF VERSION2010}, Themes, UxTheme{$ENDIF};
 
 type
   TovcThemes = class(TObject)
