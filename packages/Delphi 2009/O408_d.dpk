@@ -22,7 +22,7 @@
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
-PACKAGE O407_d;
+PACKAGE O408_d;
 
 {$R *.res}
 {$ALIGN 8}
@@ -55,7 +55,7 @@ requires
   Vcl,
   Vclx,
   designide,
-  O407_r;
+  O408_r;
 
 contains
   Ovcabot0 in '..\..\source\Ovcabot0.pas' {OvcfrmAboutForm},

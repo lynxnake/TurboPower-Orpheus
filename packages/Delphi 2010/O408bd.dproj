@@ -1,7 +1,7 @@
 ﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
-			<ProjectGuid>{BA59A88B-97E3-435F-A04A-1510502C1E47}</ProjectGuid>
-			<MainSource>O407br.dpk</MainSource>
+			<ProjectGuid>{A935A392-31A7-495E-97CD-B9D7F3AE2C64}</ProjectGuid>
+			<MainSource>O408bd.dpk</MainSource>
 			<Config Condition="'$(Config)'==''">Debug</Config>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
 			<ProjectVersion>12.0</ProjectVersion>
@@ -23,23 +23,21 @@
 			<DCC_DcuOutput>$(CompileTo)</DCC_DcuOutput>
 			<DCC_DcpOutput>$(ComponentsBin)</DCC_DcpOutput>
 			<DCC_BplOutput>$(ComponentsBin)</DCC_BplOutput>
-			<DesignOnlyPackage>false</DesignOnlyPackage>
 			<DllSuffix>140</DllSuffix>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
-			<DCC_DependencyCheckOutputName>..\..\..\..\..\Components\Compile\2010\O407br140.bpl</DCC_DependencyCheckOutputName>
-			<DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
+			<DesignOnlyPackage>true</DesignOnlyPackage>
 			<DCC_WriteableConstants>true</DCC_WriteableConstants>
-			<DCC_Platform>x86</DCC_Platform>
+			<DCC_DependencyCheckOutputName>..\..\..\..\..\Components\Compile\2010\O408bd140.bpl</DCC_DependencyCheckOutputName>
 			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
-			<RuntimeOnlyPackage>true</RuntimeOnlyPackage>
-			<DCC_Description>TurboPower Orpheus 4.07 data-aware runtime package - VCL140</DCC_Description>
-			<DCC_S>false</DCC_S>
+			<DCC_Platform>x86</DCC_Platform>
+			<DCC_Description>TurboPower Orpheus 4.07 data-aware designtime package - VCL140</DCC_Description>
+			<DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
 			<DCC_N>true</DCC_N>
+			<DCC_S>false</DCC_S>
 			<GenDll>true</GenDll>
-			<DCC_OutputNeverBuildDcps>true</DCC_OutputNeverBuildDcps>
-			<DCC_E>false</DCC_E>
-			<GenPackage>true</GenPackage>
 			<DCC_K>false</DCC_K>
+			<GenPackage>true</GenPackage>
+			<DCC_E>false</DCC_E>
 			<DCC_F>false</DCC_F>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
@@ -51,45 +49,35 @@
 			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
 		</PropertyGroup>
 		<ItemGroup>
-			<DelphiCompile Include="O407br.dpk">
+			<DelphiCompile Include="O408bd.dpk">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="vclx.dcp"/>
-			<DCCReference Include="dbrtl.dcp"/>
-			<DCCReference Include="vcldb.dcp"/>
-			<DCCReference Include="bdertl.dcp"/>
-			<DCCReference Include="O407_r.dcp"/>
-			<DCCReference Include="..\..\source\ovcdbacb.pas"/>
-			<DCCReference Include="..\..\source\ovcdbadg.pas">
-				<Form>OvcfrmAliasDlg</Form>
+			<DCCReference Include="Vcl.dcp"/>
+			<DCCReference Include="O408_d.dcp"/>
+			<DCCReference Include="O408_r.dcp"/>
+			<DCCReference Include="O408br.dcp"/>
+			<DCCReference Include="designide.dcp"/>
+			<DCCReference Include="..\..\source\ovcdbae0.pas">
+				<Form>OvcfrmDbAeRange</Form>
 			</DCCReference>
-			<DCCReference Include="..\..\source\ovcdbae.pas"/>
-			<DCCReference Include="..\..\source\ovcdbcal.pas"/>
-			<DCCReference Include="..\..\source\ovcdbccb.pas"/>
-			<DCCReference Include="..\..\source\ovcdbcl.pas"/>
-			<DCCReference Include="..\..\source\ovcdbclk.pas"/>
-			<DCCReference Include="..\..\source\ovcdbdat.pas"/>
-			<DCCReference Include="..\..\source\ovcdbdLb.pas"/>
-			<DCCReference Include="..\..\source\ovcdbed.pas"/>
-			<DCCReference Include="..\..\source\ovcdbfcb.pas"/>
-			<DCCReference Include="..\..\source\ovcdbhll.pas"/>
-			<DCCReference Include="..\..\source\ovcdbidx.pas"/>
-			<DCCReference Include="..\..\source\ovcdbise.pas"/>
-			<DCCReference Include="..\..\source\ovcdbmdg.pas">
-				<Form>OvcfrmDbMemoDlg</Form>
+			<DCCReference Include="..\..\source\ovcdbae1.pas">
+				<Form>OvcfrmDbAeSimpleMask</Form>
 			</DCCReference>
-			<DCCReference Include="..\..\source\ovcdbnf.pas"/>
-			<DCCReference Include="..\..\source\ovcdbnum.pas"/>
-			<DCCReference Include="..\..\source\ovcdbpf.pas"/>
-			<DCCReference Include="..\..\source\ovcdbplb.pas"/>
-			<DCCReference Include="..\..\source\ovcdbrpv.pas"/>
-			<DCCReference Include="..\..\source\ovcdbsed.pas"/>
-			<DCCReference Include="..\..\source\ovcdbsf.pas"/>
-			<DCCReference Include="..\..\source\ovcdbsld.pas"/>
-			<DCCReference Include="..\..\source\ovcdbtbl.pas"/>
-			<DCCReference Include="..\..\source\ovcdbtcb.pas"/>
-			<DCCReference Include="..\..\source\ovcdbtim.pas"/>
-			<DCCReference Include="..\..\source\o32dbfe.pas"/>
+			<DCCReference Include="..\..\source\ovcdbae2.pas">
+				<Form>OvcfrmDbAePictureMask</Form>
+			</DCCReference>
+			<DCCReference Include="..\..\source\ovcdbae3.pas">
+				<Form>OvcfrmDbAeNumericMask</Form>
+			</DCCReference>
+			<DCCReference Include="..\..\source\ovcdbhbd.pas"/>
+			<DCCReference Include="..\..\source\ovcdbtb0.pas">
+				<Form>OvcfrmDbColEditor</Form>
+			</DCCReference>
+			<DCCReference Include="..\..\source\ovcdbtb1.pas">
+				<Form>OvcfrmProperties</Form>
+			</DCCReference>
+			<DCCReference Include="..\..\source\ovcregbd.pas"/>
+			<DCCReference Include="..\..\source\ovcregdb.pas"/>
 			<BuildConfiguration Include="Basis">
 				<Key>Base</Key>
 			</BuildConfiguration>
@@ -109,7 +97,7 @@
 			<BorlandProject>
 				<Delphi.Personality>
 					<Source>
-						<Source Name="MainSource">O407br.dpk</Source>
+						<Source Name="MainSource">O408bd.dpk</Source>
 					</Source>
 					<Parameters>
 						<Parameters Name="UseLauncher">False</Parameters>

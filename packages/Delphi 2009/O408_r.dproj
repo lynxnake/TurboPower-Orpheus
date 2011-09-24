@@ -1,12 +1,12 @@
 ﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
-			<ProjectGuid>{A935A392-31A7-495E-97CD-B9D7F3AE2C64}</ProjectGuid>
-			<MainSource>O407bd.dpk</MainSource>
+			<ProjectGuid>{1309C9DB-8FBE-4CB4-AC4F-8C1FDDF8F54D}</ProjectGuid>
+			<MainSource>O408_r.dpk</MainSource>
 			<Config Condition="'$(Config)'==''">Debug</Config>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
 			<ProjectVersion>12.0</ProjectVersion>
 		</PropertyGroup>
-		<PropertyGroup Condition="'$(Config)'=='Basis' or '$(Base)'!=''">
+		<PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_1)'!=''">
@@ -20,65 +20,39 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
-			<DCC_DcuOutput>$(CompileTo)</DCC_DcuOutput>
-			<DCC_DcpOutput>$(ComponentsBin)</DCC_DcpOutput>
-			<DCC_BplOutput>$(ComponentsBin)</DCC_BplOutput>
-			<DllSuffix>140</DllSuffix>
-			<DCC_ImageBase>00400000</DCC_ImageBase>
-			<DesignOnlyPackage>true</DesignOnlyPackage>
 			<DCC_WriteableConstants>true</DCC_WriteableConstants>
-			<DCC_DependencyCheckOutputName>..\..\..\..\..\Components\Compile\2010\O407bd140.bpl</DCC_DependencyCheckOutputName>
-			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
-			<DCC_Platform>x86</DCC_Platform>
-			<DCC_Description>TurboPower Orpheus 4.07 data-aware designtime package - VCL140</DCC_Description>
+			<DCC_ImageBase>00400000</DCC_ImageBase>
 			<DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
-			<DCC_N>true</DCC_N>
+			<DllSuffix>120</DllSuffix>
+			<DCC_Description>TurboPower Orpheus 4.07 runtime package - VCL120</DCC_Description>
+			<DCC_Platform>x86</DCC_Platform>
+			<DCC_DependencyCheckOutputName>C:\Users\Public\Documents\RAD Studio\6.0\Bpl\O408_r120.bpl</DCC_DependencyCheckOutputName>
+			<RuntimeOnlyPackage>true</RuntimeOnlyPackage>
 			<DCC_S>false</DCC_S>
+			<DCC_N>false</DCC_N>
 			<GenDll>true</GenDll>
-			<DCC_K>false</DCC_K>
-			<GenPackage>true</GenPackage>
+			<DCC_OutputNeverBuildDcps>true</DCC_OutputNeverBuildDcps>
 			<DCC_E>false</DCC_E>
+			<GenPackage>true</GenPackage>
+			<DCC_K>false</DCC_K>
 			<DCC_F>false</DCC_F>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
-			<DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
 			<DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
+			<DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
+			<DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
 			<DCC_DebugInformation>false</DCC_DebugInformation>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
 			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
 		</PropertyGroup>
 		<ItemGroup>
-			<DelphiCompile Include="O407bd.dpk">
+			<DelphiCompile Include="O408_r.dpk">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
 			<DCCReference Include="Vcl.dcp"/>
-			<DCCReference Include="O407_d.dcp"/>
-			<DCCReference Include="O407_r.dcp"/>
-			<DCCReference Include="O407br.dcp"/>
-			<DCCReference Include="designide.dcp"/>
-			<DCCReference Include="..\..\source\ovcdbae0.pas">
-				<Form>OvcfrmDbAeRange</Form>
-			</DCCReference>
-			<DCCReference Include="..\..\source\ovcdbae1.pas">
-				<Form>OvcfrmDbAeSimpleMask</Form>
-			</DCCReference>
-			<DCCReference Include="..\..\source\ovcdbae2.pas">
-				<Form>OvcfrmDbAePictureMask</Form>
-			</DCCReference>
-			<DCCReference Include="..\..\source\ovcdbae3.pas">
-				<Form>OvcfrmDbAeNumericMask</Form>
-			</DCCReference>
-			<DCCReference Include="..\..\source\ovcdbhbd.pas"/>
-			<DCCReference Include="..\..\source\ovcdbtb0.pas">
-				<Form>OvcfrmDbColEditor</Form>
-			</DCCReference>
-			<DCCReference Include="..\..\source\ovcdbtb1.pas">
-				<Form>OvcfrmProperties</Form>
-			</DCCReference>
-			<DCCReference Include="..\..\source\ovcregbd.pas"/>
-			<DCCReference Include="..\..\source\ovcregdb.pas"/>
-			<BuildConfiguration Include="Basis">
+			<DCCReference Include="rtl.dcp"/>
+			<BuildConfiguration Include="Base">
 				<Key>Base</Key>
 			</BuildConfiguration>
 			<BuildConfiguration Include="Debug">
@@ -97,7 +71,7 @@
 			<BorlandProject>
 				<Delphi.Personality>
 					<Source>
-						<Source Name="MainSource">O407bd.dpk</Source>
+						<Source Name="MainSource">O408_r.dpk</Source>
 					</Source>
 					<Parameters>
 						<Parameters Name="UseLauncher">False</Parameters>
@@ -116,19 +90,20 @@
 						<VersionInfo Name="Special">False</VersionInfo>
 						<VersionInfo Name="Private">False</VersionInfo>
 						<VersionInfo Name="DLL">False</VersionInfo>
-						<VersionInfo Name="Locale">1033</VersionInfo>
+						<VersionInfo Name="Locale">1031</VersionInfo>
 						<VersionInfo Name="CodePage">1252</VersionInfo>
 					</VersionInfo>
 					<VersionInfoKeys>
-						<VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
-						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
 						<VersionInfoKeys Name="CompanyName"/>
 						<VersionInfoKeys Name="FileDescription"/>
+						<VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName"/>
 						<VersionInfoKeys Name="LegalCopyright"/>
 						<VersionInfoKeys Name="LegalTrademarks"/>
 						<VersionInfoKeys Name="OriginalFilename"/>
 						<VersionInfoKeys Name="ProductName"/>
+						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
 				</Delphi.Personality>
 			</BorlandProject>

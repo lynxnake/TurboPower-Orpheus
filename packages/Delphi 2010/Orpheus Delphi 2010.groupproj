@@ -3,16 +3,16 @@
 			<ProjectGuid>{90727ABA-E9AA-44C3-95AC-6133A9EDFE10}</ProjectGuid>
 		</PropertyGroup>
 		<ItemGroup>
-			<Projects Include="O407_r.dproj">
+			<Projects Include="O408_r.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="O407_d.dproj">
+			<Projects Include="O408_d.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="O407br.dproj">
+			<Projects Include="O408br.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="O407bd.dproj">
+			<Projects Include="O408bd.dproj">
 				<Dependencies/>
 			</Projects>
 		</ItemGroup>
@@ -23,50 +23,50 @@
 				<Default.Personality/>
 			</BorlandProject>
 		</ProjectExtensions>
-		<Target Name="O407_r">
-			<MSBuild Projects="O407_r.dproj"/>
+		<Target Name="O408_r">
+			<MSBuild Projects="O408_r.dproj"/>
 		</Target>
-		<Target Name="O407_r:Clean">
-			<MSBuild Targets="Clean" Projects="O407_r.dproj"/>
+		<Target Name="O408_r:Clean">
+			<MSBuild Targets="Clean" Projects="O408_r.dproj"/>
 		</Target>
-		<Target Name="O407_r:Make">
-			<MSBuild Targets="Make" Projects="O407_r.dproj"/>
+		<Target Name="O408_r:Make">
+			<MSBuild Targets="Make" Projects="O408_r.dproj"/>
 		</Target>
-		<Target Name="O407_d">
-			<MSBuild Projects="O407_d.dproj"/>
+		<Target Name="O408_d">
+			<MSBuild Projects="O408_d.dproj"/>
 		</Target>
-		<Target Name="O407_d:Clean">
-			<MSBuild Targets="Clean" Projects="O407_d.dproj"/>
+		<Target Name="O408_d:Clean">
+			<MSBuild Targets="Clean" Projects="O408_d.dproj"/>
 		</Target>
-		<Target Name="O407_d:Make">
-			<MSBuild Targets="Make" Projects="O407_d.dproj"/>
+		<Target Name="O408_d:Make">
+			<MSBuild Targets="Make" Projects="O408_d.dproj"/>
 		</Target>
-		<Target Name="O407br">
-			<MSBuild Projects="O407br.dproj"/>
+		<Target Name="O408br">
+			<MSBuild Projects="O408br.dproj"/>
 		</Target>
-		<Target Name="O407br:Clean">
-			<MSBuild Targets="Clean" Projects="O407br.dproj"/>
+		<Target Name="O408br:Clean">
+			<MSBuild Targets="Clean" Projects="O408br.dproj"/>
 		</Target>
-		<Target Name="O407br:Make">
-			<MSBuild Targets="Make" Projects="O407br.dproj"/>
+		<Target Name="O408br:Make">
+			<MSBuild Targets="Make" Projects="O408br.dproj"/>
 		</Target>
-		<Target Name="O407bd">
-			<MSBuild Projects="O407bd.dproj"/>
+		<Target Name="O408bd">
+			<MSBuild Projects="O408bd.dproj"/>
 		</Target>
-		<Target Name="O407bd:Clean">
-			<MSBuild Targets="Clean" Projects="O407bd.dproj"/>
+		<Target Name="O408bd:Clean">
+			<MSBuild Targets="Clean" Projects="O408bd.dproj"/>
 		</Target>
-		<Target Name="O407bd:Make">
-			<MSBuild Targets="Make" Projects="O407bd.dproj"/>
+		<Target Name="O408bd:Make">
+			<MSBuild Targets="Make" Projects="O408bd.dproj"/>
 		</Target>
 		<Target Name="Build">
-			<CallTarget Targets="O407_r;O407_d;O407br;O407bd"/>
+			<CallTarget Targets="O408_r;O408_d;O408br;O408bd"/>
 		</Target>
 		<Target Name="Clean">
-			<CallTarget Targets="O407_r:Clean;O407_d:Clean;O407br:Clean;O407bd:Clean"/>
+			<CallTarget Targets="O408_r:Clean;O408_d:Clean;O408br:Clean;O408bd:Clean"/>
 		</Target>
 		<Target Name="Make">
-			<CallTarget Targets="O407_r:Make;O407_d:Make;O407br:Make;O407bd:Make"/>
+			<CallTarget Targets="O408_r:Make;O408_d:Make;O408br:Make;O408bd:Make"/>
 		</Target>
 		<Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 	</Project>

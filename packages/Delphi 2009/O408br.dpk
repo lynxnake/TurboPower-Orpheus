@@ -22,7 +22,7 @@
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
-PACKAGE O407br;
+PACKAGE O408br;
 
 {$R *.res}
 {$ALIGN 8}
@@ -56,7 +56,7 @@ requires
   dbrtl,
   vcldb,
   bdertl,
-  O407_r;
+  O408_r;
 
 contains
   ovcdbacb in '..\..\source\ovcdbacb.pas',

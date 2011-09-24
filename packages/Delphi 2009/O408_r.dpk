@@ -22,7 +22,7 @@
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
-PACKAGE O407_r;
+PACKAGE O408_r;
 
 {$R *.res}
 {$ALIGN 8}
@@ -46,13 +46,14 @@ PACKAGE O407_r;
 {$WRITEABLECONST ON}
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
-{$DESCRIPTION 'TurboPower Orpheus 4.07 runtime package - VCL140'}
-{$LIBSUFFIX '140'}
+{$DESCRIPTION 'TurboPower Orpheus 4.07 runtime package - VCL120'}
+{$LIBSUFFIX '120'}
 {$RUNONLY}
 {$IMPLICITBUILD OFF}
 
 requires
-  Vcl;
+  Vcl,
+  rtl;
 
 contains
   ovcabtn in '..\..\source\ovcabtn.pas',
@@ -150,7 +151,6 @@ contains
   ovctcpic in '..\..\source\ovctcpic.pas',
   ovctcsim in '..\..\source\ovctcsim.pas',
   ovctcstr in '..\..\source\ovctcstr.pas',
-  ovctccustomedt in '..\..\source\ovctccustomedt.pas',
   ovctgpns in '..\..\source\ovctgpns.pas',
   ovctgres in '..\..\source\ovctgres.pas',
   ovctimer in '..\..\source\ovctimer.pas',
@@ -202,8 +202,9 @@ contains
   O32IGrid in '..\..\source\O32IGrid.pas',
   O32SBar in '..\..\source\O32SBar.pas',
   o32WideCharSet in '..\..\source\o32WideCharSet.pas',
-  ovcBidi in '..\..\source\ovcBidi.pas',
   ovcThemes in '..\..\source\ovcThemes.pas',
-  ovctccheckcbx in '..\..\source\ovctccheckcbx.pas';
+  ovcBidi in '..\..\source\ovcBidi.pas',
+  ovctccheckcbx in '..\..\source\ovctccheckcbx.pas',
+  ovctccustomedt in '..\..\source\ovctccustomedt.pas';
 
 end.

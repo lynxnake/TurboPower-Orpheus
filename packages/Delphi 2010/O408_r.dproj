@@ -1,7 +1,7 @@
 ﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
 			<ProjectGuid>{97ECEF13-FB31-4F7E-A2FA-21CEE6F4D30F}</ProjectGuid>
-			<MainSource>O407_r.dpk</MainSource>
+			<MainSource>O408_r.dpk</MainSource>
 			<Config Condition="'$(Config)'==''">Debug</Config>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
 			<ProjectVersion>12.0</ProjectVersion>
@@ -25,7 +25,7 @@
 			<DCC_BplOutput>$(ComponentsBin)</DCC_BplOutput>
 			<DllSuffix>140</DllSuffix>
 			<DesignOnlyPackage>false</DesignOnlyPackage>
-			<DCC_DependencyCheckOutputName>..\..\..\..\..\Components\Compile\2010\O407_r140.bpl</DCC_DependencyCheckOutputName>
+			<DCC_DependencyCheckOutputName>..\..\..\..\..\Components\Compile\2010\O408_r140.bpl</DCC_DependencyCheckOutputName>
 			<DCC_WriteableConstants>true</DCC_WriteableConstants>
 			<DCC_Description>TurboPower Orpheus 4.07 runtime package - VCL140</DCC_Description>
 			<RuntimeOnlyPackage>true</RuntimeOnlyPackage>
@@ -46,7 +46,7 @@
 			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
 		</PropertyGroup>
 		<ItemGroup>
-			<DelphiCompile Include="O407_r.dpk">
+			<DelphiCompile Include="O408_r.dpk">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
 			<DCCReference Include="Vcl.dcp"/>
@@ -236,7 +236,7 @@
 			<BorlandProject>
 				<Delphi.Personality>
 					<Source>
-						<Source Name="MainSource">O407_r.dpk</Source>
+						<Source Name="MainSource">O408_r.dpk</Source>
 					</Source>
 					<Parameters>
 						<Parameters Name="UseLauncher">False</Parameters>
