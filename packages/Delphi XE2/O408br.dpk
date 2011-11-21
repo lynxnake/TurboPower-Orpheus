@@ -58,12 +58,12 @@ requires
   vclx,
   dbrtl,
   vcldb,
-  bdertl,
+{$IFDEF CPUX86}bdertl,{$ENDIF}
   O408_r;
 
 contains
-  ovcdbacb in '..\..\source\ovcdbacb.pas',
-  ovcdbadg in '..\..\source\ovcdbadg.pas' {OvcfrmAliasDlg},
+{$IFDEF CPUX86}ovcdbacb in '..\..\source\ovcdbacb.pas',{$ENDIF}
+{$IFDEF CPUX86}ovcdbadg in '..\..\source\ovcdbadg.pas' {OvcfrmAliasDlg},{$ENDIF}
   ovcdbae in '..\..\source\ovcdbae.pas',
   ovcdbcal in '..\..\source\ovcdbcal.pas',
   ovcdbccb in '..\..\source\ovcdbccb.pas',
@@ -73,9 +73,9 @@ contains
   ovcdbdLb in '..\..\source\ovcdbdLb.pas',
   ovcdbed in '..\..\source\ovcdbed.pas',
   ovcdbfcb in '..\..\source\ovcdbfcb.pas',
-  ovcdbhll in '..\..\source\ovcdbhll.pas',
-  ovcdbidx in '..\..\source\ovcdbidx.pas',
-  ovcdbise in '..\..\source\ovcdbise.pas',
+{$IFDEF CPUX86}ovcdbhll in '..\..\source\ovcdbhll.pas',{$ENDIF}
+{$IFDEF CPUX86}ovcdbidx in '..\..\source\ovcdbidx.pas',{$ENDIF}
+{$IFDEF CPUX86}ovcdbise in '..\..\source\ovcdbise.pas',{$ENDIF}
   ovcdbmdg in '..\..\source\ovcdbmdg.pas' {OvcfrmDbMemoDlg},
   ovcdbnf in '..\..\source\ovcdbnf.pas',
   ovcdbnum in '..\..\source\ovcdbnum.pas',
@@ -86,7 +86,7 @@ contains
   ovcdbsf in '..\..\source\ovcdbsf.pas',
   ovcdbsld in '..\..\source\ovcdbsld.pas',
   ovcdbtbl in '..\..\source\ovcdbtbl.pas',
-  ovcdbtcb in '..\..\source\ovcdbtcb.pas',
+{$IFDEF CPUX86}ovcdbtcb in '..\..\source\ovcdbtcb.pas',{$ENDIF}
   ovcdbtim in '..\..\source\ovcdbtim.pas',
   o32dbfe in '..\..\source\o32dbfe.pas';
 
