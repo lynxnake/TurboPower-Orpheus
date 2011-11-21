@@ -593,7 +593,7 @@ const
 {*** TOvcDbTableDataLink ***}
 
 const
-  MaxMapSize = Classes.MaxListSize; {maximum columns}
+  MaxMapSize = MaxInt div 16; {maximum columns}
   MapElementSize = SizeOf(Integer);
 
 type
@@ -1149,7 +1149,7 @@ begin
     StopEditing(True);
 
   {if focus isn't going to the table or already there}
-  if (Msg.wParam <> LongInt(Handle)) and (Handle <> GetFocus)then
+  if (Msg.wParam <> Handle) and (Handle <> GetFocus)then
     Exclude(tbState, otsFocused);
 
   InvalidateCell(ActiveRow, ActiveColumn);
