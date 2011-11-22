@@ -115,10 +115,10 @@
    {$IF compilerversion >= 21} // Delphi 2010 or higher
      {$DEFINE VERSION2010}
    {$IFEND}
-   {$IF compilerversion >= 22} // Delphi 2011 or higher
+   {$IF compilerversion >= 22} // Delphi XE or higher
      {$DEFINE VERSIONXE}
    {$IFEND}
-   {$IF compilerversion >= 23} // Delphi XE2 (Pulsar) or higher
+   {$IF compilerversion >= 23} // Delphi XE2 or higher
      {$DEFINE VERSIONXE2}
    {$IFEND}
 {$ENDIF}
@@ -159,6 +159,11 @@
     {$WARN UNIT_DEPRECATED OFF}
   {$ENDIF}
 {$ENDIF}
+
+{$IFDEF VERSIONXE2}
+{$DEFINE VERSIONXE2UP}
+{$ENDIF}
+
 
 { This define turns off all platform warnings in Delphi 6.  Delphi 6 }
 { is cross-platform compatible with Kylix and all of Orpheus' Win32  }

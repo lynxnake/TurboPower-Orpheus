@@ -1149,7 +1149,7 @@ begin
     StopEditing(True);
 
   {if focus isn't going to the table or already there}
-  if (Msg.wParam <> Handle) and (Handle <> GetFocus)then
+  if (Msg.wParam <> {$IFNDEF VERSIONXE2}Integer({$ENDIF}Handle{$IFNDEF VERSIONXE2}){$ENDIF}) and (Handle <> GetFocus)then
     Exclude(tbState, otsFocused);
 
   InvalidateCell(ActiveRow, ActiveColumn);
