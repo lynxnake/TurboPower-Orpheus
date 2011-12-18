@@ -153,6 +153,7 @@ type
                                         {gutter area                           }
     FShowRules          : Boolean;      {true to show lines like ruled notebook}
                                         {paper                                 }
+    FShowWrapColumn     : Boolean;      {true to display a line at WrapColumn  }
     FRuleColor          : TColor;       {Color of the rules                    }
     FTabSize            : Byte;         {tab size                              }
     FTabType            : TTabType;     {real, smart, or fixed tabs            }
@@ -218,7 +219,9 @@ type
                                       {      rectangular block of text         }
     edRectSelectDiff    : Integer;
     edResettingScrollbars: Boolean;   { Flag to prevent infinite recursions
-                                        whilst resetting the scrollbars         }
+                                        whilst resetting the scrollbars        }
+    edColWidthArray     : array[0..1023] of Integer;
+                                      { see Paint method                       }
     {property methods}
     function GetFirstEditor : TOvcCustomEditor;
     function GetInsCaretType : TOvcCaret;
@@ -266,6 +269,7 @@ type
     procedure SetShowLineNumbers(Value: Boolean);
 
     procedure SetShowRules(Value: Boolean);
+    procedure SetShowWrapColumn(Value: Boolean);
     procedure SetRuleColor(Color: TColor);
 
     procedure SetTabSize(Value : Byte);
@@ -497,6 +501,9 @@ type
       read FShowLineNumbers write SetShowLineNumbers;
     property ShowRules: Boolean
       read FShowRules write SetShowRules;
+    {12/2011, AB: new property}
+    property ShowWrapColumn: Boolean
+      read FShowWrapColumn write SetShowWrapColumn;
     property RuleColor: TColor
       read FRuleColor write SetRuleColor;
 
@@ -779,6 +786,7 @@ type
     property ShowBookmarks default True;
     property ShowLineNumbers default False;
     property ShowRules default False;
+    property ShowWrapColumn default False;
     property TabSize default 8;
     property TabType default ttReal;
     property TrimWhiteSpace default True;
@@ -958,6 +966,7 @@ end;
     property ShowBookmarks default True;
     property ShowLineNumbers default False;
     property ShowRules default False;
+    property ShowWrapColumn default False;
     property TabSize default 8;
     property TabType default ttReal;
     property TrimWhiteSpace default True;
@@ -1542,6 +1551,7 @@ begin
   FMarginColor        := clWindow;
 
   FShowRules          := False;
+  FShowWrapColumn     := False;
   FRuleColor          := clNavy;
 
   FParaLengthLimit    := MaxSmallInt;
@@ -1923,7 +1933,7 @@ procedure TOvcCustomEditor.edCalcRowColInfo;
 var
   Metrics : TTextMetric;
   OldRows : LongInt;
-  OldCols : Integer;
+  OldCols, i : Integer;
 begin
   {set canvas font to selected font}
   Canvas.Font := FixedFont.Font;
@@ -1931,6 +1941,8 @@ begin
 
   {determine the width of one column}
   edColWid := Metrics.tmAveCharWidth;
+  for i := 0 to High(edColWidthArray) do
+    edColWidthArray[i] := edColWid;
 
   {because of possible client width and height changes due to the}
   {presence of the scroll bars, do this until there are no changes}
@@ -4689,8 +4701,6 @@ var
   HELine      : LongInt;
   effHBCol    : Integer;
   effHECol    : Integer;
-  lpDxVal     : Integer;
-  lpDx        : array of Integer;
 
   procedure NormalColors;
   begin
@@ -4779,6 +4789,17 @@ var
     {set bounding rectangle}
     SetRowRect(Row);
 
+    { 4.08: Some characters in S might not be printable or will not have the
+            proper width; depending on the Windows version, ExtTextout handles these
+            characters differently - which might cause trouble. For example
+            S = 'X'#152'X'  -> XP: 'X X'  Vista: 'XX'
+            S = 'x'#152'a'  -> XP: 'x a'  Vista: 'xã'
+      If the width of a character is not fix, strange effects will show up
+      especially when selecting text. Therefore, we force ExtTextOut to strictly use
+      a constant character-spacing using the parameter lpDx. }
+    if Len>High(edColWidthArray)+1 then
+      Len := High(edColWidthArray)+1;
+
     {draw the string}
     if FMargins.Left.Enabled then begin
       FR.Right := FR.Right + MARGINPAD - 1;
@@ -4789,12 +4810,12 @@ var
         FR.Left  := FR.Left  + MARGINPAD - 1;
         Canvas.FillRect(FR);
       end;
-      ExtTextOut(Canvas.Handle, FR.Left, FR.Top+1, etoFlags, @FR, S, Len, @lpDX[0]);
+      ExtTextOut(Canvas.Handle, FR.Left, FR.Top+1, etoFlags, @FR, S, Len, @edColWidthArray[0]);
       FR.Left  := FR.Left  - MARGINPAD + 1;
       FR.Right := FR.Right - MARGINPAD + 1;
     end else begin
       Canvas.FillRect(FR);
-      ExtTextOut(Canvas.Handle, FR.Left, FR.Top+1, etoFlags, @FR, S, Len, @lpDX[0]);
+      ExtTextOut(Canvas.Handle, FR.Left, FR.Top+1, etoFlags, @FR, S, Len, @edColWidthArray[0]);
     end;
   end;
 
@@ -4964,19 +4985,6 @@ var
           Len := edCols;
       end;
 
-      { 4.08: Some characters in S might not be printable or will not have the
-              proper width; depending on the Windows version, ExtTextout handles these
-              characters differently - which might cause trouble. For example
-              S = 'X'#152'X'  -> XP: 'X X'  Vista: 'XX'
-              S = 'x'#152'a'  -> XP: 'x a'  Vista: 'xã'
-        If the width of a character is not fix, strange effects will show up
-        especially when selecting text. Therefore, we force ExtTextOut to strictly use
-        a constant character-spacing using the parameter lpDx. }
-      if Length(lpDx)<Len then begin
-        SetLength(lpDx,Len);
-        for I := 0 to Len-1 do lpDx[I] := lpDxVal;
-      end;
-
       if Assigned(FOnDrawLine) then begin
         {set bounding rectangle}
         SetRowRect(Row);
@@ -5031,6 +5039,7 @@ var
 
 var
   I, RowStartPix : Integer;
+  RightLinePos   : Integer;
   SA             : PChar;
   SALen          : Word;
   OldColor       : TColor;
@@ -5108,9 +5117,6 @@ begin
   NormalColors;
 
   {display the text}
-  SetLength(lpDx,512);
-  lpDxVal := Canvas.TextWidth('x');
-  for I := 0 to 511 do lpDx[I] := lpDxVal;
   for I := 1 to edRows do
     DrawRow(edTopLine + Pred(I), I);
 
@@ -5133,18 +5139,33 @@ begin
     end;
 
   with FMargins.Right do
-    if Enabled then
+    {12/2011: AB: Display a line both for the Margin and WrapColumn }
+    if Enabled or FShowWrapColumn then
     begin
-      {Draw right margin Line}
+      {Set color and style for right margin line}
       OldColor := Canvas.Pen.Color;
       Canvas.Pen.Color := LineColor;
       OldWidth := Canvas.Pen.Width;
       Canvas.Pen.Width := LineWeight;
       OldStyle := Canvas.Pen.Style;
-      Canvas.Pen.Style:= LineStyle;
-      Canvas.MoveTo(CR.Right - LinePosition, CR.Top);
-      Canvas.LineTo(CR.Right - LinePosition, CR.Bottom);
-      Canvas.Pen.Style:= OldStyle;
+      Canvas.Pen.Style := LineStyle;
+      {Draw right margin line}
+      if Enabled then begin
+        RightLinePos := CR.Right - LinePosition;
+        Canvas.MoveTo(RightLinePos, CR.Top);
+        Canvas.LineTo(RightLinePos, CR.Bottom);
+      end;
+      if FShowWrapColumn then begin
+        RightLinePos := FR.Left + edColWid * FWrapColumn;
+        if FMargins.Left.Enabled then
+          Inc(RightLinePos, MARGINPAD - 1);
+        if RightLinePos < CR.Right then begin
+          Canvas.MoveTo(RightLinePos, CR.Top);
+          Canvas.LineTo(RightLinePos, CR.Bottom);
+        end;
+      end;
+      {Restore color and style}
+      Canvas.Pen.Style := OldStyle;
       Canvas.Pen.Width := OldWidth;
       Canvas.Pen.Color := OldColor;
     end;
@@ -5784,6 +5805,17 @@ begin
     Repaint;
   end;
 end;
+
+
+procedure TOvcCustomEditor.SetShowWrapColumn(Value: Boolean);
+  {12/2011, AB: new property}
+begin
+  if FShowWrapColumn <> Value then begin
+    FShowWrapColumn := Value;
+    Repaint;
+  end;
+end;
+
 
 procedure TOvcCustomEditor.SetRuleColor(Color: TColor);
   {New in version 4.0 - Set color of ruled lines}
@@ -6931,3 +6963,4 @@ end;
 
 
 end.
+

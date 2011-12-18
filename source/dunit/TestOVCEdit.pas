@@ -27,7 +27,7 @@ type
     OvcTextFileEditor: TOvcTextFileEditor;
   end;
 
-  TTestOVCEdit = class(TTestCase)
+  TTestOvcEdit = class(TTestCase)
   private
     FForm: TForm1;
   protected
@@ -51,6 +51,7 @@ type
     procedure TestAttachWordwrapBug;
     procedure TestDisplayLastLineBug;
     procedure TestTextproperty;
+    procedure TestGetPrintableLine;
   end;
 
 implementation
@@ -59,7 +60,7 @@ implementation
 
 { Test inserting text into an TOvcEditor }
 
-procedure TTestOVCEdit.TestInsert;
+procedure TTestOvcEdit.TestInsert;
 var
   s: string;
 begin
@@ -101,7 +102,7 @@ const
 
 { test for "normal" copy-mode }
 
-procedure TTestOVCEdit.TestCopy;
+procedure TTestOvcEdit.TestCopy;
 const
   Copies: array[1..6] of TCopytestRec =
       // text from a single line
@@ -121,7 +122,7 @@ var
   s: string;
 begin
   { Initialize the Editor and add 'Content'. As we are going to copy text containing
-    <tb>-characters, we need to set 'TOvcEditor.ClipboardChars' (otherwise <tab>-
+    <tab>-characters, we need to set 'TOvcEditor.ClipboardChars' (otherwise <tab>-
     characters would be converted into (single) spaces) }
   with FForm.OvcEditor do begin
     WordWrap := False;
@@ -143,7 +144,7 @@ end;
 
 { test for "rectangular" copy-mode }
 
-procedure TTestOVCEdit.TestCopyRect;
+procedure TTestOvcEdit.TestCopyRect;
 const
   Copies: array[1..7] of TCopytestRec =
      // text from a singe line
@@ -196,7 +197,7 @@ const
      '',
      '123456781234567812345678');
 
-procedure TTestOVCEdit.TestDeleteRect;
+procedure TTestOvcEdit.TestDeleteRect;
 var
   i, j: Integer;
   P: array[0..2048] of Char;
@@ -266,7 +267,7 @@ end;
 
 { test undo operation }
 
-procedure TTestOVCEdit.TestUndo;
+procedure TTestOvcEdit.TestUndo;
 var
   s: string;
 const
@@ -300,7 +301,7 @@ end;
 
 {$IFDEF UNICODE}
 
-procedure TTestOVCEdit.TestsuggestEncoding;
+procedure TTestOvcEdit.TestsuggestEncoding;
 var
   SL       : TStringList;
   TMPDir   : array[0..255] of Char;
@@ -354,7 +355,7 @@ end;
 {$ENDIF}
 
 
-procedure TTestOVCEdit.TestLoadFromFile;
+procedure TTestOvcEdit.TestLoadFromFile;
 var
   SL          : TStringList;
   TMPDir, Buf : array[0..255] of Char;
@@ -405,7 +406,7 @@ begin
 end;
 
 
-procedure TTestOVCEdit.TestSaveToFile;
+procedure TTestOvcEdit.TestSaveToFile;
 var
   SL          : TStringList;
   TMPDir, Buf : array[0..255] of Char;
@@ -497,7 +498,7 @@ end;
   Due to it's nature, this effect will only show up if the undo-buffer is relatively
   small. }
 
-procedure TTestOVCEdit.TestUndoBufferFull;
+procedure TTestOvcEdit.TestUndoBufferFull;
 var
   Form1: TForm1;
   i: Integer;
@@ -519,7 +520,7 @@ end;
   test for a unicode-bugfix (13.01.2011): Replacing characters led to a corruption of the
   undo-buffer }
 
-procedure TTestOVCEdit.TestUndoBufferFail;
+procedure TTestOvcEdit.TestUndoBufferFail;
 begin
   with FForm.OvcEditor do begin
     Clear;
@@ -540,7 +541,7 @@ end;
 
 { test undo-buffer integrity when copying&pasting text }
 
-procedure TTestOVCEdit.TestUndoBufferCopyPaste;
+procedure TTestOvcEdit.TestUndoBufferCopyPaste;
 const
   Content: array[1..9] of string = (
      '+-------+-------+-------+-------+-------+-------+',
@@ -635,7 +636,7 @@ end;
 
 { test undo-buffer integrity when typing text }
 
-procedure TTestOVCEdit.TestUndoBufferTyping;
+procedure TTestOvcEdit.TestUndoBufferTyping;
 var
   l1, c1, ch, i: Integer;
   Editor: TPOvcEditor;
@@ -711,7 +712,7 @@ end;
 { Test for a fixed bug that caused the application to crash when attaching one editor
   to another. }
 
-procedure TTestOVCEdit.TestAttachWordwrapBug;
+procedure TTestOvcEdit.TestAttachWordwrapBug;
 begin
   with FForm do begin
     try
@@ -734,7 +735,7 @@ end;
 
 { Test for a fixed bug that caused the editor to hide the last line }
 
-procedure TTestOVCEdit.TestDisplayLastLineBug;
+procedure TTestOvcEdit.TestDisplayLastLineBug;
 var
   Editor: TPOvcEditor;
 begin
@@ -748,7 +749,7 @@ end;
 
 { Test for the new 'Text' property }
 
-procedure TTestOVCEdit.TestTextproperty;
+procedure TTestOvcEdit.TestTextproperty;
 const
   cSomeStrings: array[0..5] of string =
     ('basic test',
@@ -767,7 +768,61 @@ begin
 end;
 
 
-procedure TTestOVCEdit.SetUp;
+{ Test for 'GetPrintableLine' }
+
+procedure TTestOvcEdit.TestGetPrintableLine;
+type
+  TData = record
+    s, pl: string;
+    len: Integer;
+  end;
+const
+  cSomeData: array[1..7] of TData =
+    ((// simple test #1
+      s:  '12345678901234567812345678123456781234567812345678';
+      pl: '1234567890'; len: 10),
+     (// simple test #2
+      s:  '1234567890';
+      pl: '1234567890'; len: 10),
+     (// simple test #3
+      s:  'a';
+      pl: 'a';          len:  1),
+     (// expanding <tab>s; expanded line too long for dest
+      s:  '12345678'#9'12345678'#9'12345678';
+      pl: '12345678  '; len: 10),
+     (// expanding <tab>s; expanded line fits in dest
+      s:  '123'#9'9';
+      pl: '123     9';  len: 9),
+     (// expanding <tab>s; org line fits in dest; expanded line is too long
+      s:  'x'#9#9'x';
+      pl: 'x         '; len: 10),
+     (// empty line
+      s:  '';
+      pl: '';           len: 0));
+var
+  i, len: Integer;
+  Dest: array[0..100] of Char;
+begin
+  { Initialize the Editor and add 'Content'. }
+  with FForm.OvcEditor do begin
+    WordWrap := False;
+    for i := 1 to High(cSomeData) do
+      AppendPara(PChar(cSomeData[i].s));
+  end;
+  { Initialize 'Dest' (to be able to detect buffer overflows) }
+  for i := 0 to High(Dest) do
+    Dest[i] := Chr(255);
+  { run the tests }
+  for i := 1 to High(cSomeData) do begin
+    len := FForm.OvcEditor.GetPrintableLine(i, Dest, 10);
+    CheckEquals(cSomeData[i].len, len, Format('Test #%d failed',[i]));
+    CheckTrue(Dest[11]=Chr(255), Format('Test #%d failed; buffer overflow',[i]));
+    CheckEquals(cSomeData[i].pl, Dest);
+  end;
+end;
+
+
+procedure TTestOvcEdit.SetUp;
 begin
   inherited SetUp;
   FForm := TForm1.Create(nil);
@@ -776,7 +831,7 @@ begin
 end;
 
 
-procedure TTestOVCEdit.TearDown;
+procedure TTestOvcEdit.TearDown;
 begin
   FForm.Free;
   inherited TearDown;
@@ -784,5 +839,5 @@ end;
 
 
 initialization
-  RegisterTest(TTestOVCEdit.Suite);
+  RegisterTest(TTestOvcEdit.Suite);
 end.

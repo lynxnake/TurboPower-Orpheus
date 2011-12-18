@@ -181,7 +181,6 @@ procedure TOvcTCCustomCheckBox.GlyphsHaveChanged(Sender : TObject);
   end;
 {====================================================================}
 
-
 {===TOvcTCCustomCheckBox painting====================================}
 procedure TOvcTCCustomCheckBox.tcPaint(TableCanvas : TCanvas;
                                  const CellRect    : TRect;
@@ -239,6 +238,13 @@ procedure TOvcTCCustomCheckBox.tcPaint(TableCanvas : TCanvas;
               else Details := GetElementDetails(tbCheckBoxMixedNormal);
             end;
             DrawElement(TableCanvas.Handle, Details, R);
+{-Changes:
+  10/2011, AB: There is an issue using user defined styles in Delphi XE2: Drawing the
+               element seems to change the pen's parameters without the table noticing
+               this. As a result, the gridlines for the next cells might not have width/
+               color or style as defined in TOvcTable.GridPenSet. The following line
+               is a workaround - there may be a better solution... }
+            TableCanvas.Pen.Width := TableCanvas.Pen.Width + 1;
           end;
         end else
 {$ENDIF}
