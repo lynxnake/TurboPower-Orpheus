@@ -911,7 +911,9 @@ begin
       ScrollDC(Canvas.Handle,NextStep,0,R,R,0,@UpdRect)
     else
       ScrollDC(Canvas.Handle,0,NextStep,R,R,0,@UpdRect);
-    UnionRect(Result, UpdRect, Result);
+{ 01/2012, AB: Types.UnionRect(Result, UpdRect, Result) always yields Result := UpdRect
+               this appears to be a bug. The workaround is to use the following line: }
+    UnionRect(Result, Result, UpdRect);
     dec(Distance,NextStep);
   until Distance = 0;
 end;
