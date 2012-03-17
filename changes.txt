@@ -1,3 +1,9 @@
+Revision 266: (2012/03/17 Armin Biernaczyk)
+- ovcef.pas
+  Workaround in TOvcBaseEntryField.efRangeToStRange for a bug in system.str in Delphi XE2
+- ovcsf.pas
+  Minor bugfix in TOvcCustomSimpleField.efTransfer.
+
 Revision 265: (2012/01/04 Armin Biernaczyk)
 - ovcvlb.pas
   Bugfix for an issue in the function 'ScrollCanvas' that led to display problems in

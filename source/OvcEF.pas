@@ -2349,19 +2349,26 @@ var
   end;
 
   function ExtendedToString(E : Extended; DP : Byte) : string;
+  {-Changes
+    03/2012, AB: Workaround for a bug in System.Str in Delphi XE2: Negative values can
+                 cause 'Str' to crash. }
   label
     UseScientificNotation;
   var
     I : Cardinal;
     S : string;
     sAnsi: AnsiString;
+    neg: Boolean;
   begin
+    neg := E<0;
+    if neg then E := -E;
+
     if StrScan(efPicture, pmScientific) <> nil then
       goto UseScientificNotation;
 
     {try to use regular notation}
     Str(E:0:DP, sAnsi);
-    S := string(sAnsi);
+    S := TrimEmbeddedZeros(string(sAnsi));
 
     {trim trailing 0's if appropriate}
     S := TrimRight(S);
@@ -2371,9 +2378,7 @@ var
       {won't fit--use scientific notation}
   UseScientificNotation:
       if (DP > 0) and (9+DP < MaxLength) then
-      begin
-        Str(E:9+DP, sAnsi);
-      end
+        Str(E:9+DP, sAnsi)
       else
         Str(E:MaxLength, sAnsi);
       S := Trim(string(sAnsi));
@@ -2384,6 +2389,8 @@ var
     I := Pos(pmDecimalPt, S);
     if I > 0 then
       S[I] := IntlSupport.DecimalChar;
+
+    if neg and (Length(S)>0) then S[1] := '-';
     Result := S;
   end;
 
@@ -2585,11 +2592,15 @@ begin
         efRangeLo.rtReal := -1.7e+38;
         efRangeHi.rtReal := +1.7e+38;
       end;
+{$IFNDEF WIN64}
     fsubExtended :
       begin
         efRangeLo.rtExt := -1.1e+4932;
         efRangeHi.rtExt := +1.1e+4932;
       end;
+{$ELSE}
+    fsubExtended,
+{$ENDIF}
     fsubDouble :
       begin
         efRangeLo.rtExt := -1.7e+308;

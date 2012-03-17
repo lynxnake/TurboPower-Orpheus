@@ -1,5 +1,5 @@
 {*********************************************************}
-{*                    OVCSF.PAS 4.06                    *}
+{*                    OVCSF.PAS 4.08                    *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -1408,14 +1408,20 @@ var
   end;
 
   procedure TransferExtended;
+  {-Changes
+    03/2012, AB: Workaround for a bug in System.Str in Delphi XE2: Negative values can
+                 cause 'Str' to crash.
+                 Bugfix: Certain values for E were not transfered properly (e.g.
+                 E=1E50 -> '1E+5') }
   label
     UseExp;
   var
     Code : Integer;
     I    : Cardinal;
     E    : Extended;
-    Tmp: string;
+    Tmp  : string;
     sAnsi: AnsiString;
+    neg  : Boolean;
   begin
     if TransferFlag = otf_GetData then begin
       StrCopy(S, efEditSt);
@@ -1427,32 +1433,34 @@ var
     end else begin
       {try to use regular notation}
       E := Extended(DataPtr^);
+      neg := E<0;
+      if neg then E := -E;
       if StrScan(efPicture, pmScientific) <> nil then
         goto UseExp;
       Str(E:0:DecimalPlaces, sAnsi);
-      Tmp := string(sAnsi);
+      { Be aware that Str(E:0:DecimalPlaces, sAnsi) might yield scientific notation }
+      Tmp := TrimEmbeddedZeros(string(sAnsi));
       StrLCopy(S, PChar(Tmp), Length(Tmp));
+      if neg and (S[0]<>#0) then S[0] := '-';
 
       {trim trailing 0's if appropriate}
-      if StrScan(S, pmDecimalPt) <> nil  then
-        TrimTrailingZerosPChar(S);
+      if StrScan(S,'E')=nil then begin
+        if StrScan(S, pmDecimalPt) <> nil then
+          TrimTrailingZerosPChar(S);
+      end else
+        TrimEmbeddedZerosPChar(S);
 
       {does it fit?}
       if StrLen(S) > MaxLength then begin
         {won't fit--use scientific notation}
   UseExp:
         if (DecimalPlaces <> 0) and (9+DecimalPlaces < MaxLength) then
-        begin
-          Str(E:9+DecimalPlaces, sAnsi);
-          Tmp := string(sAnsi);
-          StrLCopy(S, PChar(Tmp), Length(Tmp));
-        end
+          Str(E:9+DecimalPlaces, sAnsi)
         else
-        begin
           Str(E:MaxLength, sAnsi);
-          Tmp := string(sAnsi);
-          StrLCopy(S, PChar(Tmp), Length(Tmp));
-        end;
+        Tmp := string(sAnsi);
+        StrLCopy(S, PChar(Tmp), Length(Tmp));
+        if neg and (S[0]<>#0) then S[0] := '-';
         TrimAllSpacesPChar(S);
         TrimEmbeddedZerosPChar(S);
       end;
@@ -1466,14 +1474,20 @@ var
   end;
 
   procedure TransferDouble;
+  {-Changes
+    03/2012, AB: Workaround for a bug in System.Str in Delphi XE2: Negative values can
+                 cause 'Str' to crash.
+                 Bugfix: Certain values for E were not transfered properly (e.g.
+                 E=1E50 -> '1E+5') }
   label
     UseExp;
   var
     Code : Integer;
     I    : Cardinal;
     D    : Double;
-    Tmp: string;
+    Tmp  : string;
     sAnsi: AnsiString;
+    neg  : Boolean;
   begin
     if TransferFlag = otf_GetData then begin
       StrCopy(S, efEditSt);
@@ -1485,32 +1499,34 @@ var
     end else begin
       {try to use regular notation}
       D := Double(DataPtr^);
+      neg := D<0;
+      if neg then D := -D;
       if StrScan(efPicture, pmScientific) <> nil then
         goto UseExp;
+      { Be aware that Str(D:0:DecimalPlaces, sAnsi) might yield scientific notation }
       Str(D:0:DecimalPlaces, sAnsi);
       Tmp := string(sAnsi);
       StrLCopy(S, PChar(Tmp), Length(Tmp));
+      if neg and (S[0]<>#0) then S[0] := '-';
 
       {trim trailing 0's if appropriate}
-      if StrScan(S, pmDecimalPt) <> nil  then
-        TrimTrailingZerosPChar(S);
+      if StrScan(S,'E')=nil then begin
+        if StrScan(S, pmDecimalPt) <> nil then
+          TrimTrailingZerosPChar(S);
+      end else
+        TrimEmbeddedZerosPChar(S);
 
       {does it fit?}
       if StrLen(S) > MaxLength then begin
         {won't fit--use scientific notation}
   UseExp:
         if (DecimalPlaces <> 0) and (9+DecimalPlaces < MaxLength) then
-        begin
-          Str(D:9+DecimalPlaces, sAnsi);
-          Tmp := string(sAnsi);
-          StrLCopy(S, PChar(Tmp), Length(Tmp));
-        end
+          Str(D:9+DecimalPlaces, sAnsi)
         else
-        begin
           Str(D:MaxLength, sAnsi);
-          Tmp := string(sAnsi);
-          StrLCopy(S, PChar(Tmp), Length(Tmp));
-        end;
+        Tmp := string(sAnsi);
+        StrLCopy(S, PChar(Tmp), Length(Tmp));
+        if neg and (S[0]<>#0) then S[0] := '-';
         TrimAllSpacesPChar(S);
         TrimEmbeddedZerosPChar(S);
       end;
@@ -1558,17 +1574,11 @@ var
         {won't fit--use scientific notation}
   UseExp:
         if (DecimalPlaces <> 0) and (9+DecimalPlaces < MaxLength) then
-        begin
-          Str(G:9+DecimalPlaces, sAnsi);
-          Tmp := string(sAnsi);
-          StrLCopy(S, PChar(Tmp), Length(Tmp));
-        end
+          Str(G:9+DecimalPlaces, sAnsi)
         else
-        begin
           Str(G:MaxLength, sAnsi);
-          Tmp := string(sAnsi);
-          StrLCopy(S, PChar(Tmp), Length(Tmp));
-        end;
+        Tmp := string(sAnsi);
+        StrLCopy(S, PChar(Tmp), Length(Tmp));
         TrimAllSpacesPChar(S);
         TrimEmbeddedZerosPChar(S);
       end;
