@@ -1439,29 +1439,25 @@ var
         goto UseExp;
       Str(E:0:DecimalPlaces, sAnsi);
       { Be aware that Str(E:0:DecimalPlaces, sAnsi) might yield scientific notation }
-      Tmp := TrimEmbeddedZeros(string(sAnsi));
+      Tmp := Trim(string(sAnsi));
+      if neg then Tmp := '-' + Tmp;
       StrLCopy(S, PChar(Tmp), Length(Tmp));
-      if neg and (S[0]<>#0) then S[0] := '-';
 
       {trim trailing 0's if appropriate}
-      if StrScan(S,'E')=nil then begin
-        if StrScan(S, pmDecimalPt) <> nil then
-          TrimTrailingZerosPChar(S);
-      end else
-        TrimEmbeddedZerosPChar(S);
+      if StrScan(S,pmDecimalPt)<>nil then
+        TrimTrailingZerosPChar(S);
 
       {does it fit?}
-      if StrLen(S) > MaxLength then begin
+      if (StrLen(S) > MaxLength) or (StrScan(S,pmScientific)<>nil) then begin
         {won't fit--use scientific notation}
   UseExp:
         if (DecimalPlaces <> 0) and (9+DecimalPlaces < MaxLength) then
           Str(E:9+DecimalPlaces, sAnsi)
         else
           Str(E:MaxLength, sAnsi);
-        Tmp := string(sAnsi);
+        Tmp := Trim(string(sAnsi));
+        if neg then Tmp := '-' + Tmp;
         StrLCopy(S, PChar(Tmp), Length(Tmp));
-        if neg and (S[0]<>#0) then S[0] := '-';
-        TrimAllSpacesPChar(S);
         TrimEmbeddedZerosPChar(S);
       end;
 
@@ -1505,29 +1501,25 @@ var
         goto UseExp;
       { Be aware that Str(D:0:DecimalPlaces, sAnsi) might yield scientific notation }
       Str(D:0:DecimalPlaces, sAnsi);
-      Tmp := string(sAnsi);
+      Tmp := Trim(string(sAnsi));
+      if neg then Tmp := '-' + Tmp;
       StrLCopy(S, PChar(Tmp), Length(Tmp));
-      if neg and (S[0]<>#0) then S[0] := '-';
 
       {trim trailing 0's if appropriate}
-      if StrScan(S,'E')=nil then begin
-        if StrScan(S, pmDecimalPt) <> nil then
-          TrimTrailingZerosPChar(S);
-      end else
-        TrimEmbeddedZerosPChar(S);
+      if StrScan(S,pmDecimalPt)<>nil then
+        TrimTrailingZerosPChar(S);
 
       {does it fit?}
-      if StrLen(S) > MaxLength then begin
+      if (StrLen(S) > MaxLength) or (StrScan(S,pmScientific)<>nil) then begin
         {won't fit--use scientific notation}
   UseExp:
         if (DecimalPlaces <> 0) and (9+DecimalPlaces < MaxLength) then
           Str(D:9+DecimalPlaces, sAnsi)
         else
           Str(D:MaxLength, sAnsi);
-        Tmp := string(sAnsi);
+        Tmp := Trim(string(sAnsi));
+        if neg then Tmp := '-' + Tmp;
         StrLCopy(S, PChar(Tmp), Length(Tmp));
-        if neg and (S[0]<>#0) then S[0] := '-';
-        TrimAllSpacesPChar(S);
         TrimEmbeddedZerosPChar(S);
       end;
 

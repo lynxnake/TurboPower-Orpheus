@@ -2360,18 +2360,26 @@ var
     sAnsi: AnsiString;
     neg: Boolean;
   begin
+    { workaround: Str might crash in Delphi XE2 if E<0... }
     neg := E<0;
     if neg then E := -E;
 
     if StrScan(efPicture, pmScientific) <> nil then
       goto UseScientificNotation;
 
-    {try to use regular notation}
+    {try to use regular notation
+     remark: Str(E:0:DP, S) migth result in scientific notation anyway... }
     Str(E:0:DP, sAnsi);
-    S := TrimEmbeddedZeros(string(sAnsi));
+    S := Trim(string(sAnsi));
+    { restore sign }
+    if neg then S := '-' + S;
 
     {trim trailing 0's if appropriate}
-    S := TrimRight(S);
+    if Pos(pmScientific,S)=0 then begin
+      if Pos(pmDecimalPt,S)>0 then
+        S := TrimTrailingZeros(S);
+    end else
+      S := TrimEmbeddedZeros(S);
 
     {does it fit?}
     if Length(S) > MaxLength then begin
@@ -2382,6 +2390,7 @@ var
       else
         Str(E:MaxLength, sAnsi);
       S := Trim(string(sAnsi));
+      if neg then S := '-' + S;
       S := TrimEmbeddedZeros(S);
     end;
 
@@ -2390,8 +2399,7 @@ var
     if I > 0 then
       S[I] := IntlSupport.DecimalChar;
 
-    if neg and (Length(S)>0) then S[1] := '-';
-    Result := S;
+    result := S;
   end;
 
 begin

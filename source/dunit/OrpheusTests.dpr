@@ -199,7 +199,8 @@ uses
   TestOvcSpinner in 'TestOvcSpinner.pas' {TestOvcSpinnerForm},
   TestOvcMisc in 'TestOvcMisc.pas',
   TestOvcComboBox in 'TestOvcComboBox.pas' {TfrmTestOvcComboBox},
-  TestOvcDlm in 'TestOvcDlm.pas';
+  TestOvcDlm in 'TestOvcDlm.pas',
+  TestOvcFields in 'TestOvcFields.pas' {TestOvcFieldsForm};
 
 {$R *.RES}
 
