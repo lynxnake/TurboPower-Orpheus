@@ -250,8 +250,11 @@ destructor TOvcCellGlyphs.Destroy;
   end;
 {--------}
 procedure TOvcCellGlyphs.Assign(Source : TPersistent);
+  {Changes:
+     09/2012, AB: Bugfix: Did not work with Source=nil (as 'Source is TOvcCellGlyphs'
+              is False in this case. }
   begin
-    if Source is TOvcCellGlyphs then begin
+    if (Source is TOvcCellGlyphs) or (Source = nil) then begin
       if (Source = nil) then
         begin
           CBResMgr.FreeResource(PCellGlyphResource(FResource));
