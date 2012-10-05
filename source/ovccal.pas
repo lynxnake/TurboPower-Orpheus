@@ -41,6 +41,7 @@ unit ovccal;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.Types, {$ENDIF}
   Windows, Buttons, Classes, Controls, Forms, Graphics, Menus, Messages,
   SysUtils, OvcBase, OvcConst, OvcData, OvcIntl,
   OvcMisc, OvcDate;

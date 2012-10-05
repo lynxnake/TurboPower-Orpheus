@@ -36,6 +36,7 @@ interface
 {$I OVC.INC}
 
 uses
+  {$IFDEF VERSIONXE3} System.UITypes, System.Types, {$ENDIF}
   Windows, Messages, Forms, Controls, StdCtrls, Classes, Graphics,
   ovccklb, ovctcmmn, OvcTCell, OvcTCStr{$IFDEF VERSION2010}, Themes{$ENDIF};
 

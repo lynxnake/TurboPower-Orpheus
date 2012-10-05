@@ -41,13 +41,14 @@ unit ovcdata;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.UITypes, {$ENDIF}
   Windows, Controls, Forms, Graphics, Messages, StdCtrls, SysUtils, OvcConst,
   OvcDate, O32SR;
 
 const
   BorderStyles    : array[TBorderStyle] of LongInt =
                     (0, WS_BORDER);
-  ScrollBarStyles : array [TScrollStyle] of LongInt =
+  ScrollBarStyles : array [{$IFDEF VERSIONXE3} System.UITypes.{$ENDIF}TScrollStyle] of LongInt =
                     (0, WS_HSCROLL, WS_VSCROLL, WS_HSCROLL or WS_VSCROLL);
 
 {$IFNDEF VERSION4}

@@ -42,6 +42,7 @@ unit ovccklb;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.Types, {$ENDIF}
   Windows, Classes, Controls, Forms, Graphics, Menus, Messages, StdCtrls,
   SysUtils, {$IFDEF VERSION4} ImgList, {$ENDIF} OvcBase, OvcData,
   OvcLB, OvcMisc{$IFDEF VERSION7}, Themes{$ENDIF};

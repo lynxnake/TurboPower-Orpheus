@@ -41,6 +41,7 @@ unit ovcae;
 interface
 
 uses
+  {$IFDEF VERSIONXE2} System.Types, {$ENDIF}
   Windows, Classes, Controls, Forms, Graphics, Menus, Messages, SysUtils,
   OvcNf, OvcPf, OvcSf, OvcColor, OvcBase, OvcCmd, OvcConst,
   OvcData, OvcEf, OvcStr;

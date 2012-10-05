@@ -41,6 +41,7 @@ unit ovcsplit;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.Types, {$ENDIF}
   Windows, SysUtils, Messages, Classes, Graphics, Controls, Forms, Dialogs,
   Buttons, ExtCtrls, OvcBase, OvcData;
 

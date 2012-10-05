@@ -41,6 +41,7 @@ unit ovcftcbx;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.Types, {$ENDIF}
   Windows, Messages, SysUtils, Classes, Controls, Graphics, Printers,
   OvcCmbx, OvcData, OvcMisc{$IFNDEF VERSION5}, StdCtrls{$ENDIF};
 

@@ -42,6 +42,7 @@ unit ovcdbcl;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.UITypes, System.Types, {$ENDIF}
   Windows, Buttons, Classes, Controls, Db, DbCtrls, Forms, Graphics, StdCtrls,
   Menus, Messages, SysUtils, OvcBase, OvcCmd, OvcConst, OvcData, OvcMisc,
   OvcColor;
@@ -57,6 +58,10 @@ type
     {event to notify of a scroll action}
 
 type
+  {$IFDEF VERSIONXE3}
+  TScrollStyle = System.UITypes.TScrollStyle;
+  {$ENDIF}
+
   TOvcDbColumnList = class(TOvcCustomControlEx)
   {.Z+}
   protected {private}

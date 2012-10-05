@@ -40,6 +40,7 @@ unit o32lkout;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.UITypes, System.Types, {$ENDIF}
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   Buttons, Menus, ExtCtrls, MMSystem, StdCtrls, OvcBase, OvcVer, OvcData,
   OvcConst, OvcMisc, OvcSpeed, OvcFiler, OvcState;

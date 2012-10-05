@@ -122,6 +122,10 @@ type
   TBuffer = array[0..255] of Char;
 
 type
+  {$IFDEF VERSIONXE3}
+  TScrollStyle = System.UITypes.TScrollStyle;
+  {$ENDIF}
+
   TOvcCustomVirtualListBox = class(TOvcCustomControlEx)
   {.Z+}
   protected {private}

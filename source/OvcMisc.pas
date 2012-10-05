@@ -47,6 +47,7 @@ unit ovcmisc;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.UITypes, {$ENDIF}
   Windows, Buttons, Classes, Controls, ExtCtrls, Forms, Graphics, Messages,
   SysUtils, Consts, OvcData;
 

@@ -47,6 +47,7 @@ unit ovcurl;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.UITypes, {$ENDIF}
   Windows, Classes, Controls, Dialogs, ExtCtrls, Graphics, Menus, ShellAPI,
   Messages, StdCtrls, SysUtils, OvcVer;
 

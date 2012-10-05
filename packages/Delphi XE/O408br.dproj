@@ -2,7 +2,7 @@
 		<PropertyGroup>
 			<ProjectGuid>{BA59A88B-97E3-435F-A04A-1510502C1E47}</ProjectGuid>
 			<MainSource>O408br.dpk</MainSource>
-			<Config Condition="'$(Config)'==''">Debug</Config>
+			<Config Condition="'$(Config)'==''">Release</Config>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
 			<ProjectVersion>12.3</ProjectVersion>
 			<Platform Condition="'$(Platform)'==''">Win32</Platform>

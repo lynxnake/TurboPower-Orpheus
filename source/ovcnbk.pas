@@ -50,6 +50,7 @@ unit ovcnbk;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.UITypes, System.Types, {$ENDIF}
   Windows, Buttons, Classes, Controls, Forms, Graphics, Menus, Messages,
   SysUtils, StdCtrls, OvcBase, OvcCmd, OvcConst, OvcData, OvcExcpt, OvcMisc
   {$IFDEF VERSION7}, Themes{$ENDIF};

@@ -41,6 +41,7 @@ unit ovcpeakm;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.UITypes, {$ENDIF}
   Windows, Classes, Controls, Graphics, Forms, Messages, SysUtils, OvcBase,
   ExtCtrls;
 

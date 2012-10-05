@@ -42,6 +42,7 @@ unit ovcedsld;
 interface
 
 uses
+  {$IFDEF VERSIONXE2} System.Types, {$ENDIF}
   Windows, Buttons, Classes, Controls, Forms, Graphics, Menus, Messages,
   StdCtrls, SysUtils, OvcBase, OvcConst, OvcData, OvcEdPop, OvcMisc,
   OvcSlide, OvcExcpt,imm;

@@ -48,12 +48,17 @@ unit ovctable;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.UITypes, System.Types, {$ENDIF}
   Windows, SysUtils, Messages, Graphics, Classes, Controls, Forms, StdCtrls,
   Menus, Dialogs, OvcMisc, OvcData, OvcConst, OvcBase, OvcCmd, OvcTCmmn,
   OvcTCAry, OvcTSelL, OvcTCell, OvcTCHdr, OvcTGPns,
   OvcTbClr, OvcTbRws, OvcTbCls, OvcDrag;
 
 type
+  {$IFDEF VERSIONXE3}
+  TScrollStyle = System.UITypes.TScrollStyle;
+  {$ENDIF}
+
   TOvcCustomTable = class(TOvcTableAncestor)
     {-The custom class for tables}
     protected {private}

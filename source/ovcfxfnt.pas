@@ -42,6 +42,7 @@ unit ovcfxfnt;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.UITypes, {$ENDIF}
   Windows, Classes, SysUtils, Graphics, OvcExcpt;
 
 var

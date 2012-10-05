@@ -42,6 +42,7 @@ unit ovctcmmn;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.Types, {$ENDIF}
   Windows, SysUtils, Messages, Graphics, Forms, StdCtrls, Classes, Controls,
   OvcBase, OvcData, OvcExcpt, OvcMisc;
 

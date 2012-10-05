@@ -43,11 +43,16 @@ unit ovcdbtbl;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.UITypes, {$ENDIF}
   Windows, Buttons, Classes, Controls, DB, Forms, Graphics, Menus, Messages,
   SysUtils, StdCtrls, OvcBase, OvcCmd, OvcConst, OvcData, OvcExcpt, OvcMisc,
   OvcTCBEF, OvcTCell, OvcTBClr, OvcTBCls, OvcTCmmn, OvcTGPns, OvcDate;
 
 type
+  {$IFDEF VERSIONXE3}
+  TScrollStyle = System.UITypes.TScrollStyle;
+  {$ENDIF}
+
   {data-aware table options}
   TOvcDbTableOptions = (dtoCellsPaintText, dtoAllowColumnMove,
     dtoAllowColumnSize, dtoAlwaysEditing, dtoHighlightActiveRow,

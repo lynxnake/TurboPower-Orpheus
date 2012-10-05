@@ -41,6 +41,7 @@ unit ovcfmcbx;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.Types, {$ENDIF}
   Windows, Messages, SysUtils, Classes, Graphics, Registry, OvcCmbx
   {$IFNDEF VERSION5}, StdCtrls{$ENDIF};
 

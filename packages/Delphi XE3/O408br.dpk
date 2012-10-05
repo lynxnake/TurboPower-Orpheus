@@ -22,17 +22,18 @@
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
-PACKAGE O408bd;
+PACKAGE O408br;
 
 {$R *.res}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
 {$ALIGN 8}
 {$ASSERTIONS ON}
 {$BOOLEVAL OFF}
-{$DEBUGINFO OFF}
+{$DEBUGINFO ON}
 {$EXTENDEDSYNTAX ON}
 {$IMPORTEDDATA ON}
-{$IOCHECKS OFF}
-{$LOCALSYMBOLS OFF}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
 {$LONGSTRINGS ON}
 {$OPENSTRINGS ON}
 {$OPTIMIZATION ON}
@@ -46,27 +47,40 @@ PACKAGE O408bd;
 {$WRITEABLECONST ON}
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
-{$DESCRIPTION 'TurboPower Orpheus 4.08 data-aware designtime package - VCL110'}
-{$LIBSUFFIX '110'}
-{$DESIGNONLY}
-{$IMPLICITBUILD ON}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
+{$DESCRIPTION 'TurboPower Orpheus 4.08 data-aware runtime package - VCL170'}
+{$LIBSUFFIX '170'}
+{$RUNONLY}
+{$IMPLICITBUILD OFF}
 
 requires
-  Vcl,
-  O408_d,
-  O408_r,
-  O408br,
-  designide;
+  vclx,
+  dbrtl,
+  vcldb,
+  O408_r;
 
 contains
-  ovcdbae0 in '..\..\source\ovcdbae0.pas' {OvcfrmDbAeRange},
-  ovcdbae1 in '..\..\source\ovcdbae1.pas' {OvcfrmDbAeSimpleMask},
-  ovcdbae2 in '..\..\source\ovcdbae2.pas' {OvcfrmDbAePictureMask},
-  ovcdbae3 in '..\..\source\ovcdbae3.pas' {OvcfrmDbAeNumericMask},
-  ovcdbhbd in '..\..\source\ovcdbhbd.pas',
-  ovcdbtb0 in '..\..\source\ovcdbtb0.pas' {OvcfrmDbColEditor},
-  ovcdbtb1 in '..\..\source\ovcdbtb1.pas' {OvcfrmProperties},
-  ovcregbd in '..\..\source\ovcregbd.pas',
-  ovcregdb in '..\..\source\ovcregdb.pas';
+  ovcdbae in '..\..\source\ovcdbae.pas',
+  ovcdbcal in '..\..\source\ovcdbcal.pas',
+  ovcdbccb in '..\..\source\ovcdbccb.pas',
+  ovcdbcl in '..\..\source\ovcdbcl.pas',
+  ovcdbclk in '..\..\source\ovcdbclk.pas',
+  ovcdbdat in '..\..\source\ovcdbdat.pas',
+  ovcdbdLb in '..\..\source\ovcdbdLb.pas',
+  ovcdbed in '..\..\source\ovcdbed.pas',
+  ovcdbfcb in '..\..\source\ovcdbfcb.pas',
+  ovcdbmdg in '..\..\source\ovcdbmdg.pas' {OvcfrmDbMemoDlg},
+  ovcdbnf in '..\..\source\ovcdbnf.pas',
+  ovcdbnum in '..\..\source\ovcdbnum.pas',
+  ovcdbpf in '..\..\source\ovcdbpf.pas',
+  ovcdbplb in '..\..\source\ovcdbplb.pas',
+  ovcdbrpv in '..\..\source\ovcdbrpv.pas',
+  ovcdbsed in '..\..\source\ovcdbsed.pas',
+  ovcdbsf in '..\..\source\ovcdbsf.pas',
+  ovcdbsld in '..\..\source\ovcdbsld.pas',
+  ovcdbtbl in '..\..\source\ovcdbtbl.pas',
+  ovcdbtim in '..\..\source\ovcdbtim.pas',
+  o32dbfe in '..\..\source\o32dbfe.pas';
 
 end.

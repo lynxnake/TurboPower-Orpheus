@@ -42,6 +42,7 @@ unit ovccmbx;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.UITypes, System.Types, {$ENDIF}
   Windows, SysUtils, Messages, Classes, Graphics, Controls, Forms, StdCtrls,
   Buttons, OvcBase, OvcConst, OvcData, OvcMisc, OvcBordr, OvcTimer
   {$IFDEF VERSION2010}, Themes{$ENDIF};

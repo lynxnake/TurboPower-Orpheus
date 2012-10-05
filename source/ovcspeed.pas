@@ -42,6 +42,7 @@ unit ovcspeed;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.Types, {$ENDIF}
   Windows, Buttons, Classes, Controls, ExtCtrls, Graphics, Forms,
   {$IFDEF VERSION4} ActnList, ImgList, {$ENDIF} Messages, SysUtils,
   OvcBase, OvcMisc;

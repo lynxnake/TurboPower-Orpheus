@@ -42,6 +42,7 @@ unit ovcclrcb;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.UITypes, System.Types, {$ENDIF}
   Windows, Classes, Controls, Forms, Graphics, Menus, Messages, StdCtrls,
   OvcCmbx, OvcConst, OvcData {$IFDEF VERSION2010}, Themes{$ENDIF};
 

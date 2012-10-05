@@ -47,6 +47,7 @@ unit ovcviewr;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.UITypes, {$ENDIF}
   Windows, Classes, Controls, Forms, Graphics, Menus, Messages, StdCtrls,
   SysUtils, OvcBase, OvcCaret, OvcCmd, OvcColor, OvcConst, OvcData, OvcExcpt,
   OvcFxFnt, OvcMisc, OvcStr, OvcBordr, OvcEditU;
@@ -68,6 +69,10 @@ const
   MaxSmallInt          = High(SmallInt);
 
 type
+  {$IFDEF VERSIONXE3}
+  TScrollStyle = System.UITypes.TScrollStyle;
+  {$ENDIF}
+
   {The ancestor viewer class}
   TOvcBaseViewer = class(TOvcCustomControlEx)
   {.Z+}

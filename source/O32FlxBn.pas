@@ -42,6 +42,7 @@ unit o32flxbn;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.UITypes, System.Types, {$ENDIF}
   Windows, Controls, Messages, Buttons, Graphics, Classes, OvcBase, OvcVer,
   Grids, StdCtrls{$IFDEF VERSION4}, O32MouseMon{$ENDIF}, OvcMisc;
 

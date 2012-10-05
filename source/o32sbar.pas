@@ -41,6 +41,7 @@ the contained controls to size and position themselves.  It should be fixed
 ASAP. }
 
 uses
+  {$IFDEF VERSIONXE3} System.Types, {$ENDIF}
   Windows, Messages, SysUtils, Classes, ExtCtrls, Controls, Graphics, Commctrl,
   ComCtrls, Forms, {$IFDEF Version4}StdActns,{$ENDIF} OvcBase;
 

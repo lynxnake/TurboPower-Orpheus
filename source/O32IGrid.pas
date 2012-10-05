@@ -45,6 +45,7 @@ unit o32igrid;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.UITypes, System.Types, {$ENDIF}
   Windows, Graphics, Classes, Forms, Mask, StdCtrls, ExtCtrls, Grids,
   Messages, Controls, OvcBase, OvcCmbx, OvcClrCb, ovcftcbx;
 
@@ -52,6 +53,10 @@ const
   ScrollBarWidth = 16;
 
 type
+  {$IFDEF VERSIONXE3}
+  TScrollStyle = System.UITypes.TScrollStyle;
+  {$ENDIF}
+
   {Forward Declarations}
   TO32CustomInspectorGrid = class;
 

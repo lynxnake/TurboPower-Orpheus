@@ -41,6 +41,7 @@ unit ovcbcklb;
 interface
 
 uses
+  {$IFDEF VERSIONXE2} System.Types, {$ENDIF}
   Windows, Classes, Controls, Forms, Graphics, Menus, Messages, StdCtrls,
   SysUtils, OvcBase, OvcLB;
 

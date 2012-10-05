@@ -42,6 +42,7 @@ unit ovcslide;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.Types, {$ENDIF}
   Windows, Classes, Buttons, Controls, Graphics, Forms, Messages, SysUtils,
   OvcBase, OvcConst, OvcData, OvcExcpt;
 

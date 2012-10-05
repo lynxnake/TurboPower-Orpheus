@@ -41,6 +41,7 @@ unit ovcdbae;
 interface
 
 uses
+  {$IFDEF VERSIONXE2} System.Types, {$ENDIF}
   Windows, Buttons, Classes, Controls, DB, DbCtrls, Forms, Graphics,
   SysUtils, Messages, OvcBase, OvcColor, OvcCmd, OvcConst, OvcData, OvcDbNf,
   OvcDbPf, OvcDbSf, OvcMisc, OvcEf, OvcStr;

@@ -47,6 +47,7 @@ unit ovcbase;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.UITypes, System.Types, {$ENDIF}
   Windows, Classes, Controls, Dialogs, Forms, Messages, StdCtrls, SysUtils,
   OvcCmd, OvcData, OvcMisc, OvcConst, OvcExcpt, OvcTimer, OvcDate;
 

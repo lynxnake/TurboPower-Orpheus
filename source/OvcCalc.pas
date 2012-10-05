@@ -41,6 +41,7 @@ unit ovccalc;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.UITypes, System.Types, {$ENDIF}
   Windows, Buttons, Classes, ClipBrd, Controls, ExtCtrls, Forms, Graphics,
   Menus, Messages, StdCtrls, SysUtils, OvcData, OvcConst, OvcBase, OvcMisc;
 

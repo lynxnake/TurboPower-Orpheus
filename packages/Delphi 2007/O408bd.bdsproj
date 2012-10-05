@@ -125,7 +125,7 @@
 			<Linker Name="MinStackSize">16384</Linker>
 			<Linker Name="MaxStackSize">1048576</Linker>
 			<Linker Name="ImageBase">4194304</Linker>
-			<Linker Name="ExeDescription">TurboPower Orpheus 4.08 data-aware designtime package - VCL120</Linker>
+			<Linker Name="ExeDescription">TurboPower Orpheus 4.08 data-aware designtime package - VCL110</Linker>
 		</Linker>
 		<Directories>
 			<Directories Name="OutputDir"></Directories>
@@ -178,10 +178,13 @@
 			<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
 			<VersionInfoKeys Name="Comments"></VersionInfoKeys>
 		</VersionInfoKeys>
-		<buildevents/>  <Language>
-      <Language Name="ActiveLang"></Language>
-      <Language Name="ProjectLang">$00000000</Language>
-      <Language Name="RootDir"></Language>
-    </Language>
+		<buildevents/>
+		<Language>
+			<Language Name="ActiveLang"></Language>
+			<Language Name="ProjectLang">$00000000</Language>
+			<Language Name="RootDir"></Language>
+		</Language>  <Excluded_Packages>
+      <Excluded_Packages Name="c:\program files (x86)\borland\bds\4.0\RaveReports\Lib\dclRave.bpl">Datei c:\program files (x86)\borland\bds\4.0\RaveReports\Lib\dclRave.bpl nicht gefunden</Excluded_Packages>
+    </Excluded_Packages>
   </Delphi.Personality>
 </BorlandProject>

@@ -2,7 +2,7 @@
 		<PropertyGroup>
 			<ProjectGuid>{BA59A88B-97E3-435F-A04A-1510502C1E47}</ProjectGuid>
 			<MainSource>O408br.dpk</MainSource>
-			<Config Condition="'$(Config)'==''">Debug</Config>
+			<Config Condition="'$(Config)'==''">Release</Config>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
 			<ProjectVersion>13.4</ProjectVersion>
 			<Base>True</Base>
@@ -103,12 +103,7 @@
 			<DCCReference Include="vclx.dcp"/>
 			<DCCReference Include="dbrtl.dcp"/>
 			<DCCReference Include="vcldb.dcp"/>
-			<DCCReference Include="bdertl.dcp"/>
 			<DCCReference Include="O408_r.dcp"/>
-			<DCCReference Include="..\..\source\ovcdbacb.pas"/>
-			<DCCReference Include="..\..\source\ovcdbadg.pas">
-				<Form>OvcfrmAliasDlg</Form>
-			</DCCReference>
 			<DCCReference Include="..\..\source\ovcdbae.pas"/>
 			<DCCReference Include="..\..\source\ovcdbcal.pas"/>
 			<DCCReference Include="..\..\source\ovcdbccb.pas"/>
@@ -118,9 +113,6 @@
 			<DCCReference Include="..\..\source\ovcdbdLb.pas"/>
 			<DCCReference Include="..\..\source\ovcdbed.pas"/>
 			<DCCReference Include="..\..\source\ovcdbfcb.pas"/>
-			<DCCReference Include="..\..\source\ovcdbhll.pas"/>
-			<DCCReference Include="..\..\source\ovcdbidx.pas"/>
-			<DCCReference Include="..\..\source\ovcdbise.pas"/>
 			<DCCReference Include="..\..\source\ovcdbmdg.pas">
 				<Form>OvcfrmDbMemoDlg</Form>
 			</DCCReference>
@@ -133,7 +125,6 @@
 			<DCCReference Include="..\..\source\ovcdbsf.pas"/>
 			<DCCReference Include="..\..\source\ovcdbsld.pas"/>
 			<DCCReference Include="..\..\source\ovcdbtbl.pas"/>
-			<DCCReference Include="..\..\source\ovcdbtcb.pas"/>
 			<DCCReference Include="..\..\source\ovcdbtim.pas"/>
 			<DCCReference Include="..\..\source\o32dbfe.pas"/>
 			<BuildConfiguration Include="Debug">

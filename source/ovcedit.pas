@@ -45,6 +45,7 @@ unit ovcedit;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.UITypes, System.Types, {$ENDIF}
   Windows, MMSystem, Classes, Controls, Forms, Graphics, Menus, Messages,
   StdCtrls, SysUtils, OvcBase, OvcCaret, OvcColor, OvcConst, OvcCmd, OvcData,
   OvcEditN, OvcEditU, OvcExcpt, OvcFxFnt, OvcMisc, OvcStr, OvcEditP, OvcBordr;
@@ -53,6 +54,10 @@ const
   MARGINPAD = 5;
 
 type
+  {$IFDEF VERSIONXE3}
+  TScrollstyle = System.UITypes.TScrollStyle;
+  {$ENDIF}
+
   {Forward Declarations}
   TOvcCustomEditor = class;
 

@@ -40,6 +40,7 @@ unit ovcdbmdg;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.UITypes, {$ENDIF}
   Windows, Classes, Controls, DB, DBCtrls, Dialogs, ExtCtrls, Forms, Graphics,
   Messages, StdCtrls, SysUtils, OvcConst, OvcData, OvcDlg;
 

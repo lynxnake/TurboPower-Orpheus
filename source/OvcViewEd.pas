@@ -34,6 +34,7 @@ unit ovcviewed;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.Types, {$ENDIF}
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms,
   StdCtrls, ExtCtrls, OvcDrag, OvcRptVw, OvcBase, OvcRVIdx,
   Menus, OvcCmbx;

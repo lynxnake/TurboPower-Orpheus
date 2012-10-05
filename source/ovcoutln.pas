@@ -42,12 +42,17 @@ unit ovcoutln;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.UITypes, {$ENDIF}
   Windows, Classes, Controls, Forms, Graphics, Messages, SysUtils,
   OvcBase, OvcMisc, OvcVLB, OvcDlm, StdCtrls;
 
 const
   ChildIndent = 17;
 type
+  {$IFDEF VERSIONXE3}
+  TScrollStyle = System.UITypes.TScrollStyle;
+  {$ENDIF}
+
   TOvcOlNodeStyle = (osPlain, osRadio, osCheck);
   TOvcOlNodeMode  = (omPreload, omDynamicLoad, omDynamic);
 

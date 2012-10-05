@@ -45,6 +45,7 @@ unit ovcrptvw;
 interface
 
 uses
+  {$IFDEF VERSIONXE3} System.UITypes, System.Types, {$ENDIF}
   Windows, Classes, Controls, ExtCtrls, Forms, Graphics, Messages, SysUtils,
   Menus, StdCtrls,
   {$IFDEF VERSION4} ImgList,  {$ENDIF}
@@ -70,6 +71,10 @@ const
 
 
 type
+  {$IFDEF VERSIONXE3}
+  TScrollStyle = System.UITypes.TScrollStyle;
+  {$ENDIF}
+
   TOvcRVListBox = class;
   TOvcCustomReportView = class;
 

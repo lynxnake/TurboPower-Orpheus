@@ -25,14 +25,15 @@
 PACKAGE O408bd;
 
 {$R *.res}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
 {$ALIGN 8}
 {$ASSERTIONS ON}
 {$BOOLEVAL OFF}
-{$DEBUGINFO OFF}
+{$DEBUGINFO ON}
 {$EXTENDEDSYNTAX ON}
 {$IMPORTEDDATA ON}
-{$IOCHECKS OFF}
-{$LOCALSYMBOLS OFF}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
 {$LONGSTRINGS ON}
 {$OPENSTRINGS ON}
 {$OPTIMIZATION ON}
@@ -46,8 +47,10 @@ PACKAGE O408bd;
 {$WRITEABLECONST ON}
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
-{$DESCRIPTION 'TurboPower Orpheus 4.08 data-aware designtime package - VCL110'}
-{$LIBSUFFIX '110'}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
+{$DESCRIPTION 'TurboPower Orpheus 4.08 data-aware designtime package - VCL170'}
+{$LIBSUFFIX '170'}
 {$DESIGNONLY}
 {$IMPLICITBUILD ON}
 
@@ -56,7 +59,8 @@ requires
   O408_d,
   O408_r,
   O408br,
-  designide;
+  designide,
+  bdertl;
 
 contains
   ovcdbae0 in '..\..\source\ovcdbae0.pas' {OvcfrmDbAeRange},
@@ -67,6 +71,12 @@ contains
   ovcdbtb0 in '..\..\source\ovcdbtb0.pas' {OvcfrmDbColEditor},
   ovcdbtb1 in '..\..\source\ovcdbtb1.pas' {OvcfrmProperties},
   ovcregbd in '..\..\source\ovcregbd.pas',
-  ovcregdb in '..\..\source\ovcregdb.pas';
+  ovcregdb in '..\..\source\ovcregdb.pas',
+  ovcdbhll in '..\..\source\ovcdbhll.pas',
+  ovcdbise in '..\..\source\ovcdbise.pas',
+  OvcDbIdx in '..\..\source\OvcDbIdx.pas',
+  ovcdbadg in '..\..\source\ovcdbadg.pas' {OvcfrmAliasDlg},
+  ovcdbacb in '..\..\source\ovcdbacb.pas',
+  ovcdbtcb in '..\..\source\ovcdbtcb.pas';
 
 end.
