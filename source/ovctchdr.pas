@@ -100,10 +100,6 @@ type
       property TableFont default True;
       property TextHiColor default clBtnHighlight;
       property TextStyle default tsFlat;
-
-      { Don't publish DataStringType unless 'tcPaint' is changed: It provides a PString
-        to the inherited method (indepented of 'DataStringType') which the inherited method
-        will only be able to handle if DataStringType=tstString. }
       //      property DataStringType;
 
       { 07/2011 AUCOS-HKK: Reimplemented 'ASCIIZStrings' for backward compatibility }
@@ -165,9 +161,6 @@ type
       property TableFont default True;
       property TextHiColor default clBtnHighlight;
       property TextStyle default tsFlat;
-      { Don't publish DataStringType unless 'tcPaint' is changed: It provides a PString
-        to the inherited method (indepented of 'DataStringType') which the inherited method
-        will only be able to handle if DataStringType=tstString. }
       //      property DataStringType;
       { 07/2011 AUCOS-HKK: Reimplemented 'ASCIIZStrings' for backward compatibility }
       property UseASCIIZStrings;
@@ -287,7 +280,9 @@ procedure TOvcTCColHead.tcPaint(TableCanvas : TCanvas;
   {------}
   {-Changes
     04/2011 AB: Bugfix: As the inherited method expects a pointer to a string,
-                PChar(HeadSt) had to be changed to @Head when calling 'inherited tcPaint' }
+                PChar(HeadSt) had to be changed to @Head when calling 'inherited tcPaint'
+    12/2012 AB: Due to the reimplementation of 'UseASCIIZStrings', the case 'DataString-
+                Type'<>tstString must be taken into account here. }
   var
     LockedCols: TColNum;
     ActiveCol : TColNum;
@@ -295,6 +290,7 @@ procedure TOvcTCColHead.tcPaint(TableCanvas : TCanvas;
     C         : char;
     HeadSt    : string;
     CA        : TOvcCellAttributes;
+    orgDST    : TOvcTblStringtype;
   begin
     CA := CellAttr;
     if Assigned(FTable) then
@@ -315,6 +311,10 @@ procedure TOvcTCColHead.tcPaint(TableCanvas : TCanvas;
       CA.caFont.Assign(Font);
       CA.caFontColor := Font.Color;
     end;
+    { We always pass a pointer to a string (@HeadSt) to the inherited method, therefore
+      'DataStringType' must be set to tstString before calling the inherited method. }
+    orgDST := FDataStringType;
+    FDataStringType := tstString;
     { if required show a down arrow for the active column }
     if ShowActiveCol and (ColNum = ActiveCol) then
       begin
@@ -338,15 +338,22 @@ procedure TOvcTCColHead.tcPaint(TableCanvas : TCanvas;
       end
     else {Data points to a column heading}
       begin
-        if Assigned(Data) then
-          HeadSt := PString(Data)^
-        else if (0 <= ColNum) and (ColNum < Headings.Count) then
+        if Assigned(Data) then begin
+          case orgDST of
+            tstShortString: HeadSt := string(POvcShortString(Data)^);
+            tstPChar:       HeadSt := string(PChar(Data));
+            tstString:      HeadSt := PString(Data)^;
+          end;
+        end else if (0 <= ColNum) and (ColNum < Headings.Count) then
           HeadSt := Headings[ColNum]
         else
           HeadSt := '';
         inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CA, @HeadSt);
       end;
+    { restore 'DataStringType' }
+    FDataStringType := orgDST;
   end;
+
 {--------}
 procedure TOvcTCColHead.SetHeadings(H : TStringList);
   begin
@@ -433,6 +440,7 @@ procedure TOvcTCRowHead.tcPaint(TableCanvas : TCanvas;
     ActiveRow  : TRowNum;
     LockedRows : TRowNum;
     WorkRow    : TRowNum;
+    orgDST     : TOvcTblStringtype;
   begin
     if Assigned(FTable) then
       begin
@@ -444,6 +452,10 @@ procedure TOvcTCRowHead.tcPaint(TableCanvas : TCanvas;
         LockedRows := 0;
         ActiveRow := -1;
       end;
+    { We always pass a pointer to a string (@HeadSt) to the inherited method, therefore
+      'DataStringType' must be set to tstString before calling the inherited method. }
+    orgDST := FDataStringType;
+    FDataStringType := tstString;
     {display the row number, etc}
     HeadSt := '';
     if (ShowActiveRow and (RowNum = ActiveRow)) then
@@ -460,6 +472,8 @@ procedure TOvcTCRowHead.tcPaint(TableCanvas : TCanvas;
           end;
         inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @HeadSt);
       end;
+    { restore 'DataStringType' }
+    FDataStringType := orgDST;
   end;
 {--------}
 procedure TOvcTCRowHead.SetShowActiveRow(SAR : boolean);

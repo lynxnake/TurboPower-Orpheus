@@ -1,3 +1,22 @@
+Revision 270: (2013/01/01 Armin Biernaczyk)
+- ovcstate.pas
+  Bugfix: Calling TOvcFormState.ReadFormState made the window disappear when called
+  for a visible form.
+- ovctchdr.pas
+  Bugfix: The components TOvcTCColHead and TOvcTCRowHead displayed garbage when
+  'UseASCIIZStrings' was set to False.
+
+Revision 269: (2012/10/05 Armin Biernaczyk)
+Added support for Delphi XE3
+
+Revision 268: (2012/09/30 Armin Biernaczyk)
+- ovctgres.pas
+  Minor bugfix: The property TOvcTCCheckBox.CellGlyphs.IsDefault could not be set to true.
+
+Revision 267: (2012/03/18 Armin Biernaczyk)
+- Tests added to OrpheusTests
+- Minor changes regarding the bugfixes in rev 266
+
 Revision 266: (2012/03/17 Armin Biernaczyk)
 - ovcef.pas
   Workaround in TOvcBaseEntryField.efRangeToStRange for a bug in system.str in Delphi XE2

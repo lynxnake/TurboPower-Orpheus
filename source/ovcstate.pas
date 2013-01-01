@@ -563,13 +563,15 @@ type
     FWindowState    : TWindowState;
   end;
 
-               {revised}
-(*
-procedure TOvcFormState.ReadFormState(Form : TCustomForm; const Section : string);
-*)
 procedure TOvcFormState.ReadFormState(Form : TWinControl; const Section : string);
+  {Changes:
+     01/2013, AB: Bugfix: if this method was called for a visible TForm, then the form
+        disappeared, because SetWindowPlacement was called with Placement.ShowCmd =
+        SW_HIDE. }
 const
   Delims = [',', ' '];
+  ShowCommands: array[TWindowState] of Integer =
+    (SW_SHOWNORMAL, SW_MINIMIZE, SW_SHOWMAXIMIZED);
 var
   Placement : TWindowPlacement;
   WinState  : TWindowState;
@@ -589,23 +591,21 @@ begin
 
 
   {see if screen res has changed - if so, exit rather than mess things up}
-(*
-  if Form is TForm then begin
-*)
   X := FStorage.ReadInteger(Section, cPixelsPerInch, TForm(Form).PixelsPerInch);
   if X <> TForm(AForm).PixelsPerInch then
     Exit;
-(*
-  end;
-*)
-
 
   FillChar(Placement, SizeOf(Placement), #0);
   Placement.Length := SizeOf(TWindowPlacement);
   GetWindowPlacement(Form.Handle, @Placement);
 
   with Placement, TForm(Form) do begin
-    ShowCmd := SW_HIDE;
+    { Do not set ShowCmd to SW_HIDE when the form is visible - otherwise the call to
+      SetWindowPlacement later on will make the window disappear. }
+    if Visible then
+      ShowCmd := ShowCommands[WindowState]
+    else
+      ShowCmd := SW_HIDE;
     if (fsPosition in FOptions) then begin
       Flags := StrToIntDef(FStorage.ReadString(Section, cFlags, ''), Flags);
       S := FStorage.ReadString(Section, cNormPos, '');
@@ -628,7 +628,6 @@ begin
           if rcNormalPosition.Right > rcNormalPosition.Left then
             SetWindowPlacement(Handle, @Placement);
         end;
-
       end
       else Exit;
     end;
