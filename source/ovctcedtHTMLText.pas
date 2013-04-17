@@ -1,0 +1,786 @@
+﻿{*********************************************************}
+{*                  OVCTCEDT.PAS 4.08                    *}
+{*********************************************************}
+
+{* ***** BEGIN LICENSE BLOCK *****                                            *}
+{* Version: MPL 1.1                                                           *}
+{*                                                                            *}
+{* The contents of this file are subject to the Mozilla Public License        *}
+{* Version 1.1 (the "License"); you may not use this file except in           *}
+{* compliance with the License. You may obtain a copy of the License at       *}
+{* http://www.mozilla.org/MPL/                                                *}
+{*                                                                            *}
+{* Software distributed under the License is distributed on an "AS IS" basis, *}
+{* WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License   *}
+{* for the specific language governing rights and limitations under the       *}
+{* License.                                                                   *}
+{*                                                                            *}
+{* The Original Code is TurboPower Orpheus                                    *}
+{*                                                                            *}
+{* The Initial Developer of the Original Code is TurboPower Software          *}
+{*                                                                            *}
+{* Portions created by TurboPower Software Inc. are Copyright (C)1995-2002    *}
+{* TurboPower Software Inc. All Rights Reserved.                              *}
+{*                                                                            *}
+{* Contributor(s):                                                            *}
+{*   Sebastian Zierer                                                         *}
+{*                                                                            *}
+{* ***** END LICENSE BLOCK *****                                              *}
+
+{$I OVC.INC}
+
+{$B-} {Complete Boolean Evaluation}
+{$I+} {Input/Output-Checking}
+{$P+} {Open Parameters}
+{$T-} {Typed @ Operator}
+{.W-} {Windows Stack Frame}
+{$X+} {Extended Syntax}
+
+unit ovctcedtHTMLText;
+
+interface
+
+uses
+  Windows, SysUtils, Messages, Classes, Controls, Forms, StdCtrls,
+  ComCtrls,
+  OvcBase, OvcTCmmn, OvcTCell, OvcTCStr, ovctcedtTextFormatBar,
+  Graphics, ovctcedt, ovcRTF_IText, ovcRTF_Paint; { - for default color definition}
+
+type
+  TOvcTCHtmlTextEdit = class(TRichEdit)
+  protected {private}
+    FCell : TOvcBaseTableCell;
+  private
+    FAllowedFontStyles: TFontStyles;
+    function GetRichText: string;
+    procedure SetRichText(const Value: string);
+    function GetHTMLText: string;
+    procedure SetHTMLText(const Value: string);
+    procedure SetAllowedFontStyles(const Value: TFontStyles);
+  protected
+    procedure WMChar(var Msg : TWMKey); message WM_CHAR;
+    procedure WMGetDlgCode(var Msg : TMessage); message WM_GETDLGCODE;
+    procedure WMKeyDown(var Msg : TWMKey); message WM_KEYDOWN;
+    procedure WMKillFocus(var Msg : TWMKillFocus); message WM_KILLFOCUS;
+    procedure WMSetFocus(var Msg : TWMSetFocus); message WM_SETFOCUS;
+    procedure KeyPress(var Key: Char); override;
+    procedure KeyDown(var Key: Word; Shift: TShiftState); override;
+
+    property CellOwner : TOvcBaseTableCell
+       read FCell write FCell;
+  public
+    constructor Create(AOwner: TComponent); override;
+    property RichText: string read GetRichText write SetRichText;
+    property HTMLText: string read GetHTMLText write SetHTMLText;
+    class procedure FillIDocument(const Doc: ITextDocument; HtmlText: string);
+    function GetIDoc: ITextDocument;
+  published
+    property AllowedFontStyles: TFontStyles read FAllowedFontStyles write SetAllowedFontStyles default [fsBold, fsItalic, fsUnderline];
+  end;
+
+  TOvcTCCustomHTMLText = class(TOvcTCBaseString)
+  private
+    FAllowedFontStyles: TFontStyles;
+    FFormatBar: TovcTextFormatBar;
+    procedure SetAllowedFontStyles(const Value: TFontStyles);
+  protected {private}
+    FEdit        : TOvcTCHtmlTextEdit;
+    FMaxLength   : word;
+    FWantReturns : boolean;
+    FWantTabs    : boolean;
+
+  protected
+    function GetCellEditor : TControl; override;
+    function GetModified : boolean;
+
+    property MaxLength : word
+       read FMaxLength write FMaxLength;
+
+    property WantReturns : boolean
+       read FWantReturns write FWantReturns;
+
+    property WantTabs : boolean
+       read FWantTabs write FWantTabs;
+
+    procedure tcPaint(TableCanvas : TCanvas;
+                const CellRect    : TRect;
+                      RowNum      : TRowNum;
+                      ColNum      : TColNum;
+                const CellAttr    : TOvcCellAttributes;
+                      Data        : pointer); override;
+
+    procedure tcPaintStrZ(TblCanvas : TCanvas;
+                    const CellRect  : TRect;
+                    const CellAttr  : TOvcCellAttributes;
+                          StZ       : string); override;
+
+  public
+    constructor Create(AOwner : TComponent); override;
+    function CreateEditControl(AOwner : TComponent) : TOvcTCHtmlTextEdit; virtual;
+
+    function  EditHandle : THandle; override;
+    procedure EditHide; override;
+    procedure EditMove(CellRect : TRect); override;
+    procedure SaveEditedData(Data : pointer); override;
+    procedure StartEditing(RowNum : TRowNum; ColNum : TColNum;
+                           CellRect : TRect;
+                     const CellAttr : TOvcCellAttributes;
+                           CellStyle: TOvcTblEditorStyle;
+                           Data : pointer); override;
+    procedure StopEditing(SaveValue : boolean;
+                          Data : pointer); override;
+
+    property Modified : boolean
+       read GetModified;
+    property AllowedFontStyles: TFontStyles read FAllowedFontStyles write SetAllowedFontStyles default [fsBold, fsItalic, fsUnderline];
+  end;
+
+  TOvcTCHTMLText = class(TOvcTCCustomHTMLText)
+    published
+      {properties inherited from custom ancestor}
+      property Access default otxDefault;
+      property Adjust default otaDefault;
+      property Color;
+      property DataStringType;
+//      property EllipsisMode;
+//      property Font;
+      property Hint;
+//      property IgnoreCR;
+      property Margin default 4;
+      property MaxLength default 0;
+      property ShowHint default False;
+      property Table;
+      property TableColor default True;
+      property TableFont default True;
+      property TextHiColor default clBtnHighlight;
+//      property TextStyle default tsFlat;
+      { 07/2011 AUCOS-HKK: Reimplemented 'ASCIIZStrings' for backward compatibility }
+      property UseASCIIZStrings;
+      property UseWordWrap default True;
+//      property WantReturns default False;
+//      property WantTabs default False;
+      property AllowedFontStyles;
+
+      {events inherited from custom ancestor}
+      property OnChange;
+      property OnClick;
+      property OnDblClick;
+      property OnDragDrop;
+      property OnDragOver;
+      property OnEndDrag;
+      property OnEnter;
+      property OnExit;
+      property OnKeyDown;
+      property OnKeyPress;
+      property OnKeyUp;
+      property OnMouseDown;
+      property OnMouseMove;
+      property OnMouseUp;
+      property OnOwnerDraw;
+  end;
+
+
+implementation
+
+uses
+  Types, Variants, RichEdit, ovcRTF_RichOle, ActiveX, ClipBrd;
+
+function StyleΔToHTML(Old, New: TFontStyles): string;
+var
+  Removed: TFontStyles;
+  Added: TFontStyles;
+begin
+  Result := '';
+  Removed := Old - New;
+  Added := New - Old;
+  if fsBold in Added then
+    Result := Result + '<b>';
+  if fsItalic in Added then
+    Result := Result + '<i>';
+  if fsUnderline in Added then
+    Result := Result + '<u>';
+
+  if fsBold in Removed then
+    Result := Result + '</b>';
+  if fsItalic in Removed then
+    Result := Result + '</i>';
+  if fsUnderline in Removed then
+    Result := Result + '</u>';
+end;
+
+{ TOvcTCHtmlTextEdit }
+
+function Char2Html(C: Char): string;
+begin
+  case C of
+    '<': Result := '&lt;';
+    '>': Result := '&gt;';
+    '&': Result := '&amp;';
+    else
+      Result := C;
+  end;
+end;
+
+constructor TOvcTCHtmlTextEdit.Create(AOwner: TComponent);
+begin
+  inherited;
+  AllowedFontStyles := [fsBold, fsItalic, fsUnderline];
+end;
+
+class procedure TOvcTCHtmlTextEdit.FillIDocument(const Doc: ITextDocument; HtmlText: string);
+var
+  SB: TStringBuilder;
+  State: (normal, html, specialchar);
+  I: Integer;
+  CurHtml: string;
+  CurFontStyles: TFontStyles;
+
+  procedure HtmlToFontStyle(var FS: TFontStyles; Html: string);
+  begin
+    if AnsiSameText(Html, 'b') then
+      FS := FS + [fsBold]
+    else if AnsiSameText(Html, 'i') then
+      FS := FS + [fsItalic]
+    else if AnsiSameText(Html, 'u') then
+      FS := FS + [fsUnderline]
+
+    else if AnsiSameText(Html, '/b') then
+      FS := FS - [fsBold]
+    else if AnsiSameText(Html, '/i') then
+      FS := FS - [fsItalic]
+    else if AnsiSameText(Html, '/u') then
+      FS := FS - [fsUnderline];
+  end;
+
+  function SpecialCharToText(Html: string): string;
+  begin
+    if Html = 'gt' then
+      Result := '>'
+    else if Html = 'lt' then
+      Result := '<'
+    else if Html = 'amp' then
+      Result := '&';
+  end;
+
+  procedure AddToRichText(S: string);
+  begin
+    Doc.Selection.Text := S;
+    Doc.Selection.Font.Bold := -Ord(fsBold in CurFontStyles);
+    Doc.Selection.Font.Italic := -Ord(fsItalic in CurFontStyles);
+    if fsUnderline in CurFontStyles then
+      Doc.Selection.Font.Underline := tomSingle
+    else
+      Doc.Selection.Font.Underline := tomNone;
+    Doc.Selection.Move(tomCharacter, 1);
+  end;
+
+begin
+  Doc.Freeze;
+  try
+    Doc.New;
+    SB := TStringBuilder.Create;
+    try
+      state := normal;
+      CurHtml := '';
+      CurFontStyles := [];
+      for I := 1 to Length(HTMLText) do
+      begin
+        if state = normal then
+          case HTMLText[I] of
+            '<': begin State := html; CurHtml := ''; end;
+            '&': state := specialchar;
+            else AddToRichText(HTMLText[I]);
+          end
+        else if state = html then
+        begin
+          case HTMLText[I] of
+            '>': begin state := normal; HtmlToFontStyle(CurFontStyles, CurHtml); CurHtml := ''; end;
+            else
+              CurHtml := CurHtml + HTMLText[I];
+          end;
+        end
+        else if State = specialchar then
+        begin
+          case HTMLText[I] of
+            ';': begin state := normal; AddToRichText(SpecialCharToText(CurHtml)); CurHtml := ''; end;
+            else
+              CurHtml := CurHtml + HTMLText[I];
+          end;
+        end;
+
+      end;
+    finally
+      SB.Free;
+    end;
+  finally
+    Doc.Unfreeze;
+  end;
+end;
+
+function TOvcTCHtmlTextEdit.GetHTMLText: string;
+var
+  StringBuilder: TStringBuilder;
+  OldStyle, NewStyle: TFontStyles;
+  ole: IRichEditOle;
+  Doc: ITextDocument;
+  Range: ITextRange;
+  start, eof, n: Integer;
+  Font: ITextFont;
+begin
+  SendMessage(Handle, EM_GETOLEINTERFACE, 0, LPARAM(@ole));
+  Doc := ole as ITextDocument;
+
+  // Get total length
+  Range := Doc.Range(0, 0);
+  Range.Expand(tomStory);
+  eof := Range.End_;
+
+  OldStyle := [];
+  NewStyle := [];
+
+  StringBuilder := TStringBuilder.Create;
+  try
+    start := 0;
+    while start < eof - 1 do
+    begin
+      Range := Doc.Range(start, start);
+      n := Range.Expand(tomCharFormat);
+      Font := Range.Font;
+      NewStyle := [];
+      if (Font.Bold <> 0) and (fsBold in AllowedFontStyles) then
+        Include(NewStyle, fsBold);
+      if (Font.Italic <> 0) and (fsItalic in AllowedFontStyles) then
+        Include(NewStyle, fsItalic);
+      if (Font.Underline <> 0) and (fsUnderline in AllowedFontStyles) then
+        Include(NewStyle, fsUnderline);
+
+      StringBuilder.Append(StyleΔToHTML(OldStyle, NewStyle));
+      StringBuilder.Append(Range.Text);
+      OldStyle := NewStyle;
+      Start := Start + n;
+    end;
+    Result := TrimRight(StringBuilder.ToString) + StyleΔToHTML(OldStyle, []);  // trim off #12 at the end (and other superfluous spaces)
+  finally
+    StringBuilder.Free;
+  end;
+end;
+
+function TOvcTCHtmlTextEdit.GetIDoc: ITextDocument;
+var
+  ole: IRichEditOle;
+begin
+  SendMessage(Handle, EM_GETOLEINTERFACE, 0, LPARAM(@ole));
+  Result := ole as ITextDocument;
+end;
+
+function TOvcTCHtmlTextEdit.GetRichText: string;
+var
+  MS: TMemoryStream;
+begin
+  MS := TMemoryStream.Create;
+  try
+    Lines.SaveToStream(MS, TEncoding.Unicode);
+    MS.Position := 0;
+    SetString(Result, PAnsiChar(MS.Memory), MS.Size);
+  finally
+    MS.Free;
+  end;
+end;
+
+procedure TOvcTCHtmlTextEdit.KeyDown(var Key: Word; Shift: TShiftState);
+// disable some shortcuts
+var
+  Doc: ITextDocument;
+  tmp: OleVariant;
+begin
+  if Shift = [ssCtrl] then
+  begin
+    case Chr(Key) of
+      'J', 'L', 'E', 'R': Key := 0;
+      '0'..'9': Key := 0;
+      'V':
+        begin
+          tmp := Null;
+          Doc := GetIDoc;
+          if Clipboard.AsText <> '' then    // clear formatting
+            GetIDoc.Selection.Text := Clipboard.AsText;
+          Key := 0;
+        end;
+    end;
+
+    case Key of
+      VK_OEM_PLUS: Key := 0;
+    end;
+  end;
+  if Shift = [ssCtrl, ssShift] then
+  begin
+    case Key of
+      Ord('A')..Ord('Z'): Key := 0;
+      VK_OEM_PLUS: Key := 0;
+    end;
+  end;
+  inherited;
+end;
+
+procedure TOvcTCHtmlTextEdit.KeyPress(var Key: Char);
+var
+  Doc: ITextDocument;
+  // can't use Delphi FontStyles here because that changes all text styles of the selected text
+begin
+  case Key of
+    #2 {'B'}:
+      if fsBold in AllowedFontStyles then
+      begin
+        Doc := GetIDoc;
+        Doc.Selection.Font.Bold := Integer(tomToggle);
+        Key := #0;
+      end;
+//    #5: Key := #0;
+    #9 {'I'}:
+      if fsItalic in AllowedFontStyles then
+      begin
+        Doc := GetIDoc;
+        Doc.Selection.Font.Italic := Integer(tomToggle);
+        Key := #0;
+      end;
+//    #10, #12, #18: Key := #0;
+    #21 {'U'}:
+      if fsUnderline in AllowedFontStyles then
+      begin
+        Doc := GetIDoc;
+        if Doc.Selection.Font.Underline <> tomNone then
+          Doc.Selection.Font.Underline := tomNone
+        else
+          Doc.Selection.Font.Underline := tomSingle;
+        Key := #0;
+      end;
+  end;
+  inherited;
+end;
+
+procedure TOvcTCHtmlTextEdit.SetAllowedFontStyles(const Value: TFontStyles);
+begin
+  FAllowedFontStyles := Value - [fsStrikeOut]; // fsStrikeOut not supported yet
+end;
+
+procedure TOvcTCHtmlTextEdit.SetHTMLText(const Value: string);
+var
+  ole: IRichEditOle;
+  Doc: ITextDocument;
+begin
+  SendMessage(Handle, EM_GETOLEINTERFACE, 0, LPARAM(@ole));
+  Doc := ole as ITextDocument;
+
+  Doc.Freeze;
+  FillIDocument(Doc, Value);
+  SelStart := 0;
+  SelectAll;
+  Doc.Unfreeze;
+end;
+
+procedure TOvcTCHtmlTextEdit.SetRichText(const Value: string);
+var
+  MS: TMemoryStream;
+  AnsiStr: AnsiString;
+begin
+  MS := TMemoryStream.Create;
+  try
+    AnsiStr := AnsiString(Value);
+
+    MS.Write(Pointer(AnsiStr), Length(AnsiStr));
+    MS.Position := 0;
+    Lines.LoadFromStream(MS, TEncoding.Unicode);
+  finally
+    MS.Free;
+  end;
+end;
+
+procedure TOvcTCHtmlTextEdit.WMChar(var Msg : TWMKey);
+  begin
+    if (not CellOwner.TableWantsTab) or
+       (Msg.CharCode <> 9) then
+      inherited;
+  end;
+{--------}
+procedure TOvcTCHtmlTextEdit.WMGetDlgCode(var Msg : TMessage);
+  begin
+    inherited;
+    if CellOwner.TableWantsTab then
+      Msg.Result := Msg.Result or DLGC_WANTTAB;
+  end;
+{--------}
+procedure TOvcTCHtmlTextEdit.WMKeyDown(var Msg : TWMKey);
+  procedure GetSelection(var S, E : word);
+    type
+      LH = packed record L, H : word; end;
+    var
+      GetSel : longint;
+    begin
+      GetSel := SendMessage(Handle, EM_GETSEL, 0, 0);
+      S := LH(GetSel).L;
+      E := LH(GetSel).H;
+    end;
+  var
+    GridReply : TOvcTblKeyNeeds;
+    GridUsedIt : boolean;
+    SStart, SEnd : word;
+  begin
+    GridUsedIt := false;
+    GridReply := otkDontCare;
+    if (CellOwner <> nil) then
+      GridReply := CellOwner.FilterTableKey(Msg);
+    case GridReply of
+      otkMustHave :
+        begin
+          CellOwner.SendKeyToTable(Msg);
+          GridUsedIt := true;
+        end;
+      otkWouldLike :
+        case Msg.CharCode of
+          VK_RETURN :
+            if not WantReturns then
+              begin
+                CellOwner.SendKeyToTable(Msg);
+                GridUsedIt := true;
+              end;
+          VK_LEFT :
+            begin
+              GetSelection(SStart, SEnd);
+              if (SStart = SEnd) and (SStart = 0) then
+                begin
+                  CellOwner.SendKeyToTable(Msg);
+                  GridUsedIt := true;
+                end;
+            end;
+          VK_RIGHT :
+            begin
+              GetSelection(SStart, SEnd);
+              if ((SStart = SEnd) or (SStart = 0)) and (SEnd = GetTextLen) then
+                begin
+                  CellOwner.SendKeyToTable(Msg);
+                  GridUsedIt := true;
+                end;
+            end;
+        end;
+    end;{case}
+
+    if not GridUsedIt then
+      inherited;
+  end;
+{--------}
+procedure TOvcTCHtmlTextEdit.WMKillFocus(var Msg : TWMKillFocus);
+  begin
+    inherited;
+    CellOwner.PostMessageToTable(ctim_KillFocus, Msg.FocusedWnd, 0);
+  end;
+{--------}
+procedure TOvcTCHtmlTextEdit.WMSetFocus(var Msg : TWMSetFocus);
+  begin
+    inherited;
+    CellOwner.PostMessageToTable(ctim_SetFocus, Msg.FocusedWnd, 0);
+  end;
+
+{ TOvcTCCustomHTMLText }
+
+constructor TOvcTCCustomHTMLText.Create(AOwner : TComponent);
+  begin
+    inherited Create(AOwner);
+    UseWordWrap := true;
+    AllowedFontStyles := [fsBold, fsItalic, fsUnderline];
+  end;
+{--------}
+function TOvcTCCustomHTMLText.CreateEditControl(AOwner : TComponent) : TOvcTCHtmlTextEdit;
+  begin
+    Result := TOvcTCHtmlTextEdit.Create(AOwner);
+  end;
+{--------}
+function TOvcTCCustomHTMLText.EditHandle : THandle;
+  begin
+    if Assigned(FEdit) then
+      Result := FEdit.Handle
+    else
+      Result := 0;
+  end;
+{--------}
+procedure TOvcTCCustomHTMLText.EditHide;
+  begin
+    if Assigned(FEdit) then
+      with FEdit do
+        begin
+          SetWindowPos(FEdit.Handle, HWND_TOP,
+                       0, 0, 0, 0,
+                       SWP_HIDEWINDOW or SWP_NOREDRAW or SWP_NOZORDER);
+        end;
+  end;
+{--------}
+procedure TOvcTCCustomHTMLText.EditMove(CellRect : TRect);
+  begin
+    if Assigned(FEdit) then
+      begin
+        with CellRect do
+          SetWindowPos(FEdit.Handle, HWND_TOP,
+                       Left, Top, Right-Left, Bottom-Top,
+                       SWP_SHOWWINDOW or SWP_NOREDRAW or SWP_NOZORDER);
+        InvalidateRect(FEdit.Handle, nil, false);
+        UpdateWindow(FEdit.Handle);
+      end;
+  end;
+{--------}
+function TOvcTCCustomHTMLText.GetCellEditor : TControl;
+  begin
+    Result := FEdit;
+  end;
+{--------}
+function TOvcTCCustomHTMLText.GetModified : boolean;
+  begin
+    if Assigned(FEdit) then
+         Result := FEdit.Modified
+    else Result := false;
+  end ;
+{--------}
+procedure TOvcTCCustomHTMLText.StartEditing(RowNum : TRowNum; ColNum : TColNum;
+                                           CellRect : TRect;
+                                     const CellAttr : TOvcCellAttributes;
+                                           CellStyle: TOvcTblEditorStyle;
+                                           Data : pointer);
+  var
+    P: TPoint;
+  begin
+    FEdit := CreateEditControl(FTable);
+    FFormatBar := TovcTextFormatBar.Create(Self);
+    FFormatBar.AllowedFontStyles := AllowedFontStyles;
+
+    FFormatBar.PopupParent := GetParentForm(FTable);
+    P := FTable.ClientToScreen(Point(CellRect.Left + 1, CellRect.Bottom - 2));
+    if AllowedFontStyles <> [] then
+      SetWindowPos(FFormatBar.Handle, HWND_TOP, P.X, P.Y, 0, 0, SWP_SHOWWINDOW or SWP_NOSIZE or SWP_NOZORDER or SWP_NOACTIVATE);
+
+    with FEdit do
+      begin
+        Parent := FTable;
+        if Data=nil then
+          Text := ''
+        else case FDataStringType of
+          tstShortString: FEdit.HTMLText := string(POvcShortString(Data)^);
+          tstPChar:       FEdit.HTMLText := PChar(Data);
+          tstString:      FEdit.HTMLText := PChar(PString(Data)^); // SetTextBuf(PChar(PString(Data)^))
+        end;
+        Color := CellAttr.caColor;
+//        Font := CellAttr.caFont;
+//        Font.Color := CellAttr.caFontColor;
+        MaxLength := Self.MaxLength;
+        WantReturns := Self.WantReturns;
+        WantTabs := Self.WantTabs;
+        Left := CellRect.Left;
+        Top := CellRect.Top;
+        Width := CellRect.Right - CellRect.Left;
+        Height := CellRect.Bottom - CellRect.Top;
+        Visible := true;
+        TabStop := false;
+        CellOwner := Self;
+        Hint := Self.Hint;
+        ShowHint := Self.ShowHint;
+        BorderStyle := bsNone;
+        Ctl3D := false;
+        case CellStyle of
+          tesBorder : BorderStyle := bsSingle;
+          tes3D     : Ctl3D := true;
+        end;{case}
+        AllowedFontStyles := Self.AllowedFontStyles;
+
+        OnChange := Self.OnChange;
+        OnClick := Self.OnClick;
+        OnDblClick := Self.OnDblClick;
+        OnDragDrop := Self.OnDragDrop;
+        OnDragOver := Self.OnDragOver;
+        OnEndDrag := Self.OnEndDrag;
+        OnEnter := Self.OnEnter;
+        OnExit := Self.OnExit;
+        OnKeyDown := Self.OnKeyDown;
+        OnKeyPress := Self.OnKeyPress;
+        OnKeyUp := Self.OnKeyUp;
+        OnMouseDown := Self.OnMouseDown;
+        OnMouseMove := Self.OnMouseMove;
+        OnMouseUp := Self.OnMouseUp;
+      end;
+  end;
+{--------}
+
+procedure TOvcTCCustomHTMLText.StopEditing(SaveValue : boolean; Data : pointer);
+  {-Changes:
+    04/2011, AB: UseASCIIZStrings/UsePString replaced by DataStringType }
+  begin
+    try
+      FreeAndNil(FFormatBar);
+      if SaveValue and Assigned(FEdit) and Assigned(Data) then
+        case FDataStringType of
+          tstShortString: POvcShortString(Data)^ := ShortString(Copy(FEdit.HTMLText, 1, MaxLength));
+          tstPChar:       StrPLCopy(PChar(Data), FEdit.HTMLText, MaxLength+1);
+          tstString:      PString(Data)^ := FEdit.HTMLText;
+        end;
+    finally
+      FEdit.Free;
+      FEdit := nil;
+    end;
+  end;
+
+procedure TOvcTCCustomHTMLText.tcPaint(TableCanvas: TCanvas;
+  const CellRect: TRect; RowNum: TRowNum; ColNum: TColNum;
+  const CellAttr: TOvcCellAttributes; Data: pointer);
+var
+  sBuffer: string;
+  Painter: TOvcRTFPainter;
+  TextRect: TRect;
+  State: Integer;
+begin
+  {if the cell is invisible or the passed data is nil and we're not
+   designing, all's done}
+  if (CellAttr.caAccess = otxInvisible) or
+     ((Data = nil) and not (csDesigning in ComponentState)) then
+  begin
+    inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, Data);    {blank out the cell}
+    Exit;
+  end;
+
+  if Data = nil then
+    sBuffer := Format('%d:%d', [RowNum, ColNum])
+  else
+    case FDataStringType of
+      tstShortString: sBuffer := string(POvcShortString(Data)^);
+      tstPChar:       sBuffer := string(PChar(Data));
+      tstString:      sBuffer := PString(Data)^;
+    end;
+
+  Painter := TOvcRTFPainter.Create;
+  try
+    TOvcTCHtmlTextEdit.FillIDocument(Painter.GetDoc, sBuffer);
+    inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, Data);    {blank out the cell - must be done after loading the document to avoid flicker }
+    TextRect := CellRect;
+    TextRect.Left := TextRect.Left + 1;
+    TextRect.Right := TextRect.Right - 1;
+    State := SaveDC(TableCanvas.Handle);
+    Painter.Draw(TableCanvas, TextRect, True, True);
+    RestoreDC(TableCanvas.Handle, State);
+  finally
+    Painter.Free;
+  end;
+end;
+
+procedure TOvcTCCustomHTMLText.tcPaintStrZ(TblCanvas: TCanvas;
+  const CellRect: TRect; const CellAttr: TOvcCellAttributes; StZ: string);
+begin
+  // do nothing
+end;
+
+procedure TOvcTCCustomHTMLText.SaveEditedData(Data : pointer);
+begin
+  {stub out abstract method so BCB doesn't see this as an abstract class}
+end;
+
+
+procedure TOvcTCCustomHTMLText.SetAllowedFontStyles(const Value: TFontStyles);
+begin
+  FAllowedFontStyles := Value - [fsStrikeOut];
+end;
+
+end.

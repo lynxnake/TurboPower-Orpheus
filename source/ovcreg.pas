@@ -177,6 +177,7 @@ uses
   OvcTbRws,               {table rows}
   OvcTbCls,               {table columns}
   OvcTCEdt,               {table cell}
+  OvcTCEdtHTMLText,       {table cell}
   OvcTCHdr,               {table cell}
   OvcTCBmp,               {table cell}
   OvcTCGly,               {table cell}
@@ -753,6 +754,7 @@ begin
     TOvcTCPictureField,
     TOvcTCNumericField,
     TOvcTCMemo,
+    TOvcTCHTMLText,
     TOvcTCCheckBox,
     TOvcTCComboBox,
     TOvcTCCheckComboBox,

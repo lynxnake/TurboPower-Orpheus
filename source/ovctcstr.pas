@@ -79,7 +79,7 @@ type
       procedure tcPaintStrZ(TblCanvas : TCanvas;
                       const CellRect  : TRect;
                       const CellAttr  : TOvcCellAttributes;
-                            StZ       : string);
+                            StZ       : string); virtual;
       {.Z-}
 
       {properties}
