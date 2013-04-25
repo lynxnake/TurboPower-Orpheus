@@ -29,11 +29,11 @@ PACKAGE O408br;
 {$ALIGN 8}
 {$ASSERTIONS ON}
 {$BOOLEVAL OFF}
-{$DEBUGINFO ON}
+{$DEBUGINFO OFF}
 {$EXTENDEDSYNTAX ON}
 {$IMPORTEDDATA ON}
 {$IOCHECKS ON}
-{$LOCALSYMBOLS ON}
+{$LOCALSYMBOLS OFF}
 {$LONGSTRINGS ON}
 {$OPENSTRINGS ON}
 {$OPTIMIZATION ON}
@@ -47,7 +47,7 @@ PACKAGE O408br;
 {$WRITEABLECONST ON}
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
-{$DEFINE DEBUG}
+{$DEFINE RELEASE}
 {$ENDIF IMPLICITBUILDING}
 {$DESCRIPTION 'TurboPower Orpheus 4.08 data-aware runtime package - VCL160'}
 {$LIBSUFFIX '160'}
@@ -58,12 +58,9 @@ requires
   vclx,
   dbrtl,
   vcldb,
-{$IFDEF CPUX86}bdertl,{$ENDIF}
   O408_r;
 
 contains
-{$IFDEF CPUX86}ovcdbacb in '..\..\source\ovcdbacb.pas',{$ENDIF}
-{$IFDEF CPUX86}ovcdbadg in '..\..\source\ovcdbadg.pas' {OvcfrmAliasDlg},{$ENDIF}
   ovcdbae in '..\..\source\ovcdbae.pas',
   ovcdbcal in '..\..\source\ovcdbcal.pas',
   ovcdbccb in '..\..\source\ovcdbccb.pas',
@@ -73,9 +70,6 @@ contains
   ovcdbdLb in '..\..\source\ovcdbdLb.pas',
   ovcdbed in '..\..\source\ovcdbed.pas',
   ovcdbfcb in '..\..\source\ovcdbfcb.pas',
-{$IFDEF CPUX86}ovcdbhll in '..\..\source\ovcdbhll.pas',{$ENDIF}
-{$IFDEF CPUX86}ovcdbidx in '..\..\source\ovcdbidx.pas',{$ENDIF}
-{$IFDEF CPUX86}ovcdbise in '..\..\source\ovcdbise.pas',{$ENDIF}
   ovcdbmdg in '..\..\source\ovcdbmdg.pas' {OvcfrmDbMemoDlg},
   ovcdbnf in '..\..\source\ovcdbnf.pas',
   ovcdbnum in '..\..\source\ovcdbnum.pas',
@@ -86,7 +80,6 @@ contains
   ovcdbsf in '..\..\source\ovcdbsf.pas',
   ovcdbsld in '..\..\source\ovcdbsld.pas',
   ovcdbtbl in '..\..\source\ovcdbtbl.pas',
-{$IFDEF CPUX86}ovcdbtcb in '..\..\source\ovcdbtcb.pas',{$ENDIF}
   ovcdbtim in '..\..\source\ovcdbtim.pas',
   o32dbfe in '..\..\source\o32dbfe.pas';
 
