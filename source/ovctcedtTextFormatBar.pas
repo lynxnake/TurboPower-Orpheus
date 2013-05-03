@@ -33,8 +33,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics,
-  Controls, Forms, Dialogs, ovcbase, ovcspeed, ComCtrls, Vcl.ExtCtrls,
-  Vcl.Buttons;
+  Controls, Forms, Dialogs, ovcbase, ovcspeed, ComCtrls, ExtCtrls,
+  Buttons;
 
 type
   TovcTextFormatBar = class(TForm)

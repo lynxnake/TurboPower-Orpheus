@@ -13,6 +13,8 @@
 //
 // The text that accompanies the code is a different matter. For that, it’s “all rights reserved.”
 
+{$I OVC.INC}
+
 unit ovcRTF_Paint;
 
 interface
@@ -97,7 +99,11 @@ var
   HostImpl: TTextHostImpl;
   Stream: TEditStream;
   Cookie: TCookie;
+  {$IFDEF VERSIONXE2}
   res: NativeInt;
+  {$ELSE}
+  res: Integer;
+  {$ENDIF}
 begin
   HostImpl := TDrawRTFTextHost.Create(Rect, Transparent, WordWrap);
   Host := CreateTextHost(HostImpl);
