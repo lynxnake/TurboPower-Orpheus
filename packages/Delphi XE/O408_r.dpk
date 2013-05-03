@@ -173,7 +173,7 @@ contains
   ovcevents in '..\..\source\ovcevents.pas',
   o32rxvld in '..\..\source\o32rxvld.pas',
   o32intlst in '..\..\source\o32intlst.pas',
-  o32intdeq in '..\..\source\o32intdeq.pas',
+  O32IntDeq in '..\..\source\O32IntDeq.pas',
   o32rxngn in '..\..\source\o32rxngn.pas',
   o32sr in '..\..\source\o32sr.pas',
   o32vpool in '..\..\source\o32vpool.pas',
@@ -204,6 +204,12 @@ contains
   o32WideCharSet in '..\..\source\o32WideCharSet.pas',
   ovcBidi in '..\..\source\ovcBidi.pas',
   ovcThemes in '..\..\source\ovcThemes.pas',
-  ovctccheckcbx in '..\..\source\ovctccheckcbx.pas';
+  ovctccheckcbx in '..\..\source\ovctccheckcbx.pas',
+  ovctcedtHTMLText in '..\..\source\ovctcedtHTMLText.pas',
+  ovctcedtTextFormatBar in '..\..\source\ovctcedtTextFormatBar.pas' {ovcTextFormatBar},
+  ovcRTF_TOM in '..\..\source\ovcRTF_TOM.pas',
+  ovcRTF_Paint in '..\..\source\ovcRTF_Paint.pas',
+  ovcRTF_IText in '..\..\source\ovcRTF_IText.pas',
+  ovcRTF_RichOle in '..\..\source\ovcRTF_RichOle.pas';
 
 end.
