@@ -34,7 +34,27 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics,
   Controls, Forms, Dialogs, ovcbase, ovcspeed, ComCtrls, ExtCtrls,
-  Buttons;
+  Buttons, AppEvnts;
+
+type
+  TSubClassMessageEvent = procedure(Msg: TMessage) of object;
+
+  TFormSubClasser = class(TControl)
+  private
+    FForm: TCustomForm;
+    FOnMessage: TSubClassMessageEvent;
+    procedure RevertParentWindowProc;
+    class function SubClassWindowProc(hWnd: HWND; uMsg: UINT; wParam: WPARAM;
+      lParam: LPARAM; uIdSubclass: UINT_PTR; dwRefData: DWORD_PTR): LRESULT; stdcall; static;
+    procedure SetOnMessage(const Value: TSubClassMessageEvent);
+  protected
+    procedure Notification(AComponent: TComponent; Operation: TOperation); override;
+    procedure DoMessage(var Msg: TMessage);
+  public
+    destructor Destroy; override;
+    procedure SetForm(AForm: TCustomForm);
+    property OnMessage: TSubClassMessageEvent read FOnMessage write SetOnMessage;
+  end;
 
 type
   TovcTextFormatBar = class(TForm)
@@ -50,35 +70,39 @@ type
     procedure FormPaint(Sender: TObject);
   private
     FAllowedFontStyles: TFontStyles;
+    FFormSubClasser: TFormSubClasser;
     procedure SetAllowedFontStyles(const Value: TFontStyles);
+    procedure SetPopupParent(const Value: TCustomForm);
+    function GetPopupParent: TCustomForm;
+    procedure FormMessage(Msg: TMessage);
   protected
     procedure WMMouseActivate(var Message: TWMMouseActivate);
       message WM_MOUSEACTIVATE;
     procedure CreateParams(var Params: TCreateParams); override;
-    { Private declarations }
   public
-    { Public declarations }
     property AllowedFontStyles: TFontStyles read FAllowedFontStyles write SetAllowedFontStyles default [fsBold, fsItalic, fsUnderline];
+    procedure UpdatePosition;
+    property PopupParent: TCustomForm read GetPopupParent write SetPopupParent;
   end;
 
-var
-  ovcTextFormatBar: TovcTextFormatBar;
+//var
+//  ovcTextFormatBar: TovcTextFormatBar;
 
 implementation
 
 {$R *.dfm}
 
 uses
-  ovctcedtHTMLText, ovcRTF_IText, Generics.Collections;
+  CommCtrl, ovctcedtHTMLText, ovcRTF_IText, Generics.Collections, ovcTable;
 
 { TovcTextFormatBar }
 
 procedure TovcTextFormatBar.btnBoldClick(Sender: TObject);
 var
-  RE: TOvcTCHtmlTextEdit;
+  RE: TOvcCustomHtmlTextEditBase;
 begin
-  if Screen.ActiveControl is TOvcTCHtmlTextEdit then
-    RE := TOvcTCHtmlTextEdit(Screen.ActiveControl)
+  if Screen.ActiveControl is TOvcCustomHtmlTextEditBase then
+    RE := TOvcCustomHtmlTextEditBase(Screen.ActiveControl)
   else
     RE := nil;
 
@@ -88,10 +112,10 @@ end;
 
 procedure TovcTextFormatBar.btnItalicClick(Sender: TObject);
 var
-  RE: TOvcTCHtmlTextEdit;
+  RE: TOvcCustomHtmlTextEditBase;
 begin
-  if Screen.ActiveControl is TOvcTCHtmlTextEdit then
-    RE := TOvcTCHtmlTextEdit(Screen.ActiveControl)
+  if Screen.ActiveControl is TOvcCustomHtmlTextEditBase then
+    RE := TOvcCustomHtmlTextEditBase(Screen.ActiveControl)
   else
     RE := nil;
 
@@ -101,11 +125,11 @@ end;
 
 procedure TovcTextFormatBar.btnUnderlineClick(Sender: TObject);
 var
-  RE: TOvcTCHtmlTextEdit;
+  RE: TOvcCustomHtmlTextEditBase;
   Doc: ITextDocument;
 begin
-  if Screen.ActiveControl is TOvcTCHtmlTextEdit then
-    RE := TOvcTCHtmlTextEdit(Screen.ActiveControl)
+  if Screen.ActiveControl is TOvcCustomHtmlTextEditBase then
+    RE := TOvcCustomHtmlTextEditBase(Screen.ActiveControl)
   else
     RE := nil;
 
@@ -135,11 +159,22 @@ begin
   FAllowedFontStyles := [fsBold, fsItalic, fsUnderline];
 end;
 
+procedure TovcTextFormatBar.FormMessage(Msg: TMessage);
+begin
+  if Msg.Msg = WM_MOVE then
+    UpdatePosition;
+end;
+
 procedure TovcTextFormatBar.FormPaint(Sender: TObject);
 begin
   Canvas.Brush.Color := $A7ABB0;
   Canvas.Brush.Style := bsSolid;
   Canvas.FrameRect(ClientRect);
+end;
+
+function TovcTextFormatBar.GetPopupParent: TCustomForm;
+begin
+  Result := inherited PopupParent;
 end;
 
 procedure TovcTextFormatBar.SetAllowedFontStyles(const Value: TFontStyles);
@@ -168,12 +203,21 @@ begin
   end;
 end;
 
+procedure TovcTextFormatBar.SetPopupParent(const Value: TCustomForm);
+begin
+  FreeAndNil(FFormSubClasser);
+  inherited PopupParent := Self;
+  FFormSubClasser := TFormSubClasser.Create(Self);
+  FFormSubClasser.OnMessage := FormMessage;
+  FFormSubClasser.SetForm(Value);
+end;
+
 procedure TovcTextFormatBar.Timer1Timer(Sender: TObject);
 var
-  RE: TOvcTCHtmlTextEdit;
+  RE: TOvcCustomHtmlTextEditBase;
 begin
-  if Screen.ActiveControl is TOvcTCHtmlTextEdit then
-    RE := TOvcTCHtmlTextEdit(Screen.ActiveControl)
+  if Screen.ActiveControl is TOvcCustomHtmlTextEditBase then
+    RE := TOvcCustomHtmlTextEditBase(Screen.ActiveControl)
   else
     RE := nil;
 
@@ -182,15 +226,139 @@ begin
   btnUnderline.Enabled := Assigned(RE);
   if Assigned(RE) then
   begin
-    btnBold.Down := fsBold in TOvcTCHtmlTextEdit(RE).SelAttributes.Style;
-    btnItalic.Down := fsItalic in TOvcTCHtmlTextEdit(RE).SelAttributes.Style;
-    btnUnderline.Down := fsUnderline in TOvcTCHtmlTextEdit(RE).SelAttributes.Style;
+    btnBold.Down := fsBold in TOvcCustomHtmlTextEditBase(RE).SelAttributes.Style;
+    btnItalic.Down := fsItalic in TOvcCustomHtmlTextEditBase(RE).SelAttributes.Style;
+    btnUnderline.Down := fsUnderline in TOvcCustomHtmlTextEditBase(RE).SelAttributes.Style;
   end;
+//  UpdatePosition;
+end;
+
+procedure TovcTextFormatBar.UpdatePosition;
+var
+  RE: TOvcCustomHtmlTextEditBase;
+  Monitor: TMonitor;
+  Form: TCustomForm;
+  P, P2: TPoint;
+  R: TRect;
+  Table: TOvcTable;
+begin
+  if Screen.ActiveControl is TOvcCustomHtmlTextEditBase then
+    RE := TOvcCustomHtmlTextEditBase(Screen.ActiveControl)
+  else
+    Exit;
+
+  Form := GetParentForm(RE);
+  if Form = nil then
+    Exit;
+
+  P := RE.ClientToScreen(Point(1, RE.Height - 2));
+
+  // keep popup within table
+  if RE.Parent is TOvcTable then
+  begin
+    Table := TOvcTable(RE.Parent);
+    P2 := Table.ScreenToClient(Point(P.X, P.Y + Height));
+    if not PtInRect(Table.ClientRect, P2) then
+    begin
+      P2 := Table.ScreenToClient(RE.ClientToScreen(Point(1, -Height - 2)));
+      if PtInRect(Table.ClientRect, P2) then
+        P := RE.ClientToScreen(Point(1, -Height - 2));
+    end;
+  end;
+
+  // Popup above Memo if it would not fit on the screen
+  R := Form.Monitor.WorkareaRect;
+  if P.Y + Height > R.Bottom then
+    P := RE.ClientToScreen(Point(1, -Height - 2));
+
+  if (AllowedFontStyles <> []) then
+    SetWindowPos(Handle, HWND_TOP, P.X, P.Y, 0, 0, SWP_SHOWWINDOW or SWP_NOSIZE or SWP_NOZORDER or SWP_NOACTIVATE);
 end;
 
 procedure TovcTextFormatBar.WMMouseActivate(var Message: TWMMouseActivate);
 begin
   Message.Result := MA_NOACTIVATE;
+end;
+
+{ TFormSubClasser }
+
+destructor TFormSubClasser.Destroy;
+begin
+  RevertParentWindowProc;
+  inherited;
+end;
+
+procedure TFormSubClasser.DoMessage(var Msg: TMessage);
+var
+  Handled: Boolean;
+begin
+  Handled := False;
+  if Assigned(FOnMessage) then
+    FOnMessage(Msg);
+end;
+
+procedure TFormSubClasser.Notification(AComponent: TComponent;
+  Operation: TOperation);
+begin
+  inherited Notification(AComponent, Operation);
+  if (Operation = opRemove) and (AComponent = FForm) then
+  begin
+    RevertParentWindowProc;
+  end;
+end;
+
+procedure TFormSubClasser.RevertParentWindowProc;
+begin
+  if FForm <> nil then
+  begin
+    RemoveWindowSubclass(FForm.Handle, SubClassWindowProc, NativeInt(Self));
+    FForm := nil;
+  end;
+end;
+
+function SetWindowSubclass(hWnd: HWND; pfnSubclass: SUBCLASSPROC;
+  uIdSubclass: UINT_PTR; dwRefData: DWORD_PTR): BOOL; stdcall; external comctl32; // XP or newer; Winapi.CommCtrl.SetWindowSubClass is broken (InitComCtl not called)
+
+function DefSubclassProc(hWnd: HWND; uMsg: UINT; wParam: WPARAM;
+  lParam: LPARAM): LRESULT; stdcall; external comctl32; // XP or newer; Winapi.CommCtrl.SetWindowSubClass is broken (InitComCtl not called)
+
+procedure TFormSubClasser.SetForm(AForm: TCustomForm);
+begin
+  RevertParentWindowProc;
+  RemoveFreeNotification(AForm);
+
+  FForm := AForm;
+
+  if Assigned(FForm) then
+  begin
+    SetWindowSubClass(FForm.Handle, TFormSubClasser.SubClassWindowProc, 1, NativeUInt(Self));
+    FreeNotification(FForm);
+  end;
+//  else
+//    RevertParentWindowProc;
+end;
+
+procedure TFormSubClasser.SetOnMessage(const Value: TSubClassMessageEvent);
+begin
+  FOnMessage := Value;
+end;
+
+class function TFormSubClasser.SubClassWindowProc(hWnd: HWND; uMsg: UINT;
+  wParam: WPARAM; lParam: LPARAM; uIdSubclass: UINT_PTR;
+  dwRefData: DWORD_PTR): LRESULT;
+var
+  Msg: TMessage;
+begin
+  if uMsg = WM_NCDESTROY then
+    TFormSubClasser(dwRefData).RevertParentWindowProc;
+
+  msg.Msg := uMsg;
+  msg.WParam := wParam;
+  msg.LParam := lParam;
+  msg.Result := 0;
+  TFormSubClasser(dwRefData).DoMessage(msg);
+
+  Result := DefSubclassProc(hWnd, uMsg, wParam, lParam);
 end;
 
 end.

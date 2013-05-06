@@ -1,5 +1,5 @@
 ﻿{*********************************************************}
-{*                  OVCTCEDT.PAS 4.08                    *}
+{*              ovctcedtHTMLText.PAS 4.08                *}
 {*********************************************************}
 
 {* ***** BEGIN LICENSE BLOCK *****                                            *}
@@ -47,9 +47,7 @@ uses
   Graphics, ovctcedt, ovcRTF_IText, ovcRTF_Paint; { - for default color definition}
 
 type
-  TOvcTCHtmlTextEdit = class(TRichEdit)
-  protected {private}
-    FCell : TOvcBaseTableCell;
+  TOvcCustomHtmlTextEditBase = class(TRichEdit)
   private
     FAllowedFontStyles: TFontStyles;
     function GetRichText: string;
@@ -58,16 +56,8 @@ type
     procedure SetHTMLText(const Value: string);
     procedure SetAllowedFontStyles(const Value: TFontStyles);
   protected
-    procedure WMChar(var Msg : TWMKey); message WM_CHAR;
-    procedure WMGetDlgCode(var Msg : TMessage); message WM_GETDLGCODE;
-    procedure WMKeyDown(var Msg : TWMKey); message WM_KEYDOWN;
-    procedure WMKillFocus(var Msg : TWMKillFocus); message WM_KILLFOCUS;
-    procedure WMSetFocus(var Msg : TWMSetFocus); message WM_SETFOCUS;
     procedure KeyPress(var Key: Char); override;
     procedure KeyDown(var Key: Word; Shift: TShiftState); override;
-
-    property CellOwner : TOvcBaseTableCell
-       read FCell write FCell;
   public
     constructor Create(AOwner: TComponent); override;
     property RichText: string read GetRichText write SetRichText;
@@ -76,6 +66,107 @@ type
     function GetIDoc: ITextDocument;
   published
     property AllowedFontStyles: TFontStyles read FAllowedFontStyles write SetAllowedFontStyles default [fsBold, fsItalic, fsUnderline];
+  end;
+
+  TOvcCustomHtmlMemo = class(TOvcCustomHtmlTextEditBase)
+  private
+    FFormatBar: TovcTextFormatBar;
+  protected
+    procedure WMKillFocus(var Msg : TWMKillFocus); message WM_KILLFOCUS;
+    procedure WMSetFocus(var Msg : TWMSetFocus); message WM_SETFOCUS;
+  public
+    destructor Destroy; override;
+  end;
+
+  TOvcHtmlMemo = class(TOvcCustomHtmlMemo)
+  published
+    property Align;
+    property Alignment;
+    property Anchors;
+    property BevelEdges;
+    property BevelInner;
+    property BevelKind default bkNone;
+    property BevelOuter;
+    property BiDiMode;
+    property BorderStyle;
+    property CharCase;
+    property Color;
+    property Constraints;
+    property Ctl3D;
+    property DoubleBuffered;
+    property DragCursor;
+    property DragKind;
+    property DragMode;
+    property Enabled;
+    property Font;
+    property HideSelection;
+    property ImeMode;
+    property ImeName;
+    property Lines;
+    property MaxLength;
+    property OEMConvert;
+    property ParentBiDiMode;
+    property ParentColor;
+    property ParentCtl3D;
+    property ParentDoubleBuffered;
+    property ParentFont;
+    property ParentShowHint;
+    property PopupMenu;
+    property ReadOnly;
+    property ScrollBars;
+    property ShowHint;
+    property TabOrder;
+    property TabStop;
+    {$IFDEF XE3}
+    property Touch;
+    {$ENDIF}
+    property Visible;
+    property WantReturns;
+    property WantTabs;
+    property WordWrap;
+    {$IFDEF XE3}
+    property StyleElements;
+    {$ENDIF}
+    property OnChange;
+    property OnClick;
+    property OnContextPopup;
+    property OnDblClick;
+    property OnDragDrop;
+    property OnDragOver;
+    property OnEndDock;
+    property OnEndDrag;
+    property OnEnter;
+    property OnExit;
+    {$IFDEF XE3}
+    property OnGesture;
+    {$ENDIF}
+    property OnKeyDown;
+    property OnKeyPress;
+    property OnKeyUp;
+    property OnMouseActivate;
+    property OnMouseDown;
+    property OnMouseEnter;
+    property OnMouseLeave;
+    property OnMouseMove;
+    property OnMouseUp;
+    property OnStartDock;
+    property OnStartDrag;
+  end;
+
+  TOvcTCHtmlTextEdit = class(TOvcCustomHtmlTextEditBase)
+  protected {private}
+    FCell : TOvcBaseTableCell;
+  private
+  protected
+    procedure WMChar(var Msg : TWMKey); message WM_CHAR;
+    procedure WMGetDlgCode(var Msg : TMessage); message WM_GETDLGCODE;
+    procedure WMKeyDown(var Msg : TWMKey); message WM_KEYDOWN;
+    procedure WMKillFocus(var Msg : TWMKillFocus); message WM_KILLFOCUS;
+    procedure WMSetFocus(var Msg : TWMSetFocus); message WM_SETFOCUS;
+
+    property CellOwner : TOvcBaseTableCell
+       read FCell write FCell;
+  public
   end;
 
   TOvcTCCustomHTMLText = class(TOvcTCBaseString)
@@ -179,11 +270,13 @@ type
       property OnOwnerDraw;
   end;
 
+function StyleΔToHTML(Old, New: TFontStyles): string;
 
 implementation
 
 uses
-  Types, Variants, RichEdit, ovcRTF_RichOle, ActiveX, ClipBrd;
+  Types, Variants, RichEdit, ovcRTF_RichOle, ActiveX, ClipBrd,
+  StrUtils;
 
 function StyleΔToHTML(Old, New: TFontStyles): string;
 var
@@ -218,280 +311,6 @@ begin
     '&': Result := '&amp;';
     else
       Result := C;
-  end;
-end;
-
-constructor TOvcTCHtmlTextEdit.Create(AOwner: TComponent);
-begin
-  inherited;
-  AllowedFontStyles := [fsBold, fsItalic, fsUnderline];
-end;
-
-class procedure TOvcTCHtmlTextEdit.FillIDocument(const Doc: ITextDocument; HtmlText: string);
-var
-  SB: TStringBuilder;
-  State: (normal, html, specialchar);
-  I: Integer;
-  CurHtml: string;
-  CurFontStyles: TFontStyles;
-
-  procedure HtmlToFontStyle(var FS: TFontStyles; Html: string);
-  begin
-    if AnsiSameText(Html, 'b') then
-      FS := FS + [fsBold]
-    else if AnsiSameText(Html, 'i') then
-      FS := FS + [fsItalic]
-    else if AnsiSameText(Html, 'u') then
-      FS := FS + [fsUnderline]
-
-    else if AnsiSameText(Html, '/b') then
-      FS := FS - [fsBold]
-    else if AnsiSameText(Html, '/i') then
-      FS := FS - [fsItalic]
-    else if AnsiSameText(Html, '/u') then
-      FS := FS - [fsUnderline];
-  end;
-
-  function SpecialCharToText(Html: string): string;
-  begin
-    if Html = 'gt' then
-      Result := '>'
-    else if Html = 'lt' then
-      Result := '<'
-    else if Html = 'amp' then
-      Result := '&';
-  end;
-
-  procedure AddToRichText(S: string);
-  begin
-    Doc.Selection.Text := S;
-    Doc.Selection.Font.Bold := -Ord(fsBold in CurFontStyles);
-    Doc.Selection.Font.Italic := -Ord(fsItalic in CurFontStyles);
-    if fsUnderline in CurFontStyles then
-      Doc.Selection.Font.Underline := tomSingle
-    else
-      Doc.Selection.Font.Underline := tomNone;
-    Doc.Selection.Move(tomCharacter, 1);
-  end;
-
-begin
-  Doc.Freeze;
-  try
-    Doc.New;
-    SB := TStringBuilder.Create;
-    try
-      state := normal;
-      CurHtml := '';
-      CurFontStyles := [];
-      for I := 1 to Length(HTMLText) do
-      begin
-        if state = normal then
-          case HTMLText[I] of
-            '<': begin State := html; CurHtml := ''; end;
-            '&': state := specialchar;
-            else AddToRichText(HTMLText[I]);
-          end
-        else if state = html then
-        begin
-          case HTMLText[I] of
-            '>': begin state := normal; HtmlToFontStyle(CurFontStyles, CurHtml); CurHtml := ''; end;
-            else
-              CurHtml := CurHtml + HTMLText[I];
-          end;
-        end
-        else if State = specialchar then
-        begin
-          case HTMLText[I] of
-            ';': begin state := normal; AddToRichText(SpecialCharToText(CurHtml)); CurHtml := ''; end;
-            else
-              CurHtml := CurHtml + HTMLText[I];
-          end;
-        end;
-
-      end;
-    finally
-      SB.Free;
-    end;
-  finally
-    Doc.Unfreeze;
-  end;
-end;
-
-function TOvcTCHtmlTextEdit.GetHTMLText: string;
-var
-  StringBuilder: TStringBuilder;
-  OldStyle, NewStyle: TFontStyles;
-  ole: IRichEditOle;
-  Doc: ITextDocument;
-  Range: ITextRange;
-  start, eof, n: Integer;
-  Font: ITextFont;
-begin
-  SendMessage(Handle, EM_GETOLEINTERFACE, 0, LPARAM(@ole));
-  Doc := ole as ITextDocument;
-
-  // Get total length
-  Range := Doc.Range(0, 0);
-  Range.Expand(tomStory);
-  eof := Range.End_;
-
-  OldStyle := [];
-  NewStyle := [];
-
-  StringBuilder := TStringBuilder.Create;
-  try
-    start := 0;
-    while start < eof - 1 do
-    begin
-      Range := Doc.Range(start, start);
-      n := Range.Expand(tomCharFormat);
-      Font := Range.Font;
-      NewStyle := [];
-      if (Font.Bold <> 0) and (fsBold in AllowedFontStyles) then
-        Include(NewStyle, fsBold);
-      if (Font.Italic <> 0) and (fsItalic in AllowedFontStyles) then
-        Include(NewStyle, fsItalic);
-      if (Font.Underline <> 0) and (fsUnderline in AllowedFontStyles) then
-        Include(NewStyle, fsUnderline);
-
-      StringBuilder.Append(StyleΔToHTML(OldStyle, NewStyle));
-      StringBuilder.Append(Range.Text);
-      OldStyle := NewStyle;
-      Start := Start + n;
-    end;
-    Result := TrimRight(StringBuilder.ToString) + StyleΔToHTML(OldStyle, []);  // trim off #12 at the end (and other superfluous spaces)
-  finally
-    StringBuilder.Free;
-  end;
-end;
-
-function TOvcTCHtmlTextEdit.GetIDoc: ITextDocument;
-var
-  ole: IRichEditOle;
-begin
-  SendMessage(Handle, EM_GETOLEINTERFACE, 0, LPARAM(@ole));
-  Result := ole as ITextDocument;
-end;
-
-function TOvcTCHtmlTextEdit.GetRichText: string;
-var
-  MS: TMemoryStream;
-begin
-  MS := TMemoryStream.Create;
-  try
-    Lines.SaveToStream(MS, TEncoding.Unicode);
-    MS.Position := 0;
-    SetString(Result, PAnsiChar(MS.Memory), MS.Size);
-  finally
-    MS.Free;
-  end;
-end;
-
-procedure TOvcTCHtmlTextEdit.KeyDown(var Key: Word; Shift: TShiftState);
-// disable some shortcuts
-var
-  Doc: ITextDocument;
-  tmp: OleVariant;
-begin
-  if Shift = [ssCtrl] then
-  begin
-    case Chr(Key) of
-      'J', 'L', 'E', 'R': Key := 0;
-      '0'..'9': Key := 0;
-      'V':
-        begin
-          tmp := Null;
-          Doc := GetIDoc;
-          if Clipboard.AsText <> '' then    // clear formatting
-            GetIDoc.Selection.Text := Clipboard.AsText;
-          Key := 0;
-        end;
-    end;
-
-    case Key of
-      VK_OEM_PLUS: Key := 0;
-    end;
-  end;
-  if Shift = [ssCtrl, ssShift] then
-  begin
-    case Key of
-      Ord('A')..Ord('Z'): Key := 0;
-      VK_OEM_PLUS: Key := 0;
-    end;
-  end;
-  inherited;
-end;
-
-procedure TOvcTCHtmlTextEdit.KeyPress(var Key: Char);
-var
-  Doc: ITextDocument;
-  // can't use Delphi FontStyles here because that changes all text styles of the selected text
-begin
-  case Key of
-    #2 {'B'}:
-      if fsBold in AllowedFontStyles then
-      begin
-        Doc := GetIDoc;
-        Doc.Selection.Font.Bold := Integer(tomToggle);
-        Key := #0;
-      end;
-//    #5: Key := #0;
-    #9 {'I'}:
-      if fsItalic in AllowedFontStyles then
-      begin
-        Doc := GetIDoc;
-        Doc.Selection.Font.Italic := Integer(tomToggle);
-        Key := #0;
-      end;
-//    #10, #12, #18: Key := #0;
-    #21 {'U'}:
-      if fsUnderline in AllowedFontStyles then
-      begin
-        Doc := GetIDoc;
-        if Doc.Selection.Font.Underline <> tomNone then
-          Doc.Selection.Font.Underline := tomNone
-        else
-          Doc.Selection.Font.Underline := tomSingle;
-        Key := #0;
-      end;
-  end;
-  inherited;
-end;
-
-procedure TOvcTCHtmlTextEdit.SetAllowedFontStyles(const Value: TFontStyles);
-begin
-  FAllowedFontStyles := Value - [fsStrikeOut]; // fsStrikeOut not supported yet
-end;
-
-procedure TOvcTCHtmlTextEdit.SetHTMLText(const Value: string);
-var
-  ole: IRichEditOle;
-  Doc: ITextDocument;
-begin
-  SendMessage(Handle, EM_GETOLEINTERFACE, 0, LPARAM(@ole));
-  Doc := ole as ITextDocument;
-
-  Doc.Freeze;
-  FillIDocument(Doc, Value);
-  SelStart := 0;
-  SelectAll;
-  Doc.Unfreeze;
-end;
-
-procedure TOvcTCHtmlTextEdit.SetRichText(const Value: string);
-var
-  MS: TMemoryStream;
-  AnsiStr: AnsiString;
-begin
-  MS := TMemoryStream.Create;
-  try
-    AnsiStr := AnsiString(Value);
-
-    MS.Write(Pointer(AnsiStr), Length(AnsiStr));
-    MS.Position := 0;
-    Lines.LoadFromStream(MS, TEncoding.Unicode);
-  finally
-    MS.Free;
   end;
 end;
 
@@ -578,6 +397,9 @@ procedure TOvcTCHtmlTextEdit.WMSetFocus(var Msg : TWMSetFocus);
   begin
     inherited;
     CellOwner.PostMessageToTable(ctim_SetFocus, Msg.FocusedWnd, 0);
+    if CellOwner is TOvcTCCustomHTMLText then
+      if Assigned(TOvcTCCustomHTMLText(CellOwner).FFormatBar) then
+        TOvcTCCustomHTMLText(CellOwner).FFormatBar.UpdatePosition;
   end;
 
 { TOvcTCCustomHTMLText }
@@ -651,9 +473,7 @@ procedure TOvcTCCustomHTMLText.StartEditing(RowNum : TRowNum; ColNum : TColNum;
     FFormatBar.AllowedFontStyles := AllowedFontStyles;
 
     FFormatBar.PopupParent := GetParentForm(FTable);
-    P := FTable.ClientToScreen(Point(CellRect.Left + 1, CellRect.Bottom - 2));
-    if AllowedFontStyles <> [] then
-      SetWindowPos(FFormatBar.Handle, HWND_TOP, P.X, P.Y, 0, 0, SWP_SHOWWINDOW or SWP_NOSIZE or SWP_NOZORDER or SWP_NOACTIVATE);
+//    FFormatBar.UpdatePosition; // called when edit receives focus
 
     with FEdit do
       begin
@@ -781,6 +601,323 @@ end;
 procedure TOvcTCCustomHTMLText.SetAllowedFontStyles(const Value: TFontStyles);
 begin
   FAllowedFontStyles := Value - [fsStrikeOut];
+end;
+
+{ TOvcCustomHtmlTextEditBase }
+
+constructor TOvcCustomHtmlTextEditBase.Create(AOwner: TComponent);
+begin
+  inherited;
+  AllowedFontStyles := [fsBold, fsItalic, fsUnderline];
+end;
+
+class procedure TOvcCustomHtmlTextEditBase.FillIDocument(
+  const Doc: ITextDocument; HtmlText: string);
+var
+  SB: TStringBuilder;
+  State: (normal, html, specialchar);
+  I: Integer;
+  CurHtml: string;
+  CurFontStyles: TFontStyles;
+
+  procedure HtmlToFontStyle(var FS: TFontStyles; Html: string);
+  begin
+    if AnsiSameText(Html, 'b') then
+      FS := FS + [fsBold]
+    else if AnsiSameText(Html, 'i') then
+      FS := FS + [fsItalic]
+    else if AnsiSameText(Html, 'u') then
+      FS := FS + [fsUnderline]
+
+    else if AnsiSameText(Html, '/b') then
+      FS := FS - [fsBold]
+    else if AnsiSameText(Html, '/i') then
+      FS := FS - [fsItalic]
+    else if AnsiSameText(Html, '/u') then
+      FS := FS - [fsUnderline];
+  end;
+
+  function SpecialCharToText(Html: string): string;
+  begin
+    if Html = 'gt' then
+      Result := '>'
+    else if Html = 'lt' then
+      Result := '<'
+    else if Html = 'amp' then
+      Result := '&';
+  end;
+
+  procedure AddToRichText(S: string);
+  begin
+    Doc.Selection.Text := S;
+    Doc.Selection.Font.Bold := -Ord(fsBold in CurFontStyles);
+    Doc.Selection.Font.Italic := -Ord(fsItalic in CurFontStyles);
+    if fsUnderline in CurFontStyles then
+      Doc.Selection.Font.Underline := tomSingle
+    else
+      Doc.Selection.Font.Underline := tomNone;
+    Doc.Selection.Move(tomCharacter, 1);
+  end;
+
+begin
+  HtmlText := AnsiReplaceText(HtmlText, #13#10, #13);
+  Doc.Freeze;
+  try
+    Doc.New;
+    SB := TStringBuilder.Create;
+    try
+      state := normal;
+      CurHtml := '';
+      CurFontStyles := [];
+      for I := 1 to Length(HTMLText) do
+      begin
+        if state = normal then
+          case HTMLText[I] of
+            '<': begin State := html; CurHtml := ''; end;
+            '&': state := specialchar;
+            else AddToRichText(HTMLText[I]);
+          end
+        else if state = html then
+        begin
+          case HTMLText[I] of
+            '>': begin state := normal; HtmlToFontStyle(CurFontStyles, CurHtml); CurHtml := ''; end;
+            else
+              CurHtml := CurHtml + HTMLText[I];
+          end;
+        end
+        else if State = specialchar then
+        begin
+          case HTMLText[I] of
+            ';': begin state := normal; AddToRichText(SpecialCharToText(CurHtml)); CurHtml := ''; end;
+            else
+              CurHtml := CurHtml + HTMLText[I];
+          end;
+        end;
+
+      end;
+    finally
+      SB.Free;
+    end;
+  finally
+    Doc.Unfreeze;
+  end;
+end;
+
+function TOvcCustomHtmlTextEditBase.GetHTMLText: string;
+var
+  StringBuilder: TStringBuilder;
+  OldStyle, NewStyle: TFontStyles;
+  ole: IRichEditOle;
+  Doc: ITextDocument;
+  Range: ITextRange;
+  start, eof, n: Integer;
+  Font: ITextFont;
+  tmp: string;
+begin
+  SendMessage(Handle, EM_GETOLEINTERFACE, 0, LPARAM(@ole));
+  Doc := ole as ITextDocument;
+
+  // Get total length
+  Range := Doc.Range(0, 0);
+  Range.Expand(tomStory);
+  eof := Range.End_;
+
+  OldStyle := [];
+  NewStyle := [];
+
+  StringBuilder := TStringBuilder.Create;
+  try
+    start := 0;
+    while start < eof - 1 do
+    begin
+      Range := Doc.Range(start, start);
+      n := Range.Expand(tomCharFormat);
+      Font := Range.Font;
+      NewStyle := [];
+      if (Font.Bold <> 0) and (fsBold in AllowedFontStyles) then
+        Include(NewStyle, fsBold);
+      if (Font.Italic <> 0) and (fsItalic in AllowedFontStyles) then
+        Include(NewStyle, fsItalic);
+      if (Font.Underline <> 0) and (fsUnderline in AllowedFontStyles) then
+        Include(NewStyle, fsUnderline);
+
+      StringBuilder.Append(StyleΔToHTML(OldStyle, NewStyle));
+      tmp := Range.Text;
+      tmp := AnsiReplaceStr(tmp, #10, '');
+      tmp := AnsiReplaceStr(tmp, #13, #13#10);
+      StringBuilder.Append(tmp);
+      OldStyle := NewStyle;
+      Start := Start + n;
+    end;
+    Result := TrimRight(StringBuilder.ToString) + StyleΔToHTML(OldStyle, []);  // trim off #12 at the end (and other superfluous spaces)
+  finally
+    StringBuilder.Free;
+  end;
+end;
+
+function TOvcCustomHtmlTextEditBase.GetIDoc: ITextDocument;
+var
+  ole: IRichEditOle;
+begin
+  SendMessage(Handle, EM_GETOLEINTERFACE, 0, LPARAM(@ole));
+  Result := ole as ITextDocument;
+end;
+
+function TOvcCustomHtmlTextEditBase.GetRichText: string;
+var
+  MS: TMemoryStream;
+begin
+  MS := TMemoryStream.Create;
+  try
+    Lines.SaveToStream(MS, TEncoding.Unicode);
+    MS.Position := 0;
+    SetString(Result, PAnsiChar(MS.Memory), MS.Size);
+  finally
+    MS.Free;
+  end;
+end;
+
+procedure TOvcCustomHtmlTextEditBase.KeyDown(var Key: Word; Shift: TShiftState);
+// disable some shortcuts
+var
+  Doc: ITextDocument;
+  tmp: OleVariant;
+begin
+  if Shift = [ssCtrl] then
+  begin
+    case Chr(Key) of
+      'J', 'L', 'E', 'R': Key := 0;
+      '0'..'9': Key := 0;
+      'V':
+        begin
+          tmp := Null;
+          Doc := GetIDoc;
+          if Clipboard.AsText <> '' then    // clear formatting
+            GetIDoc.Selection.Text := Clipboard.AsText;
+          Key := 0;
+        end;
+    end;
+
+    case Key of
+      VK_OEM_PLUS: Key := 0;
+    end;
+  end;
+  if Shift = [ssCtrl, ssShift] then
+  begin
+    case Key of
+      Ord('A')..Ord('Z'): Key := 0;
+      VK_OEM_PLUS: Key := 0;
+    end;
+  end;
+  inherited;
+end;
+
+procedure TOvcCustomHtmlTextEditBase.KeyPress(var Key: Char);
+var
+  Doc: ITextDocument;
+  // can't use Delphi FontStyles here because that changes all text styles of the selected text
+begin
+  case Key of
+    #2 {'B'}:
+      if fsBold in AllowedFontStyles then
+      begin
+        Doc := GetIDoc;
+        Doc.Selection.Font.Bold := Integer(tomToggle);
+        Key := #0;
+      end;
+//    #5: Key := #0;
+    #9 {'I'}:
+      if fsItalic in AllowedFontStyles then
+      begin
+        Doc := GetIDoc;
+        Doc.Selection.Font.Italic := Integer(tomToggle);
+        Key := #0;
+      end;
+//    #10, #12, #18: Key := #0;
+    #21 {'U'}:
+      if fsUnderline in AllowedFontStyles then
+      begin
+        Doc := GetIDoc;
+        if Doc.Selection.Font.Underline <> tomNone then
+          Doc.Selection.Font.Underline := tomNone
+        else
+          Doc.Selection.Font.Underline := tomSingle;
+        Key := #0;
+      end;
+  end;
+  inherited;
+end;
+
+procedure TOvcCustomHtmlTextEditBase.SetAllowedFontStyles(
+  const Value: TFontStyles);
+begin
+  FAllowedFontStyles := Value - [fsStrikeOut]; // fsStrikeOut not supported yet
+end;
+
+procedure TOvcCustomHtmlTextEditBase.SetHTMLText(const Value: string);
+var
+  ole: IRichEditOle;
+  Doc: ITextDocument;
+begin
+  SendMessage(Handle, EM_GETOLEINTERFACE, 0, LPARAM(@ole));
+  Doc := ole as ITextDocument;
+
+  Doc.Freeze;
+  FillIDocument(Doc, Value);
+  SelStart := 0;
+  SelectAll;
+  Doc.Unfreeze;
+end;
+
+procedure TOvcCustomHtmlTextEditBase.SetRichText(const Value: string);
+var
+  MS: TMemoryStream;
+  AnsiStr: AnsiString;
+begin
+  MS := TMemoryStream.Create;
+  try
+    AnsiStr := AnsiString(Value);
+
+    MS.Write(Pointer(AnsiStr), Length(AnsiStr));
+    MS.Position := 0;
+    Lines.LoadFromStream(MS, TEncoding.Unicode);
+  finally
+    MS.Free;
+  end;
+end;
+
+{ TOvcCustomHtmlMemo }
+
+destructor TOvcCustomHtmlMemo.Destroy;
+begin
+  FreeAndNil(FFormatBar);
+  inherited;
+end;
+
+procedure TOvcCustomHtmlMemo.WMKillFocus(var Msg: TWMKillFocus);
+begin
+  inherited;
+  FreeAndNil(FFormatBar);
+end;
+
+procedure TOvcCustomHtmlMemo.WMSetFocus(var Msg: TWMSetFocus);
+var
+  Monitor: TMonitor;
+  Form: TCustomForm;
+  P: TPoint;
+  R: TRect;
+begin
+  inherited;
+
+  Form := GetParentForm(Self);
+  if Form = nil then
+    Exit;
+
+  FFormatBar := TovcTextFormatBar.Create(Self);
+  FFormatBar.AllowedFontStyles := AllowedFontStyles;
+
+  FFormatBar.PopupParent := Form;
+  FFormatBar.UpdatePosition;
 end;
 
 end.

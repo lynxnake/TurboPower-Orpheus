@@ -686,7 +686,8 @@ begin
     TO32FlexEdit,
     TOvcSimpleField,
     TOvcPictureField,
-    TOvcNumericField
+    TOvcNumericField,
+    TOvcHtmlMemo
     ]);
 
   {register editing and related components}
