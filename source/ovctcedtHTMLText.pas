@@ -70,7 +70,7 @@ type
 
   TOvcCustomHtmlMemo = class(TOvcCustomHtmlTextEditBase)
   private
-    FFormatBar: TovcTextFormatBar;
+    FFormatBar: TOvcTextFormatBar;
   protected
     procedure WMKillFocus(var Msg : TWMKillFocus); message WM_KILLFOCUS;
     procedure WMSetFocus(var Msg : TWMSetFocus); message WM_SETFOCUS;
@@ -172,7 +172,7 @@ type
   TOvcTCCustomHTMLText = class(TOvcTCBaseString)
   private
     FAllowedFontStyles: TFontStyles;
-    FFormatBar: TovcTextFormatBar;
+    FFormatBar: TOvcTextFormatBar;
     procedure SetAllowedFontStyles(const Value: TFontStyles);
   protected {private}
     FEdit        : TOvcTCHtmlTextEdit;
@@ -469,7 +469,7 @@ procedure TOvcTCCustomHTMLText.StartEditing(RowNum : TRowNum; ColNum : TColNum;
     P: TPoint;
   begin
     FEdit := CreateEditControl(FTable);
-    FFormatBar := TovcTextFormatBar.Create(Self);
+    FFormatBar := TOvcTextFormatBar.Create(Self);
     FFormatBar.AllowedFontStyles := AllowedFontStyles;
 
     FFormatBar.PopupParent := GetParentForm(FTable);
@@ -552,6 +552,7 @@ var
   Painter: TOvcRTFPainter;
   TextRect: TRect;
   State: Integer;
+  Doc: ITextDocument;
 begin
   {if the cell is invisible or the passed data is nil and we're not
    designing, all's done}
@@ -573,7 +574,10 @@ begin
 
   Painter := TOvcRTFPainter.Create;
   try
-    TOvcTCHtmlTextEdit.FillIDocument(Painter.GetDoc, sBuffer);
+    Doc := Painter.GetDoc;  // must store GetDoc in a temporary variable so it can be set to nil before Painter.Free
+    TOvcTCHtmlTextEdit.FillIDocument(Doc, sBuffer);
+    Doc := nil;
+
     inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, Data);    {blank out the cell - must be done after loading the document to avoid flicker }
     TextRect := CellRect;
     TextRect.Left := TextRect.Left + 1;
@@ -789,6 +793,7 @@ begin
       'J', 'L', 'E', 'R': Key := 0;
       '0'..'9': Key := 0;
       'V':
+        if not ReadOnly then
         begin
           tmp := Null;
           Doc := GetIDoc;
@@ -817,33 +822,36 @@ var
   Doc: ITextDocument;
   // can't use Delphi FontStyles here because that changes all text styles of the selected text
 begin
-  case Key of
-    #2 {'B'}:
-      if fsBold in AllowedFontStyles then
-      begin
-        Doc := GetIDoc;
-        Doc.Selection.Font.Bold := Integer(tomToggle);
-        Key := #0;
-      end;
-//    #5: Key := #0;
-    #9 {'I'}:
-      if fsItalic in AllowedFontStyles then
-      begin
-        Doc := GetIDoc;
-        Doc.Selection.Font.Italic := Integer(tomToggle);
-        Key := #0;
-      end;
-//    #10, #12, #18: Key := #0;
-    #21 {'U'}:
-      if fsUnderline in AllowedFontStyles then
-      begin
-        Doc := GetIDoc;
-        if Doc.Selection.Font.Underline <> tomNone then
-          Doc.Selection.Font.Underline := tomNone
-        else
-          Doc.Selection.Font.Underline := tomSingle;
-        Key := #0;
-      end;
+  if not ReadOnly then
+  begin
+    case Key of
+      #2 {'B'}:
+        if fsBold in AllowedFontStyles then
+        begin
+          Doc := GetIDoc;
+          Doc.Selection.Font.Bold := Integer(tomToggle);
+          Key := #0;
+        end;
+  //    #5: Key := #0;
+      #9 {'I'}:
+        if fsItalic in AllowedFontStyles then
+        begin
+          Doc := GetIDoc;
+          Doc.Selection.Font.Italic := Integer(tomToggle);
+          Key := #0;
+        end;
+  //    #10, #12, #18: Key := #0;
+      #21 {'U'}:
+        if fsUnderline in AllowedFontStyles then
+        begin
+          Doc := GetIDoc;
+          if Doc.Selection.Font.Underline <> tomNone then
+            Doc.Selection.Font.Underline := tomNone
+          else
+            Doc.Selection.Font.Underline := tomSingle;
+          Key := #0;
+        end;
+    end;
   end;
   inherited;
 end;
@@ -858,15 +866,22 @@ procedure TOvcCustomHtmlTextEditBase.SetHTMLText(const Value: string);
 var
   ole: IRichEditOle;
   Doc: ITextDocument;
+  LReadOnly: Boolean;
 begin
-  SendMessage(Handle, EM_GETOLEINTERFACE, 0, LPARAM(@ole));
-  Doc := ole as ITextDocument;
+  LReadOnly := ReadOnly;
+  ReadOnly := False;
+  try
+    SendMessage(Handle, EM_GETOLEINTERFACE, 0, LPARAM(@ole));
+    Doc := ole as ITextDocument;
 
-  Doc.Freeze;
-  FillIDocument(Doc, Value);
-  SelStart := 0;
-  SelectAll;
-  Doc.Unfreeze;
+    Doc.Freeze;
+    FillIDocument(Doc, Value);
+    SelStart := 0;
+    SelectAll;
+    Doc.Unfreeze;
+  finally
+    ReadOnly := LReadOnly;
+  end;
 end;
 
 procedure TOvcCustomHtmlTextEditBase.SetRichText(const Value: string);
@@ -909,11 +924,14 @@ var
 begin
   inherited;
 
+  if ReadOnly then
+    Exit;
+
   Form := GetParentForm(Self);
   if Form = nil then
     Exit;
 
-  FFormatBar := TovcTextFormatBar.Create(Self);
+  FFormatBar := TOvcTextFormatBar.Create(Self);
   FFormatBar.AllowedFontStyles := AllowedFontStyles;
 
   FFormatBar.PopupParent := Form;

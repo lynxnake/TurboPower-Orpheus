@@ -57,7 +57,7 @@ type
   end;
 
 type
-  TovcTextFormatBar = class(TForm)
+  TOvcTextFormatBar = class(TForm)
     Timer1: TTimer;
     btnBold: TSpeedButton;
     btnItalic: TSpeedButton;
@@ -80,13 +80,14 @@ type
       message WM_MOUSEACTIVATE;
     procedure CreateParams(var Params: TCreateParams); override;
   public
+    destructor Destroy; override;
     property AllowedFontStyles: TFontStyles read FAllowedFontStyles write SetAllowedFontStyles default [fsBold, fsItalic, fsUnderline];
     procedure UpdatePosition;
     property PopupParent: TCustomForm read GetPopupParent write SetPopupParent;
   end;
 
 //var
-//  ovcTextFormatBar: TovcTextFormatBar;
+//  ovcTextFormatBar: TOvcTextFormatBar;
 
 implementation
 
@@ -95,9 +96,18 @@ implementation
 uses
   CommCtrl, ovctcedtHTMLText, ovcRTF_IText, Generics.Collections, ovcTable;
 
-{ TovcTextFormatBar }
+function SetWindowSubclass(hWnd: HWND; pfnSubclass: SUBCLASSPROC;
+  uIdSubclass: UINT_PTR; dwRefData: DWORD_PTR): BOOL; stdcall; external comctl32; // XP or newer; Winapi.CommCtrl.SetWindowSubClass is broken (InitComCtl not called)
 
-procedure TovcTextFormatBar.btnBoldClick(Sender: TObject);
+function DefSubclassProc(hWnd: HWND; uMsg: UINT; wParam: WPARAM;
+  lParam: LPARAM): LRESULT; stdcall; external comctl32; // XP or newer; Winapi.CommCtrl.SetWindowSubClass is broken (InitComCtl not called)
+
+function RemoveWindowSubclass(hWnd: HWND; pfnSubclass: SUBCLASSPROC;
+  uIdSubclass: UINT_PTR): BOOL; stdcall; external comctl32;
+
+{ TOvcTextFormatBar }
+
+procedure TOvcTextFormatBar.btnBoldClick(Sender: TObject);
 var
   RE: TOvcCustomHtmlTextEditBase;
 begin
@@ -110,7 +120,7 @@ begin
     RE.GetIDoc.Selection.Font.Bold := Integer(tomToggle);
 end;
 
-procedure TovcTextFormatBar.btnItalicClick(Sender: TObject);
+procedure TOvcTextFormatBar.btnItalicClick(Sender: TObject);
 var
   RE: TOvcCustomHtmlTextEditBase;
 begin
@@ -123,7 +133,7 @@ begin
     RE.GetIDoc.Selection.Font.Italic := Integer(tomToggle);
 end;
 
-procedure TovcTextFormatBar.btnUnderlineClick(Sender: TObject);
+procedure TOvcTextFormatBar.btnUnderlineClick(Sender: TObject);
 var
   RE: TOvcCustomHtmlTextEditBase;
   Doc: ITextDocument;
@@ -143,7 +153,7 @@ begin
   end;
 end;
 
-procedure TovcTextFormatBar.CreateParams(var Params: TCreateParams);
+procedure TOvcTextFormatBar.CreateParams(var Params: TCreateParams);
 begin
   inherited;
 
@@ -154,30 +164,36 @@ begin
   end;
 end;
 
-procedure TovcTextFormatBar.FormCreate(Sender: TObject);
+destructor TOvcTextFormatBar.Destroy;
+begin
+  FreeAndNil(FFormSubClasser);
+  inherited;
+end;
+
+procedure TOvcTextFormatBar.FormCreate(Sender: TObject);
 begin
   FAllowedFontStyles := [fsBold, fsItalic, fsUnderline];
 end;
 
-procedure TovcTextFormatBar.FormMessage(Msg: TMessage);
+procedure TOvcTextFormatBar.FormMessage(Msg: TMessage);
 begin
   if Msg.Msg = WM_MOVE then
     UpdatePosition;
 end;
 
-procedure TovcTextFormatBar.FormPaint(Sender: TObject);
+procedure TOvcTextFormatBar.FormPaint(Sender: TObject);
 begin
   Canvas.Brush.Color := $A7ABB0;
   Canvas.Brush.Style := bsSolid;
   Canvas.FrameRect(ClientRect);
 end;
 
-function TovcTextFormatBar.GetPopupParent: TCustomForm;
+function TOvcTextFormatBar.GetPopupParent: TCustomForm;
 begin
   Result := inherited PopupParent;
 end;
 
-procedure TovcTextFormatBar.SetAllowedFontStyles(const Value: TFontStyles);
+procedure TOvcTextFormatBar.SetAllowedFontStyles(const Value: TFontStyles);
 var
   Buttons: TObjectList<TSpeedButton>;
   I: Integer;
@@ -203,16 +219,16 @@ begin
   end;
 end;
 
-procedure TovcTextFormatBar.SetPopupParent(const Value: TCustomForm);
+procedure TOvcTextFormatBar.SetPopupParent(const Value: TCustomForm);
 begin
   FreeAndNil(FFormSubClasser);
-  inherited PopupParent := Self;
+  inherited PopupParent := Value;
   FFormSubClasser := TFormSubClasser.Create(Self);
   FFormSubClasser.OnMessage := FormMessage;
   FFormSubClasser.SetForm(Value);
 end;
 
-procedure TovcTextFormatBar.Timer1Timer(Sender: TObject);
+procedure TOvcTextFormatBar.Timer1Timer(Sender: TObject);
 var
   RE: TOvcCustomHtmlTextEditBase;
 begin
@@ -233,7 +249,7 @@ begin
 //  UpdatePosition;
 end;
 
-procedure TovcTextFormatBar.UpdatePosition;
+procedure TOvcTextFormatBar.UpdatePosition;
 var
   RE: TOvcCustomHtmlTextEditBase;
   Monitor: TMonitor;
@@ -275,7 +291,7 @@ begin
     SetWindowPos(Handle, HWND_TOP, P.X, P.Y, 0, 0, SWP_SHOWWINDOW or SWP_NOSIZE or SWP_NOZORDER or SWP_NOACTIVATE);
 end;
 
-procedure TovcTextFormatBar.WMMouseActivate(var Message: TWMMouseActivate);
+procedure TOvcTextFormatBar.WMMouseActivate(var Message: TWMMouseActivate);
 begin
   Message.Result := MA_NOACTIVATE;
 end;
@@ -311,16 +327,11 @@ procedure TFormSubClasser.RevertParentWindowProc;
 begin
   if FForm <> nil then
   begin
-    RemoveWindowSubclass(FForm.Handle, SubClassWindowProc, NativeInt(Self));
+    if not RemoveWindowSubclass(FForm.Handle, SubClassWindowProc, NativeUInt(Self)) then
+      RaiseLastOSError;
     FForm := nil;
   end;
 end;
-
-function SetWindowSubclass(hWnd: HWND; pfnSubclass: SUBCLASSPROC;
-  uIdSubclass: UINT_PTR; dwRefData: DWORD_PTR): BOOL; stdcall; external comctl32; // XP or newer; Winapi.CommCtrl.SetWindowSubClass is broken (InitComCtl not called)
-
-function DefSubclassProc(hWnd: HWND; uMsg: UINT; wParam: WPARAM;
-  lParam: LPARAM): LRESULT; stdcall; external comctl32; // XP or newer; Winapi.CommCtrl.SetWindowSubClass is broken (InitComCtl not called)
 
 procedure TFormSubClasser.SetForm(AForm: TCustomForm);
 begin
@@ -331,7 +342,7 @@ begin
 
   if Assigned(FForm) then
   begin
-    SetWindowSubClass(FForm.Handle, TFormSubClasser.SubClassWindowProc, 1, NativeUInt(Self));
+    SetWindowSubClass(FForm.Handle, TFormSubClasser.SubClassWindowProc, NativeUInt(Self), NativeUInt(Self));
     FreeNotification(FForm);
   end;
 //  else
