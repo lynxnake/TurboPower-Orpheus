@@ -309,6 +309,9 @@ begin
   else
     Exit;
 
+  if Screen.ActiveControl <> FAttachedControl then
+    Exit;
+
 //  if Screen.ActiveControl is TOvcCustomHtmlTextEditBase then
 //    RE := TOvcCustomHtmlTextEditBase(Screen.ActiveControl)
 //  else
