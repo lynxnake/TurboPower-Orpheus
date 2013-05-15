@@ -71,19 +71,24 @@ type
   private
     FAllowedFontStyles: TFontStyles;
     FFormSubClasser: TFormSubClasser;
+    FAttachedControl: TWinControl;
     procedure SetAllowedFontStyles(const Value: TFontStyles);
     procedure SetPopupParent(const Value: TCustomForm);
     function GetPopupParent: TCustomForm;
     procedure FormMessage(Msg: TMessage);
+    procedure SetAttachedControl(const Value: TWinControl);
   protected
     procedure WMMouseActivate(var Message: TWMMouseActivate);
       message WM_MOUSEACTIVATE;
     procedure CreateParams(var Params: TCreateParams); override;
+    procedure Notification(AComponent: TComponent; Operation: TOperation);
+      override;
   public
     destructor Destroy; override;
     property AllowedFontStyles: TFontStyles read FAllowedFontStyles write SetAllowedFontStyles default [fsBold, fsItalic, fsUnderline];
     procedure UpdatePosition;
     property PopupParent: TCustomForm read GetPopupParent write SetPopupParent;
+    property AttachedControl: TWinControl read FAttachedControl write SetAttachedControl;
   end;
 
 //var
@@ -111,10 +116,14 @@ procedure TOvcTextFormatBar.btnBoldClick(Sender: TObject);
 var
   RE: TOvcCustomHtmlTextEditBase;
 begin
-  if Screen.ActiveControl is TOvcCustomHtmlTextEditBase then
-    RE := TOvcCustomHtmlTextEditBase(Screen.ActiveControl)
+  if FAttachedControl is TOvcCustomHtmlTextEditBase then
+    RE := TOvcCustomHtmlTextEditBase(FAttachedControl)
   else
     RE := nil;
+//  if Screen.ActiveControl is TOvcCustomHtmlTextEditBase then
+//    RE := TOvcCustomHtmlTextEditBase(Screen.ActiveControl)
+//  else
+//    RE := nil;
 
   if Assigned(RE) then
     RE.GetIDoc.Selection.Font.Bold := Integer(tomToggle);
@@ -124,10 +133,14 @@ procedure TOvcTextFormatBar.btnItalicClick(Sender: TObject);
 var
   RE: TOvcCustomHtmlTextEditBase;
 begin
-  if Screen.ActiveControl is TOvcCustomHtmlTextEditBase then
-    RE := TOvcCustomHtmlTextEditBase(Screen.ActiveControl)
+  if FAttachedControl is TOvcCustomHtmlTextEditBase then
+    RE := TOvcCustomHtmlTextEditBase(FAttachedControl)
   else
     RE := nil;
+//  if Screen.ActiveControl is TOvcCustomHtmlTextEditBase then
+//    RE := TOvcCustomHtmlTextEditBase(Screen.ActiveControl)
+//  else
+//    RE := nil;
 
   if Assigned(RE) then
     RE.GetIDoc.Selection.Font.Italic := Integer(tomToggle);
@@ -138,10 +151,14 @@ var
   RE: TOvcCustomHtmlTextEditBase;
   Doc: ITextDocument;
 begin
-  if Screen.ActiveControl is TOvcCustomHtmlTextEditBase then
-    RE := TOvcCustomHtmlTextEditBase(Screen.ActiveControl)
+  if FAttachedControl is TOvcCustomHtmlTextEditBase then
+    RE := TOvcCustomHtmlTextEditBase(FAttachedControl)
   else
     RE := nil;
+//  if Screen.ActiveControl is TOvcCustomHtmlTextEditBase then
+//    RE := TOvcCustomHtmlTextEditBase(Screen.ActiveControl)
+//  else
+//    RE := nil;
 
   if Assigned(RE) then
   begin
@@ -193,6 +210,16 @@ begin
   Result := inherited PopupParent;
 end;
 
+procedure TOvcTextFormatBar.Notification(AComponent: TComponent;
+  Operation: TOperation);
+begin
+  inherited Notification(AComponent, Operation);
+  if (Operation = opRemove) and (AComponent = FAttachedControl) then
+  begin
+    FAttachedControl := nil;
+  end;
+end;
+
 procedure TOvcTextFormatBar.SetAllowedFontStyles(const Value: TFontStyles);
 var
   Buttons: TObjectList<TSpeedButton>;
@@ -219,6 +246,19 @@ begin
   end;
 end;
 
+procedure TOvcTextFormatBar.SetAttachedControl(const Value: TWinControl);
+begin
+  if (Value <> FAttachedControl) and (Value <> Self) then
+  begin
+    if FAttachedControl <> nil then
+      RemoveFreeNotification(FAttachedControl);
+    FAttachedControl := Value;
+
+    if FAttachedControl <> nil then
+      FAttachedControl.FreeNotification(Value);
+  end;
+end;
+
 procedure TOvcTextFormatBar.SetPopupParent(const Value: TCustomForm);
 begin
   FreeAndNil(FFormSubClasser);
@@ -232,10 +272,17 @@ procedure TOvcTextFormatBar.Timer1Timer(Sender: TObject);
 var
   RE: TOvcCustomHtmlTextEditBase;
 begin
-  if Screen.ActiveControl is TOvcCustomHtmlTextEditBase then
-    RE := TOvcCustomHtmlTextEditBase(Screen.ActiveControl)
+  if FAttachedControl is TOvcCustomHtmlTextEditBase then
+    RE := TOvcCustomHtmlTextEditBase(FAttachedControl)
   else
     RE := nil;
+
+//  if Screen.ActiveControl is TOvcCustomHtmlTextEditBase then
+//    RE := TOvcCustomHtmlTextEditBase(Screen.ActiveControl)
+//  else
+//    RE := nil;
+
+  Visible := Assigned(RE) and (RE = Screen.ActiveControl);
 
   btnBold.Enabled := Assigned(RE);
   btnItalic.Enabled := Assigned(RE);
@@ -252,16 +299,20 @@ end;
 procedure TOvcTextFormatBar.UpdatePosition;
 var
   RE: TOvcCustomHtmlTextEditBase;
-  Monitor: TMonitor;
   Form: TCustomForm;
   P, P2: TPoint;
   R: TRect;
   Table: TOvcTable;
 begin
-  if Screen.ActiveControl is TOvcCustomHtmlTextEditBase then
-    RE := TOvcCustomHtmlTextEditBase(Screen.ActiveControl)
+  if FAttachedControl is TOvcCustomHtmlTextEditBase then
+    RE := TOvcCustomHtmlTextEditBase(FAttachedControl)
   else
     Exit;
+
+//  if Screen.ActiveControl is TOvcCustomHtmlTextEditBase then
+//    RE := TOvcCustomHtmlTextEditBase(Screen.ActiveControl)
+//  else
+//    Exit;
 
   Form := GetParentForm(RE);
   if Form = nil then
@@ -305,10 +356,7 @@ begin
 end;
 
 procedure TFormSubClasser.DoMessage(var Msg: TMessage);
-var
-  Handled: Boolean;
 begin
-  Handled := False;
   if Assigned(FOnMessage) then
     FOnMessage(Msg);
 end;
@@ -336,14 +384,15 @@ end;
 procedure TFormSubClasser.SetForm(AForm: TCustomForm);
 begin
   RevertParentWindowProc;
-  RemoveFreeNotification(AForm);
+  if Assigned(FForm) then
+    FForm.RemoveFreeNotification(Self);
 
   FForm := AForm;
 
   if Assigned(FForm) then
   begin
     SetWindowSubClass(FForm.Handle, TFormSubClasser.SubClassWindowProc, NativeUInt(Self), NativeUInt(Self));
-    FreeNotification(FForm);
+    FForm.FreeNotification(Self);
   end;
 //  else
 //    RevertParentWindowProc;

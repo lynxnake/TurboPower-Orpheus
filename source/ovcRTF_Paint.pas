@@ -36,6 +36,7 @@ type
     destructor Destroy; override;
     function GetDoc: ITextDocument;
     procedure Draw(Canvas: TCanvas; Rect: TRect; const Transparent, WordWrap: Boolean);
+    function GetDrawHeight(Canvas: TCanvas; DrawWidth: Integer): Integer;
   end;
 
 implementation
@@ -274,6 +275,30 @@ end;
 function TOvcRTFPainter.GetDoc: ITextDocument;
 begin
   Result := FServices as ITextDocument;
+end;
+
+function TOvcRTFPainter.GetDrawHeight(Canvas: TCanvas; DrawWidth: Integer): Integer;
+var
+  DrawRect: TRect;
+  w, h: Integer;
+  dummy: TSizeL;
+  hr: HResult;
+  dxpi, dypi: Integer;
+const
+  HIMETRIC_PER_INCH = 2540;
+begin
+  dxpi := GetDeviceCaps(Canvas.Handle, LOGPIXELSX);
+  dypi := GetDeviceCaps(Canvas.Handle, LOGPIXELSY);
+
+  w := MulDiv(DrawWidth, HIMETRIC_PER_INCH, dxpi);   // TxGetNaturalSize expects sizes in MM_HIMETRIC
+  h := High(Integer);
+  dummy.cx := High(Integer);
+  dummy.cy := High(Integer);
+  TDrawRTFTextHost(FHostImpl).FRect := DrawRect;
+  hr := FServices.TxGetNaturalSize(dvAspect_Content, Canvas.Handle, 0, nil, TXTNS_FITTOCONTENT, dummy, w, h);
+  OleCheck(hr);
+
+  Result := MulDiv(h, dypi, HIMETRIC_PER_INCH);
 end;
 
 end.

@@ -62,7 +62,7 @@ type
     constructor Create(AOwner: TComponent); override;
     property RichText: string read GetRichText write SetRichText;
     property HTMLText: string read GetHTMLText write SetHTMLText;
-    class procedure FillIDocument(const Doc: ITextDocument; HtmlText: string);
+    class procedure FillIDocument(const Doc: ITextDocument; HtmlText: string; AFont: TFont = nil);
     function GetIDoc: ITextDocument;
   published
     property AllowedFontStyles: TFontStyles read FAllowedFontStyles write SetAllowedFontStyles default [fsBold, fsItalic, fsUnderline];
@@ -465,14 +465,13 @@ procedure TOvcTCCustomHTMLText.StartEditing(RowNum : TRowNum; ColNum : TColNum;
                                      const CellAttr : TOvcCellAttributes;
                                            CellStyle: TOvcTblEditorStyle;
                                            Data : pointer);
-  var
-    P: TPoint;
   begin
     FEdit := CreateEditControl(FTable);
     FFormatBar := TOvcTextFormatBar.Create(Self);
     FFormatBar.AllowedFontStyles := AllowedFontStyles;
 
     FFormatBar.PopupParent := GetParentForm(FTable);
+    FFormatBar.AttachedControl := FEdit;
 //    FFormatBar.UpdatePosition; // called when edit receives focus
 
     with FEdit do
@@ -575,7 +574,7 @@ begin
   Painter := TOvcRTFPainter.Create;
   try
     Doc := Painter.GetDoc;  // must store GetDoc in a temporary variable so it can be set to nil before Painter.Free
-    TOvcTCHtmlTextEdit.FillIDocument(Doc, sBuffer);
+    TOvcTCHtmlTextEdit.FillIDocument(Doc, sBuffer, CellAttr.caFont);
     Doc := nil;
 
     inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, Data);    {blank out the cell - must be done after loading the document to avoid flicker }
@@ -616,7 +615,7 @@ begin
 end;
 
 class procedure TOvcCustomHtmlTextEditBase.FillIDocument(
-  const Doc: ITextDocument; HtmlText: string);
+  const Doc: ITextDocument; HtmlText: string; AFont: TFont);
 var
   SB: TStringBuilder;
   State: (normal, html, specialchar);
@@ -654,6 +653,11 @@ var
   procedure AddToRichText(S: string);
   begin
     Doc.Selection.Text := S;
+    if Assigned(AFont) then
+    begin
+      Doc.Selection.Font.Name := AFont.Name;
+      Doc.Selection.Font.Size := AFont.Size;
+    end;
     Doc.Selection.Font.Bold := -Ord(fsBold in CurFontStyles);
     Doc.Selection.Font.Italic := -Ord(fsItalic in CurFontStyles);
     if fsUnderline in CurFontStyles then
@@ -875,7 +879,7 @@ begin
     Doc := ole as ITextDocument;
 
     Doc.Freeze;
-    FillIDocument(Doc, Value);
+    FillIDocument(Doc, Value, Font);
     SelStart := 0;
     SelectAll;
     Doc.Unfreeze;
@@ -917,10 +921,7 @@ end;
 
 procedure TOvcCustomHtmlMemo.WMSetFocus(var Msg: TWMSetFocus);
 var
-  Monitor: TMonitor;
   Form: TCustomForm;
-  P: TPoint;
-  R: TRect;
 begin
   inherited;
 
@@ -935,6 +936,7 @@ begin
   FFormatBar.AllowedFontStyles := AllowedFontStyles;
 
   FFormatBar.PopupParent := Form;
+  FFormatBar.AttachedControl := Self;
   FFormatBar.UpdatePosition;
 end;
 
