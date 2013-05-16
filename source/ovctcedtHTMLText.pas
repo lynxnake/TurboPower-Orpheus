@@ -622,6 +622,7 @@ var
   I: Integer;
   CurHtml: string;
   CurFontStyles: TFontStyles;
+  CurText: string;
 
   procedure HtmlToFontStyle(var FS: TFontStyles; Html: string);
   begin
@@ -652,6 +653,9 @@ var
 
   procedure AddToRichText(S: string);
   begin
+    if S = '' then
+      Exit;
+
     Doc.Selection.Text := S;
     if Assigned(AFont) then
     begin
@@ -677,13 +681,14 @@ begin
       state := normal;
       CurHtml := '';
       CurFontStyles := [];
+      CurText := '';
       for I := 1 to Length(HTMLText) do
       begin
         if state = normal then
           case HTMLText[I] of
-            '<': begin State := html; CurHtml := ''; end;
+            '<': begin State := html; CurHtml := ''; AddToRichText(CurText); CurText := ''; end;
             '&': state := specialchar;
-            else AddToRichText(HTMLText[I]);
+            else CurText := CurText + HTMLText[I]; // AddToRichText(HTMLText[I]);
           end
         else if state = html then
         begin
@@ -696,13 +701,13 @@ begin
         else if State = specialchar then
         begin
           case HTMLText[I] of
-            ';': begin state := normal; AddToRichText(SpecialCharToText(CurHtml)); CurHtml := ''; end;
+            ';': begin state := normal; CurText := CurText + SpecialCharToText(CurHtml); {AddToRichText(SpecialCharToText(CurHtml));} CurHtml := ''; end;
             else
               CurHtml := CurHtml + HTMLText[I];
           end;
         end;
-
       end;
+      AddToRichText(CurText);
     finally
       SB.Free;
     end;
