@@ -801,8 +801,11 @@ begin
         begin
           tmp := Null;
           Doc := GetIDoc;
-          if Clipboard.AsText <> '' then    // clear formatting
+          if Clipboard.AsText <> '' then
+          begin    // clear formatting
             GetIDoc.Selection.Text := Clipboard.AsText;
+            Doc.Selection.Move(tomCharacter, 1);
+          end;
           Key := 0;
         end;
     end;

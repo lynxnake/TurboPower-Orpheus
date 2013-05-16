@@ -37,6 +37,7 @@ type
     function GetDoc: ITextDocument;
     procedure Draw(Canvas: TCanvas; Rect: TRect; const Transparent, WordWrap: Boolean);
     function GetDrawHeight(Canvas: TCanvas; DrawWidth: Integer): Integer;
+    function GetDrawExtent(Canvas: TCanvas; DrawWidth: Integer): TSize;
   end;
 
 implementation
@@ -277,13 +278,15 @@ begin
   Result := FServices as ITextDocument;
 end;
 
-function TOvcRTFPainter.GetDrawHeight(Canvas: TCanvas; DrawWidth: Integer): Integer;
+function TOvcRTFPainter.GetDrawExtent(Canvas: TCanvas;
+  DrawWidth: Integer): TSize;
 var
   DrawRect: TRect;
   w, h: Integer;
   dummy: TSizeL;
   hr: HResult;
   dxpi, dypi: Integer;
+  prevMapMode: Integer;
 const
   HIMETRIC_PER_INCH = 2540;
 begin
@@ -295,10 +298,31 @@ begin
   dummy.cx := High(Integer);
   dummy.cy := High(Integer);
   TDrawRTFTextHost(FHostImpl).FRect := DrawRect;
-  hr := FServices.TxGetNaturalSize(dvAspect_Content, Canvas.Handle, 0, nil, TXTNS_FITTOCONTENT, dummy, w, h);
+
+  // Richedit measures in MM_HIMETRIC, but that is way too accurate
+  // so the text dimensions are different from TxDraw
+  // scale down using MM_ANISOTROPIC mapping to get a more accurate estimation
+  prevMapMode := GetMapMode(Canvas.Handle);
+  SetMapMode(Canvas.Handle, MM_ANISOTROPIC);
+  SetWindowExtEx(Canvas.Handle, HIMETRIC_PER_INCH, HIMETRIC_PER_INCH, 0);
+  SetViewportExtEx(Canvas.Handle, dxpi, dypi, 0);
+
+  hr := FServices.TxGetNaturalSize(DVASPECT_CONTENT, Canvas.Handle, 0, nil, TXTNS_FITTOCONTENT, dummy, w, h);
   OleCheck(hr);
 
-  Result := MulDiv(h, dypi, HIMETRIC_PER_INCH);
+  // Restore mapping mode
+  if prevMapMode = 0 then
+    SetMapMode(Canvas.Handle, MM_TEXT)
+  else
+    SetMapMode(Canvas.Handle, prevMapMode);
+
+  Result.cy := MulDiv(h, dypi, HIMETRIC_PER_INCH);
+  Result.cx := MulDiv(w, dxpi, HIMETRIC_PER_INCH);
+end;
+
+function TOvcRTFPainter.GetDrawHeight(Canvas: TCanvas; DrawWidth: Integer): Integer;
+begin
+  Result := GetDrawExtent(Canvas, DrawWidth).cy;
 end;
 
 end.
