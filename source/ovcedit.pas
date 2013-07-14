@@ -210,6 +210,8 @@ type
     edRedrawPending     : Boolean;    {redraw pending                          }
     edRowHt             : Integer;    {height of one row                       }
     edRows              : Integer;    {number of rows in window                }
+    {03/2013, AB: new variable}
+    edeRows             : Integer;    {number of editable rows (=edRows [-1])  }
     edSelCursor         : hCursor;    {selection cursor                        }
     edSelCursorOn       : Boolean;    {is selection cursor in use?             }
     edTopLine           : LongInt;    {line at top of window                   }
@@ -1582,6 +1584,7 @@ begin
   edPrev := Self;
   edNext := Self;
   edRows := 0;
+  edeRows := 0;
   edTopLine := 1;
   edTopPara := 1;
   edTopPos := 0;
@@ -1976,6 +1979,10 @@ begin
     edRows := ClientHeight div edGetRowHt;
     if edRows <= 0 then
       edRows := 1;
+    {03/2013, AB: without 'edeRows' the caret can be placed in the last, not completely
+     visible line. The use of the new variable will force the editor to scroll the
+     content in this case}
+    edeRows := edRows;
     {if more than 1/2 of the bottom row is showing then we'll include it in the
      active rows.}
     if ClientHeight mod edGetRowHt > edGetRowHt div 2 then
@@ -1998,7 +2005,7 @@ var
   Len : Word;
 begin
   {is the caret above or below the window?}
-  if (edCurLine < edTopLine) or (edCurLine >= edTopLine+edRows) then
+  if (edCurLine < edTopLine) or (edCurLine >= edTopLine+edeRows) then
     Result := False
   else begin
     if Col = 0 then begin
@@ -2487,7 +2494,7 @@ begin
     Line := 1;
   edParas.NthLine(Line, S, Len);
 
-  {adjust by (edColWid div 2) so that clicks within a charcter work better}
+  {adjust by (edColWid div 2) so that clicks within a character work better}
   Col := Succ((X - GetLeftMargin + (edColWid div 2)) div edColWid) + edHDelta;
   if Col < 1 then
     Col := 1
@@ -2799,14 +2806,14 @@ begin
       NewTop := edCurLine-SaveVP
     else if edCurLine < edTopLine then
       NewTop := edCurLine
-    else if edCurLine > edTopLine+Pred(edRows) then
-      NewTop := edCurLine-Pred(edRows)
+    else if edCurLine > edTopLine+Pred(edeRows) then
+      NewTop := edCurLine-Pred(edeRows)
     else
       NewTop := edTopLine;
     if NewTop < 1 then
       NewTop := 1
-    else if edCurLine > NewTop+Pred(edRows) then
-      NewTop := edCurLine-Pred(edRows);
+    else if edCurLine > NewTop+Pred(edeRows) then
+      NewTop := edCurLine-Pred(edeRows);
 
     {scroll horizontally as necessary}
     if Col = 0 then
@@ -3151,7 +3158,7 @@ begin
     Inc(edTopLine, VDelta);
     if edTopLine < 1 then
       edTopLine :=1
-    else if edTopLine > edParas.LineCount - Pred(edRows) then begin
+    else if edTopLine > edParas.LineCount - Pred(edeRows) then begin
       edTopLine := edParas.LineCount - Pred(edRows);
       if edTopLine < 1 then
         edTopLine := 1;

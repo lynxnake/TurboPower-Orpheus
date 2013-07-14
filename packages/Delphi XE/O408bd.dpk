@@ -56,7 +56,8 @@ requires
   O408_d,
   O408_r,
   O408br,
-  designide;
+  designide,
+  bdertl;
 
 contains
   ovcdbae0 in '..\..\source\ovcdbae0.pas' {OvcfrmDbAeRange},

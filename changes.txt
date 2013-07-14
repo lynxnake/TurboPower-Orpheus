@@ -1,3 +1,8 @@
+Revision 287: (2013/07/14 Armin Biernaczyk)
+- ovcedit.pas
+  New internal variable 'edeRows' forces the editor to scroll the text when you enter
+  the last, not completely visible line
+
 Revision 270: (2013/01/01 Armin Biernaczyk)
 - ovcstate.pas
   Bugfix: Calling TOvcFormState.ReadFormState made the window disappear when called

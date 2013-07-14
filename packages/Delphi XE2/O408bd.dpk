@@ -59,7 +59,8 @@ requires
   O408_d,
   O408_r,
   O408br,
-  designide;
+  designide,
+  bdertl;
 
 contains
   ovcdbae0 in '..\..\source\ovcdbae0.pas' {OvcfrmDbAeRange},
@@ -70,6 +71,14 @@ contains
   ovcdbtb0 in '..\..\source\ovcdbtb0.pas' {OvcfrmDbColEditor},
   ovcdbtb1 in '..\..\source\ovcdbtb1.pas' {OvcfrmProperties},
   ovcregbd in '..\..\source\ovcregbd.pas',
-  ovcregdb in '..\..\source\ovcregdb.pas';
+  ovcregdb in '..\..\source\ovcregdb.pas',
+  ovcdbhll in '..\..\source\ovcdbhll.pas',
+  ovcdbise in '..\..\source\ovcdbise.pas',
+  OvcDbIdx in '..\..\source\OvcDbIdx.pas',
+  ovcdbadg in '..\..\source\ovcdbadg.pas' {OvcfrmAliasDlg},
+  ovcdbacb in '..\..\source\ovcdbacb.pas',
+  ovcdbtcb in '..\..\source\ovcdbtcb.pas';
 
 end.
+
+
