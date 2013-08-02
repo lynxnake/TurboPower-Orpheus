@@ -756,6 +756,9 @@ begin
 
       StringBuilder.Append(StyleΔToHTML(OldStyle, NewStyle));
       tmp := Range.Text;
+      tmp := AnsiReplaceText(tmp, '&', '&amp;');
+      tmp := AnsiReplaceText(tmp, '<', '&lt;');
+      tmp := AnsiReplaceText(tmp, '>', '&gt;');
       tmp := AnsiReplaceStr(tmp, #10, '');
       tmp := AnsiReplaceStr(tmp, #13, #13#10);
       StringBuilder.Append(tmp);
