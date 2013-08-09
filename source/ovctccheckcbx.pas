@@ -183,8 +183,10 @@ type
     FOnMeasureItem        : TMeasureItemEvent;
   private
     FMultiCheck: Boolean;
+    FTextHint: string;
     procedure SetItems(const Value: TCellCheckComboBoxItems);
     procedure SetMultiCheck(const Value: Boolean);
+    procedure SetTextHint(const Value: string);
   protected
     function GetCellEditor : TControl; override;
 
@@ -217,6 +219,7 @@ type
     property OnDrawItem: TDrawItemEvent read FOnDrawItem write FOnDrawItem;
     property OnMeasureItem: TMeasureItemEvent read FOnMeasureItem write FOnMeasureItem;
     property MultiCheck: Boolean read FMultiCheck write SetMultiCheck default True;
+    property TextHint: string read FTextHint write SetTextHint;
   public
     constructor Create(AOwner : TComponent); override;
     destructor Destroy; override;
@@ -258,6 +261,7 @@ type
     property TextHiColor default clBtnHighlight;
     property TextStyle default tsFlat;
     property UseRunTimeItems default False;
+    property TextHint;
 
     {events inherited from custom ancestor}
     property OnChange;
@@ -940,6 +944,11 @@ begin
   FMultiCheck := Value;
 end;
 
+procedure TOvcTCCustomCheckComboBox.SetTextHint(const Value: string);
+begin
+  FTextHint := Value;
+end;
+
 procedure TOvcTCCustomCheckComboBox.StartEditing(RowNum: TRowNum;
   ColNum: TColNum; CellRect: TRect; const CellAttr: TOvcCellAttributes;
   CellStyle: TOvcTblEditorStyle; Data: pointer);
@@ -1020,10 +1029,12 @@ var
   S         : string;
   OurItems  : TCellCheckComboBoxItems;
   I         : Integer;
+  LCellAttr : TOvcCellAttributes;
 begin
+  LCellAttr := CellAttr;
   {If the cell is invisible let the ancestor do all the work}
-  if (CellAttr.caAccess = otxInvisible) then begin
-    inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, nil);
+  if (LCellAttr.caAccess = otxInvisible) then begin
+    inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, LCellAttr, nil);
     Exit;
   end;
 
@@ -1051,6 +1062,13 @@ begin
             S := S + OurItems[I].Value;
         end;
       end;
+
+      // if nothing is displayed, display TextHint instead
+      if (S = '') and (FTextHint <> '') then
+      begin
+        S := FTextHint;
+        LCellAttr.caFontColor := clGray;
+      end;
     end
 //  {Otherwise, mock up a string in design mode.}
   else if (csDesigning in ComponentState) and (Items.Count > 0) then
@@ -1064,20 +1082,20 @@ begin
   if (ActiveRow = RowNum) and (ActiveCol = ColNum) then begin
     if FHideButton then begin
       {let ancestor paint the text}
-      inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @S);
+      inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, LCellAttr, @S);
     end else begin
       {Paint the string in the restricted rectangle}
-      inherited tcPaint(TableCanvas, R, RowNum, ColNum, CellAttr, @S);
+      inherited tcPaint(TableCanvas, R, RowNum, ColNum, LCellAttr, @S);
       {Paint the button on the right side}
       DrawButton(TableCanvas, CellRect);
     end;
   end else if FShowArrow then begin
     {paint the string in the restricted rectangle}
-    inherited tcPaint(TableCanvas, R, RowNum, ColNum, CellAttr, @S);
+    inherited tcPaint(TableCanvas, R, RowNum, ColNum, LCellAttr, @S);
     {Paint the arrow on the right side}
-    DrawArrow(TableCanvas, CellRect, CellAttr);
+    DrawArrow(TableCanvas, CellRect, LCellAttr);
   end else
-    inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @S);
+    inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, LCellAttr, @S);
 end;
 
 { TOvcPopupWindow }
