@@ -111,6 +111,9 @@ type
     FOnDropDown           : TNotifyEvent;
     FOnDrawItem           : TDrawItemEvent;
     FOnMeasureItem        : TMeasureItemEvent;
+  private
+    FTextHint: string;
+    procedure SetTextHint(const Value: string);
     {.Z-}
 
   protected
@@ -158,6 +161,7 @@ type
        read FStyle write FStyle;
     property UseRunTimeItems : boolean
        read FUseRunTimeItems write FUseRunTimeItems;
+    property TextHint: string read FTextHint write SetTextHint;
 
     {events}
     property OnChange : TNotifyEvent
@@ -213,6 +217,7 @@ type
       property TableFont default True;
       property TextHiColor default clBtnHighlight;
       property TextStyle default tsFlat;
+      property TextHint;
       property UseRunTimeItems default False;
 
       {events inherited from custom ancestor}
@@ -643,7 +648,9 @@ var
   R         : TRect;
   S         : String;
   OurItems  : TStrings;
+  LCellAttr : TOvcCellAttributes;
 begin
+  LCellAttr := CellAttr; // make a local copy of the attributes (needed for the TextHint)
   {Note: Data is a pointer to an integer, or to an integer and a
          string. The first is used for drop down ListBoxes
          (only) and the latter with simple and drop down combo boxes.
@@ -655,22 +662,24 @@ begin
              'inherited tcPaint...') }
 
   {If the cell is invisible let the ancestor do all the work}
-  if (CellAttr.caAccess = otxInvisible) then begin
-    inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, nil);
+  if (LCellAttr.caAccess = otxInvisible) then begin
+    inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, LCellAttr, nil);
     Exit;
   end;
 
   {If we have valid data, get the string to display from the stringlist
    or from the Data pointer. }
   S := '';
-  if (Data <> nil) then begin
+  if (Data <> nil) then
+  begin
     if UseRunTimeItems then
       OurItems := ItemRec^.RTItems
     else
       OurItems := Items;
     if (0 <= ItemRec^.Index) and (ItemRec^.Index < OurItems.Count) then
       S := OurItems[ItemRec^.Index]
-    else if (Style = csDropDown) or (Style = csSimple) then begin
+    else if (Style = csDropDown) or (Style = csSimple) then
+    begin
       if UseRunTimeItems then
         {$IFDEF CBuilder}
         S := StrPas(ItemRec^.RTSt)
@@ -683,8 +692,15 @@ begin
         {$ELSE}
         S := ItemRec^.St;
         {$ENDIF}
-      end;
-    end
+    end;
+
+    // if nothing is displayed, display TextHint instead
+    if (S = '') and (FTextHint <> '') then
+    begin
+      S := FTextHint;
+      LCellAttr.caFontColor := clGray;
+    end;
+  end
   {Otherwise, mock up a string in design mode.}
   else if (csDesigning in ComponentState) and (Items.Count > 0) then
     S := Items[RowNum mod Items.Count];
@@ -697,20 +713,20 @@ begin
   if (ActiveRow = RowNum) and (ActiveCol = ColNum) then begin
     if FHideButton then begin
       {let ancestor paint the text}
-      inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @S);
+      inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, LCellAttr, @S);
     end else begin
       {Paint the string in the restricted rectangle}
-      inherited tcPaint(TableCanvas, R, RowNum, ColNum, CellAttr, @S);
+      inherited tcPaint(TableCanvas, R, RowNum, ColNum, LCellAttr, @S);
       {Paint the button on the right side}
       DrawButton(TableCanvas, CellRect);
     end;
   end else if FShowArrow then begin
     {paint the string in the restricted rectangle}
-    inherited tcPaint(TableCanvas, R, RowNum, ColNum, CellAttr, @S);
+    inherited tcPaint(TableCanvas, R, RowNum, ColNum, LCellAttr, @S);
     {Paint the arrow on the right side}
-    DrawArrow(TableCanvas, CellRect, CellAttr);
+    DrawArrow(TableCanvas, CellRect, LCellAttr);
   end else
-    inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @S);
+    inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, LCellAttr, @S);
 
 (*
   {Are we just displaying a button on the active cell?}
@@ -718,7 +734,7 @@ begin
     {If we are not the active cell, let the ancestor do the painting (we only
      paint a button when the cell is the active one)}
     if (ActiveRow <> RowNum) or (ActiveCol <> ColNum) then begin
-      inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @S);
+      inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, LCellAttr, @S);
       Exit;
     end;
     {Calculate the effective cell width (the cell width less the size
@@ -726,7 +742,7 @@ begin
     R := CellRect;
     dec(R.Right, OvcComboBoxButtonWidth);
     {Paint the string in this restricted rectangle}
-    inherited tcPaint(TableCanvas, R, RowNum, ColNum, CellAttr, @S);
+    inherited tcPaint(TableCanvas, R, RowNum, ColNum, LCellAttr, @S);
     {Paint the button on the right side}
     DrawButton(TableCanvas, CellRect);
   end else if FShowArrow then begin
@@ -735,11 +751,11 @@ begin
     R := CellRect;
     dec(R.Right, OvcComboBoxButtonWidth);
     {Paint the string in this restricted rectangle}
-    inherited tcPaint(TableCanvas, R, RowNum, ColNum, CellAttr, @S);
+    inherited tcPaint(TableCanvas, R, RowNum, ColNum, LCellAttr, @S);
     {Paint the arrow on the right side}
-    DrawArrow(TableCanvas, CellRect, CellAttr);
+    DrawArrow(TableCanvas, CellRect, LCellAttr);
   end else
-    inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @S);
+    inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, LCellAttr, @S);
 *)
 end;
 
@@ -808,6 +824,14 @@ procedure TOvcTCCustomComboBox.SetSorted(S : boolean);
         tcDoCfgChanged;
       end;
   end;
+
+procedure TOvcTCCustomComboBox.SetTextHint(const Value: string);
+begin
+  FTextHint := Value;
+  if Assigned(FTable) then
+    FTable.Invalidate;
+end;
+
 {--------}
 procedure TOvcTCCustomComboBox.StartEditing(RowNum : TRowNum; ColNum : TColNum;
                                            CellRect : TRect;

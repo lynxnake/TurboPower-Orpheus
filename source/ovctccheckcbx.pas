@@ -947,6 +947,8 @@ end;
 procedure TOvcTCCustomCheckComboBox.SetTextHint(const Value: string);
 begin
   FTextHint := Value;
+  if Assigned(FTable) then
+    FTable.Invalidate;
 end;
 
 procedure TOvcTCCustomCheckComboBox.StartEditing(RowNum: TRowNum;
