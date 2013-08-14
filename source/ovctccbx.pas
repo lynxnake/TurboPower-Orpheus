@@ -695,6 +695,13 @@ begin
     end;
 
     // if nothing is displayed, display TextHint instead
+    // TextHint from ItemRec
+    if (S = '') and (ItemRec^.TextHint <> '') then
+    begin
+      S := ItemRec^.TextHint;
+      LCellAttr.caFontColor := clGray;
+    end;
+    // if still no hint available, try using the TextHint TOvcTCComboBox
     if (S = '') and (FTextHint <> '') then
     begin
       S := FTextHint;

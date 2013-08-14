@@ -177,6 +177,7 @@ type
       St      : string;    {string value if Index = -1}  //SZ 02.02.2010: replaced array[0..255] of char with string. We cannot use a variant record anymore, but the lower memory usage of the string compensates for that. This also should make upgrading projects easier
       RTItems : TStrings;  {run-time items list}
       RTSt    : string;    {run-time string value if Index = -1}
+      TextHint: string;    {text that is displayed in gray if an empty string would be displayed }
 //    case integer of
 //      0 : (St      : ShortString);  {string value if Index = -1}
 //      1 : (RTItems : TStrings;      {run-time items list}

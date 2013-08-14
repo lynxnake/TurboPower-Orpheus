@@ -103,6 +103,7 @@ type
   TCellCheckComboBoxInfo = record
     RTItems: TCellCheckComboBoxItems;
     CheckedItems: TStrings;
+    TextHint: string;
   end;
   PCellCheckComboBoxInfo = ^TCellCheckComboBoxInfo;
 
@@ -1066,6 +1067,13 @@ begin
       end;
 
       // if nothing is displayed, display TextHint instead
+      // try getting row specific hint from ItemRec^
+      if (S = '') and (ItemRec^.TextHint <> '') then
+      begin
+        S := ItemRec^.TextHint;
+        LCellAttr.caFontColor := clGray;
+      end;
+    // if still no hint available, try using the TextHint TOvcTCCustomCheckComboBox
       if (S = '') and (FTextHint <> '') then
       begin
         S := FTextHint;
