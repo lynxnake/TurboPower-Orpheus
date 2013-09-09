@@ -12,7 +12,7 @@ unit ExTbl07U;
 interface
 
 uses
-  WinProcs, WinTypes, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
   OvcTCStr, OvcTCCBx, OvcTCmmn, OvcTCell, OvcTCBmp, OvcTCGly, OvcBase,
   OvcTable, StdCtrls, OvcTCEdt;
 

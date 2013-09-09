@@ -579,7 +579,8 @@ implementation
 
 uses
   Dialogs, OvcNF, OvcPF, OvcSF, OvcTCBmp, OvcTCBox, OvcTCCbx, OvcTCEdt,
-  OvcTCGly, OvcTCHdr, OvcTCIco, OvcTCNum, OvcTCPic, OvcTCSim;
+  OvcTCGly, OvcTCHdr, OvcTCIco, OvcTCNum, OvcTCPic, OvcTCSim,
+  OvcTCHeaderExtended;
 
 type
   TLocalCell = class(TOvcBaseTableCell);
@@ -2043,14 +2044,14 @@ begin
           {draw the header text}
           if Assigned(FHeaderCell) and (hoUseHeaderCell in HeaderOptions) then begin
             {force proper options in header cell}
-            if (FHeaderCell is TOvcTCColHead) then
-              TOvcTCColHead(FHeaderCell).ShowLetters := (hoUseLetters in FHeaderOptions);
+            if (FHeaderCell is TOvcTCCustomColHead) then
+              TOvcTCCustomColHead(FHeaderCell).ShowLetters := (hoUseLetters in FHeaderOptions);
 
             {draw header text using the header cell}
             if Assigned(Fld) and not (hoUseLetters in HeaderOptions) and
                not (hoUseStrings in HeaderOptions) then begin
               S := Fld.DisplayLabel;
-              FHeaderCell.Paint(Canvas, DR, -1, Col.Number, CellAttr, PString(@S)); //SZ: TOvcTCColHead.tcPaint (ovctchdr.pas) needs PString
+              FHeaderCell.Paint(Canvas, DR, -1, Col.Number, CellAttr, PString(@S)); //SZ: TOvcTCCustomColHead.tcPaint (ovctchdr.pas) needs PString
             end else
               FHeaderCell.Paint(Canvas, DR, -1, Col.Number, CellAttr, nil);
           end else begin
@@ -2675,7 +2676,7 @@ begin
     Result := False  {not supported}
   else if (ACell is TOvcTCRowHead) then
     Result := False  {not supported}
-  else if (ACell is TOvcTCColHead) then
+  else if (ACell is TOvcTCCustomColHead) then
     Result := False  {not supported}
   else if (ACell is TOvcTCCheckBox) then
     Result := AField.DataType in [ftBoolean]
@@ -2884,7 +2885,7 @@ var
 begin
   {see if this cell component makes sense as a header cell}
   if Assigned(Value) and not ((Value is TOvcTCString) or
-     (Value is TOvcTCColHead)) then
+     (Value is TOvcTCCustomColHead)) then
     if (csDesigning in ComponentState) then
       raise EOrpheusTable.Create(GetOrphStr(SCTableInvalidHeaderCell))
     else
@@ -2907,9 +2908,9 @@ begin
         FHeaderCell.Table := Self;
       FHeaderCell.IncRefs;
 
-      {if this is a TOvcTCColHead cell, trun off ShowLetters}
-      if (FHeaderCell is TOvcTCColHead) and (FHeaderCell.References = 1) then
-        TOvcTCColHead(FHeaderCell).ShowLetters := False;
+      {if this is a TOvcTCCustomColHead cell, trun off ShowLetters}
+      if (FHeaderCell is TOvcTCCustomColHead) and (FHeaderCell.References = 1) then
+        TOvcTCCustomColHead(FHeaderCell).ShowLetters := False;
     end;
     tbCellChanged(Self);
   end;
@@ -2970,7 +2971,7 @@ begin
     end;
 
     if (hoUseHeaderCell in FHeaderOptions) then begin
-      if (FHeaderCell is TOvcTCColHead) then begin
+      if (FHeaderCell is TOvcTCCustomColHead) then begin
         if (hoUseStrings in FHeaderOptions) and not (hoUseStrings in Old) then
           Exclude(FHeaderOptions, hoUseLetters);
         if (hoUseLetters in FHeaderOptions) and not (hoUseLetters in Old) then

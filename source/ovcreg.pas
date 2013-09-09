@@ -229,7 +229,7 @@ uses
   O32VldPE,               {Property Editor for the Regex Sample Expressions}
   O32VPool,               {ValidatorPool Component}
   O32Ovldr,               {Orpheus mask validator}
-  O32Pvldr;               {Paradox mask validator}
+  O32Pvldr, OvcTCHeaderExtended;               {Paradox mask validator}
 
 function TorGenericStringProperty.GetAttributes: TPropertyAttributes;
 begin
@@ -749,6 +749,7 @@ begin
   RegisterComponents('Orpheus Table', [
     TOvcTable,
     TOvcTCColHead,
+    TOvcTCColHeadExtended,
     TOvcTCRowHead,
     TOvcTCString,
     TOvcTCSimpleField,

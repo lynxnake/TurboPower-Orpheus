@@ -5201,8 +5201,8 @@ procedure TOvcCustomTable.DoColumnsChanged(ColNum1, ColNum2 : TColNum;
     i : integer;
   begin
     for i := 0 to pred(taCellList.Count) do
-      if (TOvcTableCellAncestor(taCellList[i]) is TOvcTCColHead) then
-        TOvcTCColHead(taCellList[i]).chColumnsChanged(ColNum1, ColNum2, Action);
+      if (TOvcTableCellAncestor(taCellList[i]) is TOvcTCCustomColHead) then
+        TOvcTCCustomColHead(taCellList[i]).chColumnsChanged(ColNum1, ColNum2, Action);
 
     if ((ComponentState * [csLoading, csDestroying]) = []) and
        Assigned(FColumnsChanged) then

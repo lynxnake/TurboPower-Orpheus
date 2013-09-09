@@ -211,6 +211,7 @@ contains
   ovcRTF_TOM in '..\..\source\ovcRTF_TOM.pas',
   ovcRTF_Paint in '..\..\source\ovcRTF_Paint.pas',
   ovcRTF_IText in '..\..\source\ovcRTF_IText.pas',
-  ovcRTF_RichOle in '..\..\source\ovcRTF_RichOle.pas';
+  ovcRTF_RichOle in '..\..\source\ovcRTF_RichOle.pas',
+  OvcTCHeaderExtended in '..\..\source\OvcTCHeaderExtended.pas';
 
 end.

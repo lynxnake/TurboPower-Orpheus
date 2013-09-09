@@ -36,40 +36,63 @@
 {.W-} {Windows Stack Frame}
 {$X+} {Extended Syntax}
 
-unit ovctchdr;
+unit OvcTCHeaderExtended;
   {Orpheus Table Cell - Headers for columns and rows}
 
 interface
 
 uses
   {$IFDEF VERSIONXE3} System.UITypes, {$ENDIF}
-  Windows, SysUtils, Graphics, Classes, OvcTCmmn, OvcTCell, OvcTCStr, OvcMisc;
+  Windows, SysUtils, Graphics, Classes, Controls, OvcTCmmn, OvcTCell, OvcTCStr, OvcMisc, ovctchdr;
 
 type
-  // a common ancestor for table header cells
-  TOvcTCCustomColHead = class(TOvcTCBaseString)
+  TOvcTCColHeadExtendedInfoItem = class(TCollectionItem)
   private
-    FShowLetters: Boolean;
-    FShowActiveCol : boolean;
+    FCaption: string;
+    FIcon: TIcon;
+    procedure SetCaption(const Value: string);
+    procedure SetIcon(const Value: TIcon);
+  protected
+    function GetDisplayName: string; override;
   public
-    procedure SetShowLetters(SL: Boolean); virtual;
-    procedure SetShowActiveCol(SAC : boolean); virtual;
-    procedure chColumnsChanged(ColNum1, ColNum2 : TColNum; Action : TOvcTblActions); virtual; abstract;
-    constructor Create(AOwner: TComponent); override;
+    constructor Create(Collection: TCollection); override;
+    destructor Destroy; override;
+    procedure Assign(Source: TPersistent); override;
   published
-    property ShowLetters: Boolean read FShowLetters write SetShowLetters default True;
-    property ShowActiveCol: boolean read FShowActiveCol write SetShowActiveCol default False;
+    property Caption: string read FCaption write SetCaption;
+    property Icon: TIcon read FIcon write SetIcon;
   end;
 
-  TOvcTCColHead = class(TOvcTCCustomColHead)
+  TOvcTCColHeadExtendedInfoItems = class(TOwnedCollection)
+  private
+    function GetItem(Index: Integer): TOvcTCColHeadExtendedInfoItem;
+    procedure SetItem(Index: Integer;
+      const Value: TOvcTCColHeadExtendedInfoItem);
+  protected
+    procedure Update(Item: TCollectionItem); override;
+  public
+    constructor Create(AOwner: TPersistent);
+    function Add: TOvcTCColHeadExtendedInfoItem;
+    property Items[Index: Integer]: TOvcTCColHeadExtendedInfoItem read GetItem write SetItem; default;
+    procedure ExchangeItems(I, J: Integer);
+  end;
+
+  // data storage for Extended Table Header Cell
+  TOvcTCColHeadExtendedInfo = class(TOvcTCColHeadExtendedInfoItem)
+  public
+    constructor Create; reintroduce;
+  end;
+
+  TOvcTCColHeadExtended = class(TOvcTCCustomColHead)
     protected {private}
       {.Z+}
-      FHeadings      : TStringList;
+      FHeadings      : TOvcTCColHeadExtendedInfoItems;
       {.Z-}
 
     protected
       {.Z+}
-      procedure SetHeadings(H : TStringList);
+      procedure SetHeadings(H : TOvcTCColHeadExtendedInfoItems);
+
       procedure tcPaint(TableCanvas : TCanvas;
                   const CellRect    : TRect;
                         RowNum      : TRowNum;
@@ -88,8 +111,7 @@ type
       destructor Destroy; override;
 
     published
-      property Headings : TStringList
-         read FHeadings write SetHeadings;
+      property Headings: TOvcTCColHeadExtendedInfoItems read FHeadings write SetHeadings;
 
       {properties inherited from custom ancestor}
       property About;
@@ -121,97 +143,39 @@ type
       property OnOwnerDraw;
   end;
 
-  TOvcTCRowHead = class(TOvcTCBaseString)
-    protected {private}
-      {.Z+}
-      FShowActiveRow : boolean;
-      FShowNumbers   : boolean;
-      {.Z-}
-
-    protected
-      {.Z+}
-      procedure SetShowActiveRow(SAR : boolean);
-      procedure SetShowNumbers(SN : boolean);
-      procedure tcPaint(TableCanvas : TCanvas;
-                  const CellRect    : TRect;
-                        RowNum      : TRowNum;
-                        ColNum      : TColNum;
-                  const CellAttr    : TOvcCellAttributes;
-                        Data        : pointer); override;
-      {.Z-}
-
-    public
-      constructor Create(AOwner : TComponent); override;
-
-    published
-      property ShowActiveRow : boolean
-         read FShowActiveRow write SetShowActiveRow
-          default False;
-
-      property ShowNumbers : boolean
-         read FShowNumbers write SetShowNumbers
-           default True;
-
-      {properties inherited from custom ancestor}
-      property About;
-      property Adjust default otaDefault;
-      property Color;
-      property Font;
-      property Margin default 4;
-      property Table;
-      property TableColor default True;
-      property TableFont default True;
-      property TextHiColor default clBtnHighlight;
-      property TextStyle default tsFlat;
-      //      property DataStringType;
-      { 07/2011 AUCOS-HKK: Reimplemented 'ASCIIZStrings' for backward compatibility }
-      property UseASCIIZStrings;
-
-      {events inherited from custom ancestor}
-      property OnClick;
-      property OnDblClick;
-      property OnDragDrop;
-      property OnDragOver;
-      property OnEndDrag;
-      property OnMouseDown;
-      property OnMouseMove;
-      property OnMouseUp;
-      property OnOwnerDraw;
-  end;
-
 implementation
 
 uses
-  Types;
+  Types, OvcExcpt;
 
-{===TOvcTCColHead====================================================}
-constructor TOvcTCColHead.Create(AOwner : TComponent);
+{===TOvcTCColHeadExtended====================================================}
+constructor TOvcTCColHeadExtended.Create(AOwner : TComponent);
   begin
     inherited Create(AOwner);
-    FHeadings := TStringList.Create;
+    FHeadings := TOvcTCColHeadExtendedInfoItems.Create(Self);
     Access := otxReadOnly;
     {UseWordWrap := false;}
+    ShowLetters := true;
   end;
 {--------}
-destructor TOvcTCColHead.Destroy;
+destructor TOvcTCColHeadExtended.Destroy;
   begin
     FHeadings.Free;
     inherited Destroy;
   end;
 {--------}
-procedure TOvcTCColHead.chColumnsChanged(ColNum1, ColNum2 : TColNum;
+procedure TOvcTCColHeadExtended.chColumnsChanged(ColNum1, ColNum2 : TColNum;
                                          Action : TOvcTblActions);
   var
     MaxColNum : TColNum;
     ColNum    : TColNum;
-    Temp : string;
   begin
     case Action of
       taInsert :
         if (0 <= ColNum1) and (ColNum1 < FHeadings.Count) then
-          FHeadings.Insert(ColNum1, '')
+          FHeadings.Insert(ColNum1)
         else if (ColNum1 = FHeadings.Count) then
-          FHeadings.Add('');
+          FHeadings.Add;
       taDelete :
         if (0 <= ColNum1) and (ColNum1 < FHeadings.Count) then
           FHeadings.Delete(ColNum1);
@@ -220,19 +184,15 @@ procedure TOvcTCColHead.chColumnsChanged(ColNum1, ColNum2 : TColNum;
           MaxColNum := MaxL(ColNum1, ColNum2);
           if (MaxColNum >= FHeadings.Count) and (FHeadings.Count > 0) then
             for ColNum := FHeadings.Count to MaxColNum do
-              FHeadings.Add('');
+              FHeadings.Add;
           if (0 <= ColNum1) and (0 <= ColNum2) and
              (FHeadings.Count > 0) then
-            begin
-              Temp := FHeadings[ColNum1];
-              FHeadings[ColNum1] := FHeadings[ColNum2];
-              FHeadings[ColNum2] := Temp;
-            end;
+              FHeadings.ExchangeItems(ColNum1, ColNum2);
         end;
     end;
   end;
 {--------}
-procedure TOvcTCColHead.tcPaint(TableCanvas : TCanvas;
+procedure TOvcTCColHeadExtended.tcPaint(TableCanvas : TCanvas;
                           const CellRect    : TRect;
                                 RowNum      : TRowNum;
                                 ColNum      : TColNum;
@@ -292,8 +252,26 @@ procedure TOvcTCColHead.tcPaint(TableCanvas : TCanvas;
     HeadSt    : string;
     CA        : TOvcCellAttributes;
     orgDST    : TOvcTblStringtype;
+    Item      : TOvcTCColHeadExtendedInfoItem;
+    Icon      : TIcon;
+    LCellRect : TRect;
+    Left, Top : Integer;
+    W, H      : Integer;
+    CellWidth         : integer;
+    CellHeight        : integer;
+    CellAdj           : TOvcTblAdjust;
   begin
+    Icon := nil;
+
+    if (TObject(Data) is TOvcTCColHeadExtendedInfoItem) or (Data = nil) then
+      Item := TOvcTCColHeadExtendedInfoItem(Data)
+    else
+      raise EOvcException.Create('Wrong Data type');
+
     CA := CellAttr;
+    CellAdj := CellAttr.caAdjust;
+    CellWidth := CellRect.Right - CellRect.Left;
+    CellHeight := CellRect.Bottom - CellRect.Top;
     if Assigned(FTable) then
       begin
         LockedCols := tcRetrieveTableLockedCols;
@@ -339,170 +317,157 @@ procedure TOvcTCColHead.tcPaint(TableCanvas : TCanvas;
       end
     else {Data points to a column heading}
       begin
-        if Assigned(Data) then begin
-          case orgDST of
-            tstShortString: HeadSt := string(POvcShortString(Data)^);
-            tstPChar:       HeadSt := string(PChar(Data));
-            tstString:      HeadSt := PString(Data)^;
-          end;
+        HeadSt := '';
+        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CA, @HeadSt); // clear background
+
+        if Assigned(Data) then
+        begin
+          HeadSt := Item.Caption;
+          Icon   := Item.Icon;
         end else if (0 <= ColNum) and (ColNum < Headings.Count) then
-          HeadSt := Headings[ColNum]
+        begin
+          HeadSt := Headings[ColNum].Caption;
+          Icon := Headings[ColNum].Icon;
+        end
         else
           HeadSt := '';
-        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CA, @HeadSt);
+
+        LCellRect := CellRect;
+
+        if Assigned(Icon) and not Icon.Empty then
+        begin
+          W := Icon.Width;
+          H := Icon.Height;
+
+          case CellAdj of
+            otaTopLeft, otaTopCenter, otaTopRight :
+               Top := Margin;
+            otaBottomLeft, otaBottomCenter, otaBottomRight :
+               Top := (CellHeight - H - Margin);
+          else
+            Top := (CellHeight - H) div 2;
+          end;{case}
+
+          Left := CellRect.Left + Margin;
+          Top := TOp + CellRect.Top;
+          TableCanvas.Draw(Left, Top, Icon, 0);
+          LCellRect.Left := LCellRect.Left + Margin + W;
+        end;
+
+        inherited tcPaint(TableCanvas, LCellRect, RowNum, ColNum, CA, @HeadSt);
       end;
     { restore 'DataStringType' }
     FDataStringType := orgDST;
   end;
 
 {--------}
-procedure TOvcTCColHead.SetHeadings(H : TStringList);
+procedure TOvcTCColHeadExtended.SetHeadings(H : TOvcTCColHeadExtendedInfoItems);
   begin
     FHeadings.Assign(H);
     tcDoCfgChanged;
   end;
 {====================================================================}
 
-{===TOvcTCRowHead====================================================}
-constructor TOvcTCRowHead.Create(AOwner : TComponent);
-  begin
-    inherited Create(AOwner);
-    Access := otxReadOnly;
-    UseWordWrap := false;
-    ShowNumbers := true;
-  end;
-{--------}
-procedure TOvcTCRowHead.tcPaint(TableCanvas : TCanvas;
-                          const CellRect    : TRect;
-                                RowNum      : TRowNum;
-                                ColNum      : TColNum;
-                          const CellAttr    : TOvcCellAttributes;
-                                Data        : pointer);
-  {------}
-  procedure PaintAnArrow;
-    var
-      ArrowDim : Integer;
-      X, Y     : Integer;
-      TopPoint, BottomPoint, RightPoint : TPoint;
-      CellWidth  : integer;
-      CellHeight : integer;
-    begin
-      CellWidth := CellRect.Right - CellRect.Left;
-      CellHeight := CellRect.Bottom - CellRect.Top;
-      with TableCanvas do
-        begin
-          Pen.Color := CellAttr.caFont.Color;
-          Brush.Color := Pen.Color;
-          ArrowDim := MinI(CellWidth-8, CellHeight div 3);
-          case CellAttr.caAdjust of
-            otaTopLeft, otaCenterLeft, otaBottomLeft    : X := Margin;
-            otaTopRight, otaCenterRight, otaBottomRight : X := CellWidth-Margin-ArrowDim;
-          else
-            X := (CellWidth - ArrowDim) div 2;
-          end;{case}
-          inc(X, CellRect.Left);
-          case CellAttr.caAdjust of
-            otaTopLeft, otaTopCenter, otaTopRight          : Y := Margin;
-            otaBottomLeft, otaBottomCenter, otaBottomRight : Y := CellHeight-Margin-ArrowDim;
-          else
-            Y := (CellHeight - ArrowDim) div 2;
-          end;{case}
-          inc(Y, CellRect.Top);
-          TopPoint := Point(X, Y);
-          BottomPoint := Point(X, Y+ArrowDim);
-          RightPoint := Point(X+ArrowDim, Y+(ArrowDim div 2));
-          Polygon([RightPoint, TopPoint, BottomPoint]);
-        end;
-    end;
-  {------}
-  {-Changes
-    04/2011 AB: Bugfix: As the inherited method expects a pointer to a string,
-                PChar(HeadSt) had to be changed to @Head when calling 'inherited tcPaint' }
-  var
-    HeadSt     : string;
-    ActiveRow  : TRowNum;
-    LockedRows : TRowNum;
-    WorkRow    : TRowNum;
-    orgDST     : TOvcTblStringtype;
-  begin
-    if Assigned(FTable) then
-      begin
-        LockedRows := tcRetrieveTableLockedRows;
-        ActiveRow := tcRetrieveTableActiveRow;
-      end
-    else
-      begin
-        LockedRows := 0;
-        ActiveRow := -1;
-      end;
-    { We always pass a pointer to a string (@HeadSt) to the inherited method, therefore
-      'DataStringType' must be set to tstString before calling the inherited method. }
-    orgDST := FDataStringType;
-    FDataStringType := tstString;
-    {display the row number, etc}
-    HeadSt := '';
-    if (ShowActiveRow and (RowNum = ActiveRow)) then
-      begin
-        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @HeadSt);
-        PaintAnArrow;
-      end
-    else
-      begin
-        if ShowNumbers then
-          begin
-            WorkRow := (RowNum + 1) - LockedRows;
-            HeadSt := Format('%d', [WorkRow]);
-          end;
-        inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, @HeadSt);
-      end;
-    { restore 'DataStringType' }
-    FDataStringType := orgDST;
-  end;
-{--------}
-procedure TOvcTCRowHead.SetShowActiveRow(SAR : boolean);
-  begin
-    if (SAR <> ShowActiveRow) then
-      begin
-        FShowActiveRow := SAR;
-        tcDoCfgChanged;
-      end;
-  end;
-{--------}
-procedure TOvcTCRowHead.SetShowNumbers(SN : boolean);
-  begin
-    if (SN <> ShowNumbers) then
-      begin
-        FShowNumbers := SN;
-        tcDoCfgChanged;
-      end;
-  end;
-{====================================================================}
+{ TOvcTCColHeadExtendedInfoItem }
 
+procedure TOvcTCColHeadExtendedInfoItem.Assign(Source: TPersistent);
+  procedure AssignFromMyType(Src: TOvcTCColHeadExtendedInfoItem);
+  begin
+    Caption := Src.Caption;
+    Icon := Src.Icon;
+  end;
 
-{ TOvcTCCustomColHead }
+begin
+  if Source is TOvcTCColHeadExtendedInfoItem then
+    AssignFromMyType(TOvcTCColHeadExtendedInfoItem(Source))
+  else
+    inherited;
+end;
 
-constructor TOvcTCCustomColHead.Create(AOwner: TComponent);
+constructor TOvcTCColHeadExtendedInfoItem.Create(Collection: TCollection);
+begin
+  inherited Create(Collection);
+  FIcon := TIcon.Create;
+end;
+
+destructor TOvcTCColHeadExtendedInfoItem.Destroy;
+begin
+  FreeAndNil(FIcon);
+  inherited;
+end;
+
+function TOvcTCColHeadExtendedInfoItem.GetDisplayName: string;
+begin
+  Result := FCaption;
+end;
+
+procedure TOvcTCColHeadExtendedInfoItem.SetCaption(const Value: string);
+begin
+  FCaption := Value;
+  Changed(False);
+end;
+
+procedure TOvcTCColHeadExtendedInfoItem.SetIcon(const Value: TIcon);
+begin
+  FIcon.Assign(Value);
+  Changed(False);
+end;
+
+{ TOvcTCColHeadExtendedInfoItems }
+
+function TOvcTCColHeadExtendedInfoItems.Add: TOvcTCColHeadExtendedInfoItem;
+begin
+  Result := TOvcTCColHeadExtendedInfoItem(inherited Add);
+end;
+
+constructor TOvcTCColHeadExtendedInfoItems.Create(AOwner: TPersistent);
+begin
+  inherited Create(AOwner, TOvcTCColHeadExtendedInfoItem);
+end;
+
+procedure TOvcTCColHeadExtendedInfoItems.ExchangeItems(I, J: Integer);
+var
+  Item1, Item2 : TOvcTCColHeadExtendedInfoItem;
+  tmp: Integer;
+begin
+  if I > J then
+  begin // swap I, J
+    tmp := I;
+    I := J;
+    J := tmp;
+  end;
+
+  Item1 := Items[I];
+  Item2 := Items[J];
+
+  Item1.Index := J;
+  Item2.Index := I;
+end;
+
+function TOvcTCColHeadExtendedInfoItems.GetItem(
+  Index: Integer): TOvcTCColHeadExtendedInfoItem;
+begin
+  Result := TOvcTCColHeadExtendedInfoItem(inherited Items[Index]);
+end;
+
+procedure TOvcTCColHeadExtendedInfoItems.SetItem(Index: Integer;
+  const Value: TOvcTCColHeadExtendedInfoItem);
+begin
+  inherited Items[Index] := Value;
+end;
+
+procedure TOvcTCColHeadExtendedInfoItems.Update(Item: TCollectionItem);
 begin
   inherited;
-  ShowLetters := true;
+  if Owner is TOvcTCColHeadExtended then
+    TOvcTCColHeadExtended(Owner).tcDoCfgChanged;
 end;
 
-procedure TOvcTCCustomColHead.SetShowActiveCol(SAC: boolean);
-begin
-  if (SAC <> ShowActiveCol) then
-    begin
-      FShowActiveCol := SAC;
-      tcDoCfgChanged;
-    end;
-end;
+{ TOvcTCColHeadExtendedInfo }
 
-procedure TOvcTCCustomColHead.SetShowLetters(SL: Boolean);
+constructor TOvcTCColHeadExtendedInfo.Create;
 begin
-  if (SL <> ShowLetters) then
-    begin
-      FShowLetters := SL;
-      tcDoCfgChanged;
-    end;
+  inherited Create(nil);
 end;
 
 end.
