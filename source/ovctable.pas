@@ -4914,6 +4914,10 @@ procedure TOvcCustomTable.tbDrawRow(RowInx : integer; ColInxStart, ColInxEnd : i
           ge3D        : InflateRect(DestRect, -1, -1);
         end;{case}
 
+        {SZ: make the cell content a bit smaller so that alignment is correct after painting the top table border line}
+        if (RowInx = 0) and (BorderStyle = bsNone) and (GridPen.Effect in [geHorizontal, geBoth]) then
+          Inc(DestRect.Top, 1);
+
         {don't do painting for the cell being edited}
         Cell := nil;
         if not (IsActiveRow and (ColNum = ActiveCol) and
@@ -4967,6 +4971,17 @@ procedure TOvcCustomTable.tbDrawRow(RowInx : integer; ColInxStart, ColInxEnd : i
               Pen.Width := 1;
 
               Windows.SetBkColor(Handle, ColorToRGB(BrushColor));
+
+              {SZ: draw a top line if BorderStyle = bsNone and the horizontal lines should be drawn }
+              if (RowInx = 0) and (BorderStyle = bsNone) and (GridPen.Effect in [geHorizontal, geBoth]) then
+              begin
+                { set the pen color for the top }
+                Pen.Color := GridPen.NormalColor;
+                { draw top line }
+                MoveTo(ColOfs, RowOfs);
+                LineTo(ColOfs+ColWd, RowOfs);
+              end;
+
 
               {draw the top and left lines, only if required of course}
               if (GridPen.Effect = ge3D) then
