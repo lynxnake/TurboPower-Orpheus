@@ -76,7 +76,7 @@ type
     Text: PChar;
   end;
 
-function EditStreamInCallback(dwCookie: Longint; pbBuff: PByte; cb: Longint; var pcb: Longint): Longint; stdcall;
+function EditStreamInCallback(dwCookie: DWORD_PTR; pbBuff: PByte; cb: Longint; var pcb: Longint): Longint; stdcall;
 var
   Cookie: PCookie;
 begin
@@ -304,8 +304,8 @@ begin
   // scale down using MM_ANISOTROPIC mapping to get a more accurate estimation
   prevMapMode := GetMapMode(Canvas.Handle);
   SetMapMode(Canvas.Handle, MM_ANISOTROPIC);
-  SetWindowExtEx(Canvas.Handle, HIMETRIC_PER_INCH, HIMETRIC_PER_INCH, 0);
-  SetViewportExtEx(Canvas.Handle, dxpi, dypi, 0);
+  SetWindowExtEx(Canvas.Handle, HIMETRIC_PER_INCH, HIMETRIC_PER_INCH, nil);
+  SetViewportExtEx(Canvas.Handle, dxpi, dypi, nil);
 
   hr := FServices.TxGetNaturalSize(DVASPECT_CONTENT, Canvas.Handle, 0, nil, TXTNS_FITTOCONTENT, dummy, w, h);
   OleCheck(hr);
