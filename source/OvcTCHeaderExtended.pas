@@ -50,8 +50,10 @@ type
   private
     FCaption: string;
     FIcon: TIcon;
+    FShowCaption: Boolean;
     procedure SetCaption(const Value: string);
     procedure SetIcon(const Value: TIcon);
+    procedure SetShowCaption(const Value: Boolean);
   protected
     function GetDisplayName: string; override;
   public
@@ -61,6 +63,7 @@ type
   published
     property Caption: string read FCaption write SetCaption;
     property Icon: TIcon read FIcon write SetIcon;
+    property ShowCaption: Boolean read FShowCaption write SetShowCaption default True;
   end;
 
   TOvcTCColHeadExtendedInfoItems = class(TOwnedCollection)
@@ -322,11 +325,13 @@ procedure TOvcTCColHeadExtended.tcPaint(TableCanvas : TCanvas;
 
         if Assigned(Data) then
         begin
-          HeadSt := Item.Caption;
+          if Item.ShowCaption then
+            HeadSt := Item.Caption;
           Icon   := Item.Icon;
         end else if (0 <= ColNum) and (ColNum < Headings.Count) then
         begin
-          HeadSt := Headings[ColNum].Caption;
+          if Headings[ColNum].ShowCaption then
+            HeadSt := Headings[ColNum].Caption;
           Icon := Headings[ColNum].Icon;
         end
         else
@@ -375,6 +380,7 @@ procedure TOvcTCColHeadExtendedInfoItem.Assign(Source: TPersistent);
   begin
     Caption := Src.Caption;
     Icon := Src.Icon;
+    ShowCaption := Src.ShowCaption;
   end;
 
 begin
@@ -388,6 +394,7 @@ constructor TOvcTCColHeadExtendedInfoItem.Create(Collection: TCollection);
 begin
   inherited Create(Collection);
   FIcon := TIcon.Create;
+  FShowCaption := True;
 end;
 
 destructor TOvcTCColHeadExtendedInfoItem.Destroy;
@@ -410,6 +417,12 @@ end;
 procedure TOvcTCColHeadExtendedInfoItem.SetIcon(const Value: TIcon);
 begin
   FIcon.Assign(Value);
+  Changed(False);
+end;
+
+procedure TOvcTCColHeadExtendedInfoItem.SetShowCaption(const Value: Boolean);
+begin
+  FShowCaption := Value;
   Changed(False);
 end;
 
