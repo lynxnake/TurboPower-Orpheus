@@ -124,6 +124,12 @@
    {$IF compilerversion >= 24} // Delphi XE3 or higher
      {$DEFINE VERSIONXE3}
    {$IFEND}
+   {$IF compilerversion >= 25} // Delphi XE3 or higher
+     {$DEFINE VERSIONXE4}
+   {$IFEND}
+   {$IF compilerversion >= 26} // Delphi XE3 or higher
+     {$DEFINE VERSIONXE5}
+   {$IFEND}
 {$ENDIF}
 
 {$IFDEF VERSION2}
