@@ -5,8 +5,8 @@ TurboPower Orpheus -- Version 4.08
 1. Introduction
 
 Version 4.08 of Orpheus contains new Delphi packages for Delphi XE2.
-It is compatible with Delphi 2006, 2007, 2009, 2010, XE and XE2
-including win64-applications (in Delphi XE2).
+It is compatible with Delphi 2006, 2007, 2009, 2010, XE, XE2, XE3, XE4 and XE5
+including win64-applications (in Delphi XE2, XE3, XE4 and XE5).
 
 Although there are still packages for older versions of Delphi there
 have been no tests to verifiy that this version can still be used
