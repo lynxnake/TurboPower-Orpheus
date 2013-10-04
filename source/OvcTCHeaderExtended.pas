@@ -207,23 +207,23 @@ procedure TOvcTCColHeadExtended.tcPaint(TableCanvas : TCanvas;
       ArrowDim : Integer;
       X, Y     : Integer;
       LeftPoint, RightPoint, BottomPoint : TPoint;
-      CellWidth  : integer;
+      iCellWidth  : integer;
       CellHeight : integer;
     begin
-      CellWidth := CellRect.Right - CellRect.Left;
+      iCellWidth := CellRect.Right - CellRect.Left;
       CellHeight := CellRect.Bottom - CellRect.Top;
       with TableCanvas do
         begin
           Pen.Color := CellAttr.caFont.Color;
           Brush.Color := Pen.Color;
-          ArrowDim := MinI(CellWidth, CellHeight) div 3;
+          ArrowDim := MinI(iCellWidth, CellHeight) div 3;
           case CellAttr.caAdjust of
             otaTopLeft, otaCenterLeft, otaBottomLeft:
               X := Margin;
             otaTopRight, otaCenterRight, otaBottomRight:
-              X := CellWidth-Margin-ArrowDim;
+              X := iCellWidth-Margin-ArrowDim;
           else
-            X := (CellWidth - ArrowDim) div 2;
+            X := (iCellWidth - ArrowDim) div 2;
           end;{case}
           inc(X, CellRect.Left);
           case CellAttr.caAdjust of
@@ -260,7 +260,6 @@ procedure TOvcTCColHeadExtended.tcPaint(TableCanvas : TCanvas;
     LCellRect : TRect;
     Left, Top : Integer;
     W, H      : Integer;
-    CellWidth         : integer;
     CellHeight        : integer;
     CellAdj           : TOvcTblAdjust;
   begin
@@ -273,7 +272,6 @@ procedure TOvcTCColHeadExtended.tcPaint(TableCanvas : TCanvas;
 
     CA := CellAttr;
     CellAdj := CellAttr.caAdjust;
-    CellWidth := CellRect.Right - CellRect.Left;
     CellHeight := CellRect.Bottom - CellRect.Top;
     if Assigned(FTable) then
       begin

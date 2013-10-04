@@ -213,7 +213,8 @@ contains
 {$IFDEF CPUX86}ovcRTF_Paint in '..\..\source\ovcRTF_Paint.pas',{$ENDIF}
   ovcRTF_IText in '..\..\source\ovcRTF_IText.pas',
 {$IFDEF CPUX86}ovcRTF_RichOle in '..\..\source\ovcRTF_RichOle.pas',{$ENDIF}
-  ovctccheckcbx in '..\..\source\ovctccheckcbx.pas';
+  ovctccheckcbx in '..\..\source\ovctccheckcbx.pas',
+  OvcTCHeaderExtended in '..\..\source\OvcTCHeaderExtended.pas';
 
 end.
 
