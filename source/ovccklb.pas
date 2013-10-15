@@ -108,6 +108,7 @@ type
       message LB_ADDSTRING;
     procedure LBDeleteString(var Msg : TMessage);
       message LB_DELETESTRING;
+    procedure LBResetContent(var Msg: TMessage); message LB_RESETCONTENT;
 
 
     {VCL message methods}
@@ -115,6 +116,8 @@ type
       message CM_VISIBLECHANGED;
     procedure CNDrawItem(var Msg : TWMDrawItem);
       message CN_DRAWITEM;
+  private
+    FLabelInfo: TOvcLabelInfo;
 
   protected
     {descendants can set the value of this variable after calling inherited }
@@ -135,6 +138,8 @@ type
     {protected properties}
     property Style;
 
+    procedure LoadRecreateItems(RecreateItems: TStrings); override;
+    procedure SaveRecreateItems(RecreateItems: TStrings); override;
   public
     constructor Create(AOwner : TComponent);
       override;
@@ -270,7 +275,15 @@ end;
 {$ENDIF}
 {$ENDIF}
 
-{*** TOvcCheckList ***}
+type
+  TCheckListBoxDataWrapper = class
+  private
+    FState: TCheckBoxState;
+  public
+    property State: TCheckBoxState read FState write FState;
+  end;
+
+{ TOvcCheckList }
 
 procedure TOvcCheckList.ChangeStateForAll(NewState : TCheckBoxState);
 var
@@ -660,6 +673,31 @@ begin
   end;
 end;
 
+procedure TOvcCheckList.SaveRecreateItems(RecreateItems: TStrings);
+var
+  I: Integer;
+  LWrapper: TCheckListBoxDataWrapper;
+begin
+  with RecreateItems do
+  begin
+    BeginUpdate;
+    try
+      NameValueSeparator := Items.NameValueSeparator;
+      QuoteChar := Items.QuoteChar;
+      Delimiter := Items.Delimiter;
+      LineBreak := Items.LineBreak;
+      for I := 0 to Items.Count - 1 do
+      begin
+        LWrapper := TCheckListBoxDataWrapper.Create;
+        LWrapper.State := States[I];
+        AddObject(Items[I], LWrapper);
+      end;
+    finally
+      EndUpdate;
+    end;
+  end;
+end;
+
 procedure TOvcCheckList.SetBounds(ALeft, ATop, AWidth, AHeight: Integer);
 begin
   inherited SetBounds(ALeft, ATop, AWidth, AHeight);
@@ -840,6 +878,40 @@ begin
   inherited;
   if HorizontalScroll then
     ResetHorizontalScrollBar;
+end;
+
+procedure TOvcCheckList.LBResetContent(var Msg: TMessage);
+begin
+  FStates.Clear;
+  inherited;
+  if HorizontalScroll then
+    ResetHorizontalScrollBar;
+end;
+
+procedure TOvcCheckList.LoadRecreateItems(RecreateItems: TStrings);
+var
+  I: Integer;
+begin
+  with RecreateItems do
+  begin
+    BeginUpdate;
+    try
+      Items.NameValueSeparator := NameValueSeparator;
+      Items.QuoteChar := QuoteChar;
+      Items.Delimiter := Delimiter;
+      Items.LineBreak := LineBreak;
+      for I := 0 to Count - 1 do
+      begin
+        Items.Add(RecreateItems[I]);
+        if Objects[I] <> nil then
+          States[I] := (RecreateItems.Objects[I] as TCheckListBoxDataWrapper).State;
+        Objects[I].Free;
+        Objects[I] := nil;
+      end;
+    finally
+      EndUpdate;
+    end;
+  end;
 end;
 
 end.
