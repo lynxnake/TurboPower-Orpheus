@@ -116,8 +116,8 @@ type
       message CM_VISIBLECHANGED;
     procedure CNDrawItem(var Msg : TWMDrawItem);
       message CN_DRAWITEM;
-  private
-    FLabelInfo: TOvcLabelInfo;
+
+    //FLabelInfo: TOvcLabelInfo; SZ: careful, Delphi class completion silently adds FLabelInfo, but the inherited FLabelInfo should be used
 
   protected
     {descendants can set the value of this variable after calling inherited }
