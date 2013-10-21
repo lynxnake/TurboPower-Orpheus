@@ -279,8 +279,10 @@ type
   TCheckListBoxDataWrapper = class
   private
     FState: TCheckBoxState;
+    FObject: TObject;
   public
     property State: TCheckBoxState read FState write FState;
+    property Data: TObject read FObject write FObject;
   end;
 
 { TOvcCheckList }
@@ -690,6 +692,7 @@ begin
       begin
         LWrapper := TCheckListBoxDataWrapper.Create;
         LWrapper.State := States[I];
+        LWrapper.Data := Self.Items.Objects[I];
         AddObject(Items[I], LWrapper);
       end;
     finally
@@ -902,7 +905,7 @@ begin
       Items.LineBreak := LineBreak;
       for I := 0 to Count - 1 do
       begin
-        Items.Add(RecreateItems[I]);
+        Items.AddObject(RecreateItems[I], (RecreateItems.Objects[I] as TCheckListBoxDataWrapper).Data);
         if Objects[I] <> nil then
           States[I] := (RecreateItems.Objects[I] as TCheckListBoxDataWrapper).State;
         Objects[I].Free;
