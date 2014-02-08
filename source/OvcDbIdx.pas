@@ -24,6 +24,7 @@
 {*                                                                            *}
 {* Contributor(s):                                                            *}
 {*                                                                            *}
+{* Roman Kassebaum                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
 {$I OVC.INC}
@@ -798,7 +799,11 @@ begin
   end;
 
   {conditionally remove non-visible Fields}
+{$IFDEF VERSIONXE6UP}
+  if not ShowHidden and (DataSource.DataSet.Fields.CreatedModes <> [cfAutomatic]) then begin
+{$ELSE}
   if not ShowHidden and not (DataSource.DataSet.DefaultFields) then begin
+{$ENDIF}
     for I := Pred(Items.Count) downto 0 do begin
       IndexInfo := TOvcIndexInfo(Items.Objects[I]);
       Fld := DataSource.DataSet.FieldByName(IndexInfo.FFields[0]);

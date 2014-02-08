@@ -683,7 +683,11 @@ begin
   Result := True;
 
   if DataSet <> nil then
+{$IFDEF VERSIONXE6UP}
+    Result := DataSet.Fields.CreatedModes = [cfAutomatic];
+{$ELSE}
     Result := DataSet.DefaultFields;
+{$ENDIF}
 end;
 
 function TOvcDbTableDataLink.GetFields(Index : Integer) : TField;
@@ -775,7 +779,11 @@ begin
   if (FField = nil) and (Length(FDataField) > 0) then
     if (Table <> nil) and (Table.DataLink.DataSet <> nil) then begin
       with Table.Datalink.Dataset do
+{$IFDEF VERSIONXE6UP}
+        if Active or (Fields.CreatedModes <> [cfAutomatic]) then
+{$ELSE}
         if Active or (not DefaultFields) then
+{$ENDIF}
           SetField(FindField(FDataField)); { no exceptions }
     end;
 

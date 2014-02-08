@@ -23,7 +23,7 @@
 {* TurboPower Software Inc. All Rights Reserved.                              *}
 {*                                                                            *}
 {* Contributor(s):                                                            *}
-{* Roman Kassebaum (D2007 support)                                            *}
+{* Roman Kassebaum                                                            *}
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
@@ -807,9 +807,17 @@ begin
   {the field information can be obtained if a corresponding field    }
   {component has been added to the form (by using the Fields Editor).}
   if (Result = nil) and (csDesigning in ComponentState) then
+  begin
     if (DataSource <> nil) and (DataSource.DataSet <> nil) then
+    begin
+{$IFDEF VERSIONXE6UP}
+      if DataSource.DataSet.Fields.CreatedModes <> [cfAutomatic] then
+{$ELSE}
       if not DataSource.DataSet.DefaultFields then
+{$ENDIF}
         Result := DataSource.DataSet.FindField(FDataLink.FieldName);
+    end;
+  end;
 end;
 
 function TOvcDbColumnList.GetDataField : string;

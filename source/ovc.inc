@@ -24,6 +24,7 @@
 {*                                                                            *}
 {* Contributor(s):                                                            *}
 {*                                                                            *}
+{* Roman Kassebaum                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
 {Conditional defines that affect compilation}
@@ -124,11 +125,14 @@
    {$IF compilerversion >= 24} // Delphi XE3 or higher
      {$DEFINE VERSIONXE3}
    {$IFEND}
-   {$IF compilerversion >= 25} // Delphi XE3 or higher
+   {$IF compilerversion >= 25} // Delphi XE4 or higher
      {$DEFINE VERSIONXE4}
    {$IFEND}
-   {$IF compilerversion >= 26} // Delphi XE3 or higher
+   {$IF compilerversion >= 26} // Delphi XE5 or higher
      {$DEFINE VERSIONXE5}
+   {$IFEND}
+   {$IF compilerversion >= 27} // Delphi XE6 or higher
+     {$DEFINE VERSIONXE6}
    {$IFEND}
 {$ENDIF}
 
@@ -173,6 +177,9 @@
 {$DEFINE VERSIONXE2UP}
 {$ENDIF}
 
+{$IFDEF VERSIONXE6}
+{$DEFINE VERSIONXE6UP}
+{$ENDIF}
 
 { This define turns off all platform warnings in Delphi 6.  Delphi 6 }
 { is cross-platform compatible with Kylix and all of Orpheus' Win32  }
