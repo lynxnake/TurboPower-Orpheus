@@ -98,7 +98,12 @@ implementation
 
 {$R *.dfm}
 
+{$I OVC.inc}
+
 uses
+{$IFDEF VERSIONXE5UP}
+  System.Types,
+{$ENDIF}
   CommCtrl, ovctcedtHTMLText, ovcRTF_IText, Generics.Collections, ovcTable;
 
 function SetWindowSubclass(hWnd: HWND; pfnSubclass: SUBCLASSPROC;

@@ -543,6 +543,10 @@ type
 
 implementation
 
+{$IFDEF VERSIONXE5UP}
+uses
+  System.Types, System.UITypes;
+{$ENDIF}
 
 const
   lobTimerInterval = 200;

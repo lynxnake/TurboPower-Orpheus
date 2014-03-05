@@ -479,7 +479,10 @@ type
 implementation
 
 uses
-  WideStrUtils;
+{$IFDEF VERSIONXE5UP}
+  System.Types,
+{$ENDIF}
+WideStrUtils;
 
 var
   BrushBitmap : TBitmap;

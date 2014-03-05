@@ -42,6 +42,8 @@ unit ovcdbtbl;
 
 interface
 
+{$I ovc.inc}
+
 uses
   {$IFDEF VERSIONXE3} System.UITypes, {$ENDIF}
   Windows, Buttons, Classes, Controls, DB, Forms, Graphics, Menus, Messages,
@@ -578,6 +580,9 @@ type
 implementation
 
 uses
+{$IFDEF VERSIONXE5UP}
+  System.Types,
+{$ENDIF}
   Dialogs, OvcNF, OvcPF, OvcSF, OvcTCBmp, OvcTCBox, OvcTCCbx, OvcTCEdt,
   OvcTCGly, OvcTCHdr, OvcTCIco, OvcTCNum, OvcTCPic, OvcTCSim,
   OvcTCHeaderExtended;
