@@ -268,7 +268,7 @@
         <DelphiCompile Include="..\..\source\ovcsfpe.pas">
             <Form>OvcfrmSimpleMask</Form>
             <FormType>dfm</FormType>
-            <BuildOrder>28</BuildOrder>
+            <BuildOrder>44</BuildOrder>
         </DelphiCompile>
         <DelphiCompile Include="..\..\source\ovcstat0.pas">
             <Form>OvcfrmPropsDlg</Form>
@@ -299,32 +299,32 @@
             <BuildOrder>34</BuildOrder>
         </DelphiCompile>
         <FormResources Include="..\..\source\ovclkou1.dfm"/>
-        <FormResources Include="..\..\source\ovcnfpe.dfm"/>
-        <FormResources Include="..\..\source\ovcpfpe.dfm"/>
         <FormResources Include="..\..\source\ovcoutle.dfm"/>
-        <FormResources Include="..\..\source\ovclbl0.dfm"/>
+        <FormResources Include="..\..\source\ovcnfpe.dfm"/>
+        <FormResources Include="..\..\source\ovcefpe.dfm"/>
         <FormResources Include="..\..\source\ovclbl1.dfm"/>
-        <FormResources Include="..\..\source\ovctcpe.dfm"/>
+        <FormResources Include="..\..\source\ovclbl0.dfm"/>
         <FormResources Include="..\..\source\ovctbpe2.dfm"/>
-        <FormResources Include="..\..\source\ovcxfrc1.dfm"/>
-        <FormResources Include="..\..\source\ovcrvped.dfm"/>
-        <FormResources Include="..\..\source\ovcrvced.dfm"/>
-        <FormResources Include="..\..\source\ovcsfpe.dfm"/>
         <FormResources Include="..\..\source\ovctbpe1.dfm"/>
+        <FormResources Include="..\..\source\ovctcpe.dfm"/>
+        <FormResources Include="..\..\source\ovcxfrc1.dfm"/>
         <FormResources Include="..\..\source\ovcstat0.dfm"/>
-        <FormResources Include="..\..\source\O32ColEd.dfm"/>
+        <FormResources Include="..\..\source\ovcpfpe.dfm"/>
+        <FormResources Include="..\..\source\ovcrvced.dfm"/>
+        <FormResources Include="..\..\source\ovcrvped.dfm"/>
+        <FormResources Include="..\..\source\ovcdrpve.dfm"/>
         <FormResources Include="..\..\source\O32IGridEditor1.dfm"/>
+        <FormResources Include="..\..\source\O32ColEd.dfm"/>
+        <FormResources Include="..\..\source\ovccmdp1.dfm"/>
+        <FormResources Include="..\..\source\ovccmdp0.dfm"/>
+        <FormResources Include="..\..\source\ovccole0.dfm"/>
+        <FormResources Include="..\..\source\ovcdock0.dfm"/>
         <FormResources Include="..\..\source\O32LobEd.dfm"/>
         <FormResources Include="..\..\source\O32IGridItemEd.dfm"/>
         <FormResources Include="..\..\source\o32vldpe.dfm"/>
-        <FormResources Include="..\..\source\ovccole0.dfm"/>
-        <FormResources Include="..\..\source\ovcdock0.dfm"/>
-        <FormResources Include="..\..\source\ovcefpe.dfm"/>
-        <FormResources Include="..\..\source\ovcdrpve.dfm"/>
         <FormResources Include="..\..\source\ovcaepe.dfm"/>
         <FormResources Include="..\..\source\Ovcabot0.dfm"/>
-        <FormResources Include="..\..\source\ovccmdp1.dfm"/>
-        <FormResources Include="..\..\source\ovccmdp0.dfm"/>
+        <FormResources Include="..\..\source\ovcsfpe.dfm"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

@@ -107,9 +107,6 @@
         <Defines>NDEBUG;$(Defines)</Defines>
     </PropertyGroup>
     <ItemGroup>
-        <PackageImport Include="bdertl.bpi">
-            <BuildOrder>14</BuildOrder>
-        </PackageImport>
         <LibFiles Include="C:\Program Files (x86)\Embarcadero\DelphiXE5\lib\win32\release\psdk\riched20.lib" Condition="'$(Platform)'=='Win32'">
             <BuildOrder>43</BuildOrder>
             <IgnorePath>true</IgnorePath>
@@ -118,11 +115,11 @@
             <BuildOrder>44</BuildOrder>
             <IgnorePath>true</IgnorePath>
         </LibFiles>
-        <PackageImport Include="vcldb.bpi">
-            <BuildOrder>26</BuildOrder>
+        <PackageImport Include="bdertl.bpi">
+            <BuildOrder>14</BuildOrder>
         </PackageImport>
-        <PackageImport Include="vcldbx.bpi">
-            <BuildOrder>27</BuildOrder>
+        <PackageImport Include="dbrtl.bpi">
+            <BuildOrder>15</BuildOrder>
         </PackageImport>
         <PackageImport Include="designide.bpi">
             <BuildOrder>42</BuildOrder>
@@ -133,6 +130,9 @@
         <ResFiles Include="O408_bd.res">
             <BuildOrder>2</BuildOrder>
         </ResFiles>
+        <PackageImport Include="O408_br.bpi">
+            <BuildOrder>28</BuildOrder>
+        </PackageImport>
         <PackageImport Include="O408_r.bpi">
             <BuildOrder>161</BuildOrder>
         </PackageImport>
@@ -141,6 +141,12 @@
         </PackageImport>
         <PackageImport Include="vcl.bpi">
             <BuildOrder>4</BuildOrder>
+        </PackageImport>
+        <PackageImport Include="vcldb.bpi">
+            <BuildOrder>26</BuildOrder>
+        </PackageImport>
+        <PackageImport Include="vcldbx.bpi">
+            <BuildOrder>27</BuildOrder>
         </PackageImport>
         <PackageImport Include="vclx.bpi">
             <BuildOrder>40</BuildOrder>
@@ -204,18 +210,15 @@
         <DelphiCompile Include="..\..\source\ovcregdb.pas">
             <BuildOrder>19</BuildOrder>
         </DelphiCompile>
-        <PackageImport Include="O408_br.bpi">
-            <BuildOrder>28</BuildOrder>
+        <PackageImport Include="O408_d.bpi">
+            <BuildOrder>29</BuildOrder>
         </PackageImport>
-        <PackageImport Include="dbrtl.bpi">
-            <BuildOrder>15</BuildOrder>
-        </PackageImport>
-        <FormResources Include="..\..\source\ovcdbae0.dfm"/>
         <FormResources Include="..\..\source\ovcdbae1.dfm"/>
         <FormResources Include="..\..\source\ovcdbae2.dfm"/>
         <FormResources Include="..\..\source\ovcdbae3.dfm"/>
         <FormResources Include="..\..\source\ovcdbtb0.dfm"/>
         <FormResources Include="..\..\source\ovcdbtb1.dfm"/>
+        <FormResources Include="..\..\source\ovcdbae0.dfm"/>
         <FormResources Include="..\..\source\ovcdbadg.dfm"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
