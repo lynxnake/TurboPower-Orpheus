@@ -37,6 +37,7 @@ const
   WS_EX_RIGHTSCROLLBAR  =  $00000000;
 
 function SetProcessDefaultLayout(dwDefaultLayout: DWORD): BOOL; stdcall;
+function GetProcessDefaultLayout(out pdwDefaultLayout: DWORD): BOOL; stdcall;
 
 const
   LAYOUT_RTL                         = $00000001; // Right to left
@@ -59,7 +60,9 @@ implementation
 uses
   SysUtils, Math;
 
-function SetProcessDefaultLayout; external 'user32.dll';
+function GetProcessDefaultLayout(out pdwDefaultLayout: DWORD): BOOL; stdcall; external 'user32.dll';
+function SetProcessDefaultLayout(dwDefaultLayout: DWORD): BOOL; stdcall; external 'user32.dll';
+
 function SetLayout(dc: HDC; dwLayout: DWORD): DWORD; stdcall; external 'gdi32.dll';
 function GetLayout(dc: hdc): DWORD; stdcall; external 'gdi32.dll';
 
@@ -112,7 +115,7 @@ begin
   Len := GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_FONTSIGNATURE, nil, 0);
   if Len = 0 then
     Exit;
-  SetLength(Buf, Len);
+  SetLength(Buf, Len * SizeOf(Char)); // returned size is in TChars!
   Len := GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_FONTSIGNATURE, PChar(Buf), Length(Buf));
 
   Move(PByte(Buf)^, LocaleSig, Min(Len, SizeOf(LocaleSig)));
