@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2013 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2014 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'ovcdbtb0.pas' rev: 26.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'ovcdbtb0.pas' rev: 27.00 (Windows)
 
 #ifndef Ovcdbtb0HPP
 #define Ovcdbtb0HPP

@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2013 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2014 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'ovcbase.pas' rev: 26.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'ovcbase.pas' rev: 27.00 (Windows)
 
 #ifndef OvcbaseHPP
 #define OvcbaseHPP
@@ -220,7 +220,7 @@ public:
 	void __fastcall MarkAsUninitialized(bool Uninitialized);
 	System::Classes::TComponent* __fastcall ValidateEntryFields(void);
 	System::Classes::TComponent* __fastcall ValidateEntryFieldsEx(bool ReportError, bool ChangeFocus);
-	System::Classes::TComponent* __fastcall ValidateTheseEntryFields(System::Classes::TComponent* const *Fields, const int Fields_Size);
+	System::Classes::TComponent* __fastcall ValidateTheseEntryFields(System::Classes::TComponent* const *Fields, const int Fields_High);
 	__property bool ErrorPending = {read=FErrorPending, write=FErrorPending, nodefault};
 	__property System::UnicodeString ErrorText = {read=FErrorText, write=FErrorText};
 	__property HWND Handle = {read=GetHandle, nodefault};

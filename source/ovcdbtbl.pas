@@ -689,7 +689,7 @@ begin
 
   if DataSet <> nil then
 {$IFDEF VERSIONXE6UP}
-    Result := DataSet.Fields.CreatedModes = [cfAutomatic];
+    Result := DataSet.Fields.LifeCycles = [TFieldLifeCycle.lcAutomatic];
 {$ELSE}
     Result := DataSet.DefaultFields;
 {$ENDIF}
@@ -785,7 +785,7 @@ begin
     if (Table <> nil) and (Table.DataLink.DataSet <> nil) then begin
       with Table.Datalink.Dataset do
 {$IFDEF VERSIONXE6UP}
-        if Active or (Fields.CreatedModes <> [cfAutomatic]) then
+        if Active or (Fields.LifeCycles <> [TFieldLifeCycle.lcAutomatic]) then
 {$ELSE}
         if Active or (not DefaultFields) then
 {$ENDIF}

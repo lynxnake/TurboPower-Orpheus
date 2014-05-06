@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2013 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2014 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'ovcRTF_IText.pas' rev: 26.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'ovcRTF_IText.pas' rev: 27.00 (Windows)
 
 #ifndef Ovcrtf_itextHPP
 #define Ovcrtf_itextHPP
@@ -39,7 +39,6 @@ typedef Winapi::Activex::TOleEnum tomConstants;
 
 struct DECLSPEC_DRECORD __MIDL_IWinTypes_0009
 {
-	#pragma pack(push,1)
 	union
 	{
 		struct 
@@ -52,7 +51,6 @@ struct DECLSPEC_DRECORD __MIDL_IWinTypes_0009
 		};
 		
 	};
-	#pragma pack(pop)
 };
 
 

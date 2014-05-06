@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2013 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2014 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'ovcxfer.pas' rev: 26.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'ovcxfer.pas' rev: 27.00 (Windows)
 
 #ifndef OvcxferHPP
 #define OvcxferHPP
@@ -101,18 +101,18 @@ protected:
 	
 public:
 	void __fastcall GetTransferList(System::Classes::TList* L);
-	System::Word __fastcall GetTransferBufferSizePrim(System::Classes::TComponent* *CNA, const int CNA_Size, TxfrStringtype xfrStringtype);
-	System::Word __fastcall GetTransferBufferSize(System::Classes::TComponent* *CNA, const int CNA_Size);
-	System::Word __fastcall GetTransferBufferSizeZ(System::Classes::TComponent* *CNA, const int CNA_Size);
-	System::Word __fastcall GetTransferBufferSizeS(System::Classes::TComponent* *CNA, const int CNA_Size);
-	void __fastcall TransferFromFormPrim(System::Classes::TComponent* *CNA, const int CNA_Size, void *Data, TxfrStringtype xfrStringtype);
-	void __fastcall TransferFromForm(System::Classes::TComponent* *CNA, const int CNA_Size, void *Data);
-	void __fastcall TransferFromFormZ(System::Classes::TComponent* *CNA, const int CNA_Size, void *Data);
-	void __fastcall TransferFromFormS(System::Classes::TComponent* *CNA, const int CNA_Size, void *Data);
-	void __fastcall TransferToFormPrim(System::Classes::TComponent* *CNA, const int CNA_Size, const void *Data, TxfrStringtype xfrStringtype);
-	void __fastcall TransferToForm(System::Classes::TComponent* *CNA, const int CNA_Size, const void *Data);
-	void __fastcall TransferToFormZ(System::Classes::TComponent* *CNA, const int CNA_Size, const void *Data);
-	void __fastcall TransferToFormS(System::Classes::TComponent* *CNA, const int CNA_Size, const void *Data);
+	System::Word __fastcall GetTransferBufferSizePrim(System::Classes::TComponent* *CNA, const int CNA_High, TxfrStringtype xfrStringtype);
+	System::Word __fastcall GetTransferBufferSize(System::Classes::TComponent* *CNA, const int CNA_High);
+	System::Word __fastcall GetTransferBufferSizeZ(System::Classes::TComponent* *CNA, const int CNA_High);
+	System::Word __fastcall GetTransferBufferSizeS(System::Classes::TComponent* *CNA, const int CNA_High);
+	void __fastcall TransferFromFormPrim(System::Classes::TComponent* *CNA, const int CNA_High, void *Data, TxfrStringtype xfrStringtype);
+	void __fastcall TransferFromForm(System::Classes::TComponent* *CNA, const int CNA_High, void *Data);
+	void __fastcall TransferFromFormZ(System::Classes::TComponent* *CNA, const int CNA_High, void *Data);
+	void __fastcall TransferFromFormS(System::Classes::TComponent* *CNA, const int CNA_High, void *Data);
+	void __fastcall TransferToFormPrim(System::Classes::TComponent* *CNA, const int CNA_High, const void *Data, TxfrStringtype xfrStringtype);
+	void __fastcall TransferToForm(System::Classes::TComponent* *CNA, const int CNA_High, const void *Data);
+	void __fastcall TransferToFormZ(System::Classes::TComponent* *CNA, const int CNA_High, const void *Data);
+	void __fastcall TransferToFormS(System::Classes::TComponent* *CNA, const int CNA_High, const void *Data);
 public:
 	/* TOvcComponent.Create */ inline __fastcall virtual TOvcTransfer(System::Classes::TComponent* AOwner) : Ovcbase::TOvcComponent(AOwner) { }
 	/* TOvcComponent.Destroy */ inline __fastcall virtual ~TOvcTransfer(void) { }

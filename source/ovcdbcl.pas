@@ -811,7 +811,7 @@ begin
     if (DataSource <> nil) and (DataSource.DataSet <> nil) then
     begin
 {$IFDEF VERSIONXE6UP}
-      if DataSource.DataSet.Fields.CreatedModes <> [cfAutomatic] then
+      if DataSource.DataSet.Fields.LifeCycles <> [TFieldLifeCycle.lcAutomatic] then
 {$ELSE}
       if not DataSource.DataSet.DefaultFields then
 {$ENDIF}

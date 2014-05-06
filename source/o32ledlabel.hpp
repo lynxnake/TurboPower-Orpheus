@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2013 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2014 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'o32ledlabel.pas' rev: 26.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'o32ledlabel.pas' rev: 27.00 (Windows)
 
 #ifndef O32ledlabelHPP
 #define O32ledlabelHPP
@@ -46,10 +46,10 @@ protected:
 	TSegmentSize FSize;
 	Vcl::Graphics::TBitmap* lbDrawBmp;
 	MESSAGE void __fastcall CMTextChanged(Winapi::Messages::TMessage &Message);
-	void __fastcall Initialize(System::Types::TPoint *Points, const int Points_Size);
+	void __fastcall Initialize(System::Types::TPoint *Points, const int Points_High);
 	int __fastcall NewOffset(System::WideChar xOry, int OldOffset);
-	void __fastcall ProcessCaption(System::Types::TPoint *Points, const int Points_Size);
-	void __fastcall PaintSegment(int Segment, System::Uitypes::TColor Color, System::Types::TPoint *Points, const int Points_Size, int OffsetX, int OffsetY);
+	void __fastcall ProcessCaption(System::Types::TPoint *Points, const int Points_High);
+	void __fastcall PaintSegment(int Segment, System::Uitypes::TColor Color, System::Types::TPoint *Points, const int Points_High, int OffsetX, int OffsetY);
 	void __fastcall ResizeControl(int Row, int Col, int Size);
 	System::UnicodeString __fastcall GetAbout(void);
 	void __fastcall SetAbout(const System::UnicodeString Value);
@@ -59,7 +59,7 @@ protected:
 	void __fastcall SetRows(int Value);
 	void __fastcall SetColumns(int Value);
 	void __fastcall SetbgColor(System::Uitypes::TColor Value);
-	void __fastcall SelectSegments(System::Word Segment, System::Types::TPoint *Points, const int Points_Size, int OffsetX, int OffsetY);
+	void __fastcall SelectSegments(System::Word Segment, System::Types::TPoint *Points, const int Points_High, int OffsetX, int OffsetY);
 	virtual void __fastcall Paint(void);
 	
 public:

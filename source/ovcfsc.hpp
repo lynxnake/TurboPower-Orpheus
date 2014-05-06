@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2013 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2014 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'ovcfsc.pas' rev: 26.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'ovcfsc.pas' rev: 27.00 (Windows)
 
 #ifndef OvcfscHPP
 #define OvcfscHPP
@@ -113,7 +113,7 @@ protected:
 	void __fastcall fscDrawPlainStar(const bool Redraw);
 	void __fastcall fscDrawButton(const bool Redraw);
 	void __fastcall fscInvalidateButton(const TOvcFlatSpinState State);
-	void __fastcall fscPolyline(System::Types::TPoint const *Points, const int Points_Size);
+	void __fastcall fscPolyline(System::Types::TPoint const *Points, const int Points_High);
 	MESSAGE void __fastcall OMRecreateWnd(Winapi::Messages::TMessage &Msg);
 	MESSAGE void __fastcall WMGetDlgCode(Winapi::Messages::TWMNoParams &Msg);
 	HIDESBASE MESSAGE void __fastcall WMLButtonDown(Winapi::Messages::TWMMouse &Msg);

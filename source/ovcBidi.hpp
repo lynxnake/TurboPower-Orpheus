@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2013 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2014 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'ovcBidi.pas' rev: 26.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'ovcBidi.pas' rev: 27.00 (Windows)
 
 #ifndef OvcbidiHPP
 #define OvcbidiHPP
@@ -35,6 +35,7 @@ static const System::Int8 LAYOUT_VBH = System::Int8(0x4);
 static const System::Int8 LAYOUT_ORIENTATIONMASK = System::Int8(0x7);
 static const System::Int8 LAYOUT_BITMAPORIENTATIONPRESERVED = System::Int8(0x8);
 static const unsigned NOMIRRORBITMAP = unsigned(0x80000000);
+extern "C" BOOL __stdcall GetProcessDefaultLayout(/* out */ unsigned &pdwDefaultLayout);
 extern "C" BOOL __stdcall SetProcessDefaultLayout(unsigned dwDefaultLayout);
 extern "C" unsigned __stdcall SetLayout(HDC dc, unsigned dwLayout);
 extern "C" unsigned __stdcall GetLayout(HDC dc);

@@ -800,7 +800,7 @@ begin
 
   {conditionally remove non-visible Fields}
 {$IFDEF VERSIONXE6UP}
-  if not ShowHidden and (DataSource.DataSet.Fields.CreatedModes <> [cfAutomatic]) then begin
+  if not ShowHidden and (DataSource.DataSet.Fields.LifeCycles <> [TFieldLifeCycle.lcAutomatic]) then begin
 {$ELSE}
   if not ShowHidden and not (DataSource.DataSet.DefaultFields) then begin
 {$ENDIF}

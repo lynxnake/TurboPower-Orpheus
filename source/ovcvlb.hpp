@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2013 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2014 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'ovcvlb.pas' rev: 26.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'ovcvlb.pas' rev: 27.00 (Windows)
 
 #ifndef OvcvlbHPP
 #define OvcvlbHPP
@@ -242,7 +242,7 @@ public:
 	void __fastcall Scroll(int HDelta, int VDelta);
 	void __fastcall SelectAll(void);
 	virtual void __fastcall SetBounds(int ALeft, int ATop, int AWidth, int AHeight);
-	void __fastcall SetTabStops(int const *Tabs, const int Tabs_Size);
+	void __fastcall SetTabStops(int const *Tabs, const int Tabs_High);
 	__property Canvas;
 	__property int ItemIndex = {read=FItemIndex, write=SetItemIndex, nodefault};
 	__property System::Uitypes::TColor FillColor = {read=FFillColor, write=FFillColor, nodefault};

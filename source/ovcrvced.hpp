@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2013 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2014 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'ovcrvced.pas' rev: 26.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'ovcrvced.pas' rev: 27.00 (Windows)
 
 #ifndef OvcrvcedHPP
 #define OvcrvcedHPP
@@ -187,7 +187,7 @@ public:
 	/* TPropertyEditor.Create */ inline __fastcall virtual TOvcRvActiveViewProperty(const Designintf::_di_IDesigner ADesigner, int APropCount) : Designeditors::TPropertyEditor(ADesigner, APropCount) { }
 	/* TPropertyEditor.Destroy */ inline __fastcall virtual ~TOvcRvActiveViewProperty(void) { }
 	
-/* Hoisted overloads: */
+	/* Hoisted overloads: */
 	
 public:
 	inline void __fastcall  SetValue(const System::WideString Value){ Designeditors::TPropertyEditor::SetValue(Value); }
@@ -211,7 +211,7 @@ public:
 	/* TPropertyEditor.Create */ inline __fastcall virtual TOvcRvFieldNameProperty(const Designintf::_di_IDesigner ADesigner, int APropCount) : Designeditors::TPropertyEditor(ADesigner, APropCount) { }
 	/* TPropertyEditor.Destroy */ inline __fastcall virtual ~TOvcRvFieldNameProperty(void) { }
 	
-/* Hoisted overloads: */
+	/* Hoisted overloads: */
 	
 public:
 	inline void __fastcall  SetValue(const System::WideString Value){ Designeditors::TPropertyEditor::SetValue(Value); }

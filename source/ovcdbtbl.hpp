@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2013 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2014 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'ovcdbtbl.pas' rev: 26.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'ovcdbtbl.pas' rev: 27.00 (Windows)
 
 #ifndef OvcdbtblHPP
 #define OvcdbtblHPP
@@ -396,9 +396,9 @@ public:
 	Ovctcmmn::TOvcTblRegion __fastcall CalcRowCol(int X, int Y, int &RowNum, int &ColNum);
 	virtual Ovctcmmn::TOvcTblKeyNeeds __fastcall FilterKey(Winapi::Messages::TWMKey &Msg);
 	void __fastcall GetColumnOrderStrings(System::Classes::TStrings* &Cols);
-	void __fastcall GetColumnOrder(System::UnicodeString *Cols, const int Cols_Size);
+	void __fastcall GetColumnOrder(System::UnicodeString *Cols, const int Cols_High);
 	void __fastcall GetColumnWidthsStrings(System::Classes::TStrings* &Cols);
-	void __fastcall GetColumnWidths(int *Cols, const int Cols_Size);
+	void __fastcall GetColumnWidths(int *Cols, const int Cols_High);
 	int __fastcall IncCol(int ColNum, int Delta);
 	int __fastcall IncRow(int RowNum, int Delta);
 	bool __fastcall InEditingState(void);
@@ -417,9 +417,9 @@ public:
 	void __fastcall SetActiveCell(int RowNum, int ColNum);
 	bool __fastcall SetCellProperties(Data::Db::TField* AField, Ovctcell::TOvcBaseTableCell* ACell);
 	void __fastcall SetColumnOrderStrings(System::Classes::TStrings* const Cols);
-	void __fastcall SetColumnOrder(System::UnicodeString const *Cols, const int Cols_Size);
+	void __fastcall SetColumnOrder(System::UnicodeString const *Cols, const int Cols_High);
 	void __fastcall SetColumnWidthsStrings(System::Classes::TStrings* const Cols);
-	void __fastcall SetColumnWidths(int const *Cols, const int Cols_Size);
+	void __fastcall SetColumnWidths(int const *Cols, const int Cols_High);
 	bool __fastcall StartEditing(void);
 	bool __fastcall StopEditing(bool SaveValue);
 	__property Canvas;

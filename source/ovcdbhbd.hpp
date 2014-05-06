@@ -1,8 +1,8 @@
 ﻿// CodeGear C++Builder
-// Copyright (c) 1995, 2013 by Embarcadero Technologies, Inc.
+// Copyright (c) 1995, 2014 by Embarcadero Technologies, Inc.
 // All rights reserved
 
-// (DO NOT EDIT: machine generated header) 'ovcdbhbd.pas' rev: 26.00 (Windows)
+// (DO NOT EDIT: machine generated header) 'ovcdbhbd.pas' rev: 27.00 (Windows)
 
 #ifndef OvcdbhbdHPP
 #define OvcdbhbdHPP
@@ -38,7 +38,7 @@ public:
 	virtual void __fastcall GetAliasPath(const System::UnicodeString aAlias, System::UnicodeString &aPath);
 	virtual void __fastcall GetAliasDriverName(const System::UnicodeString aAlias, System::UnicodeString &aDriver);
 	virtual void __fastcall GetTableNames(const System::UnicodeString aAlias, System::Classes::TStrings* aList);
-	virtual void __fastcall FindNearestKey(Data::Db::TDataSet* aDataSet, System::TVarRec const *aKeyValues, const int aKeyValues_Size);
+	virtual void __fastcall FindNearestKey(Data::Db::TDataSet* aDataSet, System::TVarRec const *aKeyValues, const int aKeyValues_High);
 	virtual Data::Db::TIndexDefs* __fastcall GetIndexDefs(Data::Db::TDataSet* aDataSet);
 	virtual Data::Db::TField* __fastcall GetIndexField(Data::Db::TDataSet* aDataSet, int aFieldIndex);
 	virtual int __fastcall GetIndexFieldCount(Data::Db::TDataSet* aDataSet);
