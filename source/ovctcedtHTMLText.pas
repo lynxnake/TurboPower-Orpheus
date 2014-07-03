@@ -55,6 +55,7 @@ type
     function GetHTMLText: string;
     procedure SetHTMLText(const Value: string);
     procedure SetAllowedFontStyles(const Value: TFontStyles);
+    function GetPlainText: string;
   protected
     procedure KeyPress(var Key: Char); override;
     procedure KeyDown(var Key: Word; Shift: TShiftState); override;
@@ -62,6 +63,7 @@ type
     constructor Create(AOwner: TComponent); override;
     property RichText: string read GetRichText write SetRichText;
     property HTMLText: string read GetHTMLText write SetHTMLText;
+    property PlainText: string read GetPlainText;
     class procedure FillIDocument(const Doc: ITextDocument; HtmlText: string; AFont: TFont = nil);
     function GetIDoc: ITextDocument;
   published
@@ -779,6 +781,43 @@ begin
   Result := ole as ITextDocument;
 end;
 
+function TOvcCustomHtmlTextEditBase.GetPlainText: string;
+var
+  StringBuilder: TStringBuilder;
+  OldStyle, NewStyle: TFontStyles;
+  ole: IRichEditOle;
+  Doc: ITextDocument;
+  Range: ITextRange;
+  start, eof, n: Integer;
+  Font: ITextFont;
+  tmp: string;
+begin
+  SendMessage(Handle, EM_GETOLEINTERFACE, 0, LPARAM(@ole));
+  Doc := ole as ITextDocument;
+
+  // Get total length
+  Range := Doc.Range(0, 0);
+  Range.Expand(tomStory);
+  eof := Range.End_;
+
+  StringBuilder := TStringBuilder.Create;
+  try
+    start := 0;
+    while start < eof - 1 do
+    begin
+      Range := Doc.Range(start, start);
+      n := Range.Expand(tomCharFormat);
+
+      tmp := Range.Text;
+      StringBuilder.Append(tmp);
+      Start := Start + n;
+    end;
+    Result := TrimRight(StringBuilder.ToString);  // trim off #12 at the end (and other superfluous spaces)
+  finally
+    StringBuilder.Free;
+  end;
+end;
+
 function TOvcCustomHtmlTextEditBase.GetRichText: string;
 var
   MS: TMemoryStream;
@@ -908,7 +947,7 @@ begin
   try
     AnsiStr := AnsiString(Value);
 
-    MS.Write(Pointer(AnsiStr), Length(AnsiStr));
+    MS.Write(Pointer(AnsiStr)^, Length(AnsiStr));
     MS.Position := 0;
     Lines.LoadFromStream(MS, TEncoding.Unicode);
   finally

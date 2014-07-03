@@ -229,7 +229,8 @@ uses
   O32VldPE,               {Property Editor for the Regex Sample Expressions}
   O32VPool,               {ValidatorPool Component}
   O32Ovldr,               {Orpheus mask validator}
-  O32Pvldr, OvcTCHeaderExtended;               {Paradox mask validator}
+  O32Pvldr,               {Paradox mask validator}
+  OvcTCHeaderExtended;    {Extended table header}
 
 function TorGenericStringProperty.GetAttributes: TPropertyAttributes;
 begin

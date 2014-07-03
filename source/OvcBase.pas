@@ -792,6 +792,35 @@ type
       write SetController;
   end;
 
+  TOvcPopupWindow = class(TCustomForm)
+  private
+    FPrevActiveWindow: HWND;
+    FCloseAction: TCloseAction;
+    FBorderStyle: TBorderStyle;
+    FCancelled: Boolean;
+    procedure SetCloseAction(const Value: TCloseAction);
+    procedure SetBorderStyle(const Value: TBorderStyle);
+  protected
+    procedure Deactivate; override;
+    {$IFDEF VERSION2009}
+    procedure InitializeNewForm; override;
+    {$ENDIF}
+    procedure DoClose(var Action: TCloseAction); override;
+    procedure CreateParams(var Params: TCreateParams); override;
+  public
+    procedure WMActivate(var Message: TWMActivate); message WM_ACTIVATE;
+    procedure WMActivateApp(var Message: TWMActivateApp); message WM_ACTIVATEAPP;
+    procedure Popup(P: TPoint);
+    function IsShortCut(var Message: TWMKey): Boolean; override;
+    constructor Create(AOwner: TComponent); override;
+    property CloseAction: TCloseAction read FCloseAction write SetCloseAction;
+  published
+    property BorderStyle: TBorderStyle read FBorderStyle write SetBorderStyle default bsSingle;
+    property OnClose;
+    property Cancelled: Boolean read FCancelled;
+    property Visible;
+  end;
+
 
 function FindController(Form : TWinControl) : TOvcController;
   {-search for an existing controller component}
@@ -806,6 +835,7 @@ implementation
 
 {.$DEFINE Logging}
 uses
+  Graphics,
   OvcVer,
   TypInfo,
   ExtCtrls,
@@ -2682,6 +2712,108 @@ begin
     FDefaultController := TOvcController.Create(nil);
   Result := FDefaultController;
 end;
+
+{ TOvcPopupWindow }
+
+constructor TOvcPopupWindow.Create(AOwner: TComponent);
+begin
+  inherited;
+  FBorderStyle := bsSingle;
+end;
+
+procedure TOvcPopupWindow.CreateParams(var Params: TCreateParams);
+begin
+  inherited;
+  with Params Do
+  begin
+    Style := WS_POPUP;
+    if FBorderStyle = bsSingle then
+    begin
+      if CheckWin32Version(5, 1) then
+        WindowClass.Style := WindowClass.Style or CS_DROPSHADOW;
+
+        Style := Style + WS_POPUP;
+    end;
+
+    WindowClass.Style := WindowClass.Style or CS_SAVEBITS;
+    if NewStyleControls then
+      ExStyle := WS_EX_TOOLWINDOW;
+    AddBiDiModeExStyle(ExStyle);
+  end;
+end;
+
+procedure TOvcPopupWindow.Deactivate;
+begin
+  inherited;
+  Close;
+end;
+
+procedure TOvcPopupWindow.DoClose(var Action: TCloseAction);
+begin
+  Action := FCloseAction;
+  inherited DoClose(Action);
+end;
+
+{$IFDEF VERSION2009}
+procedure TOvcPopupWindow.InitializeNewForm;
+begin
+  inherited;
+  BorderStyle := bsNone;
+  Position := poDesigned;
+  Color := clWindow;
+  FCloseAction := caFree;
+end;
+{$ENDIF}
+
+function TOvcPopupWindow.IsShortCut(var Message: TWMKey): Boolean;
+begin
+  Result := False;
+  if KeyboardStateToShiftState = [] then
+    if Message.CharCode = VK_ESCAPE then
+    begin
+      FCancelled := True;
+      Result := True;
+      Close;
+    end;
+  if not Result then
+    result := inherited IsShortCut(Message);
+end;
+
+procedure TOvcPopupWindow.Popup(P: TPoint);
+begin
+  Left := P.X;
+  Top := P.Y;
+  Show;
+end;
+
+procedure TOvcPopupWindow.SetBorderStyle(const Value: TBorderStyle);
+begin
+  FBorderStyle := Value;
+end;
+
+procedure TOvcPopupWindow.SetCloseAction(const Value: TCloseAction);
+begin
+  FCloseAction := Value;
+end;
+
+procedure TOvcPopupWindow.WMActivate(var Message: TWMActivate);
+begin
+  if Message.Active <> WA_INACTIVE then
+  begin
+    FPrevActiveWindow := Message.ActiveWindow;
+    SendMessage(FPrevActiveWindow, WM_NCACTIVATE, WPARAM(True), 0);
+  end;
+end;
+
+procedure TOvcPopupWindow.WMActivateApp(var Message: TWMActivateApp);
+begin
+  if not Message.Active then
+  begin
+    SendMessage(FPrevActiveWindow, WM_NCACTIVATE, WPARAM(False), 0);
+    Close;
+  end;
+end;
+
 
 initialization
   {register the attached label class}

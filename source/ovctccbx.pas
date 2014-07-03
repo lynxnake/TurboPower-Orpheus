@@ -48,13 +48,13 @@ interface
 uses
   {$IFDEF VERSIONXE3} System.UITypes, System.Types, {$ENDIF}
   Windows, SysUtils, Messages, Graphics, Classes, Controls, Forms, StdCtrls,
-  OvcMisc, OvcTCmmn, OvcTCell, OvcTCStr;
+  OvcBase, OvcMisc, OvcTCmmn, OvcTCell, OvcTCStr;
 
 type
   TOvcTCComboBoxState = (otlbsUp, otlbsDown);
 
 type
-  TOvcTCComboBoxEdit = class(TCustomComboBox)
+  TOvcTCComboBoxEditOld = class(TCustomComboBox)
     protected {private}
       {.Z+}
       FCell     : TOvcBaseTableCell;
@@ -85,6 +85,105 @@ type
 
       property CellOwner : TOvcBaseTableCell
          read FCell write FCell;
+  end;
+
+  TOvcTCComboEdit = class(TEdit)        //introduced by SZ
+  protected
+    FCell : TOvcBaseTableCell;
+    FFilter: string;
+
+    function SelectItem(const AnItem: string): Boolean;
+  protected
+    procedure WMChar(var Msg : TWMKey); message WM_CHAR;
+    procedure WMGetDlgCode(var Msg : TMessage); message WM_GETDLGCODE;
+    procedure WMKeyDown(var Msg : TWMKey); message WM_KEYDOWN;
+    procedure WMKillFocus(var Msg : TWMKillFocus); message WM_KILLFOCUS;
+    procedure WMSetFocus(var Msg : TWMSetFocus); message WM_SETFOCUS;
+    procedure KeyPress(var Key: Char); override;
+
+    property CellOwner : TOvcBaseTableCell
+      read FCell write FCell;
+  end;
+
+  TOvcTCComboBoxEdit = class(TCustomControl)
+  private
+    FItemIndex: Integer;
+    FCell: TOvcBaseTableCell;
+    FMaxLength: Integer;
+    FItems: TStrings;
+    FSorted: Boolean;
+    FStyle: TComboBoxStyle;
+    FDropDownCount: Integer;
+    FOnChange: TNotifyEvent;
+    FOnDrawItem: TDrawItemEvent;
+    FOnMeasureItem: TMeasureItemEvent;
+    FOnDropDown: TNotifyEvent;
+    FCellAttr: TOvcCellAttributes;
+    FCloseTime: Cardinal;
+    FInUpdate: Boolean;
+    FListBox: TListBox;
+    FDropDown: TOvcPopupWindow;
+    FIsDroppedDown: Boolean;
+    FEditControl: TOvcTCComboEdit;
+    FAutoComplete: Boolean;
+    FAutoDropDown: Boolean;
+    FLastTime: Cardinal;
+    FAutoCompleteDelay: Cardinal;
+    FFilter: string;
+    procedure SetItemIndex(const Value: Integer);
+    procedure SetDropDownCount(const Value: Integer);
+    procedure SetItems(const Value: TStrings);
+    procedure SetMaxLength(const Value: Integer);
+    procedure SetSorted(const Value: Boolean);
+    procedure SetStyle(const Value: TComboBoxStyle);
+    procedure SetCellAttr(const Value: TOvcCellAttributes);
+    procedure ShowDropDown;
+    procedure ShowEdit;
+    procedure DropDownClose(Sender: TObject; var Action: TCloseAction);
+    procedure ListBoxClick(Sender: TObject);
+    procedure ListBoxMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    class procedure DrawText(Canvas: TCanvas; const CellRect: TRect; CellAttr: TOvcCellAttributes; Focused: Boolean; AText: string);
+    procedure DrawBackground(Canvas: TCanvas; const CellRect: TRect; CellAttr: TOvcCellAttributes; Focused: Boolean);
+    class procedure DrawButton(Canvas: TCanvas; const CellRect: TRect);
+    procedure CMTextChanged(var Message: TMessage); message CM_TEXTCHANGED;
+    procedure UpdateEditPosition;
+    procedure EditChanged(Sender: TObject);
+    procedure SetAutoComplete(const Value: Boolean);
+    procedure SetAutoDropDown(const Value: Boolean);
+  protected
+    procedure WMKeyDown(var Msg : TWMKey); message WM_KEYDOWN;
+    procedure WMChar(var Msg : TWMKey); message WM_CHAR;
+    function SelectItem(const AnItem: string): Boolean;
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X: Integer;
+      Y: Integer); override;
+    procedure Paint; override;
+    procedure DestroyWindowHandle; override;
+    procedure CreateWnd; override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    procedure CMRelease(var Message: TMessage); message CM_RELEASE;
+    procedure WMKillFocus(var Msg : TWMKillFocus); message WM_KILLFOCUS;
+    procedure WMSetFocus(var Msg : TWMSetFocus); message WM_SETFOCUS;
+    destructor Destroy; override;
+    procedure SetBounds(ALeft: Integer; ATop: Integer; AWidth: Integer;
+      AHeight: Integer); override;
+    property CellAttr: TOvcCellAttributes read FCellAttr write SetCellAttr;
+
+    property ItemIndex: Integer read FItemIndex write SetItemIndex;
+    property CellOwner : TOvcBaseTableCell read FCell write FCell;
+    property DropDownCount: Integer read FDropDownCount write SetDropDownCount default 8;
+    property MaxLength: Integer read FMaxLength write SetMaxLength default 0;
+    property Style: TComboBoxStyle read FStyle write SetStyle default csDropDown;
+    property Sorted: Boolean read FSorted write SetSorted default False;
+    property Items: TStrings read FItems write SetItems;
+    property OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property OnDrawItem: TDrawItemEvent read FOnDrawItem write FOnDrawItem;
+    property OnDropDown: TNotifyEvent read FOnDropDown write FOnDropDown;
+    property OnMeasureItem: TMeasureItemEvent read FOnMeasureItem write FOnMeasureItem;
+
+    property AutoCompleteDelay: Cardinal read FAutoCompleteDelay write FAutoCompleteDelay default 500;
+    property AutoComplete: Boolean read FAutoComplete write FAutoComplete default True;
+    property AutoDropDown: Boolean read FAutoDropDown write SetAutoDropDown;
   end;
 
   TOvcTCCustomComboBox = class(TOvcTCBaseString)
@@ -248,9 +347,29 @@ var
 
 implementation
 
-{$IFDEF VERSION2010}
 uses
+  Math,
+  StrUtils,
+{$IFDEF VERSION2010}
   Themes;
+{$ENDIF}
+
+{$IFDEF VERSION2010}
+function ThemesEnabled: Boolean; inline;
+begin
+{$IFDEF VERSIONXE2}
+  Result := StyleServices.Enabled;
+{$ELSE}
+  Result := ThemeServices.ThemesEnabled;
+{$ENDIF}
+end;
+
+{$IFDEF VERSIONXE2}
+function ThemeServices: TCustomStyleServices; inline;
+begin
+  Result := StyleServices;
+end;
+{$ENDIF}
 {$ENDIF}
 
 const
@@ -259,14 +378,14 @@ const
 var
   ComboBoxResourceCount : longint = 0;
 
-{===TOvcTCComboBoxEdit================================================}
-constructor TOvcTCComboBoxEdit.Create(AOwner : TComponent);
+{===TOvcTCComboBoxEditOld================================================}
+constructor TOvcTCComboBoxEditOld.Create(AOwner : TComponent);
   begin
     inherited Create(AOwner);
     NewEditWndProc := MakeObjectInstance(EditWindowProc);
   end;
 {--------}
-destructor TOvcTCComboBoxEdit.Destroy;
+destructor TOvcTCComboBoxEditOld.Destroy;
   begin
     if (Style = csDropDown) or (Style = csSimple) then
       SetWindowLong(EditField, GWL_WNDPROC, longint(PrevEditWndProc));
@@ -274,7 +393,7 @@ destructor TOvcTCComboBoxEdit.Destroy;
     inherited Destroy;
   end;
 {--------}
-procedure TOvcTCComboBoxEdit.CreateWnd;
+procedure TOvcTCComboBoxEditOld.CreateWnd;
   begin
     inherited CreateWnd;
 
@@ -288,7 +407,7 @@ procedure TOvcTCComboBoxEdit.CreateWnd;
       end;
   end;
 {--------}
-procedure TOvcTCComboBoxEdit.EditWindowProc(var Msg : TMessage);
+procedure TOvcTCComboBoxEditOld.EditWindowProc(var Msg : TMessage);
   var
     GridUsedIt : boolean;
     KeyMsg : TWMKey absolute Msg;
@@ -306,7 +425,7 @@ procedure TOvcTCComboBoxEdit.EditWindowProc(var Msg : TMessage);
         Result := CallWindowProc(PrevEditWndProc, EditField, Msg, wParam, lParam);
   end;
 {--------}
-function  TOvcTCComboBoxEdit.FilterWMKEYDOWN(var Msg : TWMKey) : boolean;
+function  TOvcTCComboBoxEditOld.FilterWMKEYDOWN(var Msg : TWMKey) : boolean;
   procedure GetSelection(var S, E : word);
     type
       LH = packed record L, H : word; end;
@@ -379,12 +498,12 @@ function  TOvcTCComboBoxEdit.FilterWMKEYDOWN(var Msg : TWMKey) : boolean;
 {--------}
 
 
-  procedure TOvcTCComboBoxEdit.CMRelease(var Message: TMessage);
+  procedure TOvcTCComboBoxEditOld.CMRelease(var Message: TMessage);
   begin
     Free;
   end;
 
-  procedure TOvcTCComboBoxEdit.WMChar(var Msg : TWMKey);
+  procedure TOvcTCComboBoxEditOld.WMChar(var Msg : TWMKey);
   var
     CurText : string;
   begin
@@ -405,14 +524,14 @@ function  TOvcTCComboBoxEdit.FilterWMKEYDOWN(var Msg : TWMKey) : boolean;
       end;
   end;
 {--------}
-procedure TOvcTCComboBoxEdit.WMGetDlgCode(var Msg : TMessage);
+procedure TOvcTCComboBoxEditOld.WMGetDlgCode(var Msg : TMessage);
   begin
     inherited;
     if CellOwner.TableWantsTab then
       Msg.Result := Msg.Result or DLGC_WANTTAB;
   end;
 {--------}
-procedure TOvcTCComboBoxEdit.WMKeyDown(var Msg : TWMKey);
+procedure TOvcTCComboBoxEditOld.WMKeyDown(var Msg : TWMKey);
   var
     GridUsedIt : boolean;
   begin
@@ -426,13 +545,13 @@ procedure TOvcTCComboBoxEdit.WMKeyDown(var Msg : TWMKey);
       inherited;
   end;
 {--------}
-procedure TOvcTCComboBoxEdit.WMKillFocus(var Msg : TWMKillFocus);
+procedure TOvcTCComboBoxEditOld.WMKillFocus(var Msg : TWMKillFocus);
   begin
     inherited;
     {ComboBox posts cbn_killfocus message to table}
   end;
 {--------}
-procedure TOvcTCComboBoxEdit.WMSetFocus(var Msg : TWMSetFocus);
+procedure TOvcTCComboBoxEditOld.WMSetFocus(var Msg : TWMSetFocus);
   begin
     inherited;
     CellOwner.PostMessageToTable(ctim_SetFocus, Msg.FocusedWnd, 0);
@@ -622,7 +741,7 @@ procedure TOvcTCCustomComboBox.EditMove(CellRect : TRect);
             if FEdit.Ctl3D then
               InflateRect(CellRect, -1, -1);
             SetWindowPos(EditHandle, HWND_TOP,
-                         Left, NewTop, Right-Left, ComboBoxHeight,
+                         Left, NewTop, Right-Left, Bottom - Top {SZ: was ComboBoxHeight},
                          SWP_SHOWWINDOW or SWP_NOREDRAW or SWP_NOZORDER);
           end;
         InvalidateRect(EditHandle, nil, false);
@@ -849,70 +968,78 @@ procedure TOvcTCCustomComboBox.StartEditing(RowNum : TRowNum; ColNum : TColNum;
     ItemRec : PCellComboBoxInfo absolute Data;
   begin
     FEdit := CreateEditControl;
-    with FEdit do
+//    with FEdit do
       begin
-        Color := CellAttr.caColor;
-        Ctl3D := false;
+        FEdit.Color := CellAttr.caColor;
+        FEdit.Ctl3D := false;
         case CellStyle of
-          tes3D     : Ctl3D := true;
+          tes3D     : FEdit.Ctl3D := true;
         end;{case}
-        Left := CellRect.Left;
-        Top := CellRect.Top;
-        Width := CellRect.Right - CellRect.Left;
-        Font := CellAttr.caFont;
-        Font.Color := CellAttr.caFontColor;
-        MaxLength := Self.MaxLength;
-        Hint := Self.Hint;
-        ShowHint := Self.ShowHint;
-        Visible := true;
-        CellOwner := Self;
-        TabStop := false;
-        Parent := FTable;
-        DropDownCount := Self.DropDownCount;
-        Sorted := Self.Sorted;
-        Style := Self.Style;
+        FEdit.Left := CellRect.Left;
+        FEdit.Top := CellRect.Top;
+        FEdit.Width := CellRect.Right - CellRect.Left;
+        FEdit.Height := CellRect.Bottom - CellRect.Top;
+        FEdit.Font := CellAttr.caFont;
+        FEdit.Font.Color := CellAttr.caFontColor;
+        FEdit.MaxLength := Self.MaxLength;
+        FEdit.Hint := Self.Hint;
+        FEdit.ShowHint := Self.ShowHint;
+        FEdit.Visible := true;
+        FEdit.CellOwner := Self;
+        FEdit.TabStop := false;
+        FEdit.Parent := FTable;
+        FEdit.DropDownCount := Self.DropDownCount;
+        FEdit.Sorted := Self.Sorted;
+        FEdit.Style := Self.Style;
         if UseRunTimeItems then
-          Items := ItemRec^.RTItems
+          FEdit.Items := ItemRec^.RTItems
         else
-          Items := Self.Items;
+          FEdit.Items := Self.Items;
         if Data = nil then
-          ItemIndex := -1
+          FEdit.ItemIndex := -1
         else
           begin
-            ItemIndex := ItemRec^.Index;
-            if (ItemIndex = -1) and
-               ((Style = csDropDown) or (Style = csSimple)) then
+            FEdit.ItemIndex := ItemRec^.Index;
+            if (FEdit.ItemIndex = -1) and
+               ((FEdit.Style = csDropDown) or (FEdit.Style = csSimple)) then
               if UseRunTimeItems then
                 {$IF defined(CBuilder)}
-                Text := StrPas(ItemRec^.RTSt)
+                FEdit.Text := StrPas(ItemRec^.RTSt)
                 {$ELSE}
-                Text := ItemRec^.RTSt
+                FEdit.Text := ItemRec^.RTSt
                 {$IFEND}
               else
                 {$IF defined(CBuilder)}
-                Text := StrPas(ItemRec^.St)
+                FEdit.Text := StrPas(ItemRec^.St)
                 {$ELSE}
-                Text := ItemRec^.St;
+                FEdit.Text := ItemRec^.St;
                 {$IFEND}
           end;
 
-        OnChange := Self.OnChange;
-        OnClick := Self.OnClick;
-        OnDblClick := Self.OnDblClick;
-        OnDragDrop := Self.OnDragDrop;
-        OnDragOver := Self.OnDragOver;
-        OnDrawItem := Self.OnDrawItem;
-        OnDropDown := Self.OnDropDown;
-        OnEndDrag := Self.OnEndDrag;
-        OnEnter := Self.OnEnter;
-        OnExit := Self.OnExit;
-        OnKeyDown := Self.OnKeyDown;
-        OnKeyPress := Self.OnKeyPress;
-        OnKeyUp := Self.OnKeyUp;
-        OnMeasureItem := Self.OnMeasureItem;
-        OnMouseDown := Self.OnMouseDown;
-        OnMouseMove := Self.OnMouseMove;
-        OnMouseUp := Self.OnMouseUp;
+//        if Assigned(self.Table) and Assigned(self.Table.Controller) then
+//          FEdit.AutoSelect := efoAutoSelect in Self.Table.Controller.EntryOptions;
+//        if not AutoSelect then
+//          SelStart := Length(Text);
+
+        FEdit.OnChange := Self.OnChange;
+        FEdit.OnClick := Self.OnClick;
+        FEdit.OnDblClick := Self.OnDblClick;
+        FEdit.OnDragDrop := Self.OnDragDrop;
+        FEdit.OnDragOver := Self.OnDragOver;
+        FEdit.OnDrawItem := Self.OnDrawItem;
+        FEdit.OnDropDown := Self.OnDropDown;
+        FEdit.OnEndDrag := Self.OnEndDrag;
+        FEdit.OnEnter := Self.OnEnter;
+        FEdit.OnExit := Self.OnExit;
+        FEdit.OnKeyDown := Self.OnKeyDown;
+        FEdit.OnKeyPress := Self.OnKeyPress;
+        FEdit.OnKeyUp := Self.OnKeyUp;
+        FEdit.OnMeasureItem := Self.OnMeasureItem;
+        FEdit.OnMouseDown := Self.OnMouseDown;
+        FEdit.OnMouseMove := Self.OnMouseMove;
+        FEdit.OnMouseUp := Self.OnMouseUp;
+
+        FEdit.ShowEdit;
       end;
   end;
 {--------}
@@ -959,5 +1086,815 @@ procedure TOvcTCCustomComboBox.StopEditing(SaveValue : boolean;
     FEdit := nil;
   end;
 {====================================================================}
+
+{ TOvcTCComboBoxEdit }
+
+procedure TOvcTCComboBoxEdit.CMRelease(var Message: TMessage);
+begin
+  Free;
+end;
+
+procedure TOvcTCComboBoxEdit.CMTextChanged(var Message: TMessage);
+begin
+  case Style of
+    csDropDown: if Assigned(FEditControl) then
+                  begin
+                    FEditControl.Text := Caption; FItemIndex := FItems.IndexOf(Text);
+                  end;
+    csDropDownList: ItemIndex := FItems.IndexOf(Text);
+  end;
+end;
+
+constructor TOvcTCComboBoxEdit.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+
+  Width := 145;
+  Height := 21;
+  DropDownCount := 8;
+  ControlStyle := ControlStyle + [csOpaque];
+  FCellAttr.caAccess := otxDefault;
+  FCellAttr.caAdjust := otaDefault;
+  FCellAttr.caColor := clWindow; // Background Color
+  FCellAttr.caFont := Font;
+  FCellAttr.caFontColor := clBtnText;
+  FCellAttr.caFontHiColor := clHighlightText;
+  FCellAttr.caTextStyle := tsFlat;
+  FDropDown := TOvcPopupWindow.CreateNew(Self);
+  FDropDown.CloseAction := caHide;
+  FDropDown.OnClose := DropDownClose;
+  FDropDown.Color := clBlack;
+  FItems := TStringList.Create;
+  FListBox := TListBox.Create(FDropDown);
+  FListBox.OnClick := ListBoxClick;
+  FListBox.Align := alClient;
+  {$IFDEF VERSION2009}
+  FListBox.AlignWithMargins := True; // Align with Margins = 1 so we get a black border
+  FListBox.Margins.Left := 1;
+  FListBox.Margins.Top:= 1;
+  FListBox.Margins.Right := 1;
+  FListBox.Margins.Bottom := 1;
+  {$ENDIF}
+  FListBox.BorderStyle := bsNone;
+  FListBox.Parent := FDropDown;
+//  FListBox.WantDblClicks := False;
+  FListBox.OnMouseMove := ListBoxMouseMove;
+  FDropDown.ActiveControl := FListBox;
+  TabStop := True;
+  Style := csDropDown;
+  AutoComplete := True;
+  AutoCompleteDelay := 500;
+//  autodropdown := true;
+end;
+
+procedure TOvcTCComboBoxEdit.CreateWnd;
+var
+  BorderStyle: NativeInt;
+begin
+  inherited;
+  if Style = csDropDown then
+  begin
+    FEditControl := TOvcTCComboEdit.Create(Self);
+    FEditControl.CellOwner := CellOwner;
+    FEditControl.BorderStyle := bsNone;
+    FEditControl.Parent := Self;
+    FEditControl.OnChange := EditChanged;
+    FEditControl.AutoSelect := True;
+    UpdateEditPosition;
+  end;
+end;
+
+destructor TOvcTCComboBoxEdit.Destroy;
+begin
+  FreeAndNil(FItems);
+  inherited Destroy;
+end;
+
+procedure TOvcTCComboBoxEdit.DestroyWindowHandle;
+begin
+  FreeAndNil(FEditControl);
+  inherited;
+end;
+
+procedure TOvcTCComboBoxEdit.DrawBackground(Canvas: TCanvas;
+  const CellRect: TRect; CellAttr: TOvcCellAttributes; Focused: Boolean);
+var
+  R: TRect;
+begin
+  with Canvas do
+  begin
+    Brush.Color := CellAttr.caColor;
+    Pen.Color := clBlack;
+    Rectangle(CellRect);
+    R := CellRect;
+    Inc(R.Top, 2);
+    Inc(R.Left, 2);
+    Dec(R.Bottom, 2);
+    Dec(R.Right, 1 + OvcComboBoxButtonWidth);
+    if Focused then
+    begin
+      Brush.Color := clHighlight;
+      FillRect(R);
+      Brush.Color := CellAttr.caColor;
+      DrawFocusRect(R);
+    end;
+  end;
+end;
+
+class procedure TOvcTCComboBoxEdit.DrawButton(Canvas: TCanvas;
+  const CellRect: TRect);
+var
+  EffCellWidth : Integer;
+  Wd, Ht       : Integer;
+  TopPixel     : Integer;
+  BotPixel     : Integer;
+  LeftPixel    : Integer;
+  RightPixel   : Integer;
+  SrcRect      : TRect;
+  DestRect     : TRect;
+{$IFDEF VERSION2010}
+  Details: TThemedElementDetails;
+  BtnRect: TRect;
+{$ENDIF}
+begin
+  {Calculate the effective cell width (the cell width less the size
+   of the button)}
+  EffCellWidth := CellRect.Right - CellRect.Left - OvcComboBoxButtonWidth;
+
+  {Calculate the black border's rectangle}
+  LeftPixel := CellRect.Left + EffCellWidth;
+  RightPixel := CellRect.Right - 1;
+  TopPixel := CellRect.Top + 1;
+  BotPixel := CellRect.Bottom - 1;
+
+  {$IFDEF VERSION2010}
+  if ThemesEnabled then
+  begin
+    Details := ThemeServices.GetElementDetails(tcDropDownButtonNormal);
+    BtnRect := CellRect;
+    BtnRect.Left := CellRect.Right - OvcComboBoxButtonWidth;
+    ThemeServices.DrawElement(canvas.handle, Details, BtnRect);
+  end
+  else
+  {$ENDIF}
+  {Paint the button}
+  with Canvas do
+    begin
+      {FIRST: paint the black border around the button}
+      Pen.Color := clBlack;
+      Pen.Width := 1;
+      Brush.Color := clBtnFace;
+      {Note: Rectangle excludes the Right and bottom pixels}
+      Rectangle(LeftPixel, TopPixel, RightPixel, BotPixel);
+      {SECOND: paint the highlight border on left/top sides}
+      {decrement drawing area}
+      inc(TopPixel);
+      dec(BotPixel);
+      inc(LeftPixel);
+      dec(RightPixel);
+      {Note: PolyLine excludes the end points of a line segment,
+             but since the end points are generally used as the
+             starting point of the next we must adjust for it.}
+      Pen.Color := clBtnHighlight;
+      PolyLine([Point(RightPixel-1, TopPixel),
+                Point(LeftPixel, TopPixel),
+                Point(LeftPixel, BotPixel)]);
+      {THIRD: paint the highlight border on bottom/right sides}
+      Pen.Color := clBtnShadow;
+      PolyLine([Point(LeftPixel, BotPixel-1),
+                Point(RightPixel-1, BotPixel-1),
+                Point(RightPixel-1, TopPixel-1)]);
+      inc(TopPixel);
+      dec(BotPixel);
+      inc(LeftPixel);
+      dec(RightPixel);
+      PolyLine([Point(LeftPixel, BotPixel-1),
+                Point(RightPixel-1, BotPixel-1),
+                Point(RightPixel-1, TopPixel-1)]);
+      {THIRD: paint the arrow bitmap}
+      Wd := OvcComboBoxBitmap.Width;
+      Ht := OvcComboBoxBitmap.Height;
+      SrcRect := Rect(0, 0, Wd, Ht);
+      with DestRect do
+        begin
+          Left := CellRect.Left + EffCellWidth + 5;
+          Top := CellRect.Top +
+                 ((CellRect.Bottom - CellRect.Top - Ht) div 2);
+          Right := Left + Wd;
+          Bottom := Top + Ht;
+        end;
+      BrushCopy(DestRect, OvcComboBoxBitmap, SrcRect, clSilver);
+    end;
+end;
+
+class procedure TOvcTCComboBoxEdit.DrawText(Canvas: TCanvas;
+  const CellRect: TRect; CellAttr: TOvcCellAttributes; Focused: Boolean;
+  AText: string);
+var
+  S: string;
+  I: Integer;
+  R: TRect;
+begin
+  R := CellRect;
+  Inc(R.Top, 2);
+  Inc(R.Left, 2);
+  Dec(R.Bottom, 2);
+  Dec(R.Right, 1 + OvcComboBoxButtonWidth);
+
+  S := AText;
+  Canvas.Brush.Style := bsClear;
+  Canvas.Font := CellAttr.caFont;
+  if Focused then
+    Canvas.Font.Color := CellAttr.caFontHiColor
+  else
+    Canvas.Font.Color := CellAttr.caFontColor;
+  Canvas.TextRect(R, S, [tfVerticalCenter, tfEndEllipsis, tfSingleLine]);
+end;
+
+procedure TOvcTCComboBoxEdit.DropDownClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+  FIsDroppedDown := False;
+  FCloseTime := GetTickCount;
+  Invalidate;
+  if Assigned(FEditControl) then
+    Windows.SetFocus(FEditControl.Handle);
+end;
+
+procedure TOvcTCComboBoxEdit.EditChanged(Sender: TObject);
+begin
+  Text := FEditControl.Text;
+end;
+
+procedure TOvcTCComboBoxEdit.ListBoxClick(Sender: TObject);
+begin
+  ItemIndex := FListBox.ItemIndex;
+  FDropDown.Close;
+  FCloseTime := 0;
+end;
+
+procedure TOvcTCComboBoxEdit.ListBoxMouseMove(Sender: TObject;
+  Shift: TShiftState; X, Y: Integer);
+var
+  I: Integer;
+begin
+  I := FListBox.ItemAtPos(Point(x, y), True);
+  if I <> -1 then
+    if not FListBox.Selected[I] then
+      FListBox.Selected[I] := True;
+end;
+
+procedure TOvcTCComboBoxEdit.MouseDown(Button: TMouseButton; Shift: TShiftState;
+  X, Y: Integer);
+begin
+  if ssDouble in Shift then
+    Exit;
+
+  Windows.SetFocus(Handle);
+  if (Button = mbLeft) then
+    if not FIsDroppedDown and (GetTickCount - FCloseTime > GetDoubleClickTime) then
+    begin
+      if ((FStyle = csDropDownList) or (FStyle = csDropDown) and (X > ClientWidth - OvcComboBoxButtonWidth)) then
+        ShowDropDown
+      else
+        ShowEdit;
+    end
+    else
+      FCloseTime := 0;
+  inherited MouseDown(Button, Shift, X, Y);
+end;
+
+procedure TOvcTCComboBoxEdit.Paint;
+var
+  LText: string;
+begin
+  inherited;
+
+  LText := '';
+
+  case Style of
+    csDropDown: ;
+//    csSimple: ;
+    csDropDownList: if InRange(ItemIndex, 0, FItems.Count - 1) then LText := FItems[ItemIndex];
+//    csOwnerDrawFixed: ;
+//    csOwnerDrawVariable: ;
+  end;
+
+  DrawBackground(Canvas, ClientRect, FCellAttr, Focused and not FIsDroppedDown and not Assigned(FEditControl));
+  if not Assigned(FEditControl) then
+  begin
+    DrawText(Canvas, ClientRect, FCellAttr, Focused and not FIsDroppedDown, LText);
+  end;
+  DrawButton(Canvas, ClientRect);
+end;
+
+function TOvcTCComboBoxEdit.SelectItem(const AnItem: string): Boolean;
+var
+  Idx: Integer;
+  ValueChange: Boolean;
+  I: Integer;
+begin
+  if Length(AnItem) = 0 then
+  begin
+    Result := False;
+    ItemIndex := -1;
+//    Change;
+    exit;
+  end;
+  Idx := -1;
+  for I := 0 to Items.Count - 1 do
+    if AnsiStartsText(AnItem, Items[I]) then
+    begin
+      Idx := I;
+      Break;
+    end;
+
+  Result := (Idx <> -1);
+  if not Result then exit;
+  ValueChange := Idx <> ItemIndex;
+//  if AutoCloseUp and (Items.IndexOf(AnItem) <> -1) then
+//    SendMessage(Handle, CB_SHOWDROPDOWN, 0, 0);
+//  SendMessage(Handle, CB_SETCURSEL, Idx, 0);
+//  if (Style in [csDropDown, csSimple]) then
+//  begin
+//    Text := AnItem + Copy(ComboBox.Items[Idx], Length(AnItem) + 1, MaxInt);
+//    SendMessage(Handle, EM_SETSEL, Length(AnItem), Length(Text));
+//  end
+//  else
+  begin
+    ItemIndex := Idx;
+    FFilter := AnItem;
+  end;
+  if ValueChange then
+  begin
+    Click;
+//    Select;
+  end;
+end;
+
+procedure TOvcTCComboBoxEdit.SetAutoComplete(const Value: Boolean);
+begin
+  FAutoComplete := Value;
+end;
+
+procedure TOvcTCComboBoxEdit.SetAutoDropDown(const Value: Boolean);
+begin
+  FAutoDropDown := Value;
+end;
+
+procedure TOvcTCComboBoxEdit.SetBounds(ALeft, ATop, AWidth, AHeight: Integer);
+begin
+  inherited;
+  UpdateEditPosition;
+end;
+
+procedure TOvcTCComboBoxEdit.SetCellAttr(const Value: TOvcCellAttributes);
+begin
+  FCellAttr := Value;
+  Invalidate;
+end;
+
+procedure TOvcTCComboBoxEdit.SetDropDownCount(const Value: Integer);
+begin
+  FDropDownCount := Value;
+end;
+
+procedure TOvcTCComboBoxEdit.SetItemIndex(const Value: Integer);
+begin
+  FItemIndex := Value;
+  if (Style = csDropDown) and Assigned(FEditControl) then
+  begin
+    if InRange(Value, 0, FItems.Count - 1) then
+      FEditControl.Text := FItems[Value]
+    else
+      FEditControl.Text := '';
+  end;
+  Invalidate;
+end;
+
+procedure TOvcTCComboBoxEdit.SetItems(const Value: TStrings);
+begin
+  FItems.Assign(Value);
+end;
+
+procedure TOvcTCComboBoxEdit.SetMaxLength(const Value: Integer);
+begin
+  FMaxLength := Value;
+end;
+
+procedure TOvcTCComboBoxEdit.SetSorted(const Value: Boolean);
+begin
+  FSorted := Value;
+end;
+
+procedure TOvcTCComboBoxEdit.SetStyle(const Value: TComboBoxStyle);
+begin
+  FStyle := Value;
+  RecreateWnd;
+end;
+
+procedure TOvcTCComboBoxEdit.ShowDropDown;
+var
+  P: TPoint;
+  I: Integer;
+  Monitor: TMonitor;
+begin
+  UpdateEditPosition;
+  P := ClientToScreen(Point(0, Height));
+  FListBox.Items.BeginUpdate;
+  FInUpdate := True;
+  try
+    FListBox.Items.Clear;
+    for I := 0 to FItems.Count - 1 do
+    begin
+      FListBox.Items.Add(FItems[I]);
+    end;
+    FListBox.ItemIndex := ItemIndex;
+  finally
+    FInUpdate := False;
+    FListBox.Items.EndUpdate;
+  end;
+  FDropDown.Width := Self.Width;
+  FDropDown.Height := FListBox.ItemHeight * MinI(FItems.Count, FDropDownCount) + 2;
+  // keep dropdown within screen
+  Monitor := Screen.MonitorFromPoint(P);
+  if Assigned(Monitor) and (P.Y + FDropDown.Height > Monitor.WorkareaRect.Bottom) then
+  begin
+    P := ClientToScreen(Point(0, 0));
+    P.Y := P.Y - FDropDown.Height;
+    if P.Y < Monitor.Top then
+      P.Y := Monitor.Top;
+  end;
+
+  FDropDown.Popup(P);
+  FIsDroppedDown := True;
+end;
+
+procedure TOvcTCComboBoxEdit.ShowEdit;
+begin
+  if Assigned(FEditControl) then
+  begin
+    FEditControl.MaxLength := MaxLength;
+    Windows.SetFocus(FEditControl.Handle); // FEditControl.SetFocus;
+    UpdateEditPosition;
+  end;
+end;
+
+procedure TOvcTCComboBoxEdit.UpdateEditPosition;
+var
+  MaxHeight: Integer;
+begin
+  if HandleAllocated and Assigned(FEditControl) then
+  begin
+    MaxHeight := ClientHeight - 2;
+    FEditControl.SetBounds(2, 1 + (ClientHeight div 2) - (FEditControl.Height div 2), ClientWidth - 3 - OvcComboBoxButtonWidth, FEditControl.Height);
+  end;
+end;
+
+procedure TOvcTCComboBoxEdit.WMChar(var Msg: TWMKey);
+var
+//  StartPos, EndPos: Integer;
+//  OldText: string;
+  SaveText: string;
+//  LastByte: Integer;
+  LItemIndex: Integer;
+  LMsg : TMSG;
+
+  Key: Char;
+begin
+  LItemIndex := ItemIndex;
+  inherited;
+
+  if not AutoComplete then exit;
+  if (Style in [csDropDown, csSimple]) then Exit;
+
+   if GetTickCount - FLastTime >= FAutoCompleteDelay then
+      FFilter := '';
+    FLastTime := GetTickCount;
+
+  Key := Char(Msg.CharCode);
+
+  case Ord(Key) of
+    VK_ESCAPE: exit;
+//    VK_TAB:
+//      if FAutoDropDown and FIsDroppedDown then
+//        DroppedDown := False;
+    VK_BACK:
+      begin
+        while ByteType(FFilter, Length(FFilter)) = mbTrailByte do
+          Delete(FFilter, Length(FFilter), 1);
+        Delete(FFilter, Length(FFilter), 1);
+        Key := #0;
+//        Change;
+      end;
+  else // case
+    SaveText := FFilter + Key;
+    if FAutoDropDown and not FIsDroppedDown then
+      ShowDropDown; // DroppedDown := True;
+
+    if IsLeadChar(Key) then
+    begin
+      if PeekMessage(LMsg, Handle, 0, 0, PM_NOREMOVE) and (LMsg.Message = WM_CHAR) then
+      begin
+        if SelectItem(SaveText + Key) then
+        begin
+          PeekMessage(LMsg, Handle, 0, 0, PM_REMOVE);
+          Key := #0
+        end;
+      end;
+    end
+    else
+    if SelectItem(SaveText) then
+      Key := #0
+  end; // case
+end;
+
+procedure TOvcTCComboBoxEdit.WMKeyDown(var Msg: TWMKey);
+begin
+  if Msg.CharCode = VK_F4 then
+    ShowDropDown
+  else if Assigned(FEditControl) then
+  begin
+    UpdateEditPosition;
+    Windows.SetFocus(FEditControl.Handle);
+    PostMessage(FEditControl.Handle, WM_KEYDOWN, Msg.CharCode, Msg.KeyData);
+  end;
+end;
+
+procedure TOvcTCComboBoxEdit.WMKillFocus(var Msg: TWMKillFocus);
+begin
+
+end;
+
+procedure TOvcTCComboBoxEdit.WMSetFocus(var Msg: TWMSetFocus);
+begin
+//  ShowEdit;
+  if Assigned(CellOwner) then
+    CellOwner.PostMessageToTable(ctim_SetFocus, Msg.FocusedWnd, 0);
+end;
+
+{ TOvcTCComboEdit }
+
+procedure TOvcTCComboEdit.KeyPress(var Key: Char);
+var
+  ComboBox: TOvcTCComboBoxEdit;
+
+  function HasSelectedText(var StartPos, EndPos: Integer): Boolean;
+  begin
+    if ComboBox.Style in [csDropDown, csSimple] then
+    begin
+      SendGetIntMessage(Handle, EM_GETSEL, StartPos, EndPos);
+      Result := EndPos > StartPos;
+    end
+    else
+      Result := False;
+  end;
+
+  procedure DeleteSelectedText(const StartPos, EndPos: DWORD);
+  var
+     OldText: String;
+  begin
+    OldText := Text;
+    Delete(OldText, StartPos + 1, EndPos - StartPos);
+//    SendMessage(Handle, CB_SETCURSEL, WPARAM(-1), 0);
+    Text := OldText;
+    SendMessage(Handle, EM_SETSEL, StartPos, StartPos);
+  end;
+
+var
+  StartPos, EndPos: Integer;
+  OldText: string;
+  SaveText: string;
+  LastByte: Integer;
+  LItemIndex: Integer;
+  Msg : TMSG;
+
+begin
+  ComboBox := Parent as TOvcTCComboBoxEdit;
+
+  LItemIndex := ComboBox.ItemIndex;
+  inherited KeyPress(Key);
+
+  if not ComboBox.AutoComplete then exit;
+  FFilter := Text;
+
+  case Ord(Key) of
+    VK_ESCAPE: exit;
+//    VK_TAB:
+//      if ComboBox.AutoDropDown and DroppedDown then
+//        DroppedDown := False;
+    VK_BACK:
+      begin
+        if HasSelectedText(StartPos, EndPos) then
+          DeleteSelectedText(StartPos, EndPos)
+        else
+          if (ComboBox.Style in [csDropDown, csSimple]) and (Length(Text) > 0) then
+          begin
+            SaveText := Text;
+            LastByte := StartPos;
+            while ByteType(SaveText, LastByte) = mbTrailByte do Dec(LastByte);
+            OldText := Copy(SaveText, 1, LastByte - 1);
+//            SendMessage(Handle, EM_SETCURSEL, WPARAM(-1), 0);
+            Text := OldText + Copy(SaveText, EndPos + 1, MaxInt);
+            SendMessage(Handle, EM_SETSEL, LastByte - 1, LastByte - 1);
+            FFilter := Text;
+          end
+          else
+          begin
+            while ByteType(FFilter, Length(FFilter)) = mbTrailByte do
+              Delete(FFilter, Length(FFilter), 1);
+            Delete(FFilter, Length(FFilter), 1);
+          end;
+        Key := #0;
+        Change;
+      end;
+  else // case
+    HasSelectedText(StartPos, EndPos); // This call sets StartPos and EndPos
+    if (ComboBox.Style < csDropDownList) and (StartPos < Length(FFilter))  then
+      SaveText := Copy(FFilter, 1, StartPos) + Key + Copy(FFilter, EndPos+1, Length(FFilter))
+    else
+      SaveText := FFilter + Key;
+    if ComboBox.AutoDropDown and not ComboBox.FIsDroppedDown then
+      ComboBox.ShowDropDown; // DroppedDown := True;
+
+    if IsLeadChar(Key) then
+    begin
+      if PeekMessage(Msg, Handle, 0, 0, PM_NOREMOVE) and (Msg.Message = WM_CHAR) then
+      begin
+        if SelectItem(SaveText + Char(Msg.wParam)) then
+        begin
+          PeekMessage(Msg, Handle, 0, 0, PM_REMOVE);
+          Key := #0
+        end;
+      end;
+    end
+    else
+    if SelectItem(SaveText) then
+      Key := #0
+  end; // case
+end;
+
+function TOvcTCComboEdit.SelectItem(const AnItem: string): Boolean;
+var
+  Idx: Integer;
+  ValueChange: Boolean;
+  ComboBox: TOvcTCComboBoxEdit;
+  I: Integer;
+begin
+  ComboBox := Parent as TOvcTCComboBoxEdit;
+
+  if Length(AnItem) = 0 then
+  begin
+    Result := False;
+    ComboBox.ItemIndex := -1;
+    Change;
+    exit;
+  end;
+  Idx := -1;
+  for I := 0 to ComboBox.Items.Count - 1 do
+    if AnsiStartsText(AnItem, ComboBox.Items[I]) then
+    begin
+      Idx := I;
+      Break;
+    end;
+
+  Result := (Idx <> -1);
+  if not Result then exit;
+  ValueChange := Idx <> ComboBox.ItemIndex;
+//  if AutoCloseUp and (Items.IndexOf(AnItem) <> -1) then
+//    SendMessage(Handle, CB_SHOWDROPDOWN, 0, 0);
+//  SendMessage(Handle, CB_SETCURSEL, Idx, 0);
+  if (ComboBox.Style in [csDropDown, csSimple]) then
+  begin
+    Text := AnItem + Copy(ComboBox.Items[Idx], Length(AnItem) + 1, MaxInt);
+    SendMessage(Handle, EM_SETSEL, Length(AnItem), Length(Text));
+  end
+  else
+  begin
+    ComboBox.ItemIndex := Idx;
+    FFilter := AnItem;
+  end;
+  if ValueChange then
+  begin
+    Click;
+//    Select;
+  end;
+end;
+
+procedure TOvcTCComboEdit.WMChar(var Msg: TWMKey);
+//var
+//  CurText : string;
+begin
+  if (Msg.CharCode <> 13) and     {Enter}
+     (Msg.CharCode <> 9) and      {Tab}
+     (Msg.CharCode <> 27) then    {Escape}
+    inherited;
+
+{  if (CellOwner as TOvcTCComboEdit).AutoAdvanceChar then
+    begin
+      CurText := Text;
+      if (length(CurText) >= MaxLength) then
+        begin
+          FillChar(Msg, sizeof(Msg), 0);
+          with Msg do
+            begin
+              Msg := WM_KEYDOWN;
+              CharCode := VK_RIGHT;
+            end;
+          CellOwner.SendKeyToTable(Msg);
+        end;
+    end;  }
+end;
+
+procedure TOvcTCComboEdit.WMGetDlgCode(var Msg: TMessage);
+begin
+    inherited;
+    if CellOwner.TableWantsTab then
+      Msg.Result := Msg.Result or DLGC_WANTTAB;
+    if CellOwner.TableWantsEnter then
+      Msg.Result := Msg.Result or DLGC_WANTALLKEYS;
+end;
+
+procedure TOvcTCComboEdit.WMKeyDown(var Msg: TWMKey);
+  procedure GetSelection(var S, E : word);
+    type
+      LH = packed record L, H : word; end;
+    var
+      GetSel : longint;
+    begin
+      GetSel := SendMessage(Handle, EM_GETSEL, 0, 0);
+      S := LH(GetSel).L;
+      E := LH(GetSel).H;
+    end;
+
+var
+  GridReply : TOvcTblKeyNeeds;
+  GridUsedIt : boolean;
+  SStart, SEnd : word;
+begin
+  GridUsedIt := false;
+  GridReply := otkDontCare;
+  if (CellOwner <> nil) then
+    GridReply := CellOwner.FilterTableKey(Msg);
+  case GridReply of
+    otkMustHave :
+      begin
+        CellOwner.SendKeyToTable(Msg);
+        GridUsedIt := true;
+      end;
+    otkWouldLike :
+      case Msg.CharCode of
+        VK_PRIOR, VK_NEXT, VK_UP, VK_DOWN :
+          begin
+            CellOwner.SendKeyToTable(Msg);
+            GridUsedIt := true;
+          end;
+        VK_LEFT :
+          if (CellOwner as TOvcTCCustomComboBox).AutoAdvanceLeftRight then
+            begin
+              GetSelection(SStart, SEnd);
+              if (SStart = SEnd) and (SStart = 0) then
+                begin
+                  CellOwner.SendKeyToTable(Msg);
+                  GridUsedIt := true;
+                end;
+            end;
+        VK_RIGHT :
+          if (CellOwner as TOvcTCCustomComboBox).AutoAdvanceLeftRight then
+            begin
+              GetSelection(SStart, SEnd);
+              if ((SStart = SEnd) or (SStart = 0)) and (SEnd = GetTextLen) then
+                begin
+                  CellOwner.SendKeyToTable(Msg);
+                  GridUsedIt := true;
+                end;
+            end;
+      end;
+  end;{case}
+
+  if not GridUsedIt then
+  begin
+    if Msg.CharCode = VK_F4 then
+    begin
+      PostMessage(Parent.Handle, WM_KEYDOWN, Msg.CharCode, Msg.KeyData);
+      GridUsedIt := True;
+    end;
+  end;
+
+  if not GridUsedIt then
+    inherited;
+end;
+
+procedure TOvcTCComboEdit.WMKillFocus(var Msg: TWMKillFocus);
+begin
+  inherited;
+  CellOwner.PostMessageToTable(ctim_KillFocus, Msg.FocusedWnd, 0);
+end;
+
+procedure TOvcTCComboEdit.WMSetFocus(var Msg: TWMSetFocus);
+begin
+  inherited;
+  CellOwner.PostMessageToTable(ctim_SetFocus, Msg.FocusedWnd, 0);
+end;
 
 end.
