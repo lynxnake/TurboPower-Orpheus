@@ -117,6 +117,7 @@ type
       FUserCommand        : TUserCommandEvent;      {user command event}
       FOnResizeColumn     : TColResizeEvent;
       FOnResizeRow        : TRowResizeEvent;
+      FOnGetRowAttributes : TRowAttrNotifyEvent; //SZ
 
       {other fields - even size}
       tbColNums : POvcTblDisplayArray;  {displayed column numbers}
@@ -154,6 +155,7 @@ type
       tbMustFinishLoading : boolean;    {finish loading data in CreateWnd}
       ProcessingVScrollMessage: Boolean;{Internal flag}
       FHasBorderWidth: Boolean;         {true if CellAttr.BorderWidth > 1 in any cell}
+
 
     protected
       {property read routines}
@@ -219,6 +221,8 @@ type
       procedure tbDrawCellBorder(RowInx: TRowNum; ColInx: TColNum; CellAttr: TOvcCellAttributes);
       procedure tbDrawCellBorders(RowInxStart, RowInxEnd : integer;
                                   ColInxStart, ColInxEnd : integer);
+      procedure tbDrawRowBorder(RowInx: TRowNum; RowAttr: TOvcRowAttributes);
+      procedure tbDrawRowBorders(RowInxStart, RowInxEnd : integer);
 
 { - HWnd changed to TOvcHWnd for BCB Compatibility }
       function  tbEditCellHasFocus(FocusHandle : TOvcHWnd{HWND}) : boolean;
@@ -272,6 +276,8 @@ type
       procedure DoEnteringRow(RowNum : TRowNum); virtual;
       procedure DoGetCellAttributes(RowNum : TRowNum; ColNum : TColNum;
                                     var CellAttr : TOvcCellAttributes); virtual;
+      procedure DoGetRowAttributes(RowNum : TRowNum;
+                                    var CellAttr : TOvcRowAttributes); virtual;
       procedure DoGetCellData(RowNum : TRowNum; ColNum : TColNum;
                               var Data : pointer;
                               Purpose : TOvcCellDataPurpose); virtual;
@@ -541,6 +547,9 @@ type
       property OnGetCellAttributes : TCellAttrNotifyEvent
          read FGetCellAttributes write FGetCellAttributes;
 
+      property OnGetRowAttributes : TRowAttrNotifyEvent
+         read FOnGetRowAttributes write FOnGetRowAttributes;
+
       property OnLeavingColumn : TColNotifyEvent
          read FLeavingColumn write FLeavingColumn;
 
@@ -593,6 +602,8 @@ type
       procedure GetDisplayedRowNums(var NA : TOvcTableNumberArray);
       procedure ResolveCellAttributes(RowNum : TRowNum; ColNum : TColNum;
                                       var CellAttr : TOvcCellAttributes); override;
+      procedure ResolveRowAttributes(RowNum : TRowNum;
+                                     var RowAttr : TOvcRowAttributes);
 
       {methods for setting cells, faster than setting row/col properties}
       procedure SetActiveCell(RowNum : TRowNum; ColNum : TColNum);
@@ -722,6 +733,7 @@ type
       property OnExit;
       property OnGetCellData;
       property OnGetCellAttributes;
+      property OnGetRowAttributes;
       property OnKeyDown;
       property OnKeyPress;
       property OnKeyUp;
@@ -1197,6 +1209,13 @@ procedure TOvcCustomTable.ResolveCellAttributes(RowNum : TRowNum; ColNum : TColN
       end;
     DoGetCellAttributes(RowNum, ColNum, CellAttr);
   end;
+
+procedure TOvcCustomTable.ResolveRowAttributes(RowNum: TRowNum;
+  var RowAttr: TOvcRowAttributes);
+begin
+  DoGetRowAttributes(RowNum, RowAttr);
+end;
+
 {====================================================================}
 
 
@@ -4723,6 +4742,7 @@ procedure TOvcCustomTable.tbDrawInvalidCells(InvCells : TOvcCellArray);
       tbDrawCells(GR.Top, GR.Bottom, GR.Left, GR.Right);
       DoPaintUnusedArea;
       tbDrawCellBorders(GR.Top, GR.Bottom, GR.Left, GR.Right);
+      tbDrawRowBorders(GR.Top, GR.Bottom);
       InvCells.Clear;
       Exit;
     end;
@@ -4852,6 +4872,7 @@ procedure TOvcCustomTable.tbDrawRow(RowInx : integer; ColInxStart, ColInxEnd : i
     GridPen   : TOvcGridPen;
     BrushColor: TColor;
     CellAttr  : TOvcCellAttributes;
+    RowAttr   : TOvcRowAttributes;
     DestRect  : TRect;
     RowIsLocked : boolean;
     ColIsLocked : boolean;
@@ -4875,6 +4896,13 @@ procedure TOvcCustomTable.tbDrawRow(RowInx : integer; ColInxStart, ColInxEnd : i
     {set up the cell attribute record}
     FillChar(CellAttr, sizeof(CellAttr), 0);
     CellAttr.caFont := tbCellAttrFont;
+
+    {SZ: set up the row attribute record}
+    FillChar(RowAttr, SizeOf(RowAttr), 0);
+    RowAttr.caBorderColor := clOvcTableDefault;
+    ResolveRowAttributes(RowNum, RowAttr);
+    if RowAttr.caBorderWidth > 1 then
+      FHasBorderWidth := True; // from now on we must invalid the entire visible area
 
     {for all required cells}
     for ColInx := ColInxEnd downto ColInxStart do
@@ -5018,7 +5046,79 @@ procedure TOvcCustomTable.tbDrawRow(RowInx : integer; ColInxStart, ColInxEnd : i
               end;
          end;
      end;
+
+    //SZ: Draw Row Border
+    if (RowAttr.caBorderColor <> clOvcTableDefault) or (RowAttr.caBorderStyle <> psSolid) then
+      tbDrawRowBorder(RowInx, RowAttr);
   end;
+
+procedure TOvcCustomTable.tbDrawRowBorder(RowInx: TRowNum; RowAttr: TOvcRowAttributes);
+var
+  RowOfs    : integer;
+  RowHt     : integer;
+//  RowNum    : TRowNum;
+//  ColNum    : TColNum;
+  ColOfs    : integer;
+  ColWd     : integer;
+//  DestRect  : TRect;
+begin
+  with tbRowNums^ do
+    begin
+//      RowNum := Ay[RowInx].Number;
+      RowOfs := Ay[RowInx].Offset;
+      RowHt := Ay[succ(RowInx)].Offset - RowOfs;
+    end;
+    with tbColNums^ do
+      begin
+//        ColNum := Ay[ColInx].Number;
+        ColOfs := Ay[0].Offset;
+        ColWd := Ay[Count].Offset - ColOfs;
+      end;
+
+  if (RowAttr.caBorderColor <> clOvcTableDefault) or (RowAttr.caBorderStyle <> psSolid) then
+  begin
+    if RowAttr.caBorderColor <> clOvcTableDefault then
+      Canvas.Pen.Color := RowAttr.caBorderColor
+    else
+      Canvas.Pen.Color := GridPenSet.NormalGrid.NormalColor;
+    Canvas.Pen.Width := RowAttr.caBorderWidth;
+    Canvas.Pen.Style := RowAttr.caBorderStyle;
+    Canvas.MoveTo(ColOfs, RowOfs);
+    Canvas.LineTo(ColOfs + ColWd - 1, RowOfs);
+    Canvas.LineTo(ColOfs + ColWd - 1, RowOfs + RowHt - 1);
+    Canvas.LineTo(ColOfs, RowOfs + RowHt - 1);
+    Canvas.LineTo(ColOfs, RowOfs);
+  end;
+end;
+
+procedure TOvcCustomTable.tbDrawRowBorders(RowInxStart, RowInxEnd: Integer);
+var
+  RowInx: TRowNum;
+  RowAttr: TOvcRowAttributes;
+  RowNum    : TRowNum;
+  ColNum    : TColNum;
+begin
+  {Delphi bug fix - refresh the canvas handle to force brush to be recreated}
+  Canvas.Refresh;
+  {draw cells that need it}
+
+  if (RowInxStart < 0) or (RowInxEnd < 0) then
+    Exit;
+
+  FillChar(RowAttr, SizeOf(RowAttr), 0);
+
+  with tbRowNums^ do
+    for RowInx := RowInxStart to RowInxEnd do
+      begin
+        RowAttr.caBorderColor := clOvcTableDefault;
+        RowAttr.caBorderStyle := psSolid;
+        RowAttr.caBorderWidth := 1;
+        RowNum := tbRowNums^.Ay[RowInx].Number;
+        ResolveRowAttributes(RowNum, RowAttr);
+        tbDrawRowBorder(RowInx, RowAttr);
+      end;
+end;
+
 {--------}
 procedure TOvcCustomTable.tbDrawSizeLine;
   var
@@ -5127,7 +5227,10 @@ procedure TOvcCustomTable.Paint;
           DoPaintUnusedArea;
 
         if FHasBorderWidth then // draw cell border if borderwidth > 1; otherwise drawn in tbDrawRow
+        begin
           tbDrawCellBorders(GR.Top, GR.Bottom, GR.Left, GR.Right);
+          tbDrawRowBorders(GR.Top, GR.Bottom);
+        end;
 
         tbDrawActiveCell;
       end
@@ -5299,6 +5402,14 @@ procedure TOvcCustomTable.DoGetCellData(RowNum  : TRowNum; ColNum : TColNum;
 {$ENDIF}
     end;
   end;
+procedure TOvcCustomTable.DoGetRowAttributes(RowNum: TRowNum;
+  var CellAttr: TOvcRowAttributes);
+begin
+    if ((ComponentState * [csLoading, csDestroying]) = []) and
+       Assigned(FOnGetRowAttributes) then
+      FOnGetRowAttributes(Self, RowNum, CellAttr);
+end;
+
 {--------}
 procedure TOvcCustomTable.DoLeavingColumn(ColNum : TColNum);
   begin

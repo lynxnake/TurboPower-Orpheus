@@ -200,6 +200,12 @@ type
     caBorderWidth : Integer;         {..Border Thickness}
   end;
 
+  TOvcRowAttributes = packed record // SZ attributes for row border 15.02.2011
+    caBorderColor : TColor;          {..Border Color - clOvcTableDefault}
+    caBorderStyle : TPenStyle;       {..Border Style (solid, dotted, ...}
+    caBorderWidth : Integer;         {..Border Thickness}
+  end;
+
 
 {---Table cell ancestor---}
   TOvcTableCellAncestor = class(TComponent)
@@ -320,6 +326,8 @@ type
   TCellAttrNotifyEvent = procedure (Sender : TObject;
                                     RowNum : TRowNum; ColNum : TColNum;
                                     var CellAttr : TOvcCellAttributes) of object;
+  TRowAttrNotifyEvent = procedure (Sender : TObject; RowNum : TRowNum;
+                                    var RowAttr : TOvcRowAttributes) of object;
   TCellPaintNotifyEvent = procedure (Sender : TObject;
                                      TableCanvas : TCanvas;
                                const CellRect    : TRect;
