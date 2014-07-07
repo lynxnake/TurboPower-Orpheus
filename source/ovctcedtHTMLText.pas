@@ -52,6 +52,7 @@ type
     FAllowedFontStyles: TFontStyles;
     function GetRichText: string;
     procedure SetRichText(const Value: string);
+    function GetHTMLTextFrom(Doc: ITextDocument): string;
     function GetHTMLText: string;
     procedure SetHTMLText(const Value: string);
     procedure SetAllowedFontStyles(const Value: TFontStyles);
@@ -59,12 +60,13 @@ type
   protected
     procedure KeyPress(var Key: Char); override;
     procedure KeyDown(var Key: Word; Shift: TShiftState); override;
+    procedure PasteRichtextFromClipboard;
   public
     constructor Create(AOwner: TComponent); override;
     property RichText: string read GetRichText write SetRichText;
     property HTMLText: string read GetHTMLText write SetHTMLText;
     property PlainText: string read GetPlainText;
-    class procedure FillIDocument(const Doc: ITextDocument; HtmlText: string; AFont: TFont = nil);
+    class procedure FillIDocument(const Doc: ITextDocument; HtmlText: string; InsertAtCurPos: Boolean; AFont: TFont = nil);
     function GetIDoc: ITextDocument;
   published
     property AllowedFontStyles: TFontStyles read FAllowedFontStyles write SetAllowedFontStyles default [fsBold, fsItalic, fsUnderline];
@@ -576,7 +578,7 @@ begin
   Painter := TOvcRTFPainter.Create;
   try
     Doc := Painter.GetDoc;  // must store GetDoc in a temporary variable so it can be set to nil before Painter.Free
-    TOvcTCHtmlTextEdit.FillIDocument(Doc, sBuffer, CellAttr.caFont);
+    TOvcTCHtmlTextEdit.FillIDocument(Doc, sBuffer, False, CellAttr.caFont);
     Doc := nil;
 
     inherited tcPaint(TableCanvas, CellRect, RowNum, ColNum, CellAttr, Data);    {blank out the cell - must be done after loading the document to avoid flicker }
@@ -617,7 +619,7 @@ begin
 end;
 
 class procedure TOvcCustomHtmlTextEditBase.FillIDocument(
-  const Doc: ITextDocument; HtmlText: string; AFont: TFont);
+  const Doc: ITextDocument; HtmlText: string; InsertAtCurPos: Boolean; AFont: TFont);
 var
   SB: TStringBuilder;
   State: (normal, html, specialchar);
@@ -677,7 +679,8 @@ begin
   HtmlText := AnsiReplaceText(HtmlText, #13#10, #13);
   Doc.Freeze;
   try
-    Doc.New;
+    if not InsertAtCurPos then
+      Doc.New;
     SB := TStringBuilder.Create;
     try
       state := normal;
@@ -720,18 +723,25 @@ end;
 
 function TOvcCustomHtmlTextEditBase.GetHTMLText: string;
 var
-  StringBuilder: TStringBuilder;
-  OldStyle, NewStyle: TFontStyles;
   ole: IRichEditOle;
   Doc: ITextDocument;
+begin
+  SendMessage(Handle, EM_GETOLEINTERFACE, 0, LPARAM(@ole));
+  Doc := ole as ITextDocument;
+
+  Result := GetHTMLTextFrom(Doc);
+end;
+
+function TOvcCustomHtmlTextEditBase.GetHTMLTextFrom(Doc: ITextDocument): string;
+var
+  StringBuilder: TStringBuilder;
+  OldStyle, NewStyle: TFontStyles;
+
   Range: ITextRange;
   start, eof, n: Integer;
   Font: ITextFont;
   tmp: string;
 begin
-  SendMessage(Handle, EM_GETOLEINTERFACE, 0, LPARAM(@ole));
-  Doc := ole as ITextDocument;
-
   // Get total length
   Range := Doc.Range(0, 0);
   Range.Expand(tomStory);
@@ -846,13 +856,14 @@ begin
       'V':
         if not ReadOnly then
         begin
-          tmp := Null;
-          Doc := GetIDoc;
-          if Clipboard.AsText <> '' then
-          begin    // clear formatting
-            GetIDoc.Selection.Text := Clipboard.AsText;
-            Doc.Selection.Move(tomCharacter, 1);
-          end;
+          PasteRichTextFromClipboard;
+//          tmp := Null;
+//          Doc := GetIDoc;
+//          if Clipboard.AsText <> '' then
+//          begin    // clear formatting
+//            GetIDoc.Selection.Text := Clipboard.AsText;
+//            Doc.Selection.Move(tomCharacter, 1);
+//          end;
           Key := 0;
         end;
     end;
@@ -910,6 +921,34 @@ begin
   inherited;
 end;
 
+procedure TOvcCustomHtmlTextEditBase.PasteRichtextFromClipboard;
+var
+  Doc: ITextDocument;
+  tmp: OleVariant;
+  Painter: TOvcRTFPainter;
+  tmpHTML: string;
+  TargetDoc: ITextDocument;
+  Range: ITextRange;
+begin
+  // Paste richtext to the RTF Painter object (so we have a rtf doc that does not need to be in a visible control on the screen)
+  Painter := TOvcRTFPainter.Create;
+  try
+    Doc := Painter.GetDoc;
+    tmp := Null;
+    Doc.Selection.Paste(tmp, 0);
+    // Get as html in order to clear formatting that is not allowed
+    tmpHtml := GetHTMLTextFrom(Doc);
+
+    // Paste text
+    TargetDoc := GetIDoc;
+//    TargetDoc.Undo(tomSuspend); //SZ: this disables undo entirely - not good; BeginEditCollection is not implemented
+    FillIDocument(TargetDoc, tmpHTML, True, Font);
+//    TargetDoc.Undo(tomResume);
+  finally
+    Painter.Free;
+  end;
+end;
+
 procedure TOvcCustomHtmlTextEditBase.SetAllowedFontStyles(
   const Value: TFontStyles);
 begin
@@ -929,7 +968,7 @@ begin
     Doc := ole as ITextDocument;
 
     Doc.Freeze;
-    FillIDocument(Doc, Value, Font);
+    FillIDocument(Doc, Value, False, Font);
     SelStart := 0;
     SelectAll;
     Doc.Unfreeze;
