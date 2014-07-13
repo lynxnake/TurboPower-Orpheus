@@ -184,6 +184,7 @@ type
     property AutoCompleteDelay: Cardinal read FAutoCompleteDelay write FAutoCompleteDelay default 500;
     property AutoComplete: Boolean read FAutoComplete write FAutoComplete default True;
     property AutoDropDown: Boolean read FAutoDropDown write SetAutoDropDown;
+    property Canvas;
   end;
 
   TOvcTCCustomComboBox = class(TOvcTCBaseString)
