@@ -1101,7 +1101,7 @@ begin
                   begin
                     FEditControl.Text := Caption; FItemIndex := FItems.IndexOf(Text);
                   end;
-    csDropDownList: ItemIndex := FItems.IndexOf(Text);
+    csDropDownList, csOwnerDrawFixed, csOwnerDrawVariable: ItemIndex := FItems.IndexOf(Text);
   end;
 end;
 
@@ -1354,7 +1354,7 @@ begin
   if (Button = mbLeft) then
     if not FIsDroppedDown and (GetTickCount - FCloseTime > GetDoubleClickTime) then
     begin
-      if ((FStyle = csDropDownList) or (FStyle = csDropDown) and (X > ClientWidth - OvcComboBoxButtonWidth)) then
+      if (FStyle in [csDropDownList, csOwnerDrawFixed, csOwnerDrawVariable]) or ((FStyle = csDropDown) and (X > ClientWidth - OvcComboBoxButtonWidth)) then
         ShowDropDown
       else
         ShowEdit;
@@ -1367,6 +1367,7 @@ end;
 procedure TOvcTCComboBoxEdit.Paint;
 var
   LText: string;
+  LState: TOwnerDrawState;
 begin
   inherited;
 
@@ -1383,7 +1384,21 @@ begin
   DrawBackground(Canvas, ClientRect, FCellAttr, Focused and not FIsDroppedDown and not Assigned(FEditControl));
   if not Assigned(FEditControl) then
   begin
-    DrawText(Canvas, ClientRect, FCellAttr, Focused and not FIsDroppedDown, LText);
+    if Style in [csOwnerDrawFixed, csOwnerDrawVariable] then
+    begin
+       // (odSelected, odGrayed, odDisabled, odChecked, odFocused, odDefault, odHotLight, odInactive, odNoAccel, odNoFocusRect, odReserved1, odReserved2, odComboBoxEdit)
+      LState := [];
+      if Focused then
+        Include(LState, odFocused);
+      if ItemIndex <> -1 then
+        Include(LState, odSelected);
+      if not Enabled then
+        Include(LState, odDisabled);
+      if Assigned(FOnDrawItem) then
+        FOnDrawItem(Self, ItemIndex, ClientRect, LState);
+    end
+    else
+      DrawText(Canvas, ClientRect, FCellAttr, Focused and not FIsDroppedDown, LText);
   end;
   DrawButton(Canvas, ClientRect);
 end;
@@ -1501,6 +1516,14 @@ var
 begin
   UpdateEditPosition;
   P := ClientToScreen(Point(0, Height));
+  case Style of
+    csDropDown, csSimple, csDropDownList: FListBox.Style := lbStandard;
+    csOwnerDrawFixed: FListBox.Style := lbOwnerDrawFixed;
+    csOwnerDrawVariable: FListBox.Style := lbOwnerDrawVariable;
+  end;
+
+  FListBox.OnDrawItem := FOnDrawItem;
+  FListBox.OnMeasureItem := FOnMeasureItem;
   FListBox.Items.BeginUpdate;
   FInUpdate := True;
   try
