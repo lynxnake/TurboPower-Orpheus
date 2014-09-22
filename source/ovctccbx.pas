@@ -1477,7 +1477,12 @@ end;
 
 procedure TOvcTCComboBoxEdit.SetItemIndex(const Value: Integer);
 begin
-  FItemIndex := Value;
+  if FItemIndex <> Value then
+  begin
+    FItemIndex := Value;
+    if Assigned(FOnChange) then
+      FOnChange(Self);
+  end;
   if (Style = csDropDown) and Assigned(FEditControl) then
   begin
     if InRange(Value, 0, FItems.Count - 1) then
@@ -1635,6 +1640,7 @@ end;
 
 procedure TOvcTCComboBoxEdit.WMKeyDown(var Msg: TWMKey);
 begin
+  inherited;
   if Msg.CharCode = VK_F4 then
     ShowDropDown
   else if Assigned(FEditControl) then
