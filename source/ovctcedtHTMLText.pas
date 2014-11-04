@@ -794,12 +794,12 @@ end;
 function TOvcCustomHtmlTextEditBase.GetPlainText: string;
 var
   StringBuilder: TStringBuilder;
-  OldStyle, NewStyle: TFontStyles;
+//  OldStyle, NewStyle: TFontStyles;
   ole: IRichEditOle;
   Doc: ITextDocument;
   Range: ITextRange;
   start, eof, n: Integer;
-  Font: ITextFont;
+//  Font: ITextFont;
   tmp: string;
 begin
   SendMessage(Handle, EM_GETOLEINTERFACE, 0, LPARAM(@ole));
@@ -844,9 +844,9 @@ end;
 
 procedure TOvcCustomHtmlTextEditBase.KeyDown(var Key: Word; Shift: TShiftState);
 // disable some shortcuts
-var
-  Doc: ITextDocument;
-  tmp: OleVariant;
+//var
+//  Doc: ITextDocument;
+//  tmp: OleVariant;
 begin
   if Shift = [ssCtrl] then
   begin
@@ -928,7 +928,7 @@ var
   Painter: TOvcRTFPainter;
   tmpHTML: string;
   TargetDoc: ITextDocument;
-  Range: ITextRange;
+//  Range: ITextRange;
 begin
   // Paste richtext to the RTF Painter object (so we have a rtf doc that does not need to be in a visible control on the screen)
   Painter := TOvcRTFPainter.Create;

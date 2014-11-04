@@ -1,3 +1,8 @@
+Revision 315: (2104/11/04 Armin Biernaczyk)
+- ovc.inc
+  New Symbol 'VERSIONXE7' for Delphi XE7
+Added support for Delphi XE7
+
 Revision 287: (2013/07/14 Armin Biernaczyk)
 - ovcedit.pas
   New internal variable 'edeRows' forces the editor to scroll the text when you enter

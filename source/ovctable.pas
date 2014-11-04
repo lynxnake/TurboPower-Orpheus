@@ -5096,7 +5096,6 @@ var
   RowInx: TRowNum;
   RowAttr: TOvcRowAttributes;
   RowNum    : TRowNum;
-  ColNum    : TColNum;
 begin
   {Delphi bug fix - refresh the canvas handle to force brush to be recreated}
   Canvas.Refresh;
