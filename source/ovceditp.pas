@@ -204,6 +204,7 @@ type
     procedure FixMarkDeletedPara(var M : TMarker; N : LongInt);
     procedure FixMarkerDeletedPara(var M : TMarker; N : LongInt);
     procedure FixMarkersDeletedPara(Editor : TOvcEditBase; N : LongInt);
+    procedure FixMarkersDeletedParas(Editor : TOvcEditBase; N1,N2 : LongInt);
     procedure FixMarkDeletedText(var M : TMarker; N : LongInt; Pos, Count : Integer);
     procedure FixMarkerDeletedText(var M : TMarker; N : LongInt; Pos, Count : Integer);
     procedure FixMarkersDeletedText(Editor : TOvcEditBase; N : LongInt; Pos, Count : Integer);
@@ -423,10 +424,10 @@ begin
            (especially when deleting a lot of paragraphs); so
            just set FixMarkers=True for the last paragraph }
     FixMarkers := False;
-    for P := Para2-1 downto Para1+1 do
+    for P := Para2-1 downto Para1 do
       DeletePara(Editor, Para1);
     FixMarkers := True;
-    DeletePara(Editor, Para1);
+    FixMarkersDeletedParas(Editor,Para1,Para2-1);
   end else begin
     {delete text in 1st paragraph}
     I := Succ(ParaLength(Para1)-Pos1);
@@ -439,13 +440,11 @@ begin
 
     {now scan and delete all intervening paragraphs}
     if Para2-1 >= Para1+1 then begin
-      if Para2-1 > Para1+1 then begin
-        FixMarkers := False;
-        for P := Para2-1 downto Para1+2 do
-          DeletePara(Editor, Para1+1);
-        FixMarkers := True;
-      end;
-      DeletePara(Editor, Para1+1);
+      FixMarkers := False;
+      for P := Para2-1 downto Para1+1 do
+        DeletePara(Editor, Para1+1);
+      FixMarkers := True;
+      FixMarkersDeletedParas(Editor,Para1+1,Para2-1);
     end;
 
     {splice}
@@ -683,6 +682,19 @@ begin
     for I := 0 to edMaxMarkers-1 do
       FixMarkerDeletedPara(Markers[I], N);
     TOvcCustomEditor(Editor).edUpdateOnDeletedPara(N);
+  end;
+end;
+
+procedure TOvcParaList.FixMarkersDeletedParas(Editor : TOvcEditBase; N1,N2 : LongInt);
+var
+  I : Integer;
+  N : LongInt;
+begin
+  if FixMarkers then begin
+    for I := 0 to edMaxMarkers-1 do
+      for N := N1 to N2 do
+        FixMarkerDeletedPara(Markers[I], N1);
+    TOvcCustomEditor(Editor).edUpdateOnDeletedPara(N1);
   end;
 end;
 

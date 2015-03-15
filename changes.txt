@@ -1,4 +1,10 @@
-Revision 315: (2104/11/04 Armin Biernaczyk)
+Revision 316: (2015/03/15 Armin Biernaczyk)
+- ovceditp.pas
+  Bugfix: When deleting several lines of text in OvcEditor, the markers were not
+  adjusted properly; depending on their position this led to an EInvalidLineOrPara-
+  Exception.
+
+Revision 315: (2014/11/04 Armin Biernaczyk)
 - ovc.inc
   New Symbol 'VERSIONXE7' for Delphi XE7
 Added support for Delphi XE7
@@ -305,7 +311,7 @@ Revision 200: (2011/03/25 Armin Biernaczyk)
 - ovccal.pas
   Bugfix in TOvcCustomCalendar.SetCalendarDate
 - ovcintl.pas
-  - removed internal assembler function GetMaxWord 
+  - removed internal assembler function GetMaxWord
   - re-coded TOvcIntlSup.isMergeIntoPicture to fix some bugs and make it easier to read.
     (methods like 'DateToDateString' did not work properly due to bugs in this method)
   - Bugfix in TOvcIntlSup.MonthStringToMonth
