@@ -234,6 +234,7 @@ type
       {Editing base methods to override}
       function CanSaveEditedData(SaveValue : boolean) : boolean; virtual;
       function CanStopEditing(SaveValue : boolean) : boolean; {for Orpheus 1.0 compatibility}
+      function ShouldStartEditingWithCharCode(CharCode: Word): Boolean; virtual;
       function FilterTableKey(var Msg : TWMKey) : TOvcTblKeyNeeds; virtual;
       {.Z+}
       procedure PostMessageToTable(Msg, wParam, lParam : longint);
@@ -753,6 +754,15 @@ procedure TOvcBaseTableCell.SetTextStyle(TS : TOvcTextStyle);
         tcDoCfgChanged;
       end;
   end;
+{--------}
+function TOvcBaseTableCell.ShouldStartEditingWithCharCode(
+  CharCode: Word): Boolean;
+// SZ added
+// the combobox should drop down when pressing F4
+begin
+  Result := False; // to be overridden by descentants
+end;
+
 {--------}
 procedure TOvcBaseTableCell.SaveEditedData(Data : pointer);
 begin

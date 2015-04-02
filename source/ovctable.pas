@@ -5710,6 +5710,8 @@ procedure TOvcCustomTable.WMKeyDown(var Msg : TWMKey);
   var
     Cmd           : word;
     ShiftFlags    : byte;
+    ShouldStartEdit: Boolean;
+    TmpCell: TOvcBaseTableCell;
   begin
     inherited;
 
@@ -5742,21 +5744,29 @@ procedure TOvcCustomTable.WMKeyDown(var Msg : TWMKey);
       Cmd := Controller.EntryCommands.TranslateUsing([tbCmdTable^], TMessage(Msg));
 
     if InEditingState then
-      begin
-        if (not (otoAlwaysEditing in Options)) and
-           ((Cmd = ccTableEdit) or (Msg.CharCode = VK_ESCAPE)) then
-          begin
-            if not StopEditingState(Msg.CharCode <> VK_ESCAPE) then
-              begin
-                inherited;
-                Exit;
-              end;
-          end
-      end
+    begin
+      if (not (otoAlwaysEditing in Options)) and
+         ((Cmd = ccTableEdit) or (Msg.CharCode = VK_ESCAPE)) then
+        begin
+          if not StopEditingState(Msg.CharCode <> VK_ESCAPE) then
+            begin
+              inherited;
+              Exit;
+            end;
+        end
+    end
     else {not editing}
+    begin
+      // SZ: Ask the cell if it wants to start editing when a certain key is pressed
+      //     for example, F4 should drop down a combobox
+      ShouldStartEdit := False;
+      TmpCell := tbFindCell(ActiveRow, ActiveCol);
+      if Assigned(TmpCell) then
+        ShouldStartEdit := TmpCell.ShouldStartEditingWithCharCode(Msg.CharCode);
+
       if (Cmd = ccTableEdit) or
          ((Cmd > ccLastCmd) and (Cmd < ccUserFirst) and
-          ((Msg.CharCode = VK_SPACE) or
+          ((Msg.CharCode = VK_SPACE) or ShouldStartEdit or
            ((VK_0 <= Msg.CharCode) and (Msg.CharCode <= VK_DIVIDE)) or
             (Msg.CharCode >= $BA))) then
         begin
@@ -5764,6 +5774,7 @@ procedure TOvcCustomTable.WMKeyDown(var Msg : TWMKey);
           if (Cmd <> ccTableEdit) then
             PostMessage(Handle, ctim_StartEditKey, Msg.CharCode, Msg.KeyData);
         end;
+    end;
 
     tbIsKeySelecting := false;
 {

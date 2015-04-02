@@ -142,6 +142,7 @@ type
     procedure DropDownClose(Sender: TObject; var Action: TCloseAction);
     procedure ListBoxClick(Sender: TObject);
     procedure ListBoxMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
+    procedure ListBoxKeyPress(Sender: TObject; var Key: Char);
     class procedure DrawText(Canvas: TCanvas; const CellRect: TRect; CellAttr: TOvcCellAttributes; Focused: Boolean; AText: string);
     procedure DrawBackground(Canvas: TCanvas; const CellRect: TRect; CellAttr: TOvcCellAttributes; Focused: Boolean);
     class procedure DrawButton(Canvas: TCanvas; const CellRect: TRect);
@@ -185,6 +186,16 @@ type
     property AutoComplete: Boolean read FAutoComplete write FAutoComplete default True;
     property AutoDropDown: Boolean read FAutoDropDown write SetAutoDropDown;
     property Canvas;
+  end;
+
+  TOvcTCPopupListBox = class(TListBox)
+  private
+    FMouseIsDown: Boolean;
+  protected
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X: Integer;
+      Y: Integer); override;
+    procedure MouseUp(Button: TMouseButton; Shift: TShiftState; X: Integer;
+      Y: Integer); override;
   end;
 
   TOvcTCCustomComboBox = class(TOvcTCBaseString)
@@ -290,6 +301,7 @@ type
                            Data : pointer); override;
     procedure StopEditing(SaveValue : boolean;
                           Data : pointer); override;
+    function ShouldStartEditingWithCharCode(CharCode: Word): Boolean; override;
   end;
 
   TOvcTCComboBox = class(TOvcTCCustomComboBox)
@@ -959,6 +971,15 @@ begin
     FTable.Invalidate;
 end;
 
+function TOvcTCCustomComboBox.ShouldStartEditingWithCharCode(
+  CharCode: Word): Boolean;
+begin
+  if CharCode = VK_F4 then // Drop down when pressing F4
+    Result := True
+  else
+    Result := inherited;
+end;
+
 {--------}
 procedure TOvcTCCustomComboBox.StartEditing(RowNum : TRowNum; ColNum : TColNum;
                                            CellRect : TRect;
@@ -1126,7 +1147,7 @@ begin
   FDropDown.OnClose := DropDownClose;
   FDropDown.Color := clBlack;
   FItems := TStringList.Create;
-  FListBox := TListBox.Create(FDropDown);
+  FListBox := TOvcTCPopupListBox.Create(FDropDown);
   FListBox.OnClick := ListBoxClick;
   FListBox.Align := alClient;
   {$IFDEF VERSION2009}
@@ -1140,6 +1161,7 @@ begin
   FListBox.Parent := FDropDown;
 //  FListBox.WantDblClicks := False;
   FListBox.OnMouseMove := ListBoxMouseMove;
+  FListBox.OnKeyPress := ListBoxKeyPress;
   FDropDown.ActiveControl := FListBox;
   TabStop := True;
   Style := csDropDown;
@@ -1327,8 +1349,19 @@ end;
 procedure TOvcTCComboBoxEdit.ListBoxClick(Sender: TObject);
 begin
   ItemIndex := FListBox.ItemIndex;
-  FDropDown.Close;
+  if (FListBox as TOvcTCPopupListBox).FMouseIsDown then // only close the popup if the click commes from a mouse event
+    FDropDown.Close;
   FCloseTime := 0;
+end;
+
+procedure TOvcTCComboBoxEdit.ListBoxKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = #13 then // close the popup when pressing enter
+  begin
+    ItemIndex := FListBox.ItemIndex;
+    FDropDown.Close;
+    FCloseTime := 0;
+  end;
 end;
 
 procedure TOvcTCComboBoxEdit.ListBoxMouseMove(Sender: TObject;
@@ -1922,6 +1955,23 @@ procedure TOvcTCComboEdit.WMSetFocus(var Msg: TWMSetFocus);
 begin
   inherited;
   CellOwner.PostMessageToTable(ctim_SetFocus, Msg.FocusedWnd, 0);
+end;
+
+{ TOvcTCPopupListBox }
+
+procedure TOvcTCPopupListBox.MouseDown(Button: TMouseButton; Shift: TShiftState;
+  X, Y: Integer);
+begin
+  FMouseIsDown := True;
+  inherited;
+
+end;
+
+procedure TOvcTCPopupListBox.MouseUp(Button: TMouseButton; Shift: TShiftState;
+  X, Y: Integer);
+begin
+  inherited;
+  FMouseIsDown := False;
 end;
 
 end.
