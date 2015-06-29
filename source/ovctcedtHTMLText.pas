@@ -481,6 +481,8 @@ procedure TOvcTCCustomHTMLText.StartEditing(RowNum : TRowNum; ColNum : TColNum;
     with FEdit do
       begin
         Parent := FTable;
+        Font := CellAttr.caFont;    // the font must be set before setting FEdit.HTMLText, otherwise formatting will be lost on start editing
+        Font.Color := CellAttr.caFontColor;
         if Data=nil then
           Text := ''
         else case FDataStringType of
@@ -489,8 +491,6 @@ procedure TOvcTCCustomHTMLText.StartEditing(RowNum : TRowNum; ColNum : TColNum;
           tstString:      FEdit.HTMLText := PChar(PString(Data)^); // SetTextBuf(PChar(PString(Data)^))
         end;
         Color := CellAttr.caColor;
-        Font := CellAttr.caFont;
-        Font.Color := CellAttr.caFontColor;
         MaxLength := Self.MaxLength;
         WantReturns := Self.WantReturns;
         WantTabs := Self.WantTabs;
