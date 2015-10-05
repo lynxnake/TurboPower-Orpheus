@@ -1,3 +1,8 @@
+Revision 323: (2015/10/05 Armin Biernaczyk)
+- ovc.inc
+  Added defines for VER300 (Delphi 10 Seattle)
+Added support for Delphi X10 Seattle
+
 Revision 316: (2015/03/15 Armin Biernaczyk)
 - ovceditp.pas
   Bugfix: When deleting several lines of text in OvcEditor, the markers were not
