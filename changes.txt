@@ -1,7 +1,12 @@
+Revision 325: (2016/08/25 Armin Biernaczyk)
+- ovc.inc
+  Added defines for VER310 (Delphi 10.1 Berlin)
+Added support for Delphi 10.1 Berlin
+
 Revision 323: (2015/10/05 Armin Biernaczyk)
 - ovc.inc
   Added defines for VER300 (Delphi 10 Seattle)
-Added support for Delphi X10 Seattle
+Added support for Delphi 10 Seattle
 
 Revision 316: (2015/03/15 Armin Biernaczyk)
 - ovceditp.pas

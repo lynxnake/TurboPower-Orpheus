@@ -118,7 +118,7 @@ const
      // an empty  line
      (l1:8; c1: 1; l2:9; c2: 1; s:#13#10));
 var
-  i: Integer;
+  i, j: Integer;
   s: string;
 begin
   { Initialize the Editor and add 'Content'. As we are going to copy text containing
@@ -136,9 +136,19 @@ begin
   for i := Low(Copies) to High(Copies) do begin
     with Copies[i] do
       FForm.OvcEditor.SetSelection(l1,c1,l2,c2,true);
-    FForm.OvcEditor.CopyToClipboard;
-    s := Clipboard.AsText;
-    CheckEqualsString(s, Copies[i].s);
+    j := 5;
+    repeat
+      try
+        Clipboard.Clear;
+        FForm.OvcEditor.CopyToClipboard;
+        s := Clipboard.AsText;
+        CheckEqualsString(s, Copies[i].s);
+        j := 0;
+      except
+        Dec(j);
+        if j=0 then raise;
+      end;
+    until j=0;
   end;
 end;
 
@@ -161,7 +171,7 @@ const
      (l1:2; c1:17; l2:9; c2: 18; s:'q'#13'1'#13'1'#13'1'#13'+'#13'+'#13' '#13'1'));
 
 var
-  i: Integer;
+  i, j: Integer;
   s: string;
 begin
   { Initialise the editor and add 'Content'. As we are going to copy text containing
@@ -179,9 +189,19 @@ begin
     with Copies[i] do
       FForm.OvcEditor.SetSelection(l1,c1,l2,c2,true);
     TPOvcEditor(FForm.OvcEditor).edRectSelect := True;
-    FForm.OvcEditor.CopyToClipboard;
-    s := Clipboard.AsText;
-    CheckEqualsString(s, Copies[i].s);
+    j := 5;
+    repeat
+      try
+        Clipboard.Clear;
+        FForm.OvcEditor.CopyToClipboard;
+        s := Clipboard.AsText;
+        CheckEqualsString(s, Copies[i].s);
+        j := 0;
+      except
+        Dec(j);
+        if j=0 then raise;
+      end;
+    until j=0;
   end;
 end;
 
