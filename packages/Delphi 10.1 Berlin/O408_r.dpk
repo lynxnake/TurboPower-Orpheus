@@ -207,9 +207,14 @@ contains
   o32WideCharSet in '..\..\source\o32WideCharSet.pas',
   ovcBidi in '..\..\source\ovcBidi.pas',
   ovcThemes in '..\..\source\ovcThemes.pas',
-  ovcRTF_IText in '..\..\source\ovcRTF_IText.pas',
+  ovctcedtHTMLText in '..\..\source\ovctcedtHTMLText.pas',
+  ovctcedtTextFormatBar in '..\..\source\ovctcedtTextFormatBar.pas' {ovcTextFormatBar},
   ovctccheckcbx in '..\..\source\ovctccheckcbx.pas',
-  OvcTCHeaderExtended in '..\..\source\OvcTCHeaderExtended.pas';
+  OvcTCHeaderExtended in '..\..\source\OvcTCHeaderExtended.pas',
+  ovcRTF_TOM in '..\..\source\ovcRTF_TOM.pas',
+  ovcRTF_Paint in '..\..\source\ovcRTF_Paint.pas',
+  ovcRTF_IText in '..\..\source\ovcRTF_IText.pas',
+  ovcRTF_RichOle in '..\..\source\ovcRTF_RichOle.pas';
 
 end.
 

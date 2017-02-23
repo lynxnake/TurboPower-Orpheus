@@ -149,7 +149,7 @@ type
     procedure CMTextChanged(var Message: TMessage); message CM_TEXTCHANGED;
     procedure UpdateEditPosition;
     procedure EditChanged(Sender: TObject);
-    procedure SetAutoComplete(const Value: Boolean);
+    //procedure SetAutoComplete(const Value: Boolean);
     procedure SetAutoDropDown(const Value: Boolean);
   protected
     procedure WMKeyDown(var Msg : TWMKey); message WM_KEYDOWN;
@@ -1478,10 +1478,12 @@ begin
   end;
 end;
 
+{
 procedure TOvcTCComboBoxEdit.SetAutoComplete(const Value: Boolean);
 begin
   FAutoComplete := Value;
 end;
+}
 
 procedure TOvcTCComboBoxEdit.SetAutoDropDown(const Value: Boolean);
 begin

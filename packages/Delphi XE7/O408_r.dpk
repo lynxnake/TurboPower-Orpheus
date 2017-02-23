@@ -207,14 +207,14 @@ contains
   o32WideCharSet in '..\..\source\o32WideCharSet.pas',
   ovcBidi in '..\..\source\ovcBidi.pas',
   ovcThemes in '..\..\source\ovcThemes.pas',
-{$IFDEF CPUX86}ovctcedtHTMLText in '..\..\source\ovctcedtHTMLText.pas',{$ENDIF}
-{$IFDEF CPUX86}ovctcedtTextFormatBar in '..\..\source\ovctcedtTextFormatBar.pas' {ovcTextFormatBar},{$ENDIF}
-{$IFDEF CPUX86}ovcRTF_TOM in '..\..\source\ovcRTF_TOM.pas',{$ENDIF}
-{$IFDEF CPUX86}ovcRTF_Paint in '..\..\source\ovcRTF_Paint.pas',{$ENDIF}
-  ovcRTF_IText in '..\..\source\ovcRTF_IText.pas',
-{$IFDEF CPUX86}ovcRTF_RichOle in '..\..\source\ovcRTF_RichOle.pas',{$ENDIF}
+  ovctcedtHTMLText in '..\..\source\ovctcedtHTMLText.pas',
+  ovctcedtTextFormatBar in '..\..\source\ovctcedtTextFormatBar.pas' {ovcTextFormatBar},
   ovctccheckcbx in '..\..\source\ovctccheckcbx.pas',
-  OvcTCHeaderExtended in '..\..\source\OvcTCHeaderExtended.pas';
+  OvcTCHeaderExtended in '..\..\source\OvcTCHeaderExtended.pas',
+  ovcRTF_TOM in '..\..\source\ovcRTF_TOM.pas',
+  ovcRTF_Paint in '..\..\source\ovcRTF_Paint.pas',
+  ovcRTF_IText in '..\..\source\ovcRTF_IText.pas',
+  ovcRTF_RichOle in '..\..\source\ovcRTF_RichOle.pas';
 
 end.
 

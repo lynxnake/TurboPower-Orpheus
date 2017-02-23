@@ -96,11 +96,7 @@ contains
   O32LobEd in '..\..\source\O32LobEd.pas' {O32frmLkOutEd},
   o32coled in '..\..\source\o32coled.pas' {O32frmCollEditor},
   O32IGridEditor1 in '..\..\source\O32IGridEditor1.pas',
-  O32IGridItemEd in '..\..\source\O32IGridItemEd.pas' {FormIGridItemEditor},
-  ovcRTF_Paint in '..\..\source\ovcRTF_Paint.pas',
-  ovcRTF_TOM in '..\..\source\ovcRTF_TOM.pas',
-  ovctcedtHTMLText in '..\..\source\ovctcedtHTMLText.pas',
-  ovctcedtTextFormatBar in '..\..\source\ovctcedtTextFormatBar.pas' {ovcTextFormatBar};
+  O32IGridItemEd in '..\..\source\O32IGridItemEd.pas' {FormIGridItemEditor};
 
 end.
 
