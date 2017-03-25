@@ -1455,10 +1455,10 @@ var
         Exit;
 
     {find the next/prev allowable character}
-{$IFNDEF WIN64} {$IFNDEF VER310}
+{$IFNDEF WIN64} {$IFNDEF VER310} {$IFNDEF VER320}
     { Win64-compiler "sees" that the following command is unnecessary }
     OK := False;
-{$ENDIF} {$ENDIF}
+{$ENDIF} {$ENDIF} {$ENDIF}
     repeat
       repeat
         if Delta = 1 then

@@ -605,7 +605,9 @@ var
   F1,F2 : double;
   ActiveRecord: Integer;
 begin
+  {$IFNDEF VER320}
   result := 0;
+  {$ENDIF}
   ActiveRecord := FDataLink.ActiveRecord;
   try
     case TField(FieldList[FieldIndex]).DataType of
@@ -842,7 +844,11 @@ end;
 
 function TOvcDbReportView.InternalRecordCount : Integer;
 var
+  {$IFDEF VER320}
+  P: System.TArray<System.Byte>;
+  {$ELSE}
   P: Pointer;
+  {$ENDIF}
 begin
   if UseRecordCount then
     Result := DataSource.DataSet.RecordCount

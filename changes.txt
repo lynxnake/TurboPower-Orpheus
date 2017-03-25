@@ -1,3 +1,8 @@
+Revision 327: (2017/03/25 Armin Biernaczyk)
+- ovc.inc
+  Added defines for VER320 (Delphi 10.2 Tokyo)
+Added support for Delphi 10.2 Tokyo
+
 Revision 326: (2017/02/23 Armin Biernaczyk)
 - O408_d.*/ O408_r.*
   Minor changes to "contains"-List
