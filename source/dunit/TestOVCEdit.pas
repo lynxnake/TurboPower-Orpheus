@@ -328,7 +328,11 @@ var
   FileName : string;
 const
   line = 'The quick brown fox jumps over the lazy fox';
-  unicodeline = 'АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЪЫЬ';
+  CyrillicUnicodeLine = 'АБВГДЕЖЗИКЛМНОПРСТУФХЦЧШЩЪЫЬ';
+  ThaiUnicodeLine = 'กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบ' +
+    'ปผฝพฟภมยรฤลฦวศษสหฬอฮฯะัาำิีึืฺุู฿เแ' +
+    'โใไๅๆ็่้๊๋์ํ๎๏๐๑๒๓๔๕๖๗๘๙๚๛';
+  UnicodeLine = CyrillicUnicodeLine + ThaiUnicodeLine;
 begin
   { 1. suggestEncoding when editor ist empty }
   CheckEqualsString(TEncoding.Default.EncodingName, FForm.OvcTextFileEditor.suggestEncoding.EncodingName);
@@ -460,7 +464,7 @@ begin
 {$IFDEF UNICODE}
     { 3. UTF-8 Textfile }
     FForm.OvcTextFileEditor.AppendPara(unicodeline);
-    FForm.OvcTextFileEditor.SaveToFile(FileName);
+    FForm.OvcTextFileEditor.SaveToFile(FileName, TEncoding.UTF8);
     SL.LoadFromFile(FileName,TEncoding.UTF8);
     FForm.OvcTextFileEditor.GetText(@Buf[0],SizeOf(Buf));
     CheckEqualsString(SL.Text+#13#10, Buf);

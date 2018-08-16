@@ -46,6 +46,9 @@ unit ovctccbx;
 interface
 
 uses
+{$IFDEF VERSION2010}
+  Themes,
+{$ENDIF}
   {$IFDEF VERSIONXE3} System.UITypes, System.Types, {$ENDIF}
   Windows, SysUtils, Messages, Graphics, Classes, Controls, Forms, StdCtrls,
   OvcBase, OvcMisc, OvcTCmmn, OvcTCell, OvcTCStr;
@@ -362,10 +365,7 @@ implementation
 
 uses
   Math,
-  StrUtils,
-{$IFDEF VERSION2010}
-  Themes;
-{$ENDIF}
+  StrUtils;
 
 {$IFDEF VERSION2010}
 function ThemesEnabled: Boolean; inline;

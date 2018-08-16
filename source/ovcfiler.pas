@@ -621,11 +621,7 @@ end;
 
 function TOvcDataFiler.GetUStringProperty(PropInfo : PExPropInfo) : string;
 begin
-{$IFDEF UNICODE}
-  Result := GetUnicodeStrProp(PropInfo^.AObject, PPropInfo(PropInfo));
-{$ELSE}
   Result := GetStrProp(PropInfo^.AObject, PPropInfo(PropInfo));
-{$ENDIF}
 end;
 
 function TOvcDataFiler.GetStringsProperty(PropInfo : PExPropInfo) : string;
@@ -873,11 +869,7 @@ end;
 
 procedure TOvcDataFiler.SetUStringProperty(const S : string; PropInfo : PExPropInfo);
 begin
-{$IFDEF UNICODE}
-  SetUnicodeStrProp(PropInfo^.AObject, PPropInfo(PropInfo), S);
-{$ELSE}
   SetStrProp(PropInfo^.AObject, PPropInfo(PropInfo), S);
-{$ENDIF}  
 end;
 
 procedure TOvcDataFiler.SetStringsProperty({const S : string; }PropInfo : PExPropInfo);

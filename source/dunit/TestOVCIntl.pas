@@ -114,6 +114,7 @@ end;
 procedure TTestOVCIntl.TestInternationalTime;
 var
   pIntlSup: TOvcIntlSup;
+  ExpectedHours: string;
 begin
   pIntlSup := TOvcIntlSup.Create;
   try
@@ -123,8 +124,13 @@ begin
     TProtectedIntlSub(pIntlSup).w1159 := 'AM';
     TProtectedIntlSub(pIntlSup).w2359 := 'PM';
 
-    CheckEquals(pIntlSup.InternationalTime(True), 'hh:mm:ss tt');
-    CheckEquals(pIntlSup.InternationalTime(False), 'hh:mm tt');
+    if TFormatSettings.Create.ShortTimeFormat.Contains('hh') then // system 'hh' means hours displayed with leading zero
+      ExpectedHours := 'hh'
+    else
+      ExpectedHours := 'Hh'; //our 'Hh' means hours will be displayed padded with spaces
+
+    CheckEquals(ExpectedHours + ':mm:ss tt', pIntlSup.InternationalTime(True));
+    CheckEquals(ExpectedHours + ':mm tt', pIntlSup.InternationalTime(False));
   finally
     pIntlSup.Free;
   end;

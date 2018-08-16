@@ -286,17 +286,24 @@ end;
 
 procedure TTestOvcTable.TestOvcTCNumericField_nftDouble;
   {- test OvcTCNumericField with datatype 'nftDouble' }
+var
+  FormatSettings: TFormatSettings;
+  ExpectedString: string;
 begin
+  FormatSettings := TFormatSettings.Create;
+
   { Test reading data }
   FForm.Data_OvcTCNumericField1 := 1234.56;
   FForm.OvcTable1.Repaint;
-  CheckEquals('1.234,56', Trim(TPOvcTCNumericField(FForm.OvcTCNumericField1).FEditDisplay.Text));
+  ExpectedString := '1' + FormatSettings.ThousandSeparator + '234' + FormatSettings.DecimalSeparator + '56';
+  CheckEquals(ExpectedString, Trim(TPOvcTCNumericField(FForm.OvcTCNumericField1).FEditDisplay.Text));
 
   { Test typing data }
   FForm.OvcTable1.SetFocus;
   FForm.OvcTable1.SetActiveCell(0,3);
   FForm.OvcTable1.StartEditingState;
-  TypeText(TPOvcBaseEntryField(TPOvcTCNumericField(FForm.OvcTCNumericField1).FEdit), '6543,21');
+  TypeText(TPOvcBaseEntryField(TPOvcTCNumericField(FForm.OvcTCNumericField1).FEdit),
+    '6543' + FormatSettings.DecimalSeparator + '21');
   FForm.OvcTable1.StopEditingState(True);
   CheckEquals(Format('%.2n',[6543.21]), Format('%.2n',[FForm.Data_OvcTCNumericField1]));
   CheckEquals(-1, FForm.Data_Overflow_OvcTCNumericField1, 'Data overflow for OvcTCNumericField1');
