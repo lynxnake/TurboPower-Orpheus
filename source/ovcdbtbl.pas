@@ -37,6 +37,10 @@
 {.W-} {Windows Stack Frame}
 {$X+} {Extended Syntax}
 
+{$IFDEF VERSIONXE4}
+  {$LEGACYIFEND ON}
+{$ENDIF}
+
 unit ovcdbtbl;
   {data-aware table}
 
@@ -4327,7 +4331,9 @@ begin
       end;
     end else if (ACell is TOvcTCComboBox) then begin
       FillChar(Data^, Size, #0);
-      if AField.DataType in [ftSmallInt, ftInteger, ftWord] then begin
+      if AField.DataType in [ftSmallInt, ftInteger, ftWord
+        {$IF CompilerVersion >= 32}, ftLongWord {$IFEND}] then
+      begin
         PCellComboBoxInfo(Data)^.Index := AField.AsInteger;
         PCellComboBoxInfo(Data)^.St := '';
       end else begin
