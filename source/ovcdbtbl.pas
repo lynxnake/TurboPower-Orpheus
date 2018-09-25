@@ -4259,20 +4259,10 @@ procedure TOvcCustomDbTable.tbGetFieldValue(AField : TField;
           ACell : TOvcBaseTableCell; Data : Pointer; Size : Integer);
   {-get the value from the db field}
 var
-//  S   : string[255];
-//  I   : SmallInt absolute S;
-//  L   : LongInt absolute S;
-//  W   : Word absolute S;
-//  B   : Boolean absolute S;
-//  E   : Extended absolute S;
-//  WD  : TStDate absolute S;
-//  WT  : TStTime absolute S;
-  {DT  : TDateTime absolute S;}
+  S   : string;
   Col : Integer;
   Idx : Integer;
 begin
-//  FillChar(S, SizeOf(S), #0);
-
   if Assigned(AField) then begin
     {get the field value into Data^}
     if ACell.SpecialCellSupported(AField) then begin
@@ -4337,11 +4327,11 @@ begin
         PCellComboBoxInfo(Data)^.Index := AField.AsInteger;
         PCellComboBoxInfo(Data)^.St := '';
       end else begin
-        PString(Data)^ := AField.Text;
-        if PString(Data)^ = '' then
+        S := AField.Text;
+        if S = '' then
           Idx := -1
         else
-          Idx := TOvcTCComboBox(ACell).Items.IndexOf(PString(Data)^);
+          Idx := TOvcTCComboBox(ACell).Items.IndexOf(S);
 
         PCellComboBoxInfo(Data)^.Index := Idx;
 
@@ -4350,7 +4340,7 @@ begin
             {$IFDEF CBuilder}
             StrPCopy(PCellComboBoxInfo(Data)^.St, S);
             {$ELSE}
-            PCellComboBoxInfo(Data)^.St := PString(Data)^ //S;
+            PCellComboBoxInfo(Data)^.St := S;
             {$ENDIF}
       end;
 
@@ -4388,12 +4378,13 @@ procedure TOvcCustomDbTable.tbGetMem(var P: Pointer; ACell: TOvcBaseTableCell; c
 var
   Size: Integer;
 begin
-  Size := tbGetDataSize(ACell);
-
   if (ACell is TOvcTCString) or (AField.DataType in [ftString{$IFDEF VERSION5}, ftWideString{$ENDIF}]) then
     New(PString(P))
   else
+  begin
+    Size := tbGetDataSize(ACell);
     GetMem(P, Size);
+  end;
 end;
 
 procedure TOvcCustomDbTable.tbGridPenChanged(Sender : TObject);
