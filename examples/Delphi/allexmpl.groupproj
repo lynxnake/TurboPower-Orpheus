@@ -1,0 +1,516 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{A93E422C-F195-4275-83D7-E761B00C0721}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="AddrBook.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="CustOrd.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="ExaBtn.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXAE.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="ExCal.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="ExCalc.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="excbglyf.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXCBX.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXCLOCK.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXTIME.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXDBAE.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXDBEF.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="ExDbFlexEdit.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXDBRV.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXDBRV2.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXDLG.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXDRV.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXDSPLIT.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXEDOD.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXEDPRN.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXEDSRC.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXEF.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="ExFlexButton1.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="ExFlexEdit.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="ExIGrid1.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXLKOUT.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXMETER.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXMRU.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXNBHINT.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXNBK.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Exrvdir.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXSLIDE.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXSTATE.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXTBLOD.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXCLOK1.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXTIMR.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="EXTRAN.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="FILEVIEW.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="ORDENTRY.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="TEXTEDIT.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="TEXTVIEW.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="AddrBook">
+        <MSBuild Projects="AddrBook.dproj"/>
+    </Target>
+    <Target Name="AddrBook:Clean">
+        <MSBuild Projects="AddrBook.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="AddrBook:Make">
+        <MSBuild Projects="AddrBook.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="CustOrd">
+        <MSBuild Projects="CustOrd.dproj"/>
+    </Target>
+    <Target Name="CustOrd:Clean">
+        <MSBuild Projects="CustOrd.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="CustOrd:Make">
+        <MSBuild Projects="CustOrd.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="ExaBtn">
+        <MSBuild Projects="ExaBtn.dproj"/>
+    </Target>
+    <Target Name="ExaBtn:Clean">
+        <MSBuild Projects="ExaBtn.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="ExaBtn:Make">
+        <MSBuild Projects="ExaBtn.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXAE">
+        <MSBuild Projects="EXAE.dproj"/>
+    </Target>
+    <Target Name="EXAE:Clean">
+        <MSBuild Projects="EXAE.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXAE:Make">
+        <MSBuild Projects="EXAE.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="ExCal">
+        <MSBuild Projects="ExCal.dproj"/>
+    </Target>
+    <Target Name="ExCal:Clean">
+        <MSBuild Projects="ExCal.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="ExCal:Make">
+        <MSBuild Projects="ExCal.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="ExCalc">
+        <MSBuild Projects="ExCalc.dproj"/>
+    </Target>
+    <Target Name="ExCalc:Clean">
+        <MSBuild Projects="ExCalc.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="ExCalc:Make">
+        <MSBuild Projects="ExCalc.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="excbglyf">
+        <MSBuild Projects="excbglyf.dproj"/>
+    </Target>
+    <Target Name="excbglyf:Clean">
+        <MSBuild Projects="excbglyf.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="excbglyf:Make">
+        <MSBuild Projects="excbglyf.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXCBX">
+        <MSBuild Projects="EXCBX.dproj"/>
+    </Target>
+    <Target Name="EXCBX:Clean">
+        <MSBuild Projects="EXCBX.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXCBX:Make">
+        <MSBuild Projects="EXCBX.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXCLOCK">
+        <MSBuild Projects="EXCLOCK.dproj"/>
+    </Target>
+    <Target Name="EXCLOCK:Clean">
+        <MSBuild Projects="EXCLOCK.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXCLOCK:Make">
+        <MSBuild Projects="EXCLOCK.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXTIME">
+        <MSBuild Projects="EXTIME.dproj"/>
+    </Target>
+    <Target Name="EXTIME:Clean">
+        <MSBuild Projects="EXTIME.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXTIME:Make">
+        <MSBuild Projects="EXTIME.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXDBAE">
+        <MSBuild Projects="EXDBAE.dproj"/>
+    </Target>
+    <Target Name="EXDBAE:Clean">
+        <MSBuild Projects="EXDBAE.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXDBAE:Make">
+        <MSBuild Projects="EXDBAE.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXDBEF">
+        <MSBuild Projects="EXDBEF.dproj"/>
+    </Target>
+    <Target Name="EXDBEF:Clean">
+        <MSBuild Projects="EXDBEF.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXDBEF:Make">
+        <MSBuild Projects="EXDBEF.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="ExDbFlexEdit">
+        <MSBuild Projects="ExDbFlexEdit.dproj"/>
+    </Target>
+    <Target Name="ExDbFlexEdit:Clean">
+        <MSBuild Projects="ExDbFlexEdit.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="ExDbFlexEdit:Make">
+        <MSBuild Projects="ExDbFlexEdit.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXDBRV">
+        <MSBuild Projects="EXDBRV.dproj"/>
+    </Target>
+    <Target Name="EXDBRV:Clean">
+        <MSBuild Projects="EXDBRV.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXDBRV:Make">
+        <MSBuild Projects="EXDBRV.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXDBRV2">
+        <MSBuild Projects="EXDBRV2.dproj"/>
+    </Target>
+    <Target Name="EXDBRV2:Clean">
+        <MSBuild Projects="EXDBRV2.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXDBRV2:Make">
+        <MSBuild Projects="EXDBRV2.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXDLG">
+        <MSBuild Projects="EXDLG.dproj"/>
+    </Target>
+    <Target Name="EXDLG:Clean">
+        <MSBuild Projects="EXDLG.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXDLG:Make">
+        <MSBuild Projects="EXDLG.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXDRV">
+        <MSBuild Projects="EXDRV.dproj"/>
+    </Target>
+    <Target Name="EXDRV:Clean">
+        <MSBuild Projects="EXDRV.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXDRV:Make">
+        <MSBuild Projects="EXDRV.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXDSPLIT">
+        <MSBuild Projects="EXDSPLIT.dproj"/>
+    </Target>
+    <Target Name="EXDSPLIT:Clean">
+        <MSBuild Projects="EXDSPLIT.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXDSPLIT:Make">
+        <MSBuild Projects="EXDSPLIT.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXEDOD">
+        <MSBuild Projects="EXEDOD.dproj"/>
+    </Target>
+    <Target Name="EXEDOD:Clean">
+        <MSBuild Projects="EXEDOD.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXEDOD:Make">
+        <MSBuild Projects="EXEDOD.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXEDPRN">
+        <MSBuild Projects="EXEDPRN.dproj"/>
+    </Target>
+    <Target Name="EXEDPRN:Clean">
+        <MSBuild Projects="EXEDPRN.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXEDPRN:Make">
+        <MSBuild Projects="EXEDPRN.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXEDSRC">
+        <MSBuild Projects="EXEDSRC.dproj"/>
+    </Target>
+    <Target Name="EXEDSRC:Clean">
+        <MSBuild Projects="EXEDSRC.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXEDSRC:Make">
+        <MSBuild Projects="EXEDSRC.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXEF">
+        <MSBuild Projects="EXEF.dproj"/>
+    </Target>
+    <Target Name="EXEF:Clean">
+        <MSBuild Projects="EXEF.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXEF:Make">
+        <MSBuild Projects="EXEF.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="ExFlexButton1">
+        <MSBuild Projects="ExFlexButton1.dproj"/>
+    </Target>
+    <Target Name="ExFlexButton1:Clean">
+        <MSBuild Projects="ExFlexButton1.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="ExFlexButton1:Make">
+        <MSBuild Projects="ExFlexButton1.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="ExFlexEdit">
+        <MSBuild Projects="ExFlexEdit.dproj"/>
+    </Target>
+    <Target Name="ExFlexEdit:Clean">
+        <MSBuild Projects="ExFlexEdit.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="ExFlexEdit:Make">
+        <MSBuild Projects="ExFlexEdit.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="ExIGrid1">
+        <MSBuild Projects="ExIGrid1.dproj"/>
+    </Target>
+    <Target Name="ExIGrid1:Clean">
+        <MSBuild Projects="ExIGrid1.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="ExIGrid1:Make">
+        <MSBuild Projects="ExIGrid1.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXLKOUT">
+        <MSBuild Projects="EXLKOUT.dproj"/>
+    </Target>
+    <Target Name="EXLKOUT:Clean">
+        <MSBuild Projects="EXLKOUT.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXLKOUT:Make">
+        <MSBuild Projects="EXLKOUT.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXMETER">
+        <MSBuild Projects="EXMETER.dproj"/>
+    </Target>
+    <Target Name="EXMETER:Clean">
+        <MSBuild Projects="EXMETER.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXMETER:Make">
+        <MSBuild Projects="EXMETER.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXMRU">
+        <MSBuild Projects="EXMRU.dproj"/>
+    </Target>
+    <Target Name="EXMRU:Clean">
+        <MSBuild Projects="EXMRU.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXMRU:Make">
+        <MSBuild Projects="EXMRU.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXNBHINT">
+        <MSBuild Projects="EXNBHINT.dproj"/>
+    </Target>
+    <Target Name="EXNBHINT:Clean">
+        <MSBuild Projects="EXNBHINT.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXNBHINT:Make">
+        <MSBuild Projects="EXNBHINT.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXNBK">
+        <MSBuild Projects="EXNBK.dproj"/>
+    </Target>
+    <Target Name="EXNBK:Clean">
+        <MSBuild Projects="EXNBK.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXNBK:Make">
+        <MSBuild Projects="EXNBK.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Exrvdir">
+        <MSBuild Projects="Exrvdir.dproj"/>
+    </Target>
+    <Target Name="Exrvdir:Clean">
+        <MSBuild Projects="Exrvdir.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Exrvdir:Make">
+        <MSBuild Projects="Exrvdir.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXSLIDE">
+        <MSBuild Projects="EXSLIDE.dproj"/>
+    </Target>
+    <Target Name="EXSLIDE:Clean">
+        <MSBuild Projects="EXSLIDE.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXSLIDE:Make">
+        <MSBuild Projects="EXSLIDE.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXSTATE">
+        <MSBuild Projects="EXSTATE.dproj"/>
+    </Target>
+    <Target Name="EXSTATE:Clean">
+        <MSBuild Projects="EXSTATE.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXSTATE:Make">
+        <MSBuild Projects="EXSTATE.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXTBLOD">
+        <MSBuild Projects="EXTBLOD.dproj"/>
+    </Target>
+    <Target Name="EXTBLOD:Clean">
+        <MSBuild Projects="EXTBLOD.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXTBLOD:Make">
+        <MSBuild Projects="EXTBLOD.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXCLOK1">
+        <MSBuild Projects="EXCLOK1.dproj"/>
+    </Target>
+    <Target Name="EXCLOK1:Clean">
+        <MSBuild Projects="EXCLOK1.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXCLOK1:Make">
+        <MSBuild Projects="EXCLOK1.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXTIMR">
+        <MSBuild Projects="EXTIMR.dproj"/>
+    </Target>
+    <Target Name="EXTIMR:Clean">
+        <MSBuild Projects="EXTIMR.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXTIMR:Make">
+        <MSBuild Projects="EXTIMR.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="EXTRAN">
+        <MSBuild Projects="EXTRAN.dproj"/>
+    </Target>
+    <Target Name="EXTRAN:Clean">
+        <MSBuild Projects="EXTRAN.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="EXTRAN:Make">
+        <MSBuild Projects="EXTRAN.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="FILEVIEW">
+        <MSBuild Projects="FILEVIEW.dproj"/>
+    </Target>
+    <Target Name="FILEVIEW:Clean">
+        <MSBuild Projects="FILEVIEW.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="FILEVIEW:Make">
+        <MSBuild Projects="FILEVIEW.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="ORDENTRY">
+        <MSBuild Projects="ORDENTRY.dproj"/>
+    </Target>
+    <Target Name="ORDENTRY:Clean">
+        <MSBuild Projects="ORDENTRY.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="ORDENTRY:Make">
+        <MSBuild Projects="ORDENTRY.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="TEXTEDIT">
+        <MSBuild Projects="TEXTEDIT.dproj"/>
+    </Target>
+    <Target Name="TEXTEDIT:Clean">
+        <MSBuild Projects="TEXTEDIT.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TEXTEDIT:Make">
+        <MSBuild Projects="TEXTEDIT.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="TEXTVIEW">
+        <MSBuild Projects="TEXTVIEW.dproj"/>
+    </Target>
+    <Target Name="TEXTVIEW:Clean">
+        <MSBuild Projects="TEXTVIEW.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TEXTVIEW:Make">
+        <MSBuild Projects="TEXTVIEW.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="AddrBook;CustOrd;ExaBtn;EXAE;ExCal;ExCalc;excbglyf;EXCBX;EXCLOCK;EXTIME;EXDBAE;EXDBEF;ExDbFlexEdit;EXDBRV;EXDBRV2;EXDLG;EXDRV;EXDSPLIT;EXEDOD;EXEDPRN;EXEDSRC;EXEF;ExFlexButton1;ExFlexEdit;ExIGrid1;EXLKOUT;EXMETER;EXMRU;EXNBHINT;EXNBK;Exrvdir;EXSLIDE;EXSTATE;EXTBLOD;EXCLOK1;EXTIMR;EXTRAN;FILEVIEW;ORDENTRY;TEXTEDIT;TEXTVIEW"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="AddrBook:Clean;CustOrd:Clean;ExaBtn:Clean;EXAE:Clean;ExCal:Clean;ExCalc:Clean;excbglyf:Clean;EXCBX:Clean;EXCLOCK:Clean;EXTIME:Clean;EXDBAE:Clean;EXDBEF:Clean;ExDbFlexEdit:Clean;EXDBRV:Clean;EXDBRV2:Clean;EXDLG:Clean;EXDRV:Clean;EXDSPLIT:Clean;EXEDOD:Clean;EXEDPRN:Clean;EXEDSRC:Clean;EXEF:Clean;ExFlexButton1:Clean;ExFlexEdit:Clean;ExIGrid1:Clean;EXLKOUT:Clean;EXMETER:Clean;EXMRU:Clean;EXNBHINT:Clean;EXNBK:Clean;Exrvdir:Clean;EXSLIDE:Clean;EXSTATE:Clean;EXTBLOD:Clean;EXCLOK1:Clean;EXTIMR:Clean;EXTRAN:Clean;FILEVIEW:Clean;ORDENTRY:Clean;TEXTEDIT:Clean;TEXTVIEW:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="AddrBook:Make;CustOrd:Make;ExaBtn:Make;EXAE:Make;ExCal:Make;ExCalc:Make;excbglyf:Make;EXCBX:Make;EXCLOCK:Make;EXTIME:Make;EXDBAE:Make;EXDBEF:Make;ExDbFlexEdit:Make;EXDBRV:Make;EXDBRV2:Make;EXDLG:Make;EXDRV:Make;EXDSPLIT:Make;EXEDOD:Make;EXEDPRN:Make;EXEDSRC:Make;EXEF:Make;ExFlexButton1:Make;ExFlexEdit:Make;ExIGrid1:Make;EXLKOUT:Make;EXMETER:Make;EXMRU:Make;EXNBHINT:Make;EXNBK:Make;Exrvdir:Make;EXSLIDE:Make;EXSTATE:Make;EXTBLOD:Make;EXCLOK1:Make;EXTIMR:Make;EXTRAN:Make;FILEVIEW:Make;ORDENTRY:Make;TEXTEDIT:Make;TEXTVIEW:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

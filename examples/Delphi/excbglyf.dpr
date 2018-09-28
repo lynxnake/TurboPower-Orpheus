@@ -24,6 +24,8 @@
 
 program excbglyf;
 
+{$R excbglyfData.res 'excbglyfData.RC'}
+
 uses
   Forms,
   excbglyu in 'excbglyu.pas' {Form1};
