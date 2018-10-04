@@ -70,13 +70,13 @@ begin
     AppendPara('Test');
     SetSelection(1,1,1,5,True);
     CopyToClipboard;
+    Application.ProcessMessages;
     SetCaretPosition(1,9);
     PasteFromClipboard;
     SetLength(s, 15);
     s := GetLine(1,@s[1],15);
   end;
-  { Fails in 4.07 (unicode) }
-  CheckEqualsString(s, 'Test    Test');
+  CheckEqualsString('Test    Test', s);
 end;
 
 { test copying text from an TOvcEditor }
