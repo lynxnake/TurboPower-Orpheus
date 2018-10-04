@@ -51,12 +51,12 @@
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_Namespace>Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;Winapi;Bde;$(DCC_Namespace)</DCC_Namespace>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <DllSuffix>240</DllSuffix>
+        <DllSuffix>250</DllSuffix>
         <DCC_ImageBase>00400000</DCC_ImageBase>
         <DesignOnlyPackage>true</DesignOnlyPackage>
         <DCC_WriteableConstants>true</DCC_WriteableConstants>
         <DCC_Platform>x86</DCC_Platform>
-        <DCC_Description>TurboPower Orpheus 4.08 data-aware designtime package - VCL240</DCC_Description>
+        <DCC_Description>TurboPower Orpheus 4.08 data-aware designtime package</DCC_Description>
         <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
         <DCC_N>true</DCC_N>
         <DCC_S>false</DCC_S>

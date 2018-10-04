@@ -49,13 +49,13 @@
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Winapi;Vcl;Bde;$(DCC_Namespace)</DCC_Namespace>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <DllSuffix>240</DllSuffix>
+        <DllSuffix>250</DllSuffix>
         <DCC_ImageBase>00400000</DCC_ImageBase>
         <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
         <DCC_WriteableConstants>true</DCC_WriteableConstants>
         <DCC_Platform>x86</DCC_Platform>
         <RuntimeOnlyPackage>true</RuntimeOnlyPackage>
-        <DCC_Description>TurboPower Orpheus 4.08 data-aware runtime package - VCL240</DCC_Description>
+        <DCC_Description>TurboPower Orpheus 4.08 data-aware runtime package</DCC_Description>
         <DCC_S>false</DCC_S>
         <DCC_N>true</DCC_N>
         <GenDll>true</GenDll>

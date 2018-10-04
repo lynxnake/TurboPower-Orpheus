@@ -49,7 +49,7 @@ PACKAGE O408_d;
 {$IMAGEBASE $400000}
 {$DEFINE DEBUG}
 {$ENDIF IMPLICITBUILDING}
-{$DESCRIPTION 'TurboPower Orpheus 4.08 designtime package - VCL250'}
+{$DESCRIPTION 'TurboPower Orpheus 4.08 designtime package'}
 {$LIBSUFFIX '250'}
 {$DESIGNONLY}
 {$IMPLICITBUILD OFF}
