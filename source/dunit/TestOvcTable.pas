@@ -290,6 +290,7 @@ var
   FormatSettings: TFormatSettings;
   ExpectedString: string;
 begin
+// Can fail because of Str call in TOvcCustomNumericField.efTransfer.TransferDouble
   FormatSettings := TFormatSettings.Create;
 
   { Test reading data }

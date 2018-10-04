@@ -36,6 +36,8 @@
 {.W-} {Windows Stack Frame}
 {$X+} {Extended Syntax}
 
+{$LegacyIfEnd ON}
+
 unit ovcef;
   {-Base entry field class}
 
@@ -141,6 +143,9 @@ type
     function GetAsCents : LongInt;
     function GetAsExtended : Extended;
     function GetAsFloat : Double;
+{$IF CompilerVersion >= 32}
+    function GetAsInt64: Int64;
+{$IFEND CompilerVesion}
     function GetAsInteger : Longint;
     function GetAsDateTime : TDateTime;
     function GetAsStDate : TStDate;
@@ -167,6 +172,9 @@ type
     procedure SetAsDateTime(Value : TDateTime);
     procedure SetAsExtended(Value : Extended);
     procedure SetAsFloat(Value : Double);
+{$IF CompilerVersion >= 32}
+    procedure SetAsInt64(Value : Int64);
+{$IFEND CompilerVesion}
     procedure SetAsInteger(Value : Longint);
     procedure SetAsStDate(Value : TStDate);
     procedure SetAsStTime(Value : TStTime);
@@ -292,7 +300,6 @@ type
       message EM_SETMODIFY;
     procedure EMSetSel(var Msg : TMessage);
       message EM_SETSEL;
-
   protected
     {VCL methods}
     procedure CreateParams(var Params : TCreateParams);
@@ -383,6 +390,10 @@ type
     procedure efIncDecValue(Wrap : Boolean; Delta : Double);
       dynamic; abstract;
       {-increment field by Delta}
+{$IF CompilerVersion >= 32}
+    procedure efInt64ToStr(P : PChar; I: Int64);
+      {-convert an Int64 to a string}
+{$IFEND CompilerVesion}
     function  efIsNumericType : Boolean;
       {-return True if field is of a numeric type}
     function  efIsReadOnly : Boolean;
@@ -429,6 +440,12 @@ type
       {-set the initial value of the field}
     function efStr2Long(P : PChar; var L : LongInt) : Boolean;
       {-convert a string to a longint}
+
+{$IF CompilerVersion >= 32}
+      function efStr2Int64(P: PChar; var I: Int64): Boolean;
+        {-convert a string to an Int64}
+{$IFEND CompilerVesion}
+
     function efTransfer(DataPtr : Pointer; TransferFlag : Word) : Word;
       virtual;
       {-transfer data to/from the entry fields}
@@ -968,7 +985,11 @@ begin
       fsubChar, fsubBoolean, fsubYesNo, fsubLongInt,
       fsubWord, fsubInteger, fsubByte, fsubShortInt,
       fsubReal, fsubExtended, fsubDouble, fsubSingle,
-      fsubComp : Uninitialized := True;
+      fsubComp
+      {$IF CompilerVersion >= 32}
+        , fsubLongWord
+      {$IFEND CompilerVesion}
+       : Uninitialized := True;
     end;
 
   {is it a hex, binary, octal, and/or numeric field?}
@@ -1722,21 +1743,73 @@ begin
     fsubComp     : efDataSize := SizeOf(Comp);
     fsubDate     : efDataSize := SizeOf(TStDate);
     fsubTime     : efDataSize := SizeOf(TStTime);
+{$IF CompilerVersion >= 32}
+    fsubLongWord : efDataSize := SizeOf(LongWord);
+{$IFEND CompilerVesion}
   else
     efDataSize := 0;
   end;
 end;
 
+{$IF CompilerVersion >=32}
+procedure TOvcBaseEntryField.efInt64ToStr(P: PChar; I: Int64);
+{-convert an Int64 to a string}
+var
+//  W  : Word;
+  S  : array[0..32] of Char;
+  Short: ShortString;
+  St : string;
+begin
+//  W := efDataSize * 2;
+  if sefHexadecimal in sefOptions then
+  begin
+    Assert(False, 'Conversion of Int64 into hexadecimal string is not implemented');
+    {HexLPChar(S, L);
+    if W < 8 then
+      StrStDeletePrim(S, 0, 8 - W);}
+  end
+  else if sefOctal in sefOptions then
+  begin
+    Assert(False, 'Conversion of Int64 into octal string is not implemented');
+    {OctalLPChar(S, L);
+    if W < 8 then
+      StrStDeletePrim(S, 0, 12 - (W * 2));}
+  end
+  else if sefBinary in sefOptions then
+  begin
+    Assert(False, 'Conversion of Int64 into binary string is not implemented');
+    {BinaryLPChar(S, L);
+    if W < 8 then
+      StrStDeletePrim(S, 0, 32 - (W * 4));}
+  end
+  else if I = 0 then
+  begin
+    S[0] := '0';
+    S[1] := #0;
+  end
+  else
+  begin
+    Str(I, Short);
+    St := string(Short);
+    StrPLCopy(S, St, (Length(S) - 1) * SizeOf(S[Low(S)]));
+  end;
+  StrCopy(P, S);
+end;
+{$IFEND CompilerVesion}
+
 function TOvcBaseEntryField.efIsNumericType : Boolean;
   {-return True if field is of a numeric type}
 begin
   case efDataType mod fcpDivisor of
-    fsubLongInt, fsubWord, fsubInteger, fsubByte,
-    fsubShortInt, fsubReal, fsubExtended, fsubDouble,
-    fsubSingle, fsubComp :
+    fsubLongInt, fsubWord, fsubInteger, fsubByte, fsubShortInt, fsubReal, fsubExtended, fsubDouble,
+      fsubSingle, fsubComp
+{$IF CompilerVersion >= 32}
+      , fsubLongWord
+{$IFEND CompilerVesion}
+      :
       Result := True;
-    else
-      Result := False;
+  else
+    Result := False;
   end;
 end;
 
@@ -2406,27 +2479,36 @@ begin
   Result := '';
   D := GetDecimalPlaces;
   case efDataType mod fcpDivisor of
-    fsubString : {};
-    fsubBoolean, fsubYesNo : {};
-    fsubChar :
-      if Value.rtChar <= ' ' then begin
+    fsubString: { };
+    fsubBoolean, fsubYesNo: { };
+    fsubChar:
+      if Value.rtChar <= ' ' then
+      begin
         Str(Ord(Value.rtChar), sAnsi);
         Result := '#' + string(sAnsi);
-      end else
-         Result := Value.rtChar;
-    fsubLongInt, fsubInteger, fsubShortInt, fsubWord, fsubByte :
+      end
+      else
+        Result := Value.rtChar;
+    fsubLongInt, fsubInteger, fsubShortInt, fsubWord, fsubByte:
       begin
         efLong2Str(Buf, Value.rtLong);
         Result := StrPas(Buf);
       end;
-    fsubReal :
+{$IF CompilerVersion >= 32}
+    fsubLongWord:
+      begin
+        efInt64ToStr(Buf, Value.rtInt64);
+        Result := StrPas(Buf);
+      end;
+{$IFEND CompilerVesion}
+    fsubReal:
       begin
         Ex := Value.rtReal;
         Result := ExtendedToString(Ex, D);
       end;
-    fsubExtended, fsubDouble, fsubSingle, fsubComp :
+    fsubExtended, fsubDouble, fsubSingle, fsubComp:
       Result := ExtendedToString(Value.rtExt, D);
-    fsubDate :
+    fsubDate:
       begin
         DateMask := OvcIntlSup.InternationalDate(True);
         if Value.rtDate = BadDate then
@@ -2434,7 +2516,7 @@ begin
         else
           Result := OvcIntlSup.DateToDateString(DateMask, Value.rtDate, False);
       end;
-    fsubTime      :
+    fsubTime:
       begin
         TimeMask := OvcIntlSup.InternationalTime(False);
         if Value.rtTime = BadTime then
@@ -2467,9 +2549,12 @@ begin
             Exclude(FOptions, efoRightJustify);
             Exclude(FOptions, efoStripLiterals);
           end;
-        fsubLongInt, fsubWord, fsubInteger, fsubByte,
-        fsubShortInt, fsubReal, fsubExtended, fsubDouble,
-        fsubSingle, fsubComp :
+        fsubLongInt, fsubWord, fsubInteger, fsubByte, fsubShortInt, fsubReal, fsubExtended,
+          fsubDouble, fsubSingle, fsubComp
+{$IF CompilerVersion >= 32}
+          , fsubLongWord
+{$IFEND CompilerVesion}
+          :
           begin
             Exclude(FOptions, efoTrimBlanks);
             Exclude(FOptions, efoRightJustify);
@@ -2478,8 +2563,8 @@ begin
       end;
     fcPicture :
       case efDataType mod fcpDivisor of
-        fsubString : {};
-        fsubChar, fsubBoolean, fsubYesNo :
+        fsubString: { };
+        fsubChar, fsubBoolean, fsubYesNo:
           begin
             Exclude(FOptions, efoCaretToEnd);
             Exclude(FOptions, efoForceInsert);
@@ -2487,14 +2572,17 @@ begin
             Exclude(FOptions, efoRightJustify);
             Exclude(FOptions, efoStripLiterals);
           end;
-        fsubLongInt, fsubWord, fsubInteger, fsubByte,
-        fsubShortInt, fsubReal, fsubExtended, fsubDouble,
-        fsubSingle, fsubComp :
+        fsubLongInt, fsubWord, fsubInteger, fsubByte, fsubShortInt, fsubReal, fsubExtended,
+          fsubDouble, fsubSingle, fsubComp
+{$IF CompilerVersion >= 32}
+          , fsubLongWord
+{$IFEND CompilerVesion}
+          :
           begin
             Exclude(FOptions, efoTrimBlanks);
             Exclude(FOptions, efoStripLiterals);
           end;
-        fsubDate, fsubTime :
+        fsubDate, fsubTime:
           begin
             Exclude(FOptions, efoTrimBlanks);
             Exclude(FOptions, efoRightJustify);
@@ -2515,10 +2603,12 @@ begin
   {if input is required then these fields must also be uninitialized}
   if (csDesigning in ComponentState) and (efoInputRequired in Options) then
     case efDataType mod fcpDivisor of
-      fsubChar, fsubBoolean, fsubYesNo, fsubLongInt,
-      fsubWord, fsubInteger, fsubByte, fsubShortInt,
-      fsubReal, fsubExtended, fsubDouble, fsubSingle,
-      fsubComp : FUninitialized := True;
+      fsubChar, fsubBoolean, fsubYesNo, fsubLongInt, fsubWord, fsubInteger, fsubByte, fsubShortInt,
+        fsubReal, fsubExtended, fsubDouble, fsubSingle, fsubComp
+{$IF CompilerVersion >= 32}
+        , fsubLongWord
+{$IFEND CompilerVesion}
+        : FUninitialized := True;
     end;
 end;
 
@@ -2634,6 +2724,13 @@ begin
         efRangeLo.rtTime := MinTime;
         efRangeHi.rtTime := MaxTime;
       end;
+{$IF CompilerVersion >= 32}
+    fsubLongWord :
+      begin
+        efRangeLo.rtInt64 := Low(LongWord);
+        efRangeHi.rtInt64 := High(LongWord);
+      end;
+{$IFEND}
   end;
 end;
 
@@ -2657,6 +2754,11 @@ begin
     fsubLongInt, fsubWord, fsubInteger, fsubByte, fsubShortInt :
       if (0 < efRangeLo.rtLong) or (0 > efRangeHi.rtLong) then
         R.rtLong := efRangeLo.rtLong;
+{$IF CompilerVersion >= 32}
+    fsubLongWord :
+      if (0 < efRangeLo.rtInt64) or (0 > efRangeHi.rtInt64) then
+        R.rtInt64 := efRangeLo.rtInt64;
+{$IFEND CompilerVesion}
     fsubReal :
       if (0 < efRangeLo.rtReal) or (0 > efRangeHi.rtReal) then
         R.rtReal := efRangeLo.rtReal;
@@ -2705,6 +2807,35 @@ begin
     efSelEnd := Stop;
   end;
 end;
+
+{$IF CompilerVersion >= 32}
+  function TOvcBaseEntryField.efStr2Int64(P: PChar; var I: Int64): Boolean;
+  var
+    S : TEditString;
+  begin
+    Result := True;
+    StrLCopy(S, P, SizeOf(TEditString) - 1);
+    TrimAllSpacesPChar(S);
+
+    {treat an empty string as 0}
+    if StrLen(S) = 0 then begin
+      I := 0;
+      Exit;
+    end;
+
+    if sefBinary in sefOptions then
+      Assert(False, 'binary string conversion is not implemented for Int64 data type') //Result := efBinStr2Long(S, L)
+    else if sefOctal in sefOptions then
+      Assert(False, 'octal string conversion is not implemented for Int64 data type') //Result := efOctStr2Long(S, L)
+    else begin
+      if (sefHexadecimal in sefOptions) and (S[0] <> #0) then
+        if StrPos(S, '$') = nil then
+          StrChInsertPrim(S, '$', 0);
+
+        Result := StrToInt64PChar(S, I);
+    end;
+  end;
+{$IFEND CompilerVesion}
 
 function TOvcBaseEntryField.efStr2Long(P : PChar; var L : LongInt) : Boolean;
   {-convert a string to a long integer}
@@ -2785,6 +2916,17 @@ begin
           ((R.rtLong < Low(ShortInt)) or (R.rtLong > High(ShortInt))) then
           Code := 1;
       end;
+{$IF CompilerVersion >= 32}
+    fsubLongWord :
+      begin
+        StrPLCopy(Buf, Value, Length(Buf) - 1);
+        if efStr2Int64(Buf, R.rtInt64) then
+          Code := 0
+        else
+          Code := 1;
+      end;
+{$IFEND CompilerVesion}
+
     fsubReal :
       if Value = '' then
         R.rtReal := 0
@@ -3035,6 +3177,10 @@ var
   It  : SmallInt absolute Li;
   By  : Byte absolute Li;
   Si  : ShortInt absolute Li;
+{$IF CompilerVersion >= 32}
+    I64 : Int64;
+    Lw  : LongWord absolute I64;
+{$IFEND CompilerVesion}
 begin
   Result := 0;
   case efDataType mod fcpDivisor of
@@ -3098,6 +3244,14 @@ begin
         if FLastError = 0 then
           Result := Si;
       end;
+{$IF CompilerVersion >= 32}
+      fsubLongWord :
+      begin
+        FLastError := GetValue(Lw);
+        if FLastError = 0 then
+          Result := Lw;
+      end;
+{$IFEND CompilerVesion}
   else
     raise EInvalidDataType.Create;
   end;
@@ -3116,6 +3270,10 @@ var
   It  : SmallInt absolute Li;
   By  : Byte absolute Li;
   Si  : ShortInt absolute Li;
+{$IF CompilerVersion >= 32}
+    I64 : Int64;
+    Lw  : LongWord absolute I64;
+{$IFEND CompilerVesion}
 begin
   Result := 0;
   case efDataType mod fcpDivisor of
@@ -3179,10 +3337,39 @@ begin
         if FLastError = 0 then
           Result := Si;
       end;
+{$IF CompilerVersion >= 32}
+    fsubLongWord :
+      begin
+        FLastError := GetValue(Lw);
+        if FLastError = 0 then
+          Result := Lw;
+      end;
+{$IFEND CompilerVesion}
   else
     raise EInvalidDataType.Create;
   end;
 end;
+
+{$IF CompilerVersion >= 32}
+function TOvcBaseEntryField.GetAsInt64 : Int64;
+  {-returns the field value as an Int64 Value}
+var
+  I64 : Int64;
+  Lw  : LongWord absolute I64;
+begin
+  Result := 0;
+  case efDataType mod fcpDivisor of
+    fsubLongWord   :
+      begin
+        FLastError := GetValue(Lw);
+        if FLastError = 0 then
+          Result := Lw;
+      end;
+  else
+    raise EInvalidDataType.Create;
+  end;
+end;
+{$IFEND CompilerVesion}
 
 function TOvcBaseEntryField.GetAsInteger : Longint;
   {-returns the field value as a LongInt Value}
@@ -3266,6 +3453,9 @@ begin
     fsubSingle   : Result := GetAsFloat;
     fsubExtended : Result := GetAsExtended;
     fsubComp     : Result := GetAsExtended;
+{$IF CompilerVersion >= 32}
+    fsubLongWord : Result := GetAsInt64;
+{$IFEND CompilerVesion}
   else
     Result := GetAsString;
   end;
@@ -3456,6 +3646,9 @@ begin
       fsubComp     : efTransfer(@Comp(Data),     otf_GetData);
       fsubDate     : efTransfer(@TStDate(Data),  otf_GetData);
       fsubTime     : efTransfer(@TStTime(Data),  otf_GetData);
+{$IF CompilerVersion >=32}
+      fsubLongWord : efTransfer(@LongWord(Data), otf_GetData)
+{$IFEND CompilerVersion}
     else
       raise EOvcException.Create(GetOrphStr(SCInvalidParamValue));
     end;
@@ -3846,6 +4039,24 @@ begin
   end;
 end;
 
+{$IF CompilerVersion >= 32}
+procedure TOvcBaseEntryField.SetAsInt64(Value: Int64);
+  {-sets the field value to a Int64 Value}
+var
+  LW  : LongWord;
+begin
+  case efDataType mod fcpDivisor of
+    fsubLongWord :
+      begin
+        LW := LongWord(Value);
+        SetValue(LW);
+      end;
+  else
+    raise EInvalidDataType.Create;
+  end;
+end;
+{$IFEND CompilerVesion}
+
 procedure TOvcBaseEntryField.SetAsInteger(Value : Longint);
   {-sets the field value to a LongInt Value}
 var
@@ -3915,6 +4126,9 @@ begin
         fsubDouble   : R.rtDbl := R.rtExt;
         fsubSingle   : R.rtSgl := R.rtExt;
         fsubComp     : R.rtComp := R.rtExt;
+{$IF CompilerVersion >=32}
+        fsubLongWord : R.rtLongWord := R.rtInt64;
+{$IFEND CompilerVersion}
       end;
       SetValue(R);
     end else
@@ -3952,6 +4166,17 @@ begin
         {try to convert it into a string}
         SetAsString(VarAsType(Value, GetDefStrType));
       end;
+
+{$IF CompilerVersion >= 32}
+      varInt64 :
+        case fSub of
+          fsubLongWord : SetAsInt64(Value);
+        else
+          {try to convert it into a string}
+          SetAsString(VarAsType(Value, GetDefStrType));
+        end;
+{$IFEND CompilerVesion}
+
     varSingle,
     varDouble,
     varCurrency :
@@ -4199,13 +4424,16 @@ begin
     fsubDouble   : efRangeHi.rtExt  := Value.rtDbl;
     fsubSingle   : efRangeHi.rtExt  := Value.rtSgl;
     fsubComp     : efRangeHi.rtExt  := Value.rtComp;
+{$IF CompilerVersion >=32}
+    fsubLongWord : efRangeHi.rtInt64 := Value.rtLongWord;
+{$IFEND CompilerVersion}
   else
     efRangeHi := Value;
   end;
 
-// QEC060210-14:00 - Commented out code below to fix Windows Error 
+// QEC060210-14:00 - Commented out code below to fix Windows Error
 //                   "Cannot focus invisible or hidden component."
-//                   when using on Notebook Tab Pages.  
+//                   when using on Notebook Tab Pages.
 {  if (ValidateContents(true) > 0)
   and (Parent <> nil)
   and (Parent.Visible)
@@ -4224,9 +4452,9 @@ begin
       raise EInvalidRangeValue.Create(efDataType mod fcpDivisor);
   efRangeHi := R;
 
-// QEC060210-14:00 - Commented out code below to fix Windows Error 
+// QEC060210-14:00 - Commented out code below to fix Windows Error
 //                   "Cannot focus invisible or hidden component."
-//                   when using on Notebook Tab Pages.  
+//                   when using on Notebook Tab Pages.
 {  if (ValidateContents(true) > 0)
   and (Parent <> nil)
   and (Parent.Visible)
@@ -4247,13 +4475,16 @@ begin
     fsubDouble   : efRangeLo.rtExt  := Value.rtDbl;
     fsubSingle   : efRangeLo.rtExt  := Value.rtSgl;
     fsubComp     : efRangeLo.rtExt  := Value.rtComp;
+{$IF CompilerVersion >=32}
+    fsubLongWord : efRangeLo.rtInt64  := Value.rtLongWord;
+{$IFEND CompilerVersion}
   else
     efRangeLo := Value;
   end;
 
-// QEC060210-14:00 - Commented out code below to fix Windows Error 
+// QEC060210-14:00 - Commented out code below to fix Windows Error
 //                   "Cannot focus invisible or hidden component."
-//                   when using on Notebook Tab Pages.  
+//                   when using on Notebook Tab Pages.
 {  if (ValidateContents(true) > 0)
   and (Parent <> nil)
   and (Parent.Visible)
@@ -4272,9 +4503,9 @@ begin
       raise EInvalidRangeValue.Create(efDataType mod fcpDivisor);
   efRangeLo := R;
 
-// QEC060210-14:00 - Commented out code below to fix Windows Error 
+// QEC060210-14:00 - Commented out code below to fix Windows Error
 //                   "Cannot focus invisible or hidden component."
-//                   when using on Notebook Tab Pages.  
+//                   when using on Notebook Tab Pages.
 {  if (ValidateContents(true) > 0)
   and (Parent <> nil)
   and (Parent.Visible)
@@ -4355,6 +4586,9 @@ begin
       fsubComp     : efTransfer(@Comp(Data),     otf_SetData);
       fsubDate     : efTransfer(@TStDate(Data),  otf_SetData);
       fsubTime     : efTransfer(@TStTime(Data),  otf_SetData);
+{$IF CompilerVersion >=32}
+      fsubLongWord : efTransfer(@LongWord(Data), otf_SetData);
+{$IFEND CompilerVersion}
     else
       raise EOvcException.Create(GetOrphStr(SCInvalidParamValue));
     end;

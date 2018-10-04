@@ -35,6 +35,8 @@
 {.W-} {Windows Stack Frame}
 {$X+} {Extended Syntax}
 
+{$LegacyIfEnd ON}
+
 unit ovcdata;
   {-Miscellaneous type and constant declarations}
 
@@ -287,6 +289,10 @@ type
     12 : (rtDate : LongInt);              {04}
     13 : (rtTime : LongInt);              {04}
     14 : (rt10   : array[1..10] of Byte); {10} {forces structure to size of 10 bytes}
+{$IF CompilerVersion >=32}
+    15 : (rtLongWord: LongWord);
+    16 : (rtInt64: Int64);
+{$IFEND}
   end;
 
 const
@@ -580,6 +586,9 @@ const
   fidNumericDouble   = fcpNumeric+fsubDouble;
   fidNumericSingle   = fcpNumeric+fsubSingle;
   fidNumericComp     = fcpNumeric+fsubComp;
+{$IF CompilerVersion >=32}
+  fidNumericLongword = fcpNumeric+fsubLongword;
+{$IFEND}
 
 
 function GetOrphStr(Index : Word) : string;

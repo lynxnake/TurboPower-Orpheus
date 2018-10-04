@@ -273,6 +273,8 @@ const
   SCColorSkyBlue           = 30520;
   SCColorCream             = 30521;
 
+  SCUnsupportedFieldType   = 30522;
+
 const
   cHotKeyChar     = '&'; {hotkey prefix character}
 
@@ -408,6 +410,9 @@ const
   fsubComp                 = 13;
   fsubDate                 = 14;
   fsubTime                 = 15;
+{$IF CompilerVersion >= 32}
+  fsubLongWord             = 16;
+{$IFEND CompilerVesion}
 
 
 {constants for simple, picture, and numeric picture}

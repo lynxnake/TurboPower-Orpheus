@@ -226,6 +226,7 @@ resourcestring
   RSInvalidParameter        = 'Invalid parameter: mpAnchor';
   RSInvalidOperation        = 'Invalid operation: Call AddSplit for split menus';
   RSFormUseOnly             = 'This component can only be used on forms';
+  RSUnsupportedFieldType    = 'Unsupported field type: %s';
   RSColorBlack              = 'Black';
   RSColorMaroon             = 'Maroon';
   RSColorGreen              = 'Green';

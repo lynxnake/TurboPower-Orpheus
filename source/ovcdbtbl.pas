@@ -587,9 +587,22 @@ uses
 {$IFDEF VERSIONXE5UP}
   System.Types,
 {$ENDIF}
-  Dialogs, OvcNF, OvcPF, OvcSF, OvcTCBmp, OvcTCBox, OvcTCCbx, OvcTCEdt,
-  OvcTCGly, OvcTCHdr, OvcTCIco, OvcTCNum, OvcTCPic, OvcTCSim,
-  OvcTCHeaderExtended;
+  Dialogs,
+  OvcNF,
+  OvcPF,
+  OvcSF,
+  OvcTCBmp,
+  OvcTCBox,
+  OvcTCCbx,
+  OvcTCEdt,
+  OvcTCGly,
+  OvcTCHdr,
+  OvcTCIco,
+  OvcTCNum,
+  OvcTCPic,
+  OvcTCSim,
+  OvcTCHeaderExtended,
+  TypInfo;
 
 type
   TLocalCell = class(TOvcBaseTableCell);
@@ -2633,6 +2646,7 @@ begin
       ftBCD      : TOvcTCSimpleField(ACell).DataType := sftExtended;
     else
       Result := False;
+      Assert(False, Format(GetOrphStr(SCUnsupportedFieldType), [GetEnumName(TypeInfo(TFieldType), Ord(AField.DataType))]));
     end;
   end else if (ACell is TOvcTCPictureField) then begin
     case AField.DataType of
@@ -2673,6 +2687,7 @@ begin
         end;
     else
       Result := False;
+      Assert(False, Format(GetOrphStr(SCUnsupportedFieldType), [GetEnumName(TypeInfo(TFieldType), Ord(AField.DataType))]));
     end;
   end else if (ACell is TOvcTCNumericField) then begin
     case AField.DataType of
@@ -2682,8 +2697,12 @@ begin
       ftFloat    : TOvcTCNumericField(ACell).DataType := nftExtended;
       ftCurrency : TOvcTCNumericField(ACell).DataType := nftExtended;
       ftBCD      : TOvcTCNumericField(ACell).DataType := nftExtended;
+      {$IF CompilerVersion >=32}
+      ftLongWord : TOvcTCNumericField(ACell).DataType := nftLongword;
+      {$IFEND}
     else
       Result := False;
+      Assert(False, Format(GetOrphStr(SCUnsupportedFieldType), [GetEnumName(TypeInfo(TFieldType), Ord(AField.DataType))]));
     end;
   end else if (ACell is TOvcTCBitmap) then
     Result := AField.DataType in [ftBlob, ftGraphic]
@@ -4285,6 +4304,9 @@ begin
         ftSmallInt : PSmallInt(Data)^ := AField.AsInteger; //I := AField.AsInteger;
         ftInteger  : PLongInt(Data)^ := AField.AsInteger; // L := AField.AsInteger;
         ftWord     : PWord(Data)^ := AField.AsInteger; // W := AField.AsInteger;
+        {$IF CompilerVersion >= 32}
+          ftLongWord : PLongWord(Data)^ := AField.AsLongWord;
+        {$IFEND}
         ftBoolean  : PBoolean(Data)^ := AField.AsBoolean; // B := AField.AsBoolean;
         ftFloat    : PExtended(Data)^ := AField.AsFloat; // E := AField.AsFloat;
         ftCurrency : PExtended(Data)^ := AField.AsFloat; // E := AField.AsFloat;
@@ -4318,6 +4340,8 @@ begin
               end;
             end;
           end;
+        else
+          Assert(False, Format(GetOrphStr(SCUnsupportedFieldType), [GetEnumName(TypeInfo(TFieldType), Ord(AField.DataType))]));
       end;
     end else if (ACell is TOvcTCComboBox) then begin
       FillChar(Data^, Size, #0);
@@ -4382,7 +4406,12 @@ begin
     New(PString(P))
   else
   begin
-    Size := tbGetDataSize(ACell);
+{$IF CompilerVersion >=32}
+    if AField.DataType = ftLongWord then
+      Size := SizeOf(LongWord)
+    else
+{$IFEND CompilerVersion}
+      Size := tbGetDataSize(ACell);
     GetMem(P, Size);
   end;
 end;
@@ -5229,6 +5258,8 @@ begin
               end;
             end;
           end;
+        else
+          Assert(False, Format(GetOrphStr(SCUnsupportedFieldType), [GetEnumName(TypeInfo(TFieldType), Ord(AField.DataType))]));
       end;
     end;
 

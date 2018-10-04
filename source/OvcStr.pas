@@ -115,6 +115,10 @@ function StrStPos(P, S : PChar; var Pos : Cardinal) : Boolean;
   {-Sets Pos to position of the S in P, returns True if found}
 function StrToLongPChar(S : PChar; var I : LongInt) : Boolean;
   {-Convert a PChar string to a long integer}
+{$IF CompilerVersion >= 32}
+function StrToInt64PChar(S : PChar; var I : Int64) : Boolean;
+{$IFEND CompilerVesion}
+  {-Convert a string to a Int64}
 procedure TrimAllSpacesPChar(P : PChar);
   {-Trim leading and trailing blanks from P}
 function TrimEmbeddedZeros(const S : string) : string;
@@ -1844,6 +1848,32 @@ begin
     Result := True;
 end;
 
+{$IF CompilerVersion >= 32}
+function StrToInt64PChar(S : PChar; var I : Int64) : Boolean;
+  {-Convert a string to a Int64, returning true if successful}
+var
+  Code : Cardinal;
+  P    : array[0..255] of Char;
+begin
+  if StrLen(S)+1 > SizeOf(P) then begin
+    Result := False;
+    I := -1;
+    Exit;
+  end;
+  StrCopy(P, S);
+  TrimTrailPrimPChar(P);
+  if StrStPos(P, '0x', Code) then begin
+    StrStDeletePrim(P, Code, 2);
+    StrChInsertPrim(P, '$', Code);
+  end;
+  Val(P, I, Code);
+  if Code <> 0 then begin
+    I := Code - 1;
+    Result := False;
+  end else
+    Result := True;
+end;
+{$IFEND CompilerVesion}
 
 procedure TrimAllSpacesPChar(P : PChar);
   {-Trim leading and trailing blanks from P}

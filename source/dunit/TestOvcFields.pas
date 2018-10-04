@@ -12,6 +12,7 @@
 {*                                                                            *}
 {* ***** END LICENSE BLOCK *****                                              *}
 
+{$LegacyIfEnd ON}
 unit TestOvcFields;
 
 interface
@@ -154,7 +155,13 @@ const
 {$ENDIF}
      (RangeHiRes: '1,7E+308';   RangeLoRes: '-1,7E+308';),     //   nftDouble
      (RangeHiRes: '3,4E+38';    RangeLoRes: '-3,4E+38';),      //   nftSingle
-     (RangeHiRes: '9,2E+18';    RangeLoRes: '-9,2E+18';));     //   nftComp
+     (RangeHiRes: '9,2E+18';    RangeLoRes: '-9,2E+18';)       //   nftComp
+
+{$IF CompilerVersion >= 32}
+     , (RangeHiRes: '4294967295'; RangeLoRes: '0';)            //   nftLongWord
+{$IFEND CompilerVesion}
+
+     );
 var
   i: TNumericDataType;
   res: string;

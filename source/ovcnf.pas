@@ -35,6 +35,8 @@
 {.W-} {Windows Stack Frame}
 {$X+} {Extended Syntax}
 
+{$LegacyIfEnd ON}
+
 unit ovcnf;
   {-Numeric field visual component}
 
@@ -49,7 +51,7 @@ type
   {numeric field types}
   TNumericDataType   = (
     nftLongInt, nftWord, nftInteger, nftByte, nftShortInt, nftReal,
-    nftExtended, nftDouble, nftSingle, nftComp);
+    nftExtended, nftDouble, nftSingle, nftComp {$IF CompilerVersion >=32}, nftLongWord{$IFEND});
 
 type
   TOvcCustomNumericField = class(TOvcPictureBase)
@@ -855,7 +857,7 @@ var
       else
         Inc(L, Trunc(Delta));
 
-      {insure valid value}
+      {ensure valid value}
       if L < efRangeLo.rtLong then
         L := efRangeLo.rtLong;
       if L > efRangeHi.rtLong then
@@ -866,6 +868,41 @@ var
       efPerformRepaint(True);
     end;
   end;
+
+{$IF CompilerVersion >= 32}
+  procedure IncDecValueInt64;
+  var
+    I : Int64;
+    S    : TEditString;
+  begin
+    pbStripPicture(S, efEditSt);
+
+    if efStr2Int64(S, I) then begin
+      if (Delta < 0) and (I <= efRangeLo.rtInt64) then
+        if Wrap then
+          I := efRangeHi.rtInt64
+        else
+          Exit
+      else if (Delta > 0) and (I >= efRangeHi.rtInt64) then
+        if Wrap then
+          I := efRangeLo.rtInt64
+        else
+          Exit
+      else
+        Inc(I, Trunc(Delta));
+
+      {ensure valid value}
+      if I < efRangeLo.rtInt64 then
+        I := efRangeLo.rtInt64;
+      if I > efRangeHi.rtInt64 then
+        I := efRangeHi.rtInt64;
+
+      efTransfer(@I, otf_SetData);
+      nfReloadTmp;
+      efPerformRepaint(True);
+    end;
+  end;
+{$IFEND CompilerVesion}
 
   procedure IncDecValueReal;
   var
@@ -1050,13 +1087,15 @@ var
 begin
   if not (sefHaveFocus in sefOptions) then
     Exit;
-
   case FNumericDataType of
     nftLongInt,
     nftWord,
     nftInteger,
     nftByte,
     nftShortInt  : IncDecValueLongInt;
+{$IF CompilerVersion >=32}
+    nftLongWord : IncDecValueInt64;
+{$IFEND CompilerVersion}
     nftReal      : IncDecValueReal;
     nftExtended  : IncDecValueExtended;
     nftDouble    : IncDecValueDouble;
@@ -1109,6 +1148,26 @@ var
       pbMergePicture(efEditSt, S);
     end;
   end;
+
+{$IF CompilerVersion >=32}
+  procedure TransferLongWord;
+  var
+    L      : LongInt;
+    S      : TEditString;
+  begin
+    if TransferFlag = otf_GetData then begin
+      pbStripPicture(S, efEditSt);
+
+      if efStr2Long(S, L) then
+        LongWord(DataPtr^) := L
+      else
+        LongWord(DataPtr^) := 0;
+    end else begin
+      efLong2Str(S, LongWord(DataPtr^));
+      pbMergePicture(efEditSt, S);
+    end;
+  end;
+{$IFEND CompilerVersion}
 
   procedure TransferInteger;
   var
@@ -1250,6 +1309,8 @@ var
     end else begin
       pbCalcWidthAndPlaces(Width, Places);
       Str(Double(DataPtr^):Width:Places, sShort);
+      { TODO : replace Str with FormatFloat or similar
+        Str fails to convert 1234.56 into '1,234.56' with ThousandSeparator=',' and DecimalSeparator='.' }
       Tmp := string(sShort);
       StrLCopy(S, PChar(Tmp), Length(Tmp));
       if DecimalPlaces <> 0 then
@@ -1333,6 +1394,9 @@ begin  {transfer}
   case FNumericDataType of
     nftLongInt  : TransferLongInt;
     nftWord     : TransferWord;
+{$IF CompilerVersion >=32}
+    nftLongWord : TransferLongword;
+{$IFEND CompilerVersion}
     nftInteger  : TransferInteger;
     nftByte     : TransferByte;
     nftShortInt : TransferShortInt;
@@ -1389,6 +1453,30 @@ function TOvcCustomNumericField.efValidateField : Word;
         end;
     end;
   end;
+
+{$IF CompilerVersion >=32}
+  procedure ValidateLongWord;
+  var
+    L : LongInt;
+    LW : LongWord;
+    S    : TEditString;
+  begin
+    pbStripPicture(S, efEditSt);
+
+    if not efStr2Long(S, L) then
+      Result := oeInvalidNumber
+    else if (L < efRangeLo.rtLong) or (L > efRangeHi.rtLong) then
+      Result := oeRangeError
+    else begin
+      if sefHaveFocus in sefOptions then
+        if not (sefGettingValue in sefOptions) then begin
+          LW := L;
+          efTransfer(@LW, otf_SetData);
+          Invalidate;
+        end;
+    end;
+  end;
+{$IFEND CompilerVersion}
 
   procedure ValidateInteger;
   var
@@ -1592,6 +1680,9 @@ begin  {validate}
   case FNumericDataType of
     nftLongInt  : ValidateLongInt;
     nftWord     : ValidateWord;
+{$IF CompilerVersion >=32}
+    nftLongWord : ValidateLongWord;
+{$IFEND CompilerVersion}
     nftInteger  : ValidateInteger;
     nftByte     : ValidateByte;
     nftShortInt : ValidateShortInt;
@@ -1625,6 +1716,9 @@ begin
     nftDouble    : Result := fidNumericDouble;
     nftSingle    : Result := fidNumericSingle;
     nftComp      : Result := fidNumericComp;
+{$IF CompilerVersion >=32}
+    nftLongword  : Result := fidNumericLongword;
+{$IFEND CompilerVersion}
   else
     raise EOvcException.Create(GetOrphStr(SCInvalidParamValue));
   end;
@@ -1663,6 +1757,9 @@ begin
     nftDouble    : PictureMask := '##########';
     nftSingle    : PictureMask := '##########';
     nftComp      : PictureMask := 'iiiiiiiiii';
+{$IF CompilerVersion >=32}
+    nftLongword  : PictureMask := '9999999999';
+{$IFEND CompilerVersion}
   else
     raise EOvcException.Create(GetOrphStr(SCInvalidParamValue));
   end;
@@ -1690,7 +1787,11 @@ procedure TOvcCustomNumericField.nfSetDefaultRanges;
   {-set default range values based on the field type}
 begin
   case FNumericDataType of
-    nftLongInt, nftWord, nftInteger, nftByte, nftShortInt :
+    nftLongInt, nftWord, nftInteger, nftByte, nftShortInt
+{$IF CompilerVersion >=32}
+    , nftLongword 
+{$IFEND CompilerVersion}
+      :
       if efRangeLo.rtLong = efRangeHi.rtLong then
         efSetDefaultRange(efDataType);
     nftReal :
