@@ -252,4 +252,6 @@ resourcestring
 
   {end - Index based resource strings}
 
+  RSComboBoxIndexOutOfBounds = 'Combobox index (%d) is out of bounds';
+
 

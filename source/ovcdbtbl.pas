@@ -588,6 +588,7 @@ uses
   System.Types,
 {$ENDIF}
   Dialogs,
+  O32SR,
   OvcNF,
   OvcPF,
   OvcSF,
@@ -4345,12 +4346,26 @@ begin
       end;
     end else if (ACell is TOvcTCComboBox) then begin
       FillChar(Data^, Size, #0);
-      if AField.DataType in [ftSmallInt, ftInteger, ftWord
-        {$IF CompilerVersion >= 32}, ftLongWord {$IFEND}] then
+      if AField.DataType in [ftSmallInt, ftInteger, ftWord] then
       begin
         PCellComboBoxInfo(Data)^.Index := AField.AsInteger;
         PCellComboBoxInfo(Data)^.St := '';
-      end else begin
+      end
+      else
+      {$IF CompilerVersion >= 32}
+      if AField.DataType = ftLongWord then
+      begin
+        if (AField.AsLargeInt >= Low(Integer)) and (AField.AsLargeInt <= High(Integer)) then
+        begin
+          PCellComboBoxInfo(Data)^.Index := AField.AsInteger;
+          PCellComboBoxInfo(Data)^.St := '';
+        end
+        else
+          raise EOrpheusTable.CreateFmt(RSComboBoxIndexOutOfBounds, [AField.AsLargeInt]);
+      end
+      else
+      {$IFEND CompilerVersion}
+      begin
         S := AField.Text;
         if S = '' then
           Idx := -1
@@ -4361,11 +4376,11 @@ begin
 
         if Idx = -1 then
           if TOvcTCComboBox(ACell).Style in [csDropDown, csSimple] then
-            {$IFDEF CBuilder}
+{$IFDEF CBuilder}
             StrPCopy(PCellComboBoxInfo(Data)^.St, S);
-            {$ELSE}
+{$ELSE}
             PCellComboBoxInfo(Data)^.St := S;
-            {$ENDIF}
+{$ENDIF}
       end;
 
       Exit;
