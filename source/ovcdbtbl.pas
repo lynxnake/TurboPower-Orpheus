@@ -4234,7 +4234,9 @@ end;
 
 procedure TOvcCustomDbTable.tbFreeMem(P: Pointer; ACell: TOvcBaseTableCell; const AField: TField);
 begin
-  if (ACell is TOvcTCString) or (AField.DataType in [ftString{$IFDEF VERSION5}, ftWideString{$ENDIF}]) then
+  if not(ACell is TOvcTCCustomComboBox) and
+    ((ACell is TOvcTCString) or (AField.DataType in [ftString{$IFDEF VERSION5},
+    ftWideString{$ENDIF}])) then
     Dispose(PString(P))
   else
     FreeMem(P);
@@ -4417,7 +4419,9 @@ procedure TOvcCustomDbTable.tbGetMem(var P: Pointer; ACell: TOvcBaseTableCell; c
 var
   Size: Integer;
 begin
-  if (ACell is TOvcTCString) or (AField.DataType in [ftString{$IFDEF VERSION5}, ftWideString{$ENDIF}]) then
+  if not(ACell is TOvcTCCustomComboBox) and
+    ((ACell is TOvcTCString) or (AField.DataType in [ftString{$IFDEF VERSION5},
+    ftWideString{$ENDIF}])) then
     New(PString(P))
   else
   begin
