@@ -2188,7 +2188,11 @@ function TOvcRvExpIsTest.AsBoolean(const TestValue: Variant): Boolean;
 begin
   case IsOp of
   ioNull :
+    {$ifdef VERSIONDX103}
+    Result := (TestValue = null) xor UnaryNot;
+    {$else}
     Result := VarIsNull(TestValue) xor UnaryNot;
+    {$endif}
   ioTrue :
     if UnaryNot then
       Result := not TestValue
@@ -2201,7 +2205,11 @@ begin
       Result := not TestValue;
   else
   //ioUnknown :
+    {$ifdef VERSIONDX103}
+    Result := (TestValue = null) xor UnaryNot;
+    {$else}
     Result := VarIsNull(TestValue) xor UnaryNot;
+    {$endif}
   end;
 end;
 

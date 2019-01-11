@@ -1,3 +1,8 @@
+Revision 328: (2019/01/06 Ryan Potts)
+- ovc.inc
+  Added defines for VER330 (Delphi 10.3 Rio)
+Added support for Delphi 10.3 Rio
+
 Revision 327: (2017/03/25 Armin Biernaczyk)
 - ovc.inc
   Added defines for VER320 (Delphi 10.2 Tokyo)
