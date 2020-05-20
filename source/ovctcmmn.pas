@@ -756,7 +756,16 @@ procedure TOvcTableAncestor.tbWriteCellData(Writer : TWriter);
     i : integer;
     Cell : TOvcTableCellAncestor;
     S : string;
+  function CellSort(Item1, Item2: Pointer): Integer;
+  var
+    S1, S2 : string;
   begin
+    S1 := TOvcTableCellAncestor(Item1).Owner.Name + '.' + TOvcTableCellAncestor(Item1).Name;
+    S2 := TOvcTableCellAncestor(Item2).Owner.Name + '.' + TOvcTableCellAncestor(Item2).Name;
+    Result := CompareStr(S1,S2);
+  end;
+  begin
+    taCellList.Sort(@CellSort);
     with Writer do
       begin
         WriteListBegin;
