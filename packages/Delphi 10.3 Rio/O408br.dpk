@@ -49,8 +49,8 @@ PACKAGE O408br;
 {$IMAGEBASE $400000}
 {$DEFINE DEBUG}
 {$ENDIF IMPLICITBUILDING}
-{$DESCRIPTION 'TurboPower Orpheus 4.08 data-aware runtime package - VCL250'}
-{$LIBSUFFIX '250'}
+{$DESCRIPTION 'TurboPower Orpheus 4.08 data-aware runtime package - VCL260'}
+{$LIBSUFFIX '260'}
 {$RUNONLY}
 {$IMPLICITBUILD OFF}
 
